@@ -8,7 +8,8 @@
     "typecheck": "tsc --noEmit",
     "check": "tsc --noEmit && vitest run",
     "sim": "tsx tools/simulate.ts",
-    "decks": "tsx tools/random-decks.ts"
+    "decks": "tsx tools/random-decks.ts",
+    "ranking": "tsx tools/card-ranking.ts"
   },
   "devDependencies": {
     "@types/node": "^26.6.5",
