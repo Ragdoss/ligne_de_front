@@ -19,7 +19,7 @@ describe('IA heuristique', () => {
     const games = 20;
     for (let g = 0; g < games; g++) {
       const ai = g % 2 === 0 ? 'A' : 'B';
-      const f = (['empire', 'elfe', 'demons', 'nomades'] as const)[g % 4];
+      const f = (['empire', 'elfe', 'demons', 'nomades'] as const)[g % 4]!;
       let s = createGame({ seed: `w${g}`, A: { faction: f, deck: DEMO_DECKS[f]! }, B: { faction: f, deck: DEMO_DECKS[f]! } });
       for (let n = 0; n < 3000 && !s.over; n++) {
         const acts = legalActions(s);
