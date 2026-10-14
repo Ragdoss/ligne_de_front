@@ -7,7 +7,7 @@ import { nextRandom } from '../src/engine/rng';
 import type { Faction, GameState } from '../src/engine/types';
 
 // Cartes dont le moteur gère déjà les effets (Démons et Nomades : prochaine étape ; cartes de scénario exclues).
-const PORTED: Faction[] = ['empire', 'elfe'];
+const PORTED: Faction[] = ['empire', 'elfe', 'demons', 'nomades'];
 
 function checkInvariants(s: GameState): void {
   const ctx = new Ctx(s);
@@ -29,12 +29,12 @@ function checkInvariants(s: GameState): void {
 }
 
 describe('Parties aléatoires', () => {
-  it('200 parties Empire/Elfes jouées au hasard vont au bout sans erreur', () => {
+  it('400 parties entre les 4 factions jouées au hasard vont au bout sans erreur', () => {
     let rng = 12345;
     const rand = (n: number) => { const r = nextRandom(rng); rng = r.state; return Math.floor(r.value * n); };
     let finished = 0;
-    for (let g = 0; g < 200; g++) {
-      const fa = PORTED[g % 2]!, fb = PORTED[(g + 1) % 2]!;
+    for (let g = 0; g < 400; g++) {
+      const fa = PORTED[g % 4]!, fb = PORTED[Math.floor(g / 4) % 4]!;
       let s = createGame({ seed: g, A: { faction: fa, deck: DEMO_DECKS[fa]! }, B: { faction: fb, deck: DEMO_DECKS[fb]! } });
       for (let step = 0; step < 3000 && !s.over; step++) {
         const acts = legalActions(s);
@@ -48,6 +48,6 @@ describe('Parties aléatoires', () => {
       }
       if (s.over) finished++;
     }
-    expect(finished).toBeGreaterThan(190);
+    expect(finished).toBeGreaterThan(380);
   });
 });

@@ -10,6 +10,9 @@ export function drawCountFor(level: number): number {
 
 export function endTurn(ctx: Ctx): void {
   const ending = ctx.s.active;
+  // Copies gratuites d'Archéotacticiens non jouées : détruites en fin de tour.
+  const pl = ctx.player(ending);
+  pl.hand = pl.hand.filter(h => !h.freeCopy);
   resolveCombat(ctx, ending);
   if (ctx.over) return;
 
@@ -32,7 +35,10 @@ export function startTurn(ctx: Ctx, p: PlayerId): void {
   const pl = ctx.player(p);
   // Formation en Carré : prend fin au début du tour de son lanceur.
   for (const q of ['A', 'B'] as PlayerId[]) {
-    for (const u of ctx.units(q)) if (u.squareOwner === p) { u.squareArm = 0; u.squareOwner = null; }
+    for (const u of ctx.units(q)) {
+      if (u.squareOwner === p) { u.squareArm = 0; u.squareOwner = null; }
+      if (u.pactShield?.owner === p) u.pactShield = null; // Pacte de Survie : fin au début du tour du lanceur
+    }
   }
 
   // Ressource : niveau + reliquat du tour précédent.
@@ -41,6 +47,13 @@ export function startTurn(ctx: Ctx, p: PlayerId): void {
   let peasants = 0;
   for (const u of ctx.units(p)) if (u.keywords.includes('GenerateurRessource')) peasants += pl.level >= 4 ? 2 : 1;
   if (peasants) { pl.resource += peasants; ctx.emit({ type: 'resource', player: p, amount: peasants, source: 'paysans' }); }
+
+  // Cérémonie du Déclin : +1 lassitude au début du tour (qui rapporte aussi des ressources).
+  for (const u of ctx.units(p)) {
+    const n = card(u.cardId).lassitudeAtTurnStart as number | undefined;
+    if (n) ctx.gainLassitude(p, n, u.cardId);
+  }
+  if (ctx.over) return;
 
   let generators = 0, rally = 0;
   for (const u of ctx.units(p)) {

@@ -55,6 +55,10 @@ export function formatEvent(e: GameEvent, names: Record<PlayerId, string> = { A:
     case 'left': return `${cardName(e.cardId)} quitte le plateau (fin de durée de vie).`;
     case 'effect': return `${cardName(e.cardId)} : effet appliqué.`;
     case 'choice': return null;
+    case 'discarded': return `${n(e.player)} défausse ${cardName(e.cardId)} (${cardName(e.source)}).`;
+    case 'intercepted': return `Saboteur Nomade : ${cardName(e.cardId)}, piochée par ${n(e.player)}, part en défausse (le Saboteur perd ${e.moralLoss} Moral).`;
+    case 'freeCopy': return `Archéotacticiens : ${n(e.player)} reçoit une copie gratuite de ${cardName(e.cardId)}.`;
+    case 'sacrificed': return `${cardName(e.cardId)} est sacrifié pour invoquer ${cardName(e.forCard)}.`;
     case 'gameOver': return `Fin de partie : ${n(e.winner)} l'emporte — l'adversaire ${REASONS[e.reason] ?? e.reason}.`;
   }
 }

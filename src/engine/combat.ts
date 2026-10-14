@@ -49,6 +49,18 @@ export function resolveCombat(ctx: Ctx, ending: PlayerId): void {
     if (d.moralOnFullHeal && r.end > 0 && best.currentEnd >= best.maxEnd) ctx.heal(best, 0, d.moralOnFullHeal, healer.cardId);
   }
 
+  // Maître du Chenil Infernal : avant les attaques, comble le rang avant de son contrôleur de Chiens (Minions).
+  if (ctx.units(ending).some(u => card(u.cardId).summonsChienInfernalEachTurn)) {
+    const row = ctx.player(ending).board.avant;
+    row.forEach((slot, idx) => {
+      if (slot) return;
+      const pup = ctx.makeUnit('chien_infernal', ending, true);
+      if (!pup.keywords.includes('Minions')) pup.keywords.push('Minions');
+      row[idx] = pup;
+      ctx.emit({ type: 'deployed', player: ending, uid: pup.uid, cardId: pup.cardId, slot: { player: ending, zone: 'avant', idx } });
+    });
+  }
+
   type Att = { u: Unit; p: PlayerId; zone: Zone; idx: number };
   const attackers: Att[] = [];
   for (const p of ['A', 'B'] as PlayerId[]) {
@@ -93,6 +105,7 @@ export function resolveCombat(ctx: Ctx, ending: PlayerId): void {
       u.ignoreArmor = false;
       u.tempAtk = 0; u.tempDebuffAtk = 0; u.tempArm = 0; u.tempIni = 0;
       u.stunned = false;
+      u.woundedByFrondeur = false;
     }
   }
   if (ctx.over) return;
@@ -103,8 +116,20 @@ function attack(ctx: Ctx, a: Unit, target: Unit): void {
   let atk = ctx.effectiveAtk(a);
   if (a.types.includes('Lancier') && target.types.includes('Monté') && !a.brokenMorale) atk += 10;
   const arm = a.ignoreArmor ? 0 : ctx.effectiveArm(target);
-  const damage = Math.max(0, atk - arm);
+  let damage = Math.max(0, atk - arm);
+  if (target.pactShield && damage > 0) {
+    // Pacte de Survie : les dégâts évités deviennent de la lassitude (1 par tranche de 10, reliquat conservé).
+    const sh = target.pactShield;
+    sh.endAcc += damage;
+    const g = Math.floor(sh.endAcc / 10);
+    sh.endAcc %= 10;
+    ctx.emit({ type: 'effect', key: 'pactEnd', player: sh.owner, cardId: 'pacte_survie', data: { uid: target.uid, avoided: damage } });
+    damage = 0;
+    if (g) ctx.gainLassitude(sh.owner, g, 'pacte_survie');
+    if (ctx.over) return;
+  }
   target.currentEnd = Math.max(0, target.currentEnd - damage);
+  if (damage > 0 && card(a.cardId).woundInflictsFrondeurMill) target.woundedByFrondeur = true;
   const fear = a.brokenMorale ? undefined : a.keywords.find(k => k.startsWith('Effrayant'));
   const fearVal = fear ? parseInt(fear.split(' ')[1] ?? '0', 10) || 0 : 0;
   const moralLoss = ctx.loseMoral(target, 1 + fearVal);

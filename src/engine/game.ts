@@ -1,7 +1,8 @@
 // API publique du moteur : créer une partie, appliquer une action, lister les actions légales.
 
 import { Ctx, card } from './ctx';
-import { cardCost, playCard, resolveChoice, targetCount, unplayableReason, validFirstTarget, validSecondTarget } from './play';
+import { activateChoices, resolveChoice } from './choices';
+import { cardCost, playCard, targetCount, unplayableReason, validFirstTarget, validSecondTarget } from './play';
 import { seedFrom } from './rng';
 import { endTurn } from './turn';
 import type { Action, ActionResult, Faction, GameConfig, GameEvent, GameState, PlayerId, PlayerState, SlotRef } from './types';
@@ -55,7 +56,7 @@ function newPlayer(ctx: Ctx, id: PlayerId, setup: PlayerSetup): PlayerState {
 export function createGame(setup: GameSetup): GameState {
   const config = defaultConfig(setup.config);
   const s: GameState = {
-    config, active: 'A', turn: 1, nextUid: 1, rng: seedFrom(setup.seed), pending: null, over: null,
+    config, active: 'A', turn: 1, nextUid: 1, rng: seedFrom(setup.seed), pending: [], over: null,
     players: {} as GameState['players'],
   };
   const ctx = new Ctx(s);
@@ -69,17 +70,23 @@ export function applyAction(state: GameState, action: Action): ActionResult {
   const s = structuredClone(state);
   const ctx = new Ctx(s);
   let err: string | null = null;
-  if (s.pending && action.type !== 'choose') return { ok: false, error: 'choicePending' };
+  if (s.pending.length && action.type !== 'choose') return { ok: false, error: 'choicePending' };
   switch (action.type) {
     case 'choose': err = resolveChoice(ctx, action.option); break;
     case 'endTurn': endTurn(ctx); break;
     case 'play': err = playCard(ctx, s.active, action.handUid, action.target, action.target2); break;
   }
   if (err) return { ok: false, error: err };
+  activateChoices(ctx);
   return { ok: true, state: s, events: ctx.events };
 }
 
 /** Coût actuel d'une carte en main du joueur actif (pour l'affichage). */
+/** Joueur qui doit agir maintenant (le joueur actif, ou celui qui doit faire un choix en attente). */
+export function actingPlayer(state: GameState): PlayerId {
+  return state.pending[0]?.player ?? state.active;
+}
+
 export function costOf(state: GameState, p: PlayerId, handUid: number): number {
   const ctx = new Ctx(state);
   const h = state.players[p].hand.find(x => x.uid === handUid);
@@ -89,7 +96,8 @@ export function costOf(state: GameState, p: PlayerId, handUid: number): number {
 /** Toutes les actions légales du joueur qui doit agir. */
 export function legalActions(state: GameState): Action[] {
   if (state.over) return [];
-  if (state.pending) return state.pending.options.map((_, i) => ({ type: 'choose', option: i }));
+  const head = state.pending[0];
+  if (head) return (head.options ?? []).map((_, i) => ({ type: 'choose', option: i }));
   const ctx = new Ctx(state);
   const p = state.active;
   const out: Action[] = [];

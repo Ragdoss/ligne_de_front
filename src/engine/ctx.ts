@@ -4,7 +4,7 @@
 import { CARDS } from '../data/cards';
 import { nextRandom } from './rng';
 import type {
-  CardDef, GameEvent, GameState, PlayerId, PlayerState, SlotRef, Unit, Zone,
+  CardDef, ChoiceKind, GameEvent, GameState, HandCard, PlayerId, PlayerState, SlotRef, Unit,
 } from './types';
 
 export const opponentOf = (p: PlayerId): PlayerId => (p === 'A' ? 'B' : 'A');
@@ -119,6 +119,7 @@ export class Ctx {
       tempAtk: 0, tempDebuffAtk: 0, tempArm: 0, tempIni: 0,
       ignoreArmor: false, stunned: false, stunnedBy: null,
       squareArm: 0, squareOwner: null,
+      pactShield: null, woundedByFrondeur: false,
     };
   }
 
@@ -127,7 +128,13 @@ export class Ctx {
     const ratio = 0.5 + 0.5 * (u.currentEnd / u.maxEnd);
     let atk = u.baseAtk * ratio;
     if (u.justDeployed && !u.arrivesReady) atk *= 0.5;
-    if (u.leader && !u.brokenMorale) atk += card(u.leader).bonusAtk ?? 0;
+    if (u.leader && !u.brokenMorale) {
+      const l = card(u.leader);
+      atk += l.bonusAtk ?? 0;
+      // Abîme Grandissant : +X ATK par tranche de lassitude de son contrôleur.
+      const step = l.lassitudeStep as number | undefined, per = l.atkPerLassitudeStep as number | undefined;
+      if (step && per) atk += Math.floor(this.player(u.controller).points / step) * per;
+    }
     if (!u.brokenMorale) atk += u.tempAtk;
     atk -= u.tempDebuffAtk;
     return Math.max(0, Math.round(atk));
@@ -154,6 +161,11 @@ export class Ctx {
   /** Retire du Moral ; retourne la perte réellement appliquée (plancher du Chevalier Templier). */
   loseMoral(u: Unit, amount: number): number {
     if (amount <= 0) return 0;
+    if (u.pactShield) { // Pacte de Survie : la perte devient 1 point de lassitude pour le lanceur
+      this.emit({ type: 'effect', key: 'pactMoral', player: u.pactShield.owner, cardId: 'pacte_survie', data: { uid: u.uid } });
+      this.gainLassitude(u.pactShield.owner, 1, 'pacte_survie');
+      return 0;
+    }
     const before = u.currentMor;
     let after = Math.max(0, before - amount);
     const floor = card(u.cardId).moralFloorWithLeader;
@@ -192,6 +204,12 @@ export class Ctx {
     const pl = this.player(p);
     pl.points += n;
     this.emit({ type: 'lassitude', player: p, amount: n, total: pl.points, source });
+    // Cérémonie du Déclin : chaque exemplaire en jeu rapporte autant de ressources que de lassitude gagnée.
+    const ceremonies = this.units(p).filter(u => card(u.cardId).resourceOnLassitudeGain).length;
+    if (ceremonies) {
+      pl.resource += n * ceremonies;
+      this.emit({ type: 'resource', player: p, amount: n * ceremonies, source: 'ceremonie_declin' });
+    }
     this.checkLevel(p);
   }
   loseLassitude(p: PlayerId, n: number, source: string): void {
@@ -226,8 +244,10 @@ export class Ctx {
   }
 
   // ---------- Cartes ----------
-  addToHand(p: PlayerId, cardId: string, opts: { generated?: boolean; levelFree?: boolean } = {}): void {
-    this.player(p).hand.push({ uid: this.uid(), cardId, ...opts });
+  addToHand(p: PlayerId, cardId: string, opts: Omit<HandCard, 'uid' | 'cardId'> = {}): HandCard {
+    const h: HandCard = { uid: this.uid(), cardId, ...opts };
+    this.player(p).hand.push(h);
+    return h;
   }
   generate(p: PlayerId, cardId: string, source: string): void {
     this.addToHand(p, cardId, { generated: true });
@@ -238,13 +258,56 @@ export class Ctx {
     const pl = this.player(p);
     const cardId = pl.deck.shift();
     if (cardId === undefined) { this.endGame(opponentOf(p), 'emptyDeck'); return false; }
-    this.addToHand(p, cardId);
-    this.emit({ type: 'draw', player: p, cardId, source });
-    return true;
+    this.deliverDrawn(p, cardId, source);
+    return !this.over;
   }
-  discard(p: PlayerId, cardId: string): void { this.player(p).discard.push(cardId); }
+  /** Une carte retirée du deck rejoint la main… sauf si un Saboteur Nomade adverse l'intercepte. */
+  deliverDrawn(p: PlayerId, cardId: string, source: string): void {
+    const sab = this.units(opponentOf(p)).find(u => card(u.cardId).interceptsEnemyDraws);
+    if (!sab) {
+      this.addToHand(p, cardId);
+      this.emit({ type: 'draw', player: p, cardId, source });
+      return;
+    }
+    this.discard(p, cardId);
+    const cost = card(cardId).cout;
+    sab.currentMor -= cost;
+    this.emit({ type: 'intercepted', player: p, cardId, saboteur: sab.uid, moralLoss: cost });
+    if (sab.currentMor <= 0) {
+      const compensate = sab.currentMor < -1;
+      this.destroy(sab, 'moral');
+      if (compensate && !this.over && this.player(p).deck.length) this.draw(p, 'saboteur_nomade');
+    }
+  }
+  /**
+   * Une carte arrive dans la défausse de `p`. Si c'est une Tactique que `p` n'a pas jouée lui-même et que
+   * l'adversaire contrôle des Archéotacticiens, l'adversaire en reçoit une copie gratuite.
+   */
+  discard(p: PlayerId, cardId: string, playedByOwner = false): void {
+    this.player(p).discard.push(cardId);
+    if (card(cardId).cardType !== 'Tactique' || playedByOwner) return;
+    const q = opponentOf(p);
+    if (this.units(q).some(u => card(u.cardId).grantsFreeTacticCopyOnEnemyDiscard)) {
+      this.addToHand(q, cardId, { generated: true, freeCopy: true });
+      this.emit({ type: 'freeCopy', player: q, cardId });
+    }
+  }
+  /** Défausse une carte précise de la main (défausse forcée). */
+  discardFromHand(p: PlayerId, handUid: number, source: string): string | null {
+    const pl = this.player(p);
+    const i = pl.hand.findIndex(h => h.uid === handUid);
+    if (i === -1) return null;
+    const h = pl.hand.splice(i, 1)[0]!;
+    if (!h.generated) this.discard(p, h.cardId);
+    this.emit({ type: 'discarded', player: p, cardId: h.cardId, source });
+    return h.cardId;
+  }
   discardLeader(u: Unit): void {
     if (u.leader) this.discard(u.leaderOwner ?? u.controller, u.leader);
+  }
+  /** Ajoute un choix à la file d'attente (ses options sont calculées quand il devient actif). */
+  queueChoice(kind: ChoiceKind, player: PlayerId, source: string, data: Record<string, number | string | null> = {}): void {
+    this.s.pending.push({ kind, player, source, options: null, data });
   }
 
   // ---------- Destruction ----------
@@ -263,6 +326,8 @@ export class Ctx {
     if (!minion) this.gainLassitude(p, u.niveau, 'destroyed');
     if (!u.isToken) this.discard(p, u.cardId);
     this.discardLeader(u);
+    // Suppôt Infernal : le porteur détruit permet de récupérer une copie d'un Démon de la défausse.
+    if (u.leader && card(u.leader).recoversDemonOnCarrierDeath) this.queueChoice('recoverDemon', p, u.leader);
     const vital = this.s.config.mustSurvive[p];
     if (vital && vital === u.cardId) this.endGame(opponentOf(p), 'vitalDestroyed');
 
@@ -280,6 +345,20 @@ export class Ctx {
       }
     }
     if (def.onDeathDraw) for (let i = 0; i < def.onDeathDraw && !this.over; i++) this.draw(p, u.cardId);
+    const oppDraws = def.onDeathOpponentDraws as number | undefined;
+    if (oppDraws) for (let i = 0; i < oppDraws && !this.over; i++) this.draw(opponentOf(p), u.cardId);
+    // Frondeur Nomade : une cible qu'il a blessée ce tour-ci et qui meurt fait défausser le dessus du deck.
+    if (u.woundedByFrondeur && !minion && !this.over) {
+      const top = this.player(p).deck.shift();
+      if (top) { this.discard(p, top); this.emit({ type: 'discarded', player: p, cardId: top, source: 'frondeur_nomade' }); }
+    }
+    // Démon d'Akantha : se soigne quand un ennemi meurt de son Moral.
+    if (cause === 'moral' && !this.over) {
+      for (const e of this.units(opponentOf(p))) {
+        const h = card(e.cardId).onEnemyMoralDeathHeal as number | undefined;
+        if (h) this.heal(e, h, 0, e.cardId);
+      }
+    }
     if (this.over) return;
 
     const allies = this.units(p);

@@ -1,4 +1,5 @@
-// Jouer une carte : coût, conditions, cibles valides, effets ; et choix en attente (Vision, Promotion).
+// Jouer une carte : coût, conditions, cibles valides, effets (régiments, Leaders, tactiques, effets d'arrivée).
+// Les effets qui demandent une décision passent par la file de choix (voir choices.ts).
 
 import { Ctx, card, opponentOf } from './ctx';
 import type { CardDef, HandCard, PlayerId, SlotRef, Unit } from './types';
@@ -13,12 +14,16 @@ export function dynamicRawCost(ctx: Ctx, c: CardDef, p: PlayerId): number {
   return 0;
 }
 export function cardCost(ctx: Ctx, p: PlayerId, h: HandCard): number {
+  if (h.freeCopy) return 0;
   const c = card(h.cardId);
   if (c.dynamicCost) {
     const raw = dynamicRawCost(ctx, c, p);
     return raw <= 0 ? 0 : Math.max(0, raw - tacticReduction(ctx, p));
   }
-  let cost = c.cout;
+  let cost = c.cout - (h.discount ?? 0);
+  if (c.types?.includes('Basilic')) {
+    for (const u of ctx.units(p)) cost -= (card(u.cardId).basilicCostReduction as number | undefined) ?? 0;
+  }
   if (c.elementalDiscount && ctx.controlsElemental(p)) cost -= c.elementalDiscount;
   if (c.cardType === 'Tactique') cost -= tacticReduction(ctx, p);
   return Math.max(0, cost);
@@ -30,21 +35,25 @@ export function unplayableReason(ctx: Ctx, p: PlayerId, h: HandCard): string | n
   const c = card(h.cardId);
   const pl = ctx.player(p);
   if (c.niveau > pl.level && !h.levelFree) return 'level';
-  if (c.dynamicCost && dynamicRawCost(ctx, c, p) <= 0) return 'noEffect';
+  if (c.dynamicCost && dynamicRawCost(ctx, c, p) <= 0 && !h.freeCopy) return 'noEffect';
   if (cardCost(ctx, p, h) > pl.resource) return 'resource';
   if (c.requiresOwnEmpireLeaderToCast && !ctx.units(p).some(u => u.types.includes('Empire') && u.leader)) return 'condition';
-  if (c.effect === 'tectonique') {
-    const b = ctx.player(opponentOf(p)).board;
-    const slots = [...b.avant, ...b.arriere];
-    if (!slots.some(Boolean) || !slots.some(x => !x)) return 'condition';
-  }
-  if (c.effect === 'eveilElementaire' && !pl.board.avant.some(u => !u)) return 'condition';
-  if (c.effect === 'promotion') {
-    const hasLeaderInHand = pl.hand.some(x => x.uid !== h.uid && card(x.cardId).cardType === 'Leader');
-    if (!hasLeaderInHand) return 'condition';
+  switch (c.effect) {
+    case 'tectonique': {
+      const b = ctx.player(opponentOf(p)).board;
+      const slots = [...b.avant, ...b.arriere];
+      if (!slots.some(Boolean) || !slots.some(x => !x)) return 'condition';
+      break;
+    }
+    case 'eveilElementaire': if (!pl.board.avant.some(u => !u)) return 'condition'; break;
+    case 'promotion': if (!pl.hand.some(x => x.uid !== h.uid && card(x.cardId).cardType === 'Leader')) return 'condition'; break;
+    case 'tuteurDemoniaque': if (!pl.deck.some(id => isDemonRegiment(id))) return 'condition'; break;
+    case 'halteConvoi': return 'scenarioOnly';
   }
   return null;
 }
+
+export const isDemonRegiment = (id: string) => card(id).cardType === 'Regiment' && !!card(id).types?.includes('Démon');
 
 /** La carte demande-t-elle une cible ? Et une seconde ? */
 export function targetCount(c: CardDef): 0 | 1 | 2 {
@@ -65,6 +74,8 @@ export function validFirstTarget(ctx: Ctx, p: PlayerId, c: CardDef, ref: SlotRef
   if (ref.player !== (targetsOpponent(c) ? opponentOf(p) : p)) return false;
   const u = ctx.unitAt(ref);
   if (c.cardType === 'Regiment') {
+    const min = c.sacrificeMinLevel as number | undefined;
+    if (min) return !!u && ref.zone === c.slotType && u.niveau >= min; // invocation par sacrifice
     const zones = c.slotTypes ?? [c.slotType];
     return zones.includes(ref.zone) && !u;
   }
@@ -116,7 +127,7 @@ export function playCard(ctx: Ctx, p: PlayerId, handUid: number, target?: SlotRe
   if (c.cardType === 'Regiment') deployRegiment(ctx, p, c, target!);
   else if (c.cardType === 'Leader') attachLeader(ctx, p, c, ctx.unitAt(target!)!);
   else {
-    if (!h.generated) ctx.discard(p, c.id);
+    if (!h.generated) ctx.discard(p, c.id, true);
     resolveTactic(ctx, p, c, target, target2);
   }
   return null;
@@ -124,6 +135,24 @@ export function playCard(ctx: Ctx, p: PlayerId, handUid: number, target?: SlotRe
 
 function deployRegiment(ctx: Ctx, p: PlayerId, c: CardDef, ref: SlotRef): void {
   const u = ctx.makeUnit(c.id, p);
+  const min = c.sacrificeMinLevel as number | undefined;
+  if (min) {
+    // Invocation par sacrifice : le régiment sacrifié est détruit (avec ses conséquences habituelles).
+    const sac = ctx.unitAt(ref)!;
+    if (c.sacrificeGainsStats) {
+      u.baseAtk += sac.baseAtk; u.maxEnd += sac.maxEnd; u.currentEnd += sac.maxEnd; u.baseArm += sac.baseArm; u.ini += sac.ini;
+    }
+    if (c.sacrificeGainsKeywords) for (const k of sac.keywords) if (!u.keywords.includes(k)) u.keywords.push(k);
+    const grant = card(sac.cardId).onSacrificeGrant as { keywords?: string[]; arrivesReady?: boolean } | undefined;
+    if (grant) {
+      for (const k of grant.keywords ?? []) if (!u.keywords.includes(k)) u.keywords.push(k);
+      if (grant.arrivesReady) u.arrivesReady = true;
+    }
+    ctx.emit({ type: 'sacrificed', player: p, uid: sac.uid, cardId: sac.cardId, forCard: c.id });
+    ctx.destroy(sac, 'effect');
+    if (ctx.over) return;
+  }
+  if (u.types.includes('Basilic') && ctx.units(p).some(x => card(x.cardId).grantsBasilicsArriveReady)) u.arrivesReady = true;
   ctx.setAt(ref, u);
   ctx.emit({ type: 'deployed', player: p, uid: u.uid, cardId: c.id, slot: ref });
   if (c.createsLieutenantOnArrival) ctx.generate(p, 'lieutenant', c.id);
@@ -134,6 +163,17 @@ function deployRegiment(ctx: Ctx, p: PlayerId, c: CardDef, ref: SlotRef): void {
       x.brokenMorale = false;
     }
   }
+  if (u.types.includes('Nomade')) nomadArrival(ctx, p, u);
+  if (u.types.includes('Basilic')) {
+    for (const e of ctx.units(p)) {
+      const d = card(e.cardId);
+      const bonus = d.basilicEndBonus as number | undefined;
+      if (bonus) { u.maxEnd += bonus; u.currentEnd += bonus; }
+      const selfHeal = d.healsOnBasilicArrival as number | undefined;
+      if (selfHeal) ctx.heal(e, selfHeal, 0, e.cardId);
+    }
+  }
+  if (c.recoversDemonOnArrival) ctx.queueChoice('recoverDemonOs', p, c.id);
 }
 
 function attachLeader(ctx: Ctx, p: PlayerId, c: CardDef, u: Unit): void {
@@ -148,33 +188,97 @@ function attachLeader(ctx: Ctx, p: PlayerId, c: CardDef, u: Unit): void {
   if (c.grantsKeywordOnAttach && !u.keywords.includes(c.grantsKeywordOnAttach)) u.keywords.push(c.grantsKeywordOnAttach);
   if (c.bonusNiveauOnAttach) u.niveau += c.bonusNiveauOnAttach;
   if (c.grantsReadyOnAttach) u.arrivesReady = true;
-  if (c.visionOnAttach) openVision(ctx, p);
+  if (c.visionOnAttach) ctx.queueChoice('vision', p, c.id);
+  if (c.replaysArrivalEffectOnAttach && u.types.includes('Nomade')) nomadArrival(ctx, u.controller, u);
 }
 
+// ---------- Effets d'arrivée des Nomades (rejoués par Mirage, Embuscade, Maître de Caravane) ----------
+function nomadArrival(ctx: Ctx, p: PlayerId, u: Unit): void {
+  const q = opponentOf(p);
+  const opp = ctx.player(q);
+  const note = (key: string, data?: Record<string, unknown>) => ctx.emit({ type: 'effect', key, player: p, cardId: u.cardId, data });
+  switch (u.cardId) {
+    case 'jeune_nomade': {
+      if (!opp.hand.length) { note('noTarget'); break; }
+      ctx.discardFromHand(q, opp.hand[ctx.randomInt(opp.hand.length)]!.uid, u.cardId);
+      break;
+    }
+    case 'frondeur_nomade': {
+      const enemies = ctx.units(q);
+      if (!enemies.length) { note('noTarget'); break; }
+      const t = enemies[ctx.randomInt(enemies.length)]!;
+      t.stunned = true;
+      ctx.emit({ type: 'stunned', uid: t.uid, cardId: t.cardId, by: u.uid });
+      break;
+    }
+    case 'charmeur_basilics': {
+      const bas = ctx.player(p).hand.filter(h => card(h.cardId).types?.includes('Basilic'));
+      if (!bas.length) { note('noTarget'); break; }
+      const h = bas[ctx.randomInt(bas.length)]!;
+      h.discount = (h.discount ?? 0) + 1;
+      note('basilicDiscount', { cardId: h.cardId });
+      break;
+    }
+    case 'basilics_oasis': {
+      const ref = ctx.slotOf(u.uid);
+      if (ref?.zone === 'avant') { u.maxEnd += 10; u.currentEnd += 10; note('oasisAvant'); }
+      else if (ref?.zone === 'arriere') { if (!u.keywords.includes('Distance')) u.keywords.push('Distance'); u.ini += 30; note('oasisArriere'); }
+      break;
+    }
+    case 'archeotacticiens': {
+      for (const type of ['Tactique', 'Leader', 'Regiment'] as const) {
+        const idxs = opp.deck.map((id, i) => [id, i] as const).filter(([id]) => card(id).cardType === type);
+        if (!idxs.length) continue;
+        const max = Math.max(...idxs.map(([id]) => card(id).cout));
+        const tied = idxs.filter(([id]) => card(id).cout === max);
+        const [id, i] = tied[ctx.randomInt(tied.length)]!;
+        opp.deck.splice(i, 1);
+        ctx.discard(q, id);
+        ctx.emit({ type: 'discarded', player: q, cardId: id, source: u.cardId });
+      }
+      break;
+    }
+    case 'chasseur_reliques': ctx.queueChoice('relics', p, u.cardId, { uid: u.uid }); break;
+    case 'marchand_ombres': ctx.queueChoice('shadow', p, u.cardId); break;
+    case 'caravane_marchande': ctx.queueChoice('caravane', p, u.cardId, { uid: u.uid }); break;
+    case 'basilics_desert': {
+      const n = opp.discard.filter(id => card(id).cardType === 'Regiment').length;
+      if (!n) { note('noTarget'); break; }
+      u.maxEnd += 5 * n; u.currentEnd += 5 * n; u.baseArm += n; u.ini += 3 * n; u.maxMor += n; u.currentMor += n;
+      note('basilicsDesert', { count: n });
+      break;
+    }
+  }
+}
+
+// ---------- Tactiques ----------
 function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: SlotRef): void {
   const pl = ctx.player(p);
+  const q = opponentOf(p);
   const target = t1 ? ctx.unitAt(t1) : null;
   const note = (key: string, data?: Record<string, unknown>) => ctx.emit({ type: 'effect', key, player: p, cardId: c.id, data });
   switch (c.effect) {
+    // --- Neutres ---
     case 'palissade': {
       let n = 0;
       pl.board.avant.forEach((u, i) => { if (!u) { pl.board.avant[i] = ctx.makeUnit('palissade_regiment', p, true); n++; } });
       note('palissade', { count: n });
       break;
     }
-    case 'eveilElementaire': {
-      const i = pl.board.avant.findIndex(u => !u);
-      const u = ctx.makeUnit('elem_eveil_regiment', p, true);
-      pl.board.avant[i] = u;
-      ctx.emit({ type: 'deployed', player: p, uid: u.uid, cardId: u.cardId, slot: { player: p, zone: 'avant', idx: i } });
-      break;
-    }
     case 'chocEtEffroi': {
       let n = 0;
-      for (const u of ctx.units(opponentOf(p))) if (u.brokenMorale) { u.stunned = true; n++; }
+      for (const u of ctx.units(q)) if (u.brokenMorale) { u.stunned = true; n++; }
       note('chocEtEffroi', { count: n });
       break;
     }
+    case 'couvert': {
+      const pre = ctx.effectiveAtk(target!);
+      if (pre - 20 <= 0) { target!.tempDebuffAtk += Math.max(0, pre - 1); target!.tempArm += 20; }
+      else { target!.tempDebuffAtk += 20; target!.tempArm += 30; }
+      note('couvert', { uid: target!.uid });
+      break;
+    }
+    // --- Empire ---
     case 'formationCarre': {
       let n = 0;
       for (const u of ctx.units(p)) if (u.leader) { u.squareArm = 10; u.squareOwner = p; n++; }
@@ -187,19 +291,7 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
       note('ordreHautCommandement', { count: n });
       break;
     }
-    case 'briseMatin': {
-      let n = 0;
-      for (const u of ctx.units(p)) if (u.types.includes('Elfe')) { u.tempIni += 15; n++; }
-      note('briseMatin', { count: n });
-      break;
-    }
-    case 'serenite': ctx.loseLassitude(p, 3, c.id); break;
-    case 'promotion': {
-      const options = pl.hand.filter(h => card(h.cardId).cardType === 'Leader').map(h => h.uid);
-      ctx.s.pending = { kind: 'promotionDiscard', player: p, options };
-      ctx.emit({ type: 'choice', player: p, kind: 'promotionDiscard' });
-      break;
-    }
+    case 'promotion': ctx.queueChoice('promotionDiscard', p, c.id); break;
     case 'assassinat': {
       if (target?.leader) {
         ctx.discardLeader(target);
@@ -209,25 +301,33 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
       break;
     }
     case 'ignoreArmure': target!.ignoreArmor = true; note('ignoreArmure', { uid: target!.uid }); break;
+    case 'ralliement': ctx.heal(target!, 0, target!.brokenMorale ? 5 : 3, c.id); break;
+    // --- Elfes ---
+    case 'eveilElementaire': {
+      const i = pl.board.avant.findIndex(u => !u);
+      const u = ctx.makeUnit('elem_eveil_regiment', p, true);
+      pl.board.avant[i] = u;
+      ctx.emit({ type: 'deployed', player: p, uid: u.uid, cardId: u.cardId, slot: { player: p, zone: 'avant', idx: i } });
+      break;
+    }
+    case 'briseMatin': {
+      let n = 0;
+      for (const u of ctx.units(p)) if (u.types.includes('Elfe')) { u.tempIni += 15; n++; }
+      note('briseMatin', { count: n });
+      break;
+    }
+    case 'serenite': ctx.loseLassitude(p, 3, c.id); break;
     case 'buffArchers': {
       for (const u of ctx.units(p)) if (u.types.includes('Archer')) u.tempAtk += 10;
       note('buffArchers');
       break;
     }
     case 'soin10': ctx.heal(target!, 10, 0, c.id); break;
-    case 'ralliement': ctx.heal(target!, 0, target!.brokenMorale ? 5 : 3, c.id); break;
-    case 'couvert': {
-      const pre = ctx.effectiveAtk(target!);
-      if (pre - 20 <= 0) { target!.tempDebuffAtk += Math.max(0, pre - 1); target!.tempArm += 20; }
-      else { target!.tempDebuffAtk += 20; target!.tempArm += 30; }
-      note('couvert', { uid: target!.uid });
-      break;
-    }
     case 'brumeTrompeuse': {
       const elems = ctx.units(p).filter(u => u.types.includes('Élémentaux')).length;
       target!.tempIni -= 20;
       const hit = [target!.uid];
-      const pool = ctx.units(opponentOf(p)).filter(u => u.uid !== target!.uid);
+      const pool = ctx.units(q).filter(u => u.uid !== target!.uid);
       for (let i = 0; i < elems && pool.length; i++) {
         const extra = pool.splice(ctx.randomInt(pool.length), 1)[0]!;
         extra.tempIni -= 20;
@@ -268,47 +368,63 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
       if (second) { second.tempIni += 20; ctx.emit({ type: 'moved', uid: second.uid, cardId: second.cardId, from: t2!, to: t1! }); }
       break;
     }
+    // --- Démons ---
+    case 'effroiDemoniaque': {
+      const demons = ctx.units(p).filter(u => u.types.includes('Démon')).length;
+      const lost = ctx.loseMoral(target!, 2 + demons);
+      ctx.emit({ type: 'moralLoss', uid: target!.uid, cardId: target!.cardId, amount: lost, source: c.id });
+      ctx.checkBroken(target!);
+      if (target!.currentMor <= 0) {
+        ctx.destroy(target!, 'moral');
+        if (!ctx.over) for (const u of ctx.units(p)) if (u.types.includes('Démon')) ctx.addMoralRaw(u, 1);
+      }
+      break;
+    }
+    case 'pacteSang': {
+      ctx.gainLassitude(p, 4, c.id);
+      if (ctx.over) break;
+      pl.resource += 2;
+      ctx.emit({ type: 'resource', player: p, amount: 2, source: c.id });
+      for (let i = 0; i < 2 && !ctx.over; i++) ctx.draw(p, c.id);
+      break;
+    }
+    case 'ranconAmes': ctx.queueChoice('ranconAmes', p, c.id, { uid: target!.uid }); break;
+    case 'detteInfernale': {
+      const u = target!;
+      u.baseAtk += 10; u.maxEnd += 20; u.currentEnd += 20;
+      note('detteInfernale', { uid: u.uid });
+      ctx.gainLassitude(p, u.niveau, c.id);
+      break;
+    }
+    case 'pacteSurvie': target!.pactShield = { owner: p, endAcc: 0 }; note('pacteSurvie', { uid: target!.uid }); break;
+    case 'banquetInfernal': {
+      const u = target!;
+      if (ctx.units(p).some(x => x.types.includes('Démon')) && !u.keywords.includes('Minions')) u.keywords.push('Minions');
+      const gain = Math.max(0, u.currentMor);
+      ctx.destroy(u, 'effect');
+      if (ctx.over) break;
+      pl.resource += gain;
+      ctx.emit({ type: 'resource', player: p, amount: gain, source: c.id });
+      break;
+    }
+    case 'tuteurDemoniaque': ctx.queueChoice('tuteur', p, c.id); break;
+    // --- Nomades ---
+    case 'mirage': for (const u of ctx.units(p)) if (u.types.includes('Nomade')) nomadArrival(ctx, p, u); break;
+    case 'embuscade': target!.tempIni += 50; nomadArrival(ctx, p, target!); break;
+    case 'marcheNoir': {
+      for (const who of [p, q]) for (let i = 0; i < 3 && !ctx.over; i++) ctx.draw(who, c.id);
+      if (ctx.over) break;
+      for (let i = 0; i < 2 && ctx.player(q).hand.length; i++) {
+        const opp = ctx.player(q);
+        ctx.discardFromHand(q, opp.hand[ctx.randomInt(opp.hand.length)]!.uid, c.id);
+      }
+      ctx.queueChoice('handDiscard', p, c.id, { n: 2, sum: 0, thief: null, gainBase: 0 });
+      break;
+    }
+    case 'ranconDesert': ctx.queueChoice('ransomDesert', p, c.id); break;
+    case 'frappezRavitaillement': ctx.queueChoice('handDiscard', q, c.id, { n: 2, sum: 0, thief: null, gainBase: 0 }); break;
+    case 'volezRavitaillement': ctx.queueChoice('handDiscard', q, c.id, { n: 3, sum: 0, thief: p, gainBase: 7 }); break;
     default:
       throw new Error(`Effet de tactique non implémenté : ${c.effect} (${c.id})`);
   }
-}
-
-// ---------- Choix en attente ----------
-function openVision(ctx: Ctx, p: PlayerId): void {
-  const options = ctx.player(p).deck.filter(id => card(id).cardType === 'Tactique').slice(0, 3);
-  if (!options.length) { ctx.emit({ type: 'effect', key: 'visionEmpty', player: p, cardId: 'vision' }); return; }
-  ctx.s.pending = { kind: 'vision', player: p, options };
-  ctx.emit({ type: 'choice', player: p, kind: 'vision' });
-}
-
-export function resolveChoice(ctx: Ctx, option: number): string | null {
-  const pend = ctx.s.pending;
-  if (!pend) return 'noChoice';
-  if (!Number.isInteger(option) || option < 0 || option >= pend.options.length) return 'badOption';
-  const pl = ctx.player(pend.player);
-  ctx.s.pending = null;
-  if (pend.kind === 'vision') {
-    const id = pend.options[option]!;
-    pl.deck.splice(pl.deck.indexOf(id), 1);
-    pl.deck = [id, ...ctx.shuffle(pl.deck)];
-    ctx.emit({ type: 'effect', key: 'visionChosen', player: pend.player, cardId: 'vision', data: { chosen: id } });
-  } else if (pend.kind === 'promotionDiscard') {
-    const uid = pend.options[option]!;
-    const i = pl.hand.findIndex(h => h.uid === uid);
-    const h = pl.hand.splice(i, 1)[0]!;
-    if (!h.generated) ctx.discard(pend.player, h.cardId);
-    const picks = pl.deck.filter(id => card(id).cardType === 'Leader').slice(0, 2);
-    ctx.emit({ type: 'effect', key: 'promotionDiscarded', player: pend.player, cardId: 'promotion', data: { discarded: h.cardId, revealed: picks } });
-    if (picks.length) {
-      ctx.s.pending = { kind: 'promotionPick', player: pend.player, options: picks };
-      ctx.emit({ type: 'choice', player: pend.player, kind: 'promotionPick' });
-    }
-  } else {
-    const id = pend.options[option]!;
-    pl.deck.splice(pl.deck.indexOf(id), 1);
-    ctx.addToHand(pend.player, id);
-    ctx.emit({ type: 'draw', player: pend.player, cardId: id, source: 'promotion' });
-    pl.deck = ctx.shuffle(pl.deck);
-  }
-  return null;
 }

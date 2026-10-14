@@ -126,6 +126,10 @@ export interface Unit {
   /** Formation en Carré : bonus d'Armure jusqu'au prochain tour de `squareOwner`. */
   squareArm: number;
   squareOwner: PlayerId | null;
+  /** Pacte de Survie : pertes converties en lassitude pour `owner` jusqu'à son prochain tour. */
+  pactShield: { owner: PlayerId; endAcc: number } | null;
+  /** Blessé ce tour-ci par un Frondeur Nomade. */
+  woundedByFrondeur: boolean;
 }
 
 export interface HandCard {
@@ -135,6 +139,10 @@ export interface HandCard {
   generated?: boolean;
   /** Peut être jouée sans respecter le niveau requis (renforts de scénario). */
   levelFree?: boolean;
+  /** Réduction de coût propre à cet exemplaire (Suppôt Infernal, Charmeur de Basilics). */
+  discount?: number;
+  /** Copie gratuite d'Archéotacticiens : coût 0, détruite à la fin du tour de son propriétaire. */
+  freeCopy?: boolean;
 }
 
 export interface Board {
@@ -159,10 +167,40 @@ export interface PlayerState {
   healAcc: number;
 }
 
-export type PendingChoice =
-  | { kind: 'vision'; player: PlayerId; options: string[] }
-  | { kind: 'promotionDiscard'; player: PlayerId; options: number[] /* uids en main */ }
-  | { kind: 'promotionPick'; player: PlayerId; options: string[] };
+export type ChoiceKind =
+  | 'vision'            // Vision : une des 3 prochaines tactiques du deck
+  | 'promotionDiscard'  // Promotion : Leader de la main à défausser
+  | 'promotionPick'     // Promotion : Leader révélé à piocher
+  | 'recoverDemon'      // Suppôt Infernal : copie d'un Démon de la défausse (moins chère)
+  | 'recoverDemonOs'    // Veilleur d'Os : récupérer un Démon de la défausse (ou rien)
+  | 'ranconAmes'        // Rançon d'Âmes : lassitude payée (1 à 5)
+  | 'tuteur'            // Tuteur Démoniaque : niveau de Démon cherché
+  | 'handDiscard'       // Défausse de main au choix (Marché Noir, Frappez/Volez le ravitaillement)
+  | 'relics'            // Chasseur de Reliques : régiment de la défausse adverse + stat gagnée
+  | 'shadow'            // Marchand d'Ombres : carte de la main adverse à défausser
+  | 'caravane'          // Caravane Marchande : carte de la défausse adverse à supprimer
+  | 'ransomDesert';     // Rançon du Désert : carte de la défausse adverse à supprimer
+
+export interface ChoiceOption {
+  cardId?: string;
+  handUid?: number;
+  value?: number;
+  stat?: 'atk' | 'arm';
+  skip?: boolean;
+}
+
+/**
+ * Choix en attente. Les choix s'empilent dans une file (GameState.pending) ; seul le premier est actif.
+ * Ses options sont calculées au moment où il devient actif (l'état a pu changer entre-temps).
+ */
+export interface PendingChoice {
+  kind: ChoiceKind;
+  player: PlayerId;
+  /** Carte à l'origine du choix. */
+  source: string;
+  options: ChoiceOption[] | null;
+  data: Record<string, number | string | null>;
+}
 
 /** Réglages de partie (valeurs par défaut = règles standard ; les scénarios les modifient). */
 export interface GameConfig {
@@ -189,7 +227,7 @@ export interface GameState {
   turn: number;
   nextUid: number;
   rng: number;
-  pending: PendingChoice | null;
+  pending: PendingChoice[];
   over: { winner: PlayerId; reason: string } | null;
 }
 
@@ -222,7 +260,11 @@ export type GameEvent =
   | { type: 'leaderDestroyed'; uid: number; cardId: string; leaderId: string }
   | { type: 'left'; player: PlayerId; uid: number; cardId: string; reason: 'lifespan' }
   | { type: 'effect'; key: string; player: PlayerId; cardId: string; data?: Record<string, unknown> }
-  | { type: 'choice'; player: PlayerId; kind: PendingChoice['kind'] }
+  | { type: 'choice'; player: PlayerId; kind: ChoiceKind }
+  | { type: 'discarded'; player: PlayerId; cardId: string; source: string }
+  | { type: 'intercepted'; player: PlayerId; cardId: string; saboteur: number; moralLoss: number }
+  | { type: 'freeCopy'; player: PlayerId; cardId: string }
+  | { type: 'sacrificed'; player: PlayerId; uid: number; cardId: string; forCard: string }
   | { type: 'gameOver'; winner: PlayerId; reason: string };
 
 export type ActionResult =

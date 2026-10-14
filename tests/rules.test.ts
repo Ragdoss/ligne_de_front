@@ -276,12 +276,12 @@ describe('Tactiques', () => {
     s.players.A.deck = ['recrue_imp', 'ralliement', 'recrue_imp', 'charge_imp', 'formation_carre', 'promotion'];
     const v = give(s, 'A', 'vision');
     s = act(s, { type: 'play', handUid: v, target: { player: 'A', zone: 'avant', idx: 0 } }).state;
-    expect(s.pending).toMatchObject({ kind: 'vision', options: ['ralliement', 'charge_imp', 'formation_carre'] });
+    expect(s.pending[0]).toMatchObject({ kind: 'vision', options: [{ cardId: 'ralliement' }, { cardId: 'charge_imp' }, { cardId: 'formation_carre' }] });
     expect(legalActions(s)).toHaveLength(3);
     expect(applyAction(s, { type: 'endTurn' })).toEqual({ ok: false, error: 'choicePending' });
     s = act(s, { type: 'choose', option: 1 }).state;
     expect(s.players.A.deck[0]).toBe('charge_imp');
-    expect(s.pending).toBeNull();
+    expect(s.pending).toHaveLength(0);
   });
   it('Promotion : défausser un Leader, puis choisir parmi les 2 prochains Leaders du deck', () => {
     let s = blankGame();
@@ -292,7 +292,7 @@ describe('Tactiques', () => {
     s = act(s, { type: 'play', handUid: p }).state;
     s = act(s, { type: 'choose', option: 0 }).state;
     expect(s.players.A.discard).toContain('lieutenant');
-    expect(s.pending).toMatchObject({ kind: 'promotionPick', options: ['capitaine_garde', 'general_empire'] });
+    expect(s.pending[0]).toMatchObject({ kind: 'promotionPick', options: [{ cardId: 'capitaine_garde' }, { cardId: 'general_empire' }] });
     s = act(s, { type: 'choose', option: 1 }).state;
     expect(s.players.A.hand.map(h => h.cardId)).toEqual(['general_empire']);
   });
