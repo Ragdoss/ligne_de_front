@@ -17,10 +17,13 @@ src/
     turn.ts      Fin et début de tour (ressources, effets récurrents, pioche)
     play.ts      Jouer une carte (coût, cibles, effets des tactiques, choix en attente)
     rng.ts       Hasard reproductible (graine)
+    choices.ts   File des choix en attente (Vision, défausses au choix…)
+  ai/            IA heuristique (simule chaque action et garde la meilleure)
   data/          Données : cartes, decks
   i18n/          Textes français (noms des cartes, journal de partie)
 tests/           Tests automatiques (une règle = un test, plus des parties aléatoires complètes)
-tools/           Outils (extraction du catalogue depuis le prototype)
+tools/           Outils (simulations en masse, extraction du catalogue depuis le prototype)
+reports/         Rapports de simulation
 docs/            GDD et prototype historique
 ```
 
@@ -39,6 +42,7 @@ npm install
 npm test          # tests
 npm run typecheck # vérification des types
 npm run check     # les deux
+npm run sim -- 100  # 100 parties IA par paire de factions, rapport dans reports/
 ```
 
 ## Avancement

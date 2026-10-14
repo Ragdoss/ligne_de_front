@@ -14,13 +14,27 @@ Fait :
 - Ressources (niveau + reliquat), Paysans, générateurs, niveaux 4/9/16/25, réserve qui rejoint la pioche au niveau 4.
 - Pioche 1/2/3 selon le niveau, limite de main 10, défaites (lassitude 50, aucun régiment, pioche vide, régiment vital).
 - Leaders : bonus, types requis, un seul Leader par régiment, Leaders sur régiment adverse (Espion Impérial).
-- Toutes les cartes Empire, Elfes et neutres, dont les tactiques à deux cibles et les choix (Vision, Promotion).
+- Les 99 cartes des 4 factions (hors carte de scénario « Halte du Convoi ») :
+  sacrifices, Effrayant, Pacte de Survie, récupérations dans la défausse, Saboteur, Archéotacticiens…
+- File de choix en attente (Vision, Promotion, Tuteur, Rançon d'Âmes, défausses au choix — y compris
+  celles que doit faire l'adversaire —, Chasseur de Reliques, Caravane, Rançon du Désert…).
 - Journal de partie en français.
 
 À faire :
-- Démons et Nomades (sacrifices, défausse, pioches interceptées, copies gratuites…).
 - Scénarios et campagne (le moteur a déjà les réglages : plateau, seuils, lassitude, régiment vital).
 
-## Étape 2 — IA et simulations en masse
+## Étape 2 — IA et simulations en masse (première version faite)
+
+- `src/ai/heuristic.ts` : pour chaque action possible, l'IA simule « jouer puis finir le tour » et garde
+  la meilleure position (fonction d'évaluation : régiments, Moral, lassitude, main, ressources).
+  Elle n'a aucune règle propre à une carte : toute nouvelle carte est jouée automatiquement.
+- `npm run sim -- 100` : 1 600 parties IA contre IA (toutes les paires de factions), rapport dans `reports/`.
+
+Constats de la première simulation (`reports/simulation-v1.md`) :
+- L'Empire gagne 85 % de ses parties. Son deck de démonstration contient toutes les récompenses de la
+  campagne (63 cartes, beaucoup de Leaders et de soutiens) : à refaire avec des decks comparables.
+- Blocage possible (1 % des parties) : deux joueurs coincés au niveau 1, sans ATK en jeu (Cultistes, Paysans),
+  la main pleine de cartes de niveau 2+. Main pleine = pioche bloquée = jamais de pioche vide, Moral égal =
+  jamais de lassitude : la partie ne finit pas. Question de règle à trancher.
 ## Étape 3 — Interface jouable
 ## Étape 4 — Contenu (campagne, roguelite, multijoueur)

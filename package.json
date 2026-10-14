@@ -1,15 +1,17 @@
 {
   "name": "ligne-de-front",
   "version": "0.1.0",
-  "description": "Ligne de Front — jeu de cartes de régiments",
+  "description": "Ligne de Front \u2014 jeu de cartes de r\u00e9giments",
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "check": "tsc --noEmit && vitest run"
+    "check": "tsc --noEmit && vitest run",
+    "sim": "tsx tools/simulate.ts"
   },
   "devDependencies": {
     "@types/node": "^26.6.5",
+    "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vite": "^8.3.4",
     "vitest": "^5.0.4"
