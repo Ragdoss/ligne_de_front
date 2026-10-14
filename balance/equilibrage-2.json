@@ -1,0 +1,14 @@
+{
+  "_description": "Équilibrage 2 (Ragdoss, 14/10/2026) : équilibrage 1 + Pénétration d'armure, Cadets, Archéotacticiens, Frondeur, Fanatiques, Sérénité.",
+  "cadets_academie": { "cout": 4, "atk": 7, "end": 36 },
+  "lancier_emp": { "atk": 12, "arm": 4, "bonusVsMounted": 15 },
+  "soldat_kragz": { "atk": 9, "arm": 4 },
+  "chevalier_prov": { "atk": 14, "arm": 13 },
+  "arbaletrier_imp": { "keywords": ["Lent", "Pénétration 5"] },
+  "serenite_foret": { "cout": 1, "doubledWithElemental": true },
+  "clerc_foret": { "cout": 2 },
+  "saboteur_nomade": { "atk": 1, "end": 21 },
+  "frondeur_nomade": { "cout": 1 },
+  "archeotacticiens": { "cout": 4 },
+  "fanatiques": { "cout": 3 }
+}

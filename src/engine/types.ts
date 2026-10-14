@@ -79,6 +79,8 @@ export interface CardDef {
   healsMostInjuredEachTurn?: number;
   moralOnFullHeal?: number;
   stunsTargetOnAttack?: boolean;
+  /** Effet doublé si le joueur contrôle un Élémentaux (Sérénité de la Forêt). */
+  doubledWithElemental?: boolean;
   /** Bonus d'ATK contre les régiments Monté (Lanciers : 10 par défaut). */
   bonusVsMounted?: number;
   excludeFromMoralTotal?: boolean;

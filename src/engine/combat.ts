@@ -116,7 +116,10 @@ function attack(ctx: Ctx, a: Unit, target: Unit): void {
   let atk = ctx.effectiveAtk(a);
   const vsMounted = card(a.cardId).bonusVsMounted ?? (a.types.includes('Lancier') ? 10 : 0);
   if (vsMounted && target.types.includes('Monté') && !a.brokenMorale) atk += vsMounted;
-  const arm = a.ignoreArmor ? 0 : ctx.effectiveArm(target);
+  // Pénétration d'armure X : l'attaquant ignore les X premiers points d'Armure de sa cible.
+  const pen = a.keywords.find(k => k.startsWith('Pénétration'));
+  const penVal = pen ? parseInt(pen.split(' ')[1] ?? '0', 10) || 0 : 0;
+  const arm = a.ignoreArmor ? 0 : Math.max(0, ctx.effectiveArm(target) - penVal);
   let damage = Math.max(0, atk - arm);
   if (target.pactShield && damage > 0) {
     // Pacte de Survie : les dégâts évités deviennent de la lassitude (1 par tranche de 10, reliquat conservé).

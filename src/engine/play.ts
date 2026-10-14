@@ -316,7 +316,7 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
       note('briseMatin', { count: n });
       break;
     }
-    case 'serenite': ctx.loseLassitude(p, 3, c.id); break;
+    case 'serenite': ctx.loseLassitude(p, c.doubledWithElemental && ctx.controlsElemental(p) ? 6 : 3, c.id); break;
     case 'buffArchers': {
       for (const u of ctx.units(p)) if (u.types.includes('Archer')) u.tempAtk += 10;
       note('buffArchers');

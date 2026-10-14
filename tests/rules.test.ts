@@ -317,3 +317,19 @@ describe('Main pleine', () => {
     expect(s.players.B.deck.length).toBe(deckBefore - 2);
   });
 });
+
+describe('Pénétration d\'armure', () => {
+  it("l'attaquant ignore les X premiers points d'Armure", () => {
+    let s = blankGame();
+    s.config.moralCheck = false;
+    place(s, 'A', 'avant', 0, 'recrue_imp', { keywords: ['Pénétration 5'] });
+    place(s, 'B', 'avant', 0, 'chevalier_prov', { ini: 0 });
+    const ev = act(s, { type: 'endTurn' }).events.find(e => e.type === 'attack' && e.attackerCard === 'recrue_imp');
+    expect(ev).toMatchObject({ arm: 10, damage: 0 });
+    s = blankGame();
+    s.config.moralCheck = false;
+    place(s, 'A', 'avant', 0, 'recrue_imp', { keywords: ['Pénétration 5'] });
+    place(s, 'B', 'avant', 0, 'elem_terre', { ini: 0 });
+    expect(act(s, { type: 'endTurn' }).events.find(e => e.type === 'attack' && e.attackerCard === 'recrue_imp')).toMatchObject({ arm: 0, damage: 10 });
+  });
+});
