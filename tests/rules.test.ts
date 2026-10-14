@@ -147,13 +147,13 @@ describe('Combat de fin de tour', () => {
     const r2 = act(r1.state, endTurn);
     expect(r2.events.some(e => e.type === 'attack' && e.attackerCard === 'arbaletrier_imp')).toBe(true);
   });
-  it('Lancier : +10 ATK contre un régiment Monté', () => {
+  it('Lancier : +15 ATK contre un régiment Monté', () => {
     let s = blankGame();
     s.config.moralCheck = false;
     place(s, 'A', 'avant', 0, 'lancier_emp');
     place(s, 'B', 'avant', 0, 'cavalier_elfe', { ini: 0 });
     const ev = act(s, endTurn).events.find(e => e.type === 'attack' && e.attackerCard === 'lancier_emp');
-    expect(ev && ev.type === 'attack' && ev.atk).toBe(25);
+    expect(ev && ev.type === 'attack' && ev.atk).toBe(12 + 15);
   });
   it('Moral brisé (≤ 1/3) : le bonus de Leader ne compte plus', () => {
     const s = blankGame();
@@ -323,7 +323,7 @@ describe('Pénétration d\'armure', () => {
     let s = blankGame();
     s.config.moralCheck = false;
     place(s, 'A', 'avant', 0, 'recrue_imp', { keywords: ['Pénétration 5'] });
-    place(s, 'B', 'avant', 0, 'chevalier_prov', { ini: 0 });
+    place(s, 'B', 'avant', 0, 'chevalier_prov', { ini: 0, baseArm: 15 });
     const ev = act(s, { type: 'endTurn' }).events.find(e => e.type === 'attack' && e.attackerCard === 'recrue_imp');
     expect(ev).toMatchObject({ arm: 10, damage: 0 });
     s = blankGame();

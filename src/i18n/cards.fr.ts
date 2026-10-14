@@ -6,7 +6,7 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "lancier_emp": {
     "name": "Lancier de l'Empire",
-    "desc": "+10 ATK contre les régiments Monté."
+    "desc": "+15 ATK contre les régiments Monté."
   },
   "archer_imp": {
     "name": "Archer Impérial",
@@ -14,7 +14,7 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "arbaletrier_imp": {
     "name": "Arbalétrier Impérial",
-    "desc": "Lent."
+    "desc": "Lent. Pénétration d'armure 5 (ignore les 5 premiers points d'Armure de sa cible)."
   },
   "chevalier_prov": {
     "name": "Chevalier de Province",
@@ -262,7 +262,7 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "serenite_foret": {
     "name": "Sérénité de la Forêt",
-    "desc": "Tu perds 3 points de lassitude (le niveau ne redescend jamais)."
+    "desc": "Tu perds 3 points de lassitude, 6 si tu contrôles un Élémentaux (le niveau ne redescend jamais)."
   },
   "chant_vent": {
     "name": "Chant du Vent",

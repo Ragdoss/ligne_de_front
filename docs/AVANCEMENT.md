@@ -54,3 +54,5 @@ aux outils avec `--patch` : `npm run sim -- 100 v2 --patch balance/equilibrage-1
 - `balance/equilibrage-2.json` (équilibrage 1 + nouvelles demandes) : nouveau mot-clé **Pénétration X** (ignore les X premiers
   points d'Armure de la cible) et Sérénité doublée avec un Élémentaux. Empire 76 % ; Cadets +5,7 (toujours 1er) ;
   Frondeur −4,5 → −1,5 ; Archéotacticiens +6,0 → +4,2 ; Fanatiques, Sérénité, Arbalétrier restent en bas.
+
+**Intégré au catalogue** (`npm run integrate -- balance/equilibrage-2.json`) : les valeurs d'équilibrage 2 sont désormais les valeurs officielles.

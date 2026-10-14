@@ -9,7 +9,8 @@
     "check": "tsc --noEmit && vitest run",
     "sim": "tsx tools/simulate.ts",
     "decks": "tsx tools/random-decks.ts",
-    "ranking": "tsx tools/card-ranking.ts"
+    "ranking": "tsx tools/card-ranking.ts",
+    "integrate": "tsx tools/integrate-patch.ts"
   },
   "devDependencies": {
     "@types/node": "^26.6.5",

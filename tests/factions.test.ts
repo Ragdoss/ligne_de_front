@@ -17,7 +17,7 @@ describe('Démons', () => {
     s = act(s, { type: 'play', handUid: uid, target: A_AVANT(1) }).state;
     const d = s.players.A.board.avant[1]!;
     expect(d.cardId).toBe('demon_akantha');
-    expect([d.baseAtk, d.maxEnd, d.baseArm, d.ini]).toEqual([35, 60, 20, 10]);
+    expect([d.baseAtk, d.maxEnd, d.baseArm, d.ini]).toEqual([34, 60, 18, 10]); // Akantha 20/10/5/0 + Chevalier 14/50/13/10
     expect(s.players.A.points).toBe(3);
     expect(s.players.A.board.avant[3]!.currentMor).toBe(ally.currentMor - 1);
   });
@@ -164,7 +164,7 @@ describe('Nomades', () => {
     s = act(s, { type: 'play', handUid: t, target: { player: 'A', zone: 'arriere', idx: 1 } }).state;
     expect(s.pending[0]!.options).toEqual([{ cardId: 'chevalier_prov', stat: 'atk' }, { cardId: 'chevalier_prov', stat: 'arm' }]);
     s = act(s, { type: 'choose', option: 1 }).state;
-    expect(s.players.A.board.arriere[1]!.baseArm).toBe(15);
+    expect(s.players.A.board.arriere[1]!.baseArm).toBe(13);
     expect(s.players.B.discard).toHaveLength(0);
   });
 });

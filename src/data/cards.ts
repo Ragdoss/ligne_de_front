@@ -33,14 +33,15 @@ export const CARDS: Record<string, CardDef> = {
     "niveau": 2,
     "cout": 3,
     "slotType": "avant",
-    "atk": 15,
+    "atk": 12,
     "end": 40,
-    "arm": 5,
+    "arm": 4,
     "ini": 20,
     "mor": 7,
     "keywords": [
       "BonusAntiMonte"
-    ]
+    ],
+    "bonusVsMounted": 15
   },
   "archer_imp": {
     "id": "archer_imp",
@@ -81,7 +82,8 @@ export const CARDS: Record<string, CardDef> = {
     "ini": 10,
     "mor": 5,
     "keywords": [
-      "Lent"
+      "Lent",
+      "Pénétration 5"
     ]
   },
   "chevalier_prov": {
@@ -96,9 +98,9 @@ export const CARDS: Record<string, CardDef> = {
     "niveau": 3,
     "cout": 5,
     "slotType": "avant",
-    "atk": 15,
+    "atk": 14,
     "end": 50,
-    "arm": 15,
+    "arm": 13,
     "ini": 10,
     "mor": 8,
     "keywords": []
@@ -148,9 +150,9 @@ export const CARDS: Record<string, CardDef> = {
     "niveau": 2,
     "cout": 3,
     "slotType": "avant",
-    "atk": 10,
+    "atk": 9,
     "end": 50,
-    "arm": 5,
+    "arm": 4,
     "ini": 12,
     "mor": 8,
     "keywords": [],
@@ -204,13 +206,13 @@ export const CARDS: Record<string, CardDef> = {
       "Empire"
     ],
     "niveau": 3,
-    "cout": 3,
+    "cout": 4,
     "slotTypes": [
       "avant",
       "arriere"
     ],
-    "atk": 10,
-    "end": 40,
+    "atk": 7,
+    "end": 36,
     "arm": 5,
     "ini": 15,
     "mor": 6,
@@ -564,7 +566,7 @@ export const CARDS: Record<string, CardDef> = {
       "Clerc"
     ],
     "niveau": 2,
-    "cout": 3,
+    "cout": 2,
     "slotType": "isole",
     "atk": 0,
     "end": 30,
@@ -1009,9 +1011,10 @@ export const CARDS: Record<string, CardDef> = {
     "cardType": "Tactique",
     "faction": "elfe",
     "niveau": 3,
-    "cout": 2,
+    "cout": 1,
     "targetRule": "none",
-    "effect": "serenite"
+    "effect": "serenite",
+    "doubledWithElemental": true
   },
   "chant_vent": {
     "id": "chant_vent",
@@ -1186,7 +1189,7 @@ export const CARDS: Record<string, CardDef> = {
       "Humain"
     ],
     "niveau": 3,
-    "cout": 4,
+    "cout": 3,
     "slotTypes": [
       "avant",
       "arriere"
@@ -1260,7 +1263,7 @@ export const CARDS: Record<string, CardDef> = {
       "Nomade"
     ],
     "niveau": 1,
-    "cout": 2,
+    "cout": 1,
     "slotType": "arriere",
     "atk": 5,
     "end": 20,
@@ -1281,8 +1284,8 @@ export const CARDS: Record<string, CardDef> = {
     "niveau": 3,
     "cout": 3,
     "slotType": "isole",
-    "atk": 0,
-    "end": 20,
+    "atk": 1,
+    "end": 21,
     "arm": 0,
     "ini": 0,
     "mor": 10,
@@ -1363,7 +1366,7 @@ export const CARDS: Record<string, CardDef> = {
       "Nomade"
     ],
     "niveau": 4,
-    "cout": 3,
+    "cout": 4,
     "slotType": "arriere",
     "atk": 15,
     "end": 30,
