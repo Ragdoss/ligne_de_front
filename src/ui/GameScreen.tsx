@@ -28,6 +28,14 @@ export interface GameScreenProps {
   /** Fin de partie : le parent décide de la suite (récompenses, réessayer…). */
   renderEnd: (game: GameState, close: () => void) => React.ReactNode;
   onQuit: () => void;
+  /** Multiplicateur de durée des animations de combat (options). */
+  animMul?: number;
+  /** Multiplicateur du délai de réflexion de l'ordinateur (options). */
+  aiMul?: number;
+  /** Main de l'ordinateur visible dès le départ (options). */
+  initialReveal?: boolean;
+  /** Appelé une fois quand la partie se termine. */
+  onOver?: (game: GameState) => void;
 }
 
 function PlayerBar({ game, p, label, active }: { game: GameState; p: PlayerId; label: string; active: boolean }) {
@@ -70,7 +78,7 @@ export function Dialog({ title, lines, onClose, button = 'Continuer' }: { title?
   );
 }
 
-export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, intro, renderEnd, onQuit }: GameScreenProps) {
+export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, intro, renderEnd, onQuit, animMul = 1, aiMul = 1, initialReveal = false, onOver }: GameScreenProps) {
   const [game, setGame] = useState<GameState>(() => createGame(setup));
   const [shown, setShown] = useState<GameState | null>(null); // état affiché pendant une animation de combat
   const [highlight, setHighlight] = useState<Highlight | null>(null);
@@ -80,7 +88,7 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
   const [hint, setHint] = useState('');
   const [banners, setBanners] = useState<Banner[]>([]);
   const [order, setOrder] = useState<Record<PlayerId, number[]>>({ A: [], B: [] });
-  const [revealAI, setRevealAI] = useState(false);
+  const [revealAI, setRevealAI] = useState(initialReveal);
   const [overClosed, setOverClosed] = useState(false);
   const [dialogs, setDialogs] = useState<{ title?: string; lines: DialogLine[] }[]>(() => (intro?.length ? [{ title, lines: intro }] : []));
   const busy = useRef(false);
@@ -117,7 +125,7 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
       for (const e of r.events) {
         if (e.type === 'attack') {
           setHighlight({ attacker: e.attacker, target: e.target, damage: e.damage, moral: e.moralLoss });
-          await sleep(fast ? 380 : 520);
+          await sleep((fast ? 380 : 520) * animMul);
         } else if (e.type === 'destroyed') {
           gone.add(e.uid);
           setFaded(new Set(gone));
@@ -131,14 +139,20 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
     if (dlg.length) setDialogs(d => [...d, ...dlg]);
     setGame(r.state);
     busy.current = false;
-  }, [game, names, human, pushBanner, fast]);
+  }, [game, names, human, pushBanner, fast, animMul]);
 
   // Tour de l'ordinateur (et ses choix en attente). Il attend que les dialogues soient fermés.
   useEffect(() => {
     if (game.over || paused || busy.current || human[acting]) return;
-    const t = setTimeout(() => { void apply(chooseAction(game, undefined, aiFilter)); }, fast ? 250 : 450);
+    const t = setTimeout(() => { void apply(chooseAction(game, undefined, aiFilter)); }, (fast ? 250 : 450) * aiMul);
     return () => clearTimeout(t);
-  }, [game, paused, acting, apply, human, fast, aiFilter]);
+  }, [game, paused, acting, apply, human, fast, aiFilter, aiMul]);
+
+  // Fin de partie signalée une seule fois au parent (gains de pièces…).
+  const overSent = useRef(false);
+  useEffect(() => {
+    if (game.over && !overSent.current) { overSent.current = true; onOver?.(game); }
+  }, [game, onOver]);
 
   // Ciblage
   const plays = useMemo(() => (sel ? playsForHandCard(game, sel.uid) : []), [game, sel]);

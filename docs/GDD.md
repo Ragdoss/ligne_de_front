@@ -179,11 +179,15 @@ Liste non exhaustive des rôles envisagés à ce stade, avec leur tendance de co
 
 ## 5. Boucle d'acquisition des cartes
 
-- Pas d'achat de boosters à contenu aléatoire.
-- **Campagne solo** : progression qui débloque progressivement l'intégralité du **core set**.
-- Extensions futures : modèle à définir, mais en cohérence avec la philosophie "pas de RNG payant" (ex : extension achetée = contenu débloqué directement, ou débloqué via progression).
+- **Collection du joueur** : chaque carte peut être possédée en **3 exemplaires au maximum**. Un nouveau joueur commence avec **1 exemplaire de chaque carte** collectionnable (jetons et cartes de scénario exclus).
+- **Monnaie du jeu (pièces)** : **+5 pièces par victoire** contre l'ordinateur en partie locale ou par scénario de campagne réussi (pas en mode à deux ni en spectateur). Aucune monnaie achetable : la monnaie se gagne uniquement en jouant.
+- **Paquets** : un paquet coûte **5 pièces** et contient **5 cartes** tirées dans l'intégralité du pool collectionnable (pas de rareté pour l'instant). Un exemplaire tiré alors qu'on en possède déjà 3 rapporte **1 pièce** à la place.
+- **Campagne** : le pool de la campagne est **séparé** de la collection du joueur. À la fin d'une campagne, on compare les deux : pour chaque carte, la collection monte au nombre d'exemplaires du pool de campagne (3 maximum) — ex. 1 Cavaliers Elfes en collection et 2 en fin de campagne → 2 en collection. Une campagne n'est comptée qu'une fois.
+- **Option « Toutes les cartes débloquées »** : toutes les cartes à 3 exemplaires pour les parties locales et le créateur de deck (sans modifier la collection).
+- **Règles de construction d'un deck** : 3 exemplaires maximum par carte ; au moins **3 régiments de niveau 1** ; au moins **30 cartes de niveau 1 à 3** ; au moins **15 cartes de niveau 4-5**.
+- **Pistes futures** : raretés, skins alternatifs de cartes, extensions.
 
-**[OUVERT]** Modèle économique global du jeu — pas de piste précise pour l'instant, décision reportée. Si le jeu prend forme et mérite d'être commercialisé, la question sera retravaillée à ce moment-là (en restant fidèle à la philosophie "pas de RNG payant").
+**[OUVERT]** Modèle économique global du jeu — décision reportée. La philosophie reste « pas de RNG payant » : les paquets aléatoires ne s'achètent qu'avec la monnaie gagnée en jeu.
 
 ---
 

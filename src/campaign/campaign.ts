@@ -7,6 +7,8 @@ import type { CampaignScenario } from './types';
 
 export interface CampaignSave {
   version: 1;
+  /** Identifiant unique de cette partie de campagne (pour ne fusionner son pool qu'une fois dans la collection). */
+  id: string;
   /** Cartes possédées (avec répétitions). */
   pool: string[];
   /** Index du scénario en cours dans CAMPAIGN_ORDER. */
@@ -17,7 +19,7 @@ export interface CampaignSave {
 }
 
 export function newCampaign(): CampaignSave {
-  return { version: 1, pool: SCENARIOS.s1!.A.deckList!.slice(), idx: 0, deck: null, finished: false };
+  return { version: 1, id: `camp-${Date.now()}`, pool: SCENARIOS.s1!.A.deckList!.slice(), idx: 0, deck: null, finished: false };
 }
 export const currentScenario = (c: CampaignSave): CampaignScenario => SCENARIOS[CAMPAIGN_ORDER[c.idx]!]!;
 
@@ -115,6 +117,7 @@ export function sanitize(raw: unknown): CampaignSave | null {
   if (!c || !Array.isArray(c.pool) || typeof c.idx !== 'number') return null;
   return {
     version: 1,
+    id: typeof c.id === 'string' ? c.id : `camp-${Date.now()}`,
     pool: c.pool.filter(id => typeof id === 'string' && CARDS[id]),
     idx: Math.max(0, Math.min(CAMPAIGN_ORDER.length - 1, c.idx | 0)),
     deck: c.deck && typeof c.deck === 'object' ? c.deck : null,

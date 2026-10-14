@@ -77,3 +77,16 @@ aux outils avec `--patch` : `npm run sim -- 100 v2 --patch balance/equilibrage-1
 - `npm run difficulty -- 200` : réussite de l'ordinateur jouant l'Empire dans chaque scénario
   (`reports/difficulte-scenarios*.md`). Premiers chiffres (200 parties) : S1 5 %, S2 6 %, S3 11 %, S4 24 % ;
   avant équilibrage : 6 %, 10 %, 11 %, 27 % — l'effet du nerf est dans la marge (±4 points).
+
+## Accueil, collection et économie
+
+- Écran d'accueil : Jouer en local, Jouer en ligne (à venir), Campagne, Ma collection, Options.
+- Profil du joueur (`src/profile/profile.ts`, sauvegardé dans le navigateur + code d'export) : collection (3 exemplaires max,
+  1 exemplaire de chaque carte au départ), pièces, decks, options, campagnes déjà fusionnées.
+- Économie : +5 pièces par victoire contre l'ordinateur ou par scénario réussi ; paquet de 5 cartes à 5 pièces, tiré dans tout le
+  pool ; un exemplaire au-delà de 3 rend 1 pièce. Fin de campagne : la collection monte au niveau du pool de campagne (3 max).
+- Ma collection : « Mes decks » (liste + créateur de deck avec règles en direct, complétion automatique, import de liste) et
+  « Mes cartes » (toutes les cartes, possédées ou non, filtres, ouverture de paquets).
+- Règles de deck : 3 exemplaires max, ≥ 3 régiments niv. 1, ≥ 30 cartes niv. 1-3, ≥ 15 cartes niv. 4-5.
+- Options : taille de l'interface, durée des animations, temps de réflexion de l'ordinateur, main de l'ordinateur visible,
+  toutes les cartes débloquées.
