@@ -50,7 +50,10 @@ function computeOptions(ctx: Ctx, c: PendingChoice): ChoiceOption[] {
 
 /** Quand un choix n'a aucune option, il se termine sans effet (sauf la fin du vol de ravitaillement). */
 function finishWithoutOptions(ctx: Ctx, c: PendingChoice): void {
-  if (c.kind === 'handDiscard' && c.data.thief) {
+  if (c.kind === 'handDiscard' && c.data.drawAfter) {
+    // Main pleine en début de tour : les défausses sont faites, on pioche.
+    for (let i = 0; i < Number(c.data.drawAfter) && !ctx.over; i++) ctx.draw(c.player, 'handLimit');
+  } else if (c.kind === 'handDiscard' && c.data.thief) {
     const thief = c.data.thief as 'A' | 'B';
     const gain = Math.max(0, Number(c.data.gainBase) - Number(c.data.sum));
     ctx.player(thief).resource += gain;

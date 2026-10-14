@@ -3,6 +3,7 @@ import type { GameEvent, PlayerId, SlotRef } from '../engine/types';
 import { CARD_TEXT_FR } from './cards.fr';
 
 export const cardName = (id: string): string => CARD_TEXT_FR[id]?.name ?? id;
+const srcName = (id: string): string => (id === 'handLimit' ? 'main pleine' : cardName(id));
 const zoneFr = (r: SlotRef) => (r.zone === 'isole' ? 'isolé' : `${r.zone === 'avant' ? 'avant' : 'arrière'} ${r.idx + 1}`);
 
 const REASONS: Record<string, string> = {
@@ -20,7 +21,7 @@ export function formatEvent(e: GameEvent, names: Record<PlayerId, string> = { A:
   const n = (p: PlayerId) => names[p];
   switch (e.type) {
     case 'turnStart':
-      return `Tour ${e.turn} : ${n(e.player)} — ressource ${e.resource}${e.leftover ? ` (dont ${e.leftover} reportée(s))` : ''}, pioche ${e.drawn.length ? e.drawn.map(cardName).join(', ') : 'aucune carte'}${e.blocked ? ` (${e.blocked} bloquée(s) : main pleine)` : ''}.`;
+      return `Tour ${e.turn} : ${n(e.player)} — ressource ${e.resource}${e.leftover ? ` (dont ${e.leftover} reportée(s))` : ''}, ${e.blocked ? `main pleine : défausse ${e.blocked} carte(s) avant de piocher` : `pioche ${e.drawn.length ? e.drawn.map(cardName).join(', ') : 'aucune carte'}`}.`;
     case 'cardPlayed': return `${n(e.player)} joue ${cardName(e.cardId)} (coût ${e.cost}).`;
     case 'deployed': return `${cardName(e.cardId)} est déployé en ${zoneFr(e.slot)}.`;
     case 'leaderAttached': return `${cardName(e.leaderId)} prend la tête de ${cardName(e.cardId)}.`;
@@ -47,7 +48,7 @@ export function formatEvent(e: GameEvent, names: Record<PlayerId, string> = { A:
     case 'moralCheck':
       return e.loser ? `Moral total ${e.totals.A} contre ${e.totals.B} : ${n(e.loser)} gagne ${e.amount} point(s) de lassitude.` : `Moral total égal (${e.totals.A}) : aucune lassitude.`;
     case 'resource': return `${n(e.player)} gagne ${e.amount} ressource(s) (${e.source === 'paysans' ? 'Paysans' : 'régiments générateurs'}).`;
-    case 'draw': return e.source === 'turn' ? null : `${n(e.player)} pioche ${cardName(e.cardId)} (${cardName(e.source)}).`;
+    case 'draw': return e.source === 'turn' ? null : `${n(e.player)} pioche ${cardName(e.cardId)} (${srcName(e.source)}).`;
     case 'generated': return `${cardName(e.cardId)} est créé dans la main de ${n(e.player)} (${cardName(e.source)}).`;
     case 'returnedToHand': return `${cardName(e.cardId)} retourne dans la main de ${n(e.player)}.`;
     case 'moved': return `${cardName(e.cardId)} est déplacé de ${zoneFr(e.from)} vers ${zoneFr(e.to)}.`;
@@ -55,7 +56,7 @@ export function formatEvent(e: GameEvent, names: Record<PlayerId, string> = { A:
     case 'left': return `${cardName(e.cardId)} quitte le plateau (fin de durée de vie).`;
     case 'effect': return `${cardName(e.cardId)} : effet appliqué.`;
     case 'choice': return null;
-    case 'discarded': return `${n(e.player)} défausse ${cardName(e.cardId)} (${cardName(e.source)}).`;
+    case 'discarded': return `${n(e.player)} défausse ${cardName(e.cardId)} (${srcName(e.source)}).`;
     case 'intercepted': return `Saboteur Nomade : ${cardName(e.cardId)}, piochée par ${n(e.player)}, part en défausse (le Saboteur perd ${e.moralLoss} Moral).`;
     case 'freeCopy': return `Archéotacticiens : ${n(e.player)} reçoit une copie gratuite de ${cardName(e.cardId)}.`;
     case 'sacrificed': return `${cardName(e.cardId)} est sacrifié pour invoquer ${cardName(e.forCard)}.`;

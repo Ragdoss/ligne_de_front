@@ -94,14 +94,19 @@ export function startTurn(ctx: Ctx, p: PlayerId): void {
     }
   }
 
-  // Pioche (bloquée au-delà de la limite de main).
+  // Pioche. Main pleine (limite atteinte) : on défausse d'abord autant de cartes qu'on va en piocher (au choix),
+  // puis on pioche — la pioche continue donc toujours de s'épuiser.
+  const count = drawCountFor(pl.level);
+  if (pl.hand.length >= ctx.s.config.handLimit) {
+    ctx.emit({ type: 'turnStart', player: p, turn: ctx.s.turn, resource: pl.resource, leftover, drawn: [], blocked: count });
+    ctx.queueChoice('handDiscard', p, 'handLimit', { n: count, sum: 0, thief: null, gainBase: 0, drawAfter: count });
+    return;
+  }
   const drawn: string[] = [];
-  let blocked = 0;
-  for (let i = 0; i < drawCountFor(pl.level); i++) {
-    if (pl.hand.length >= ctx.s.config.handLimit) { blocked++; continue; }
+  for (let i = 0; i < count; i++) {
     const cardId = pl.deck[0];
     if (!ctx.draw(p, 'turn')) return;
     drawn.push(cardId!);
   }
-  ctx.emit({ type: 'turnStart', player: p, turn: ctx.s.turn, resource: pl.resource, leftover, drawn, blocked });
+  ctx.emit({ type: 'turnStart', player: p, turn: ctx.s.turn, resource: pl.resource, leftover, drawn, blocked: 0 });
 }

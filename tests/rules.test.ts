@@ -297,3 +297,23 @@ describe('Tactiques', () => {
     expect(s.players.A.hand.map(h => h.cardId)).toEqual(['general_empire']);
   });
 });
+
+describe('Main pleine', () => {
+  it('main pleine en début de tour : défausser autant que la pioche (au choix), puis piocher', () => {
+    let s = blankGame();
+    s.config.moralCheck = false;
+    place(s, 'A', 'avant', 0, 'recrue_imp');
+    place(s, 'B', 'avant', 3, 'eclaireur_elfe');
+    s.players.B.level = 2; // pioche 2 cartes
+    for (let i = 0; i < 10; i++) give(s, 'B', 'chevalier_prov');
+    const deckBefore = s.players.B.deck.length;
+    s = act(s, { type: 'endTurn' }).state;
+    expect(s.pending[0]).toMatchObject({ kind: 'handDiscard', player: 'B' });
+    s = act(s, { type: 'choose', option: 0 }).state;
+    s = act(s, { type: 'choose', option: 0 }).state;
+    expect(s.pending).toHaveLength(0);
+    expect(s.players.B.hand).toHaveLength(10);
+    expect(s.players.B.discard.filter(id => id === 'chevalier_prov')).toHaveLength(2);
+    expect(s.players.B.deck.length).toBe(deckBefore - 2);
+  });
+});

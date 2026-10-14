@@ -13,13 +13,14 @@ describe('IA heuristique', () => {
     }
   });
   it('bat largement un joueur qui joue au hasard', () => {
-    let rng = 99;
+    let rng = 7;
     const rand = (n: number) => { const r = nextRandom(rng); rng = r.state; return Math.floor(r.value * n); };
     let aiWins = 0;
-    const games = 16;
+    const games = 20;
     for (let g = 0; g < games; g++) {
       const ai = g % 2 === 0 ? 'A' : 'B';
-      let s = createGame({ seed: `r${g}`, A: { faction: 'empire', deck: DEMO_DECKS.empire! }, B: { faction: 'empire', deck: DEMO_DECKS.empire! } });
+      const f = (['empire', 'elfe', 'demons', 'nomades'] as const)[g % 4];
+      let s = createGame({ seed: `w${g}`, A: { faction: f, deck: DEMO_DECKS[f]! }, B: { faction: f, deck: DEMO_DECKS[f]! } });
       for (let n = 0; n < 3000 && !s.over; n++) {
         const acts = legalActions(s);
         const a = actingPlayer(s) === ai ? chooseAction(s) : acts[rand(acts.length)]!;
@@ -29,6 +30,6 @@ describe('IA heuristique', () => {
       }
       if (s.over?.winner === ai) aiWins++;
     }
-    expect(aiWins).toBeGreaterThanOrEqual(13);
+    expect(aiWins).toBeGreaterThanOrEqual(17);
   });
 });

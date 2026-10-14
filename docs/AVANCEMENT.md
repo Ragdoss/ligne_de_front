@@ -33,8 +33,13 @@ Fait :
 Constats de la première simulation (`reports/simulation-v1.md`) :
 - L'Empire gagne 85 % de ses parties. Son deck de démonstration contient toutes les récompenses de la
   campagne (63 cartes, beaucoup de Leaders et de soutiens) : à refaire avec des decks comparables.
-- Blocage possible (1 % des parties) : deux joueurs coincés au niveau 1, sans ATK en jeu (Cultistes, Paysans),
-  la main pleine de cartes de niveau 2+. Main pleine = pioche bloquée = jamais de pioche vide, Moral égal =
-  jamais de lassitude : la partie ne finit pas. Question de règle à trancher.
+- Blocage possible (1 % des parties) : main pleine = pioche bloquée = la partie pouvait ne jamais finir.
+  **Corrigé (règle de Ragdoss)** : main pleine en début de tour → défausser autant que la pioche, puis piocher.
+
+Deuxième simulation (`reports/simulation-v2.md`, decks Démons et Nomades de Ragdoss, nouvelle règle de main) :
+- Plus aucune partie bloquée. Empire 80 %, Démons 42 %, Nomades 40 %, Elfes 38 %.
+- Test complémentaire (60 parties par ligne, Empire contre Elfes) : Empire complet 88 %,
+  Empire sans ses cartes de niveau 4-5 : 90 %, les deux sans niveau 4-5 : 93 %.
+  → l'avantage de l'Empire se joue en début et milieu de partie (coûts et Leaders), pas dans ses grosses cartes.
 ## Étape 3 — Interface jouable
 ## Étape 4 — Contenu (campagne, roguelite, multijoueur)
