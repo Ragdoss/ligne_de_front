@@ -222,6 +222,8 @@ export interface GameConfig {
   mustSurvive: Partial<Record<PlayerId, string>>;
   handLimit: number;
   startingHand: number;
+  /** false : piocher dans une pioche vide ne fait pas perdre (on ne pioche simplement rien). Absent = true. */
+  emptyDeckDefeat?: boolean;
 }
 
 // ---------- Scénarios ----------

@@ -32,6 +32,8 @@ export interface CampaignScenario {
   /** L'ordinateur ne pose plus de régiment à partir de ce tour. */
   aiNoRegimentsFromTurn?: Partial<Record<PlayerId, number>>;
   mustSurvive?: Partial<Record<PlayerId, string>>;
+  /** false : pas de défaite par pioche vide dans ce scénario. */
+  emptyDeckDefeat?: boolean;
   startLevel?: Partial<Record<PlayerId, number>>;
   levelThresholds?: Partial<Record<PlayerId, number[]>>;
   moralCheckLassitude?: number;

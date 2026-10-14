@@ -257,7 +257,10 @@ export class Ctx {
   draw(p: PlayerId, source: string): boolean {
     const pl = this.player(p);
     const cardId = pl.deck.shift();
-    if (cardId === undefined) { this.endGame(opponentOf(p), 'emptyDeck'); return false; }
+    if (cardId === undefined) {
+      if (this.s.config.emptyDeckDefeat === false) return true;
+      this.endGame(opponentOf(p), 'emptyDeck'); return false;
+    }
     this.deliverDrawn(p, cardId, source);
     return !this.over;
   }

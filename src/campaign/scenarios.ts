@@ -327,12 +327,13 @@ export const SCENARIOS: Record<string, CampaignScenario> = {
     "title": "Scénario 3 — Le convoi du col des Brumes",
     "deckRules": {
       "min": 20,
-      "text": "Minimum 20 cartes. Terrain plus long : 6 emplacements à l'avant, 5 à l'arrière."
+      "text": "Minimum 20 cartes. Terrain plus long : 6 emplacements à l'avant, 5 à l'arrière. Pas de défaite par pioche vide."
     },
     "layout": {
       "avant": 6,
       "arriere": 5
     },
+    "emptyDeckDefeat": false,
     "intro": [
       {
         "who": "",

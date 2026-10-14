@@ -38,6 +38,7 @@ export function scenarioGameSetup(sc: CampaignScenario, playerDeck: string[], se
       endTurnLassitude: per(sc.endTurnLassitude, 0),
       noRegimentDefeatFromTurn: per(sc.noRegimentDefeatFromTurn, 1),
       mustSurvive: sc.mustSurvive ?? {},
+      emptyDeckDefeat: sc.emptyDeckDefeat ?? true,
     },
     scenario: {
       events: sc.events,

@@ -61,6 +61,18 @@ describe('Scénarios', () => {
     const r = act(s, { type: 'endTurn' });
     expect(r.state.over).toEqual({ winner: 'A', reason: 'convoyArrived' });
   });
+  it('scénario 3 : pioche vide ne fait pas perdre (main pleine : pas de défausse inutile)', () => {
+    const s = start('s3');
+    s.players.A.deck = []; s.players.B.deck = [];
+    s.active = 'B';
+    let r = act(s, { type: 'endTurn' });
+    expect(r.state.over).toBeNull();
+    expect(r.state.pending.length).toBe(0);
+    const t = start('s1');
+    t.players.A.deck = []; t.active = 'B';
+    r = act(t, { type: 'endTurn' });
+    expect(r.state.over?.reason).toBe('emptyDeck');
+  });
   it('scénario 4 : Sylvain vital, et l’ordinateur ne joue Tectonique que pour lui trouver une cible', () => {
     const s = start('s4');
     expect(s.config.mustSurvive).toEqual({ B: 'sylvain' });
