@@ -39,11 +39,11 @@ export interface Profile {
 
 export const DEFAULT_OPTIONS: Options = { scale: 1, animSpeed: 1, aiSpeed: 1, revealAiHand: false, allUnlocked: false };
 
-/** Nouveau joueur : 1 exemplaire de chaque carte (de quoi construire un premier deck valide). */
+/** Nouveau joueur : aucune carte. La campagne en débloque ; l'option « toutes les cartes débloquées » permet de tout essayer. */
 export function newProfile(): Profile {
   return {
     version: 1,
-    collection: Object.fromEntries(COLLECTIBLE.map(id => [id, 1])),
+    collection: Object.fromEntries(COLLECTIBLE.map(id => [id, 0])),
     coins: 0,
     decks: [],
     options: { ...DEFAULT_OPTIONS },
@@ -127,6 +127,11 @@ export function sanitizeProfile(raw: unknown): Profile {
 }
 export function loadProfile(): Profile {
   try { const raw = localStorage.getItem(KEY); return raw ? sanitizeProfile(JSON.parse(raw)) : newProfile(); } catch { return newProfile(); }
+}
+/** Efface tout : collection, pièces, decks, options et campagne en cours. */
+export function resetEverything(): Profile {
+  try { for (const k of Object.keys(localStorage)) if (k.startsWith('ligneDeFront.jeu.')) localStorage.removeItem(k); } catch { /* stockage indisponible */ }
+  return newProfile();
 }
 export function saveProfile(p: Profile): void {
   try { localStorage.setItem(KEY, JSON.stringify(p)); } catch { /* stockage indisponible */ }

@@ -87,7 +87,7 @@ export function MyCards({ profile, update }: { profile: Profile; update: (fn: (p
           if (res) setPack(res);
         }}>Ouvrir un paquet ({PACK_SIZE} cartes, {PACK_PRICE} pièces)</button>
       </div>
-      <p className="muted small">Chaque victoire contre l’ordinateur ou en campagne rapporte 5 pièces. Un exemplaire tiré au-delà de 3 rend 1 pièce.</p>
+      <p className="muted small">Chaque victoire contre l’ordinateur ou en campagne rapporte 5 pièces. Un exemplaire tiré au-delà de 3 rend 1 pièce. La fin d’une campagne ajoute ses cartes à ta collection.</p>
       <FilterBar f={f} set={setF} />
       <div className="camp-grid">
         {ids.map(id => <CardTile key={id} id={id} dim={!have(id)} badge={<span className={`count${have(id) ? '' : ' zero'}`}>{have(id)} / {MAX_COPIES}</span>} />)}

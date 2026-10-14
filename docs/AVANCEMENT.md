@@ -99,3 +99,8 @@ aux outils avec `--patch` : `npm run sim -- 100 v2 --patch balance/equilibrage-1
 - Dialogues façon roman visuel (`src/ui/VnDialog.tsx`), en campagne comme en combat : deux personnages face à face,
   celui qui parle en pleine encre, l'autre estompé ; une réplique à la fois, la précédente estompée au-dessus.
   Portraits par personnage dans `PORTRAITS` (le soldat sert à tous pour l'instant).
+- Les récompenses de fin de scénario passent aussi en dialogue : le Commandant présente renforts, promotion et cartes à
+  choisir (cartes au centre de la scène, choix dans le bandeau). Répliques personnalisables par scénario (`reward.lines`).
+- Jusqu'à 5 personnages sur scène (3e et suivants en retrait à côté des deux premiers).
+- Nouveau joueur : aucune carte (la campagne et les paquets en donnent ; option « toutes les cartes débloquées » pour tout essayer).
+- Options : « Tout réinitialiser » (collection, pièces, decks, options, campagne), avec confirmation.

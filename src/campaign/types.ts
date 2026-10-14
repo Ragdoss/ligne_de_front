@@ -16,6 +16,8 @@ export interface Reward {
   gifts?: string[];
   exchange?: { from: string; to: string; count: number };
   picks?: { count: number; options: string[]; unique?: boolean; title?: string; text?: string };
+  /** Réplique qui présente chaque étape de la récompense (sinon : texte par défaut du Commandant). */
+  lines?: Partial<Record<'gifts' | 'exchange' | 'picks', DialogLine>>;
 }
 
 export interface CampaignScenario {

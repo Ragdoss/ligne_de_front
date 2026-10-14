@@ -4,7 +4,7 @@ import { exportCode, importCode, loadCampaign, newCampaign, type CampaignSave } 
 import { CAMPAIGN_ORDER, SCENARIOS } from '../campaign/scenarios';
 import { DEMO_DECKS } from '../data/decks';
 import type { Faction } from '../engine/types';
-import { checkDeck, DEFAULT_OPTIONS, profileCode, profileFromCode, type Options, type Profile } from '../profile/profile';
+import { checkDeck, DEFAULT_OPTIONS, profileCode, profileFromCode, resetEverything, type Options, type Profile } from '../profile/profile';
 import { mainFaction } from './Decks';
 import { FACTION_LABEL, PLAYABLE_FACTIONS } from './labels';
 
@@ -97,8 +97,8 @@ export function LocalPlay({ profile, onStart, onBack, goDecks }: { profile: Prof
       <DeckSelect profile={profile} value={B} onChange={setB} human={humanB} label={humanB ? 'Joueur B' : 'Joueur B (ordinateur)'} />
       {!ready && (
         <p className="warn">
-          Il te faut un deck valide construit avec tes cartes. <button type="button" className="link" onClick={goDecks}>Créer un deck</button>
-          {' '}— ou active « Toutes les cartes débloquées » dans les options pour utiliser les decks de démonstration.
+          Il te faut un deck valide construit avec tes cartes (la campagne et les paquets t’en font gagner). <button type="button" className="link" onClick={goDecks}>Créer un deck</button>
+          {' '}— ou active « Toutes les cartes débloquées » dans les options pour utiliser toutes les cartes et les decks de démonstration.
         </p>
       )}
       <p className="muted small">Une victoire contre l’ordinateur rapporte 5 pièces.</p>
@@ -150,6 +150,7 @@ export function OptionsScreen({ profile, update, onBack }: { profile: Profile; u
   const set = <K extends keyof Options>(k: K, v: Options[K]) => update(p => { p.options[k] = v; });
   const [code, setCode] = useState('');
   const [msg, setMsg] = useState('');
+  const [resetArmed, setResetArmed] = useState(false);
   const range = (k: 'scale' | 'animSpeed' | 'aiSpeed', label: string, min: number, max: number, step: number, fmt: (v: number) => string) => (
     <label className="field">
       <span>{label} : <b>{fmt(o[k])}</b></span>
@@ -166,6 +167,19 @@ export function OptionsScreen({ profile, update, onBack }: { profile: Profile; u
         <label className="check"><input type="checkbox" checked={o.revealAiHand} onChange={e => set('revealAiHand', e.target.checked)} /> Main de l’ordinateur visible dès le début</label>
         <label className="check"><input type="checkbox" checked={o.allUnlocked} onChange={e => set('allUnlocked', e.target.checked)} /> Toutes les cartes débloquées (parties locales et créateur de deck)</label>
         <button type="button" onClick={() => update(p => { p.options = { ...DEFAULT_OPTIONS }; })}>Rétablir les réglages par défaut</button>
+      </section>
+      <section className="menu-block danger-zone">
+        <h2>Tout réinitialiser</h2>
+        <p className="muted small">Efface ta collection, tes pièces, tes decks, tes options et ta campagne en cours. Impossible à annuler (pense au code de sauvegarde ci-dessous si tu veux pouvoir revenir en arrière).</p>
+        <div className="choices row left">
+          {resetArmed ? (
+            <>
+              <button type="button" className="danger" onClick={() => { const fresh = resetEverything(); update(p => Object.assign(p, fresh)); setResetArmed(false); setMsg('Tout a été réinitialisé.'); }}>Oui, tout effacer</button>
+              <button type="button" onClick={() => setResetArmed(false)}>Annuler</button>
+            </>
+          ) : <button type="button" onClick={() => setResetArmed(true)}>Tout réinitialiser…</button>}
+        </div>
+        {msg === 'Tout a été réinitialisé.' && <p className="ok">{msg}</p>}
       </section>
       <section className="menu-block">
         <h2>Sauvegarde du profil</h2>

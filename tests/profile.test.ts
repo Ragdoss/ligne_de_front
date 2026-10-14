@@ -2,8 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { autoComplete, checkDeck, COLLECTIBLE, mergeCampaignPool, newProfile, openPack, PACK_PRICE } from '../src/profile/profile';
 
 describe('Profil joueur', () => {
-  it('un nouveau joueur peut construire un deck valide avec sa collection de départ', () => {
+  it('un nouveau joueur ne possède aucune carte ; avec « toutes les cartes débloquées », il construit un deck valide', () => {
     const p = newProfile();
+    expect(COLLECTIBLE.every(id => !p.collection[id])).toBe(true);
+    expect(checkDeck(autoComplete([], p, 'empire'), p).ok).toBe(false);
+    p.options.allUnlocked = true;
     for (const f of ['empire', 'elfe', 'demons', 'nomades']) {
       const deck = autoComplete([], p, f);
       const c = checkDeck(deck, p);
@@ -30,6 +33,7 @@ describe('Profil joueur', () => {
   });
   it('fin de campagne : la collection monte au nombre d’exemplaires du pool (3 max), une seule fois', () => {
     const p = newProfile();
+    p.collection.cavalier_elfe = 1; p.collection.recrue_imp = 1;
     const gained = mergeCampaignPool(p, ['cavalier_elfe', 'cavalier_elfe', ...Array(12).fill('recrue_imp')], 'camp-1');
     expect(gained).toEqual({ cavalier_elfe: 1, recrue_imp: 2 });
     expect(p.collection.cavalier_elfe).toBe(2);

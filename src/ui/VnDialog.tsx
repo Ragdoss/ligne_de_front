@@ -1,5 +1,6 @@
 // Dialogues façon « roman visuel » : les personnages face à face, celui qui parle en pleine encre,
-// l'autre estompé ; une réplique à la fois dans le bandeau du bas (la précédente reste visible, estompée).
+// les autres estompés ; une réplique à la fois dans le bandeau du bas (la précédente reste visible, estompée).
+// VnScene sert aussi aux récompenses de campagne (cartes au centre, choix dans le bandeau).
 import { useEffect, useState } from 'react';
 import type { DialogLine } from '../engine/types';
 import soldat from './assets/soldat.png';
@@ -7,6 +8,57 @@ import soldat from './assets/soldat.png';
 /** Portrait de chaque personnage (le soldat sert de portrait provisoire à tout le monde). */
 const PORTRAITS: Record<string, string> = {};
 const portraitOf = (who: string) => PORTRAITS[who] ?? soldat;
+
+/** Placement : 1er à gauche, 2e à droite, 3e à droite (en retrait), 4e à gauche (en retrait)… */
+function sideOf(cast: string[], who: string): 'left' | 'right' {
+  const i = cast.indexOf(who);
+  return i === 0 || i === 3 || i === 4 ? 'left' : 'right';
+}
+
+export function VnScene({ title, cast, speaking, past, now, center, actions, onAdvance, onSkip, count }: {
+  title?: string;
+  /** Personnages présents, dans l'ordre d'apparition (4 au plus sont affichés). */
+  cast: string[];
+  speaking?: string;
+  past?: DialogLine;
+  now: DialogLine;
+  /** Contenu au centre de la scène (cartes d'une récompense…). */
+  center?: React.ReactNode;
+  /** Boutons du bandeau ; sans eux, un clic n'importe où fait avancer. */
+  actions?: React.ReactNode;
+  onAdvance?: () => void;
+  onSkip?: () => void;
+  count?: string;
+}) {
+  const shown = cast.slice(0, 5);
+  const left = shown.filter(w => sideOf(shown, w) === 'left');
+  const right = shown.filter(w => sideOf(shown, w) === 'right').reverse(); // le premier à droite reste au bord
+  const fig = (w: string, s: 'left' | 'right', inner: boolean) => (
+    <img key={w} className={`vn-fig ${s}${inner ? ' inner' : ''}${speaking === w ? ' speaking' : ''}`} src={portraitOf(w)} alt={w} />
+  );
+  const line = (l: DialogLine, cls: string) => (
+    <p className={`vn-line ${cls} ${l.who ? sideOf(shown, l.who) : 'narr'}`}>{l.who && <b>{l.who} : </b>}{l.text}</p>
+  );
+  return (
+    <div className={`vn${onAdvance ? ' advance' : ''}`} role="dialog" aria-modal="true" aria-label={title ?? 'Dialogue'} onClick={onAdvance}>
+      <div className="vn-top">
+        {title && <h2>{title}</h2>}
+        {onSkip && <button type="button" className="vn-skip" onClick={e => { e.stopPropagation(); onSkip(); }}>Passer »</button>}
+      </div>
+      <div className="vn-stage">
+        <div className="vn-group left">{left.map((w, i) => fig(w, 'left', i > 0))}</div>
+        <div className="vn-center" onClick={e => center && e.stopPropagation()}>{center}</div>
+        <div className="vn-group right">{right.map((w, i) => fig(w, 'right', i < right.length - 1))}</div>
+      </div>
+      <div className="vn-band" onClick={e => actions && e.stopPropagation()}>
+        {past && line(past, 'past')}
+        {line(now, 'now')}
+        <div className="vn-actions">{actions}</div>
+        {count && <span className="vn-count">{count}</span>}
+      </div>
+    </div>
+  );
+}
 
 export function Dialog({ title, lines, onClose, button = 'Continuer' }: { title?: string; lines: DialogLine[]; onClose: () => void; button?: string }) {
   const [i, setI] = useState(0);
@@ -20,39 +72,19 @@ export function Dialog({ title, lines, onClose, button = 'Continuer' }: { title?
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   });
-
-  // Côté de chaque personnage : dans l'ordre d'apparition, gauche, droite, gauche…
-  const speakers = [...new Set(lines.map(l => l.who).filter(Boolean))];
-  const side = (who: string) => (speakers.indexOf(who) % 2 === 0 ? 'left' : 'right');
-  const shownOn = (s: 'left' | 'right') => {
-    const said = lines.slice(0, i + 1).map(l => l.who).filter(w => w && side(w) === s);
-    return said.length ? said[said.length - 1]! : speakers.find(w => side(w) === s);
-  };
+  const cast = [...new Set(lines.map(l => l.who).filter(Boolean))];
   const cur = lines[i]!;
-  const prev = i > 0 ? lines[i - 1] : undefined;
-  const line = (l: DialogLine, cls: string) => (
-    <p className={`vn-line ${cls} ${l.who ? side(l.who) : 'narr'}`}>{l.who && <b>{l.who} : </b>}{l.text}</p>
-  );
   return (
-    <div className="vn" role="dialog" aria-modal="true" aria-label={title ?? 'Dialogue'} onClick={next}>
-      <div className="vn-top">
-        {title && <h2>{title}</h2>}
-        <button type="button" className="vn-skip" onClick={e => { e.stopPropagation(); onClose(); }}>Passer »</button>
-      </div>
-      <div className="vn-stage">
-        {(['left', 'right'] as const).map(s => {
-          const who = shownOn(s);
-          return who ? <img key={s} className={`vn-fig ${s}${cur.who === who ? ' speaking' : ''}`} src={portraitOf(who)} alt={who} /> : <span key={s} />;
-        })}
-      </div>
-      <div className="vn-band">
-        {prev && line(prev, 'past')}
-        {line(cur, 'now')}
-        <button type="button" className="vn-next" autoFocus onClick={e => { e.stopPropagation(); next(); }}>
-          {last ? button : 'Suivant ▸'}
-        </button>
-        <span className="vn-count">{i + 1} / {lines.length}</span>
-      </div>
-    </div>
+    <VnScene
+      title={title}
+      cast={cast}
+      speaking={cur.who}
+      past={i > 0 ? lines[i - 1] : undefined}
+      now={cur}
+      onAdvance={next}
+      onSkip={onClose}
+      count={`${i + 1} / ${lines.length}`}
+      actions={<button type="button" className="vn-next" autoFocus onClick={e => { e.stopPropagation(); next(); }}>{last ? button : 'Suivant ▸'}</button>}
+    />
   );
 }
