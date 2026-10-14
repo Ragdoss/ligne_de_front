@@ -4,8 +4,9 @@ import { Ctx, card } from './ctx';
 import { activateChoices, resolveChoice } from './choices';
 import { cardCost, playCard, targetCount, unplayableReason, validFirstTarget, validSecondTarget } from './play';
 import { seedFrom } from './rng';
+import { applyScenarioStart } from './scenario';
 import { endTurn } from './turn';
-import type { Action, ActionResult, Faction, GameConfig, GameEvent, GameState, PlayerId, PlayerState, SlotRef } from './types';
+import type { Action, ActionResult, Faction, GameConfig, GameEvent, GameState, PlayerId, PlayerState, ScenarioSetup, SlotRef } from './types';
 
 export const DEFAULT_LEVEL_THRESHOLDS = [0, 4, 9, 16, 25];
 
@@ -31,6 +32,7 @@ export interface GameSetup {
   A: PlayerSetup;
   B: PlayerSetup;
   config?: Partial<GameConfig>;
+  scenario?: ScenarioSetup;
 }
 
 function newPlayer(ctx: Ctx, id: PlayerId, setup: PlayerSetup): PlayerState {
@@ -56,12 +58,17 @@ function newPlayer(ctx: Ctx, id: PlayerId, setup: PlayerSetup): PlayerState {
 export function createGame(setup: GameSetup): GameState {
   const config = defaultConfig(setup.config);
   const s: GameState = {
-    config, active: 'A', turn: 1, nextUid: 1, rng: seedFrom(setup.seed), pending: [], over: null,
+    config, active: 'A', turn: 1, nextUid: 1, rng: seedFrom(setup.seed), pending: [], over: null, scenario: null,
     players: {} as GameState['players'],
   };
   const ctx = new Ctx(s);
   s.players.A = newPlayer(ctx, 'A', setup.A);
   s.players.B = newPlayer(ctx, 'B', setup.B);
+  if (setup.scenario) {
+    const { events, convoy, moralCheckLostResource } = setup.scenario;
+    s.scenario = { events: events ?? [], convoy, moralCheckLostResource, fired: [], convoyHold: 0 };
+    applyScenarioStart(ctx, setup.scenario);
+  }
   return s;
 }
 

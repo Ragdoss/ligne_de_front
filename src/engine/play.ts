@@ -48,7 +48,7 @@ export function unplayableReason(ctx: Ctx, p: PlayerId, h: HandCard): string | n
     case 'eveilElementaire': if (!pl.board.avant.some(u => !u)) return 'condition'; break;
     case 'promotion': if (!pl.hand.some(x => x.uid !== h.uid && card(x.cardId).cardType === 'Leader')) return 'condition'; break;
     case 'tuteurDemoniaque': if (!pl.deck.some(id => isDemonRegiment(id))) return 'condition'; break;
-    case 'halteConvoi': return 'scenarioOnly';
+    case 'halteConvoi': if (!ctx.s.scenario?.convoy) return 'scenarioOnly'; break;
   }
   return null;
 }
@@ -408,6 +408,13 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
       break;
     }
     case 'tuteurDemoniaque': ctx.queueChoice('tuteur', p, c.id); break;
+    // --- Scénario ---
+    case 'halteConvoi': {
+      ctx.s.scenario!.convoyHold++;
+      note('halteConvoi');
+      ctx.draw(p, c.id);
+      break;
+    }
     // --- Nomades ---
     case 'mirage': for (const u of ctx.units(p)) if (u.types.includes('Nomade')) nomadArrival(ctx, p, u); break;
     case 'embuscade': target!.tempIni += 50; nomadArrival(ctx, p, target!); break;

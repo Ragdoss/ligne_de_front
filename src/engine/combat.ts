@@ -1,6 +1,7 @@
 // Combat de fin de tour et comparaison de Moral.
 
 import { Ctx, card, opponentOf } from './ctx';
+import { scenarioMoralCheckLost } from './scenario';
 import type { PlayerId, Unit, Zone } from './types';
 
 function lowestMoral(list: (Unit | null | undefined)[]): Unit | null {
@@ -172,5 +173,8 @@ export function moralCheck(ctx: Ctx): void {
   else if (totals.A < totals.B) loser = 'A';
   else if (totals.B < totals.A) loser = 'B';
   ctx.emit({ type: 'moralCheck', totals, loser, amount: loser ? lvl : 0 });
-  if (loser) ctx.gainLassitude(loser, lvl, 'moralCheck');
+  if (loser) {
+    ctx.gainLassitude(loser, lvl, 'moralCheck');
+    scenarioMoralCheckLost(ctx, loser);
+  }
 }

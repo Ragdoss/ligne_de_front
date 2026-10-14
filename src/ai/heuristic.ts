@@ -43,7 +43,10 @@ export function evaluate(s: GameState, p: PlayerId, w: AiWeights = DEFAULT_WEIGH
 function key(a: Action): string { return JSON.stringify(a); }
 
 /** Choisit l'action du joueur qui doit agir. */
-export function chooseAction(s: GameState, w: AiWeights = DEFAULT_WEIGHTS): Action {
+/** Filtre optionnel : règles imposées à l'ordinateur par un scénario (false = action interdite). */
+export type ActionFilter = (s: GameState, a: Action) => boolean;
+
+export function chooseAction(s: GameState, w: AiWeights = DEFAULT_WEIGHTS, filter?: ActionFilter): Action {
   const me = actingPlayer(s);
   const acts = legalActions(s);
   if (acts.length === 1) return acts[0]!;
@@ -78,6 +81,7 @@ export function chooseAction(s: GameState, w: AiWeights = DEFAULT_WEIGHTS): Acti
   const seen = new Set<string>();
   for (const a of acts) {
     if (a.type === 'endTurn') continue;
+    if (filter && !filter(s, a)) continue;
     const k = key(a);
     if (seen.has(k)) continue;
     seen.add(k);

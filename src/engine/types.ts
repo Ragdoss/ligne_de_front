@@ -224,6 +224,37 @@ export interface GameConfig {
   startingHand: number;
 }
 
+// ---------- Scénarios ----------
+export interface DialogLine { who: string; text: string }
+export interface ScenarioEvent {
+  turn: number;
+  pid: PlayerId;
+  dialog?: DialogLine[];
+  resource?: number;
+  /** Cartes ajoutées à la main (générées : elles ne vont pas en défausse). */
+  giveCards?: string[];
+  /** Les cartes données peuvent être jouées sans le niveau requis. */
+  levelFree?: boolean;
+  spawn?: { cardId: string; zone: 'avant' | 'arriere'; idx: number }[];
+}
+export interface ScenarioRules {
+  events: ScenarioEvent[];
+  /** Convoi : avance d'une case vers la droite (rang arrière) tous les `every` tours à partir de `firstTurn`. */
+  convoy?: { cardId: string; pid: PlayerId; firstTurn: number; every: number };
+  /** Ressources gagnées par le perdant de la comparaison de Moral (base, ou level3 à partir du niveau 3). */
+  moralCheckLostResource?: Partial<Record<PlayerId, { base: number; level3: number }>>;
+}
+export interface ScenarioSetup extends ScenarioRules {
+  start?: Partial<Record<PlayerId, { avant?: Record<string, string>; arriere?: Record<string, string> }>>;
+  startHand?: Partial<Record<PlayerId, string[]>>;
+  startLevel?: Partial<Record<PlayerId, number>>;
+  startOverrides?: Record<string, { mor?: number }>;
+}
+export interface ScenarioRuntime extends ScenarioRules {
+  fired: string[];
+  convoyHold: number;
+}
+
 export interface GameState {
   config: GameConfig;
   players: Record<PlayerId, PlayerState>;
@@ -232,6 +263,7 @@ export interface GameState {
   nextUid: number;
   rng: number;
   pending: PendingChoice[];
+  scenario: ScenarioRuntime | null;
   over: { winner: PlayerId; reason: string } | null;
 }
 
@@ -269,6 +301,7 @@ export type GameEvent =
   | { type: 'intercepted'; player: PlayerId; cardId: string; saboteur: number; moralLoss: number }
   | { type: 'freeCopy'; player: PlayerId; cardId: string }
   | { type: 'sacrificed'; player: PlayerId; uid: number; cardId: string; forCard: string }
+  | { type: 'dialog'; lines: DialogLine[] }
   | { type: 'gameOver'; winner: PlayerId; reason: string };
 
 export type ActionResult =

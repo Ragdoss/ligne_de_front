@@ -11,6 +11,7 @@ const REASONS: Record<string, string> = {
   noRegiment: "n'a plus aucun régiment en fin de tour",
   emptyDeck: 'doit piocher mais sa pioche est vide',
   vitalDestroyed: 'a perdu son régiment vital',
+  convoyArrived: 'n\'a pas pu arrêter le convoi',
 };
 
 const LASSITUDE_SOURCES: Record<string, string> = {
@@ -51,19 +52,28 @@ export function formatEvent(e: GameEvent, names: Record<PlayerId, string> = { A:
       return e.loser
         ? `Moral total — ${n('A')} ${e.totals.A}, ${n('B')} ${e.totals.B} : ${n(e.loser)} gagne ${e.amount} point(s) de lassitude.`
         : `Moral total égal (${e.totals.A}) : aucune lassitude.`;
-    case 'resource': return `${n(e.player)} gagne ${e.amount} ressource(s) (${e.source === 'paysans' ? 'Paysans' : 'régiments générateurs'}).`;
+    case 'resource': return `${n(e.player)} gagne ${e.amount} ressource(s) (${e.source === 'paysans' ? 'Paysans' : e.source === 'generator' ? 'régiments générateurs' : e.source === 'scenario' ? 'scénario' : cardName(e.source)}).`;
     case 'draw': return e.source === 'turn' ? null : `${n(e.player)} pioche ${cardName(e.cardId)} (${srcName(e.source)}).`;
     case 'generated': return `${cardName(e.cardId)} est créé dans la main de ${n(e.player)} (${cardName(e.source)}).`;
     case 'returnedToHand': return `${cardName(e.cardId)} retourne dans la main de ${n(e.player)}.`;
     case 'moved': return `${cardName(e.cardId)} est déplacé de ${zoneFr(e.from)} vers ${zoneFr(e.to)}.`;
     case 'leaderDestroyed': return `${cardName(e.leaderId)}, à la tête de ${cardName(e.cardId)}, est éliminé.`;
     case 'left': return `${cardName(e.cardId)} quitte le plateau (fin de durée de vie).`;
-    case 'effect': return `${cardName(e.cardId)} : effet appliqué.`;
+    case 'effect': {
+      const special: Record<string, string> = {
+        convoyHalt: 'Le convoi marque une halte : il n’avance pas ce tour-ci.',
+        convoyArrived: 'Le convoi quitte le terrain : il a traversé le col !',
+        halteConvoi: `${n(e.player)} ordonne une halte au convoi et pioche une carte.`,
+        choiceEmpty: `${cardName(e.cardId)} : rien à choisir, l’effet est sans conséquence.`,
+      };
+      return special[e.key] ?? `${cardName(e.cardId)} : effet appliqué.`;
+    }
     case 'choice': return null;
     case 'discarded': return `${n(e.player)} défausse ${cardName(e.cardId)} (${srcName(e.source)}).`;
     case 'intercepted': return `Saboteur Nomade : ${cardName(e.cardId)}, piochée par ${n(e.player)}, part en défausse (le Saboteur perd ${e.moralLoss} Moral).`;
     case 'freeCopy': return `Archéotacticiens : ${n(e.player)} reçoit une copie gratuite de ${cardName(e.cardId)}.`;
     case 'sacrificed': return `${cardName(e.cardId)} est sacrifié pour invoquer ${cardName(e.forCard)}.`;
+    case 'dialog': return e.lines.map(l => (l.who ? `${l.who} : « ${l.text} »` : l.text)).join(' ');
     case 'gameOver': return `Fin de partie : ${n(e.winner)} l'emporte — l'adversaire ${REASONS[e.reason] ?? e.reason}.`;
   }
 }

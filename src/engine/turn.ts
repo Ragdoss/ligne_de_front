@@ -2,6 +2,7 @@
 
 import { resolveCombat } from './combat';
 import { Ctx, card, opponentOf } from './ctx';
+import { scenarioTurnStart } from './scenario';
 import type { PlayerId } from './types';
 
 export function drawCountFor(level: number): number {
@@ -93,6 +94,10 @@ export function startTurn(ctx: Ctx, p: PlayerId): void {
       ctx.emit({ type: 'left', player: p, uid: iso.uid, cardId: iso.cardId, reason: 'lifespan' });
     }
   }
+
+  // Scénario : avancée du convoi et événements du tour (renforts, dialogues…).
+  scenarioTurnStart(ctx, p);
+  if (ctx.over) return;
 
   // Pioche. Main pleine (limite atteinte) : on défausse d'abord autant de cartes qu'on va en piocher (au choix),
   // puis on pioche — la pioche continue donc toujours de s'épuiser.
