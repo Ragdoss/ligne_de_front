@@ -79,6 +79,8 @@ export interface CardDef {
   healsMostInjuredEachTurn?: number;
   moralOnFullHeal?: number;
   stunsTargetOnAttack?: boolean;
+  /** Bonus d'ATK contre les régiments Monté (Lanciers : 10 par défaut). */
+  bonusVsMounted?: number;
   excludeFromMoralTotal?: boolean;
   onEnemyDeathMoral?: number;
   onAllyDeathMoralGain?: number;

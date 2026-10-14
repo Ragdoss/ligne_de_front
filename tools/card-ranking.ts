@@ -8,9 +8,13 @@ import { CARDS } from '../src/data/cards';
 import { applyAction, createGame } from '../src/engine/game';
 import { nextRandom, seedFrom } from '../src/engine/rng';
 import { cardName } from '../src/i18n/log.fr';
+import { patchFromArgs } from '../src/data/patch';
 
-const GAMES = Number(process.argv[2] ?? 6000);
-const SEED = process.argv[3] ?? 'classement';
+// Option « --patch balance/fichier.json » : modifications d'équilibrage appliquées avant la simulation.
+const { args: ARGS, patch: PATCH, changes: PATCH_CHANGES } = patchFromArgs(process.argv.slice(2));
+
+const GAMES = Number(ARGS[0] ?? 6000);
+const SEED = ARGS[1] ?? 'classement';
 const MAX_COPIES = 3;
 const MAX_TURNS = 80;
 const EXCLUDED = new Set(['convoi', 'garnison', 'halte_convoi', 'palissade_regiment', 'elem_eveil_regiment', 'soin_simple']);
@@ -80,7 +84,7 @@ const row = (r: typeof rows[number], rank: number) =>
 const header = ['| # | Carte | Faction | Type | Niv. | Coût | Écart de victoire (points) | Victoires quand jouée |', '|---|---|---|---|---|---|---|---|'];
 const empire = rows.filter(r => r.faction === 'empire');
 const lines = [
-  '# Classement des cartes', '',
+  '# Classement des cartes', '', ...(PATCH ? [`Modifications testées (\`${PATCH}\`) :`, '', ...PATCH_CHANGES.map(c => `- ${c}`), ''] : []),
   `${decided} parties terminées entre decks aléatoires tout neufs (45 cartes : 30 de niveau 1-3, 15 de niveau 4-5, toutes factions), ${Math.round((Date.now() - t0) / 1000)} s.`, '',
   '**Écart de victoire** : taux de victoire des decks qui contiennent la carte, moins celui des decks qui ne la contiennent pas.',
   'Positif = la carte fait gagner. La marge (±) donne l\'incertitude : un écart plus petit que sa marge n\'est pas significatif.',
@@ -90,7 +94,7 @@ const lines = [
   '_IA heuristique : une carte dont l\'effet est mal exploité par l\'IA peut sembler plus faible qu\'elle ne l\'est._',
 ];
 mkdirSync('reports', { recursive: true });
-const file = `reports/classement-cartes-${SEED}.md`;
+const file = `reports/classement-cartes-${SEED}${PATCH ? `-${PATCH.replace(/^.*\//, "").replace(/\.json$/, "")}` : ""}.md`;
 writeFileSync(file, lines.join('\n') + '\n');
 console.log(lines.slice(0, 8 + empire.length + 2).join('\n'));
 console.log(`\nRapport complet : ${file}`);

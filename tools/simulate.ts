@@ -8,11 +8,15 @@ import { DEMO_DECKS } from '../src/data/decks';
 import { applyAction, createGame } from '../src/engine/game';
 import type { Faction, PlayerId } from '../src/engine/types';
 import { cardName } from '../src/i18n/log.fr';
+import { patchFromArgs } from '../src/data/patch';
+
+// Option « --patch balance/fichier.json » : modifications d'équilibrage appliquées avant la simulation.
+const { args: ARGS, patch: PATCH, changes: PATCH_CHANGES } = patchFromArgs(process.argv.slice(2));
 
 const FACTIONS: Faction[] = ['empire', 'elfe', 'demons', 'nomades'];
 const LABEL: Record<string, string> = { empire: 'Empire', elfe: 'Elfes', demons: 'Démons', nomades: 'Nomades' };
-const N = Number(process.argv[2] ?? 100);
-const SEED = process.argv[3] ?? 'sim';
+const N = Number(ARGS[0] ?? 100);
+const SEED = ARGS[1] ?? 'sim';
 const MAX_TURNS = 80;
 
 interface Result { winner: PlayerId | null; reason: string; turns: number; first: Faction; second: Faction; played: Record<PlayerId, string[]> }
@@ -75,7 +79,7 @@ for (const r of results) {
 }
 
 const lines: string[] = [];
-lines.push(`# Rapport de simulation`, '', `${results.length} parties IA contre IA (${N} par match-up, graine « ${SEED} »), ${Math.round((Date.now() - t0) / 1000)} s.`, '');
+lines.push(`# Rapport de simulation`, '', ...(PATCH ? [`Modifications testées (\`${PATCH}\`) :`, '', ...PATCH_CHANGES.map(c => `- ${c}`), ''] : []), `${results.length} parties IA contre IA (${N} par match-up, graine « ${SEED} »), ${Math.round((Date.now() - t0) / 1000)} s.`, '');
 lines.push('## Taux de victoire par faction (hors miroirs)', '', '| Faction | Parties | Victoires |', '|---|---|---|');
 for (const f of FACTIONS) { const b = byFaction.get(f)!; lines.push(`| ${LABEL[f]} | ${b.games} | ${pct(b.wins, b.games)} |`); }
 lines.push('', '## Match-ups (victoires du joueur de la ligne, qui commence)', '', `| | ${FACTIONS.map(f => LABEL[f]).join(' | ')} |`, `|---|${FACTIONS.map(() => '---').join('|')}|`);
@@ -94,7 +98,7 @@ for (const [id, c] of [...cardStats.entries()].filter(([, c]) => c.plays >= 20).
 lines.push('', '_Lecture : l\'IA est heuristique et les decks sont ceux de démonstration ; ces chiffres signalent des déséquilibres à examiner, ils ne les prouvent pas._');
 
 mkdirSync('reports', { recursive: true });
-const file = `reports/simulation-${SEED}.md`;
+const file = `reports/simulation-${SEED}${PATCH ? `-${PATCH.replace(/^.*\//, "").replace(/\.json$/, "")}` : ""}.md`;
 writeFileSync(file, lines.join('\n') + '\n');
 console.log(lines.slice(0, 20).join('\n'));
 console.log(`\nRapport complet : ${file}`);

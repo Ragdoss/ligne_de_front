@@ -1,0 +1,10 @@
+{
+  "_description": "Équilibrage 1 (Ragdoss, 14/10/2026) : Empire moins staté, coups de pouce Elfes et Saboteur.",
+  "cadets_academie": { "cout": 4 },
+  "lancier_emp": { "atk": 12, "arm": 4, "bonusVsMounted": 15 },
+  "soldat_kragz": { "atk": 9, "arm": 4 },
+  "chevalier_prov": { "atk": 14, "arm": 13 },
+  "serenite_foret": { "cout": 1 },
+  "clerc_foret": { "cout": 2 },
+  "saboteur_nomade": { "atk": 1, "end": 21 }
+}

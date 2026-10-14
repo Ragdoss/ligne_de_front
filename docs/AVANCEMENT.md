@@ -43,3 +43,11 @@ Deuxième simulation (`reports/simulation-v2.md`, decks Démons et Nomades de Ra
   → l'avantage de l'Empire se joue en début et milieu de partie (coûts et Leaders), pas dans ses grosses cartes.
 ## Étape 3 — Interface jouable
 ## Étape 4 — Contenu (campagne, roguelite, multijoueur)
+
+## Équilibrage
+
+Les modifications à tester s'écrivent dans `balance/*.json` ({ carte: { champ: nouvelle valeur } }) et se passent
+aux outils avec `--patch` : `npm run sim -- 100 v2 --patch balance/equilibrage-1.json`. Le catalogue n'est pas modifié.
+
+- `balance/equilibrage-1.json` (Ragdoss) : Empire 80 % → 75 % ; Cadets +10,2 → +7,6 ; Lancier +6,4 → +4,2 ;
+  Soldat de Kragz +6,2 → +4,7 ; Chevalier de Province inchangé (+4,6 → +4,5) ; Sérénité, Clerc et Saboteur restent en bas.

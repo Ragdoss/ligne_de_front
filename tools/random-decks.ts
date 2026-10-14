@@ -8,10 +8,14 @@ import { CARDS } from '../src/data/cards';
 import { applyAction, createGame } from '../src/engine/game';
 import { nextRandom, seedFrom } from '../src/engine/rng';
 import { cardName } from '../src/i18n/log.fr';
+import { patchFromArgs } from '../src/data/patch';
 
-const NDECKS = Number(process.argv[2] ?? 12);
-const GAMES = Number(process.argv[3] ?? 20);
-const SEED = process.argv[4] ?? 'decks';
+// Option « --patch balance/fichier.json » : modifications d'équilibrage appliquées avant la simulation.
+const { args: ARGS, patch: PATCH, changes: PATCH_CHANGES } = patchFromArgs(process.argv.slice(2));
+
+const NDECKS = Number(ARGS[0] ?? 12);
+const GAMES = Number(ARGS[1] ?? 20);
+const SEED = ARGS[2] ?? 'decks';
 const MAX_COPIES = 3;
 const MAX_TURNS = 80;
 
@@ -90,7 +94,7 @@ const factionMix = (d: string[]) => {
 };
 const order = decks.map((_, k) => k).sort((a, b) => ys[b]! - ys[a]!);
 const lines = [
-  '# Tournoi de decks aléatoires', '',
+  '# Tournoi de decks aléatoires', '', ...(PATCH ? [`Modifications testées (\`${PATCH}\`) :`, '', ...PATCH_CHANGES.map(c => `- ${c}`), ''] : []),
   `${NDECKS} decks de 45 cartes (30 de niveau 1-3, 15 de niveau 4-5, ${MAX_COPIES} exemplaires maximum, toutes factions mélangées),`,
   `${GAMES} parties par paire (chacun commence la moitié du temps), ${stats.reduce((n, s) => n + s.games, 0) / 2} parties en ${Math.round((Date.now() - t0) / 1000)} s.`, '',
   '| Deck | Victoires | Cartes Empire | Empire / Elfes / Démons / Nomades / neutres |', '|---|---|---|---|',
@@ -103,7 +107,7 @@ const lines = [
   ...decks.map((d, k) => `- **Deck ${k + 1}** (${pct(ys[k]!)}) : ${Object.entries(d.reduce<Record<string, number>>((m, id) => { m[id] = (m[id] ?? 0) + 1; return m; }, {})).map(([id, n]) => `${n}× ${cardName(id)}`).join(', ')}`),
 ];
 mkdirSync('reports', { recursive: true });
-const file = `reports/decks-aleatoires-${SEED}.md`;
+const file = `reports/decks-aleatoires-${SEED}${PATCH ? `-${PATCH.replace(/^.*\//, "").replace(/\.json$/, "")}` : ""}.md`;
 writeFileSync(file, lines.join('\n') + '\n');
 console.log(lines.slice(0, NDECKS + 10).join('\n'));
 console.log(`\nRapport complet : ${file}`);

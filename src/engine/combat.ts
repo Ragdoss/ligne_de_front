@@ -114,7 +114,8 @@ export function resolveCombat(ctx: Ctx, ending: PlayerId): void {
 
 function attack(ctx: Ctx, a: Unit, target: Unit): void {
   let atk = ctx.effectiveAtk(a);
-  if (a.types.includes('Lancier') && target.types.includes('Monté') && !a.brokenMorale) atk += 10;
+  const vsMounted = card(a.cardId).bonusVsMounted ?? (a.types.includes('Lancier') ? 10 : 0);
+  if (vsMounted && target.types.includes('Monté') && !a.brokenMorale) atk += vsMounted;
   const arm = a.ignoreArmor ? 0 : ctx.effectiveArm(target);
   let damage = Math.max(0, atk - arm);
   if (target.pactShield && damage > 0) {
