@@ -1,7 +1,7 @@
 {
   "name": "ligne-de-front",
   "version": "0.1.0",
-  "description": "Ligne de Front \u2014 jeu de cartes de r\u00e9giments",
+  "description": "Ligne de Front — jeu de cartes de régiments",
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
@@ -13,7 +13,8 @@
     "integrate": "tsx tools/integrate-patch.ts",
     "dev": "vite",
     "build": "vite build",
-    "build:artifact": "vite build && node tools/to-artifact.mjs"
+    "build:artifact": "vite build && node tools/to-artifact.mjs",
+    "difficulty": "tsx tools/campaign-difficulty.ts"
   },
   "devDependencies": {
     "@types/node": "^26.6.5",

@@ -307,7 +307,7 @@ export const SCENARIOS: Record<string, CampaignScenario> = {
           "formation_carre",
           "promotion"
         ],
-        "text": "Choisissez une tactique à ajouter à votre pool"
+        "text": "Choisis une tactique à ajouter à ton pool"
       }
     },
     "events": [],
@@ -458,7 +458,7 @@ export const SCENARIOS: Record<string, CampaignScenario> = {
         "count": 3,
         "unique": true,
         "title": "Récompense — Cartes de niveau 4",
-        "text": "Choisissez une carte de niveau 4 à ajouter à votre pool",
+        "text": "Choisis une carte de niveau 4 à ajouter à ton pool",
         "options": [
           "chevalier_templier",
           "etat_major",

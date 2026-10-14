@@ -63,3 +63,17 @@ aux outils avec `--patch` : `npm run sim -- 100 v2 --patch balance/equilibrage-1
   statistiques effectives, main triable (coût/type/niveau, glisser-déposer, flèches), cases ciblables en surbrillance,
   tactiques à deux cibles, fenêtres de choix, journal en français, bandeau des tactiques, animation des attaques.
 - `npm run dev` pour jouer en local, `npm run build:artifact` pour produire la page autonome `dist/ligne-de-front.html`.
+
+## Campagne (portée du simulateur)
+
+- Moteur : scénarios (`src/engine/scenario.ts`) — plateau de départ, main de départ, niveaux imposés, événements de début de
+  tour (ressources, renforts en main jouables sans le niveau, invocations, dialogues), convoi + Halte du Convoi,
+  ressources sur comparaison de Moral perdue.
+- Données : `src/campaign/scenarios.ts` (les 4 scénarios à l'identique du simulateur), `src/campaign/campaign.ts`
+  (pool, deck, récompenses, sauvegarde navigateur + code, règles de l'ordinateur : pas de régiment à partir du tour 6 au
+  scénario 1, Changement Tectonique réservé à Sylvain au scénario 4).
+- Interface : menu (campagne / partie libre avec decks personnalisés collés), fenêtre de deck, dialogues, récompenses,
+  réessayer, fin de campagne. Lien terminé par `#autopilot` : l'ordinateur joue aussi à la place du joueur.
+- `npm run difficulty -- 200` : réussite de l'ordinateur jouant l'Empire dans chaque scénario
+  (`reports/difficulte-scenarios*.md`). Premiers chiffres (200 parties) : S1 5 %, S2 6 %, S3 11 %, S4 24 % ;
+  avant équilibrage : 6 %, 10 %, 11 %, 27 % — l'effet du nerf est dans la marge (±4 points).

@@ -1,0 +1,14 @@
+{
+  "_description": "Valeurs d'avant les équilibrages 1 et 2 (pour comparer).",
+  "cadets_academie": { "cout": 3, "atk": 10, "end": 40 },
+  "lancier_emp": { "atk": 15, "arm": 5, "bonusVsMounted": 10 },
+  "soldat_kragz": { "atk": 10, "arm": 5 },
+  "chevalier_prov": { "atk": 15, "arm": 15 },
+  "arbaletrier_imp": { "keywords": ["Lent"] },
+  "serenite_foret": { "cout": 2, "doubledWithElemental": false },
+  "clerc_foret": { "cout": 3 },
+  "saboteur_nomade": { "atk": 0, "end": 20 },
+  "frondeur_nomade": { "cout": 2 },
+  "archeotacticiens": { "cout": 3 },
+  "fanatiques": { "cout": 4 }
+}
