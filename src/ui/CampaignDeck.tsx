@@ -22,11 +22,12 @@ function statsLine(id: string): string {
   return 'Tactique';
 }
 
-export function CampaignDeck({ campaign, scenario, onLaunch, onMenu }: {
+export function CampaignDeck({ campaign, scenario, onLaunch, onBack }: {
   campaign: CampaignSave;
   scenario: CampaignScenario;
   onLaunch: (sel: Record<string, number>) => void;
-  onMenu: () => void;
+  /** Retour au camp : la sélection est conservée. */
+  onBack: (sel: Record<string, number>) => void;
 }) {
   const counts = useMemo(() => poolCounts(campaign.pool), [campaign]);
   const [sel, setSel] = useState<Record<string, number>>(() => defaultDeckSelection(campaign));
@@ -49,7 +50,7 @@ export function CampaignDeck({ campaign, scenario, onLaunch, onMenu }: {
         </div>
         <div className="actions">
           <button type="button" onClick={() => setShowCode(v => !v)}>Code de sauvegarde</button>
-          <button type="button" onClick={onMenu}>Menu</button>
+          <button type="button" onClick={() => onBack(sel)}>Retour au camp</button>
         </div>
       </header>
       {showCode && <p className="muted small">Copie ce code pour reprendre ailleurs : <code className="code">{exportCode(campaign)}</code></p>}
@@ -86,6 +87,7 @@ export function CampaignDeck({ campaign, scenario, onLaunch, onMenu }: {
       </div>
       <div className="controls">
         <p className="hint">{size >= min ? 'Prêt pour la bataille.' : `Il manque ${min - size} carte(s).`}</p>
+        <button type="button" onClick={() => onBack(sel)}>Enregistrer et revenir au camp</button>
         <button type="button" className="primary" disabled={size < min} onClick={() => onLaunch(sel)}>Lancer le scénario</button>
       </div>
     </div>

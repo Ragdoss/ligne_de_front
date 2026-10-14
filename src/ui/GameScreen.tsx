@@ -11,6 +11,9 @@ import { Hand } from './Hand';
 import { cardDesc, cardName, choiceTitle, optionLabel, UNPLAYABLE } from './labels';
 
 const sameSlot = (a?: SlotRef, b?: SlotRef) => !!a && !!b && a.player === b.player && a.zone === b.zone && a.idx === b.idx;
+import { Dialog } from './VnDialog';
+export { Dialog };
+
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
 export interface GameScreenProps {
@@ -63,20 +66,6 @@ function PlayerBar({ game, p, label, active }: { game: GameState; p: PlayerId; l
 }
 
 interface Banner { id: number; who: string; cardId: string }
-
-export function Dialog({ title, lines, onClose, button = 'Continuer' }: { title?: string; lines: DialogLine[]; onClose: () => void; button?: string }) {
-  return (
-    <div className="overlay" role="dialog" aria-modal="true" aria-label={title ?? 'Dialogue'}>
-      <div className="box">
-        {title && <h2>{title}</h2>}
-        <div className="dlg">
-          {lines.map((l, i) => <p key={i} className={l.who ? 'speech' : 'narr'}>{l.who && <b>{l.who}</b>}{l.text}</p>)}
-        </div>
-        <div className="choices row"><button type="button" className="primary" autoFocus onClick={onClose}>{button}</button></div>
-      </div>
-    </div>
-  );
-}
 
 export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, intro, renderEnd, onQuit, animMul = 1, aiMul = 1, initialReveal = false, onOver }: GameScreenProps) {
   const [game, setGame] = useState<GameState>(() => createGame(setup));

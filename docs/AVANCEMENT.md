@@ -90,3 +90,12 @@ aux outils avec `--patch` : `npm run sim -- 100 v2 --patch balance/equilibrage-1
 - Règles de deck : 3 exemplaires max, ≥ 3 régiments niv. 1, ≥ 30 cartes niv. 1-3, ≥ 15 cartes niv. 4-5.
 - Options : taille de l'interface, durée des animations, temps de réflexion de l'ordinateur, main de l'ordinateur visible,
   toutes les cartes débloquées.
+
+## Camp de campagne et dialogues
+
+- Entre deux combats, la campagne passe par le camp (`src/ui/Camp.tsx`) : décor dessiné par Ragdoss, barre du bas
+  Votre deck / Discuter avec les troupes / Continuer au prochain combat / Options / Retour au menu principal.
+  Les soldats du décor sont cliquables (discussion). Textes du camp : `src/campaign/campTalks.ts` (provisoires).
+- Dialogues façon roman visuel (`src/ui/VnDialog.tsx`), en campagne comme en combat : deux personnages face à face,
+  celui qui parle en pleine encre, l'autre estompé ; une réplique à la fois, la précédente estompée au-dessus.
+  Portraits par personnage dans `PORTRAITS` (le soldat sert à tous pour l'instant).

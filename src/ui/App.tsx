@@ -1,10 +1,11 @@
 // Application : accueil, parties locales, campagne, collection (decks, cartes, paquets), options.
 import { useCallback, useRef, useState } from 'react';
-import { currentScenario, saveCampaign, scenarioAiFilter, scenarioGameSetup, selectionToDeck, type CampaignSave } from '../campaign/campaign';
+import { currentScenario, defaultDeckSelection, saveCampaign, scenarioAiFilter, scenarioGameSetup, selectionToDeck, type CampaignSave } from '../campaign/campaign';
 import { CAMPAIGN_ORDER } from '../campaign/scenarios';
 import type { GameState } from '../engine/types';
 import { formatEvent } from '../i18n/log.fr';
 import { COINS_PER_WIN, loadProfile, mergeCampaignPool, saveProfile, type Profile } from '../profile/profile';
+import { CampHub } from './Camp';
 import { CampaignDeck } from './CampaignDeck';
 import { CardTile } from './CardTile';
 import { MyCards } from './Collection';
@@ -21,7 +22,9 @@ type Screen =
   | { kind: 'local' }
   | { kind: 'localGame'; setup: LocalSetup; key: number }
   | { kind: 'campaignMenu' }
+  | { kind: 'campHub'; campaign: CampaignSave }
   | { kind: 'campDeck'; campaign: CampaignSave }
+  | { kind: 'campOptions'; campaign: CampaignSave }
   | { kind: 'campGame'; campaign: CampaignSave; deck: string[]; key: number }
   | { kind: 'campVictory'; campaign: CampaignSave }
   | { kind: 'campReward'; campaign: CampaignSave }
@@ -71,7 +74,7 @@ export function App() {
     }
     const next = { ...c, idx: c.idx + 1 };
     saveCampaign(next);
-    return { kind: 'campDeck', campaign: next };
+    return { kind: 'campHub', campaign: next };
   };
 
   let content: React.ReactNode;
@@ -111,7 +114,28 @@ export function App() {
       />
     );
   } else if (screen.kind === 'campaignMenu') {
-    content = <CampaignMenu onBack={home} onPlay={c => { saveCampaign(c); setScreen({ kind: 'campDeck', campaign: c }); }} />;
+    content = <CampaignMenu onBack={home} onPlay={c => { saveCampaign(c); setScreen({ kind: 'campHub', campaign: c }); }} />;
+  } else if (screen.kind === 'campHub') {
+    const c = screen.campaign;
+    const sc = currentScenario(c);
+    content = (
+      <CampHub
+        campaign={c}
+        scenario={sc}
+        onDeck={() => setScreen({ kind: 'campDeck', campaign: c })}
+        onOptions={() => setScreen({ kind: 'campOptions', campaign: c })}
+        onMenu={home}
+        onFight={() => {
+          const sel = defaultDeckSelection(c);
+          const size = Object.values(sel).reduce((a, b) => a + b, 0);
+          if (size < sc.deckRules.min) { setScreen({ kind: 'campDeck', campaign: c }); return; }
+          setScreen({ kind: 'campGame', campaign: c, deck: selectionToDeck(sel), key: Date.now() });
+        }}
+      />
+    );
+  } else if (screen.kind === 'campOptions') {
+    const c = screen.campaign;
+    content = <OptionsScreen profile={profile} update={update} onBack={() => setScreen({ kind: 'campHub', campaign: c })} />;
   } else if (screen.kind === 'campDeck') {
     const c = screen.campaign;
     content = (
@@ -119,7 +143,7 @@ export function App() {
         key={c.idx}
         campaign={c}
         scenario={currentScenario(c)}
-        onMenu={() => setScreen({ kind: 'campaignMenu' })}
+        onBack={sel => { const next = { ...c, deck: sel }; saveCampaign(next); setScreen({ kind: 'campHub', campaign: next }); }}
         onLaunch={sel => {
           const next = { ...c, deck: sel };
           saveCampaign(next);
@@ -142,7 +166,7 @@ export function App() {
         aiFilter={scenarioAiFilter(sc)}
         title={sc.title}
         intro={sc.intro}
-        onQuit={() => setScreen({ kind: 'campDeck', campaign: c })}
+        onQuit={() => setScreen({ kind: 'campHub', campaign: c })}
         onOver={g => { if (g.over!.winner === 'A') update(p => { p.coins += COINS_PER_WIN; }); }}
         renderEnd={(g: GameState, close) => g.over!.winner === 'A' ? (
           <EndBox title="Scénario réussi !" text={formatEvent({ type: 'gameOver', winner: 'A', reason: g.over!.reason }, names) ?? ''} extra={<CoinGain />}>
@@ -152,8 +176,8 @@ export function App() {
         ) : (
           <EndBox title="Scénario échoué" text={formatEvent({ type: 'gameOver', winner: g.over!.winner, reason: g.over!.reason }, names) ?? ''}>
             <button type="button" onClick={close}>Voir le plateau</button>
-            <button type="button" onClick={home}>Accueil</button>
-            <button type="button" className="primary" onClick={() => setScreen({ kind: 'campDeck', campaign: c })}>Réessayer le scénario</button>
+            <button type="button" onClick={() => setScreen({ kind: 'campHub', campaign: c })}>Retour au camp</button>
+            <button type="button" className="primary" onClick={() => setScreen({ kind: 'campGame', campaign: c, deck: screen.deck, key: Date.now() })}>Réessayer le scénario</button>
           </EndBox>
         )}
       />
@@ -181,7 +205,7 @@ export function App() {
           </div>
         )}
         <div className="choices row left">
-          <button type="button" onClick={() => setScreen({ kind: 'campDeck', campaign: screen.campaign })}>Rejouer le dernier scénario</button>
+          <button type="button" onClick={() => setScreen({ kind: 'campHub', campaign: screen.campaign })}>Retour au camp</button>
           <button type="button" onClick={() => setScreen({ kind: 'collection', tab: 'cards' })}>Voir ma collection</button>
           <button type="button" className="primary" onClick={home}>Accueil</button>
         </div>
