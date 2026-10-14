@@ -40,13 +40,17 @@ export function formatEvent(e: GameEvent, names: Record<PlayerId, string> = { A:
     }
     case 'moralLoss': return null; // trop verbeux : déjà couvert par la destruction de l'allié
     case 'lassitude':
+      // Déjà annoncée par la ligne de destruction ou de comparaison de Moral.
+      if (e.source === 'destroyed' || e.source === 'moralCheck') return null;
       return e.amount > 0
         ? `${n(e.player)} gagne ${e.amount} point(s) de lassitude (${LASSITUDE_SOURCES[e.source] ?? cardName(e.source)}) — total ${e.total}.`
         : `${n(e.player)} perd ${-e.amount} point(s) de lassitude — total ${e.total}.`;
     case 'levelUp': return `${n(e.player)} passe niveau ${e.level}.`;
     case 'reserveJoined': return `${n(e.player)} : ${e.count} carte(s) de niveau 4-5 rejoignent la pioche.`;
     case 'moralCheck':
-      return e.loser ? `Moral total ${e.totals.A} contre ${e.totals.B} : ${n(e.loser)} gagne ${e.amount} point(s) de lassitude.` : `Moral total égal (${e.totals.A}) : aucune lassitude.`;
+      return e.loser
+        ? `Moral total — ${n('A')} ${e.totals.A}, ${n('B')} ${e.totals.B} : ${n(e.loser)} gagne ${e.amount} point(s) de lassitude.`
+        : `Moral total égal (${e.totals.A}) : aucune lassitude.`;
     case 'resource': return `${n(e.player)} gagne ${e.amount} ressource(s) (${e.source === 'paysans' ? 'Paysans' : 'régiments générateurs'}).`;
     case 'draw': return e.source === 'turn' ? null : `${n(e.player)} pioche ${cardName(e.cardId)} (${srcName(e.source)}).`;
     case 'generated': return `${cardName(e.cardId)} est créé dans la main de ${n(e.player)} (${cardName(e.source)}).`;

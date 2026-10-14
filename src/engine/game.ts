@@ -93,28 +93,48 @@ export function costOf(state: GameState, p: PlayerId, handUid: number): number {
   return h ? cardCost(ctx, p, h) : 0;
 }
 
+/** Actions possibles pour une carte précise de la main du joueur actif (vide si elle n'est pas jouable). */
+export function playsForHandCard(state: GameState, handUid: number): Action[] {
+  if (state.over || state.pending.length) return [];
+  const ctx = new Ctx(state);
+  const p = state.active;
+  const h = state.players[p].hand.find(x => x.uid === handUid);
+  if (!h || unplayableReason(ctx, p, h)) return [];
+  const c = card(h.cardId);
+  const n = targetCount(c);
+  if (n === 0) return [{ type: 'play', handUid }];
+  const out: Action[] = [];
+  const slotsBoth: SlotRef[] = [...ctx.allSlots('A'), ...ctx.allSlots('B')];
+  for (const t of slotsBoth) {
+    if (!validFirstTarget(ctx, p, c, t)) continue;
+    if (n === 1) { out.push({ type: 'play', handUid, target: t }); continue; }
+    for (const t2 of slotsBoth) if (validSecondTarget(ctx, c, t, t2)) out.push({ type: 'play', handUid, target: t, target2: t2 });
+  }
+  return out;
+}
+
+/** Raison pour laquelle une carte de la main du joueur actif n'est pas jouable (null = jouable). */
+export function whyUnplayable(state: GameState, handUid: number): string | null {
+  const h = state.players[state.active].hand.find(x => x.uid === handUid);
+  if (!h) return 'notInHand';
+  const r = unplayableReason(new Ctx(state), state.active, h);
+  if (r) return r;
+  return playsForHandCard(state, handUid).length ? null : 'noTarget';
+}
+
 /** Toutes les actions légales du joueur qui doit agir. */
 export function legalActions(state: GameState): Action[] {
   if (state.over) return [];
   const head = state.pending[0];
   if (head) return (head.options ?? []).map((_, i) => ({ type: 'choose', option: i }));
-  const ctx = new Ctx(state);
-  const p = state.active;
   const out: Action[] = [];
   const seen = new Set<string>();
-  const slotsBoth: SlotRef[] = [...ctx.allSlots('A'), ...ctx.allSlots('B')];
-  for (const h of state.players[p].hand) {
-    if (seen.has(h.cardId + (h.levelFree ? '*' : ''))) continue; // les exemplaires identiques donnent les mêmes actions
-    seen.add(h.cardId + (h.levelFree ? '*' : ''));
-    if (unplayableReason(ctx, p, h)) continue;
-    const c = card(h.cardId);
-    const n = targetCount(c);
-    if (n === 0) { out.push({ type: 'play', handUid: h.uid }); continue; }
-    for (const t of slotsBoth) {
-      if (!validFirstTarget(ctx, p, c, t)) continue;
-      if (n === 1) { out.push({ type: 'play', handUid: h.uid, target: t }); continue; }
-      for (const t2 of slotsBoth) if (validSecondTarget(ctx, c, t, t2)) out.push({ type: 'play', handUid: h.uid, target: t, target2: t2 });
-    }
+  for (const h of state.players[state.active].hand) {
+    // Les exemplaires identiques (même carte, même réduction) donnent les mêmes actions.
+    const key = `${h.cardId}|${h.levelFree ? 1 : 0}|${h.discount ?? 0}|${h.freeCopy ? 1 : 0}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(...playsForHandCard(state, h.uid));
   }
   out.push({ type: 'endTurn' });
   return out;

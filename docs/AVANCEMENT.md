@@ -56,3 +56,10 @@ aux outils avec `--patch` : `npm run sim -- 100 v2 --patch balance/equilibrage-1
   Frondeur −4,5 → −1,5 ; Archéotacticiens +6,0 → +4,2 ; Fanatiques, Sérénité, Arbalétrier restent en bas.
 
 **Intégré au catalogue** (`npm run integrate -- balance/equilibrage-2.json`) : les valeurs d'équilibrage 2 sont désormais les valeurs officielles.
+
+## Étape 3 — Interface jouable (première version)
+
+- `src/ui/` (React) : écran de départ (contre l'ordinateur, à deux, ou ordinateur contre ordinateur), plateau avec
+  statistiques effectives, main triable (coût/type/niveau, glisser-déposer, flèches), cases ciblables en surbrillance,
+  tactiques à deux cibles, fenêtres de choix, journal en français, bandeau des tactiques, animation des attaques.
+- `npm run dev` pour jouer en local, `npm run build:artifact` pour produire la page autonome `dist/ligne-de-front.html`.
