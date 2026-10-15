@@ -74,7 +74,7 @@ function PlayerBar({ game, p, label, active }: { game: GameState; p: PlayerId; l
   );
 }
 
-interface Banner { id: number; who: string; cardId: string }
+interface Banner { id: number; who: string; cardId: string; on?: string }
 
 export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, intro, renderEnd, onQuit, animMul = 1, aiMul = 1, initialReveal = false, onOver, remote, bottomSide, onGame, overlay }: GameScreenProps) {
   const [game, setGame] = useState<GameState>(() => createGame(setup));
@@ -98,9 +98,9 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
   const top: PlayerId = bottom === 'A' ? 'B' : 'A';
   const watch = !human.A && !human.B;
 
-  const pushBanner = useCallback((who: string, cardId: string, ai: boolean) => {
+  const pushBanner = useCallback((who: string, cardId: string, ai: boolean, on?: string) => {
     const id = Math.random();
-    setBanners(b => [...b.slice(-2), { id, who, cardId }]);
+    setBanners(b => [...b.slice(-2), { id, who, cardId, on }]);
     setTimeout(() => setBanners(b => b.filter(x => x.id !== id)), ai ? 4200 : 2600);
   }, []);
 
@@ -117,6 +117,8 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
     setLog(l => [...l, ...lines.map(({ e, text }) => ({ text, cls: e.type === 'turnStart' || e.type === 'combatStart' ? 'turn' : e.type === 'destroyed' || e.type === 'gameOver' ? 'kill' : e.type === 'levelUp' || e.type === 'lassitude' ? 'lvl' : e.type === 'dialog' ? 'dlg-line' : '' }))]);
     for (const e of r.events) {
       if (e.type === 'cardPlayed' && card(e.cardId).cardType === 'Tactique') pushBanner(names[e.player], e.cardId, !human[e.player]);
+      // Leaders joués par l'adversaire (ordinateur ou joueur à distance) : même bandeau, avec le régiment qui le reçoit.
+      if (e.type === 'leaderAttached' && !human[e.player]) pushBanner(names[e.player], e.leaderId, true, cardName(e.cardId));
     }
     // Animation du combat : on montre l'état d'avant, attaque par attaque, puis l'état final.
     if (action.type === 'endTurn' && r.events.some(e => e.type === 'attack')) {
@@ -252,7 +254,7 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
       <div className="banners" aria-live="polite">
         {banners.map(b => (
           <div key={b.id} className={`banner ${card(b.cardId).faction}`}>
-            <div className="b-who">{b.who} joue une tactique</div>
+            <div className="b-who">{b.who} joue {card(b.cardId).cardType === 'Leader' ? `un Leader${b.on ? ` sur ${b.on}` : ''}` : 'une tactique'}</div>
             <div className="b-name">{cardName(b.cardId)}</div>
             <div className="b-desc">{cardDesc(b.cardId)}</div>
           </div>
