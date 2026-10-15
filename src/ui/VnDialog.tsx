@@ -4,9 +4,36 @@
 import { useEffect, useState } from 'react';
 import type { DialogLine } from '../engine/types';
 import soldat from './assets/soldat.png';
+import empireChevalier from './assets/portraits/empire/1.webp';
+import empireEpeiste from './assets/portraits/empire/2.webp';
+import empireLancier from './assets/portraits/empire/3.webp';
+import elfeArchere from './assets/portraits/elfe/1.webp';
+import elfeGardien from './assets/portraits/elfe/2.webp';
+import demonsAcolyte from './assets/portraits/demons/2.webp';
+import demonsHierophante from './assets/portraits/demons/3.webp';
+import nomadesCheikha from './assets/portraits/nomades/2.webp';
+import nomadesEclaireur from './assets/portraits/nomades/4.webp';
 
-/** Portrait de chaque personnage (le soldat sert de portrait provisoire à tout le monde). */
-const PORTRAITS: Record<string, string> = {};
+/**
+ * Portrait de chaque personnage, en buste ; le soldat sert de portrait provisoire aux autres.
+ * Les planches complètes sont dans assets/portraits/<faction>/ (1 à 4, de gauche à droite sur la planche) :
+ * non utilisés pour l'instant : empire/4 (arbalétrier), elfe/3, elfe/4, demons/1 (bâton à l'œil), demons/4, nomades/1, nomades/3.
+ */
+const PORTRAITS: Record<string, string> = {
+  // Empire
+  'Commandant': empireChevalier,
+  'Soldat': empireEpeiste,
+  'Légat Varro': empireLancier,
+  // Royaumes elfiques
+  'Sylvain': elfeGardien,
+  'Éclaireuse Lyra': elfeArchere,
+  // Invocateurs de démons
+  'Hiérophante Morvak': demonsHierophante,
+  'Acolyte': demonsAcolyte,
+  // Nomades
+  'Cheikha Zahra': nomadesCheikha,
+  'Éclaireur Idris': nomadesEclaireur,
+};
 const portraitOf = (who: string) => PORTRAITS[who] ?? soldat;
 
 /** Placement : 1er à gauche, 2e à droite, 3e à droite (en retrait), 4e à gauche (en retrait)… */
