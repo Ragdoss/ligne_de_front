@@ -65,8 +65,8 @@ export function createGame(setup: GameSetup): GameState {
   s.players.A = newPlayer(ctx, 'A', setup.A);
   s.players.B = newPlayer(ctx, 'B', setup.B);
   if (setup.scenario) {
-    const { events, convoy, moralCheckLostResource } = setup.scenario;
-    s.scenario = { events: events ?? [], convoy, moralCheckLostResource, fired: [], convoyHold: 0 };
+    const { events, convoy, moralCheckLostResource, weather, alarm } = setup.scenario;
+    s.scenario = { events: events ?? [], convoy, moralCheckLostResource, weather, alarm, fired: [], convoyHold: 0, alarmRaised: false, alarmDone: false, liberated: 0 };
     applyScenarioStart(ctx, setup.scenario);
   }
   return s;

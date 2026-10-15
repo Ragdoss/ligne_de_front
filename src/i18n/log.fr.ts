@@ -12,6 +12,7 @@ const REASONS: Record<string, string> = {
   emptyDeck: 'doit piocher mais sa pioche est vide',
   vitalDestroyed: 'a perdu son régiment vital',
   convoyArrived: 'n\'a pas pu arrêter le convoi',
+  survived: 'n\'a pas réussi à l\'emporter à temps',
 };
 
 const LASSITUDE_SOURCES: Record<string, string> = {
@@ -65,6 +66,15 @@ export function formatEvent(e: GameEvent, names: Record<PlayerId, string> = { A:
         convoyArrived: 'Le convoi quitte le terrain : il a traversé le col !',
         halteConvoi: `${n(e.player)} ordonne une halte au convoi et pioche une carte.`,
         choiceEmpty: `${cardName(e.cardId)} : rien à choisir, l’effet est sans conséquence.`,
+        weather: e.data?.kind === 'tempete' ? 'Une tempête de sable se lève : seuls les Nomades y voient encore (Distance perdue, −20 INI).'
+          : e.data?.kind === 'nuit' ? 'La nuit tombe : les Démons gagnent +10 ATK.'
+          : e.data?.kind === 'jour' ? 'Le jour se lève : les Elfes gagnent +15 INI.' : 'La tempête retombe.',
+        alarm: 'L’alarme est donnée ! Des renforts accourent.',
+        liberated: `${cardName(e.cardId)} est libéré et rejoint ${n(e.player)} !`,
+        hatch: `${cardName(e.cardId)} éclot !`,
+        cheikh: `${cardName(e.cardId)} : la défausse adverse renforce son porteur (+5 ATK).`,
+        tempeteSable: `${n(e.player)} soulève une tempête de sable : l’adversaire perd Distance et 20 INI ce tour-ci.`,
+        purification: `${cardName(e.cardId)} purifie sa cible.`,
       };
       return special[e.key] ?? `${cardName(e.cardId)} : effet appliqué.`;
     }

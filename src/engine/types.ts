@@ -134,6 +134,10 @@ export interface Unit {
   pactShield: { owner: PlayerId; endAcc: number } | null;
   /** Blessé ce tour-ci par un Frondeur Nomade. */
   woundedByFrondeur: boolean;
+  /** Compteur de tours (éclosion de l'Œuf de Dragon). */
+  counter?: number;
+  /** Tempête de Sable : perd Distance pour ce combat. */
+  blinded?: boolean;
 }
 
 export interface HandCard {
@@ -224,6 +228,10 @@ export interface GameConfig {
   startingHand: number;
   /** false : piocher dans une pioche vide ne fait pas perdre (on ne pioche simplement rien). Absent = true. */
   emptyDeckDefeat?: boolean;
+  /** Victoire du joueur dès que ce tour commence (« tenir jusqu'au tour X »). */
+  winAtTurn?: Partial<Record<PlayerId, number>>;
+  /** Libération : ces régiments de `pid` passent dans l'autre camp quand leur Moral se brise. */
+  liberation?: { pid: PlayerId; cardIds: string[] };
 }
 
 // ---------- Scénarios ----------
@@ -239,15 +247,21 @@ export interface ScenarioEvent {
   levelFree?: boolean;
   spawn?: { cardId: string; zone: 'avant' | 'arriere'; idx: number }[];
 }
+/** Météo périodique : actif `duration` tours tous les `every` tours à partir de `first`. Tempête, ou nuit (sinon jour). */
+export interface Weather { kind: 'tempete' | 'nuit'; first: number; every: number; duration: number }
+/** Alarme : `pid` ne pose aucun régiment (ordinateur) avant l'alarme, donnée au tour `turn` ou à sa première perte. */
+export interface Alarm { pid: PlayerId; turn: number; resource?: number; spawn?: ScenarioEvent['spawn']; dialog?: DialogLine[] }
 export interface ScenarioRules {
   events: ScenarioEvent[];
   /** Convoi : avance d'une case vers la droite (rang arrière) tous les `every` tours à partir de `firstTurn`. */
   convoy?: { cardId: string; pid: PlayerId; firstTurn: number; every: number };
   /** Ressources gagnées par le perdant de la comparaison de Moral (base, ou level3 à partir du niveau 3). */
   moralCheckLostResource?: Partial<Record<PlayerId, { base: number; level3: number }>>;
+  weather?: Weather;
+  alarm?: Alarm;
 }
 export interface ScenarioSetup extends ScenarioRules {
-  start?: Partial<Record<PlayerId, { avant?: Record<string, string>; arriere?: Record<string, string> }>>;
+  start?: Partial<Record<PlayerId, { avant?: Record<string, string>; arriere?: Record<string, string>; isole?: string }>>;
   startHand?: Partial<Record<PlayerId, string[]>>;
   startLevel?: Partial<Record<PlayerId, number>>;
   startOverrides?: Record<string, { mor?: number }>;
@@ -255,6 +269,11 @@ export interface ScenarioSetup extends ScenarioRules {
 export interface ScenarioRuntime extends ScenarioRules {
   fired: string[];
   convoyHold: number;
+  /** Alarme donnée (et renforts déjà arrivés). */
+  alarmRaised?: boolean;
+  alarmDone?: boolean;
+  /** Régiments libérés (Libération). */
+  liberated?: number;
 }
 
 export interface GameState {

@@ -93,6 +93,27 @@ export class Ctx {
   }
   controlsElemental(p: PlayerId): boolean { return this.units(p).some(u => u.types.includes('Élémentaux')); }
 
+  // ---------- Météo de scénario ----------
+  /** Météo du tour `turn` (par défaut le tour en cours) : tempête, nuit, jour, ou rien. */
+  weather(turn = this.s.turn): 'tempete' | 'nuit' | 'jour' | null {
+    const w = this.s.scenario?.weather;
+    if (!w) return null;
+    const on = turn >= w.first && (turn - w.first) % w.every < w.duration;
+    if (w.kind === 'tempete') return on ? 'tempete' : null;
+    return on ? 'nuit' : 'jour';
+  }
+  /** Le régiment frappe-t-il à distance ce tour-ci (Tempête de Sable, tempête de scénario) ? */
+  hasDistance(u: Unit): boolean {
+    if (!u.keywords.includes('Distance') || u.blinded) return false;
+    return !(this.weather() === 'tempete' && !u.types.includes('Nomade'));
+  }
+  /** Valeur d'Effrayant (la plus forte si plusieurs). */
+  fear(u: Unit): number {
+    let v = 0;
+    for (const k of u.keywords) if (k.startsWith('Effrayant')) v = Math.max(v, parseInt(k.split(' ')[1] ?? '0', 10) || 0);
+    return v;
+  }
+
   makeUnit(cardId: string, controller: PlayerId, isToken = false): Unit {
     const c = card(cardId);
     return {
@@ -136,6 +157,7 @@ export class Ctx {
       if (step && per) atk += Math.floor(this.player(u.controller).points / step) * per;
     }
     if (!u.brokenMorale) atk += u.tempAtk;
+    if (this.weather() === 'nuit' && u.types.includes('Démon')) atk += 10;
     atk -= u.tempDebuffAtk;
     return Math.max(0, Math.round(atk));
   }
@@ -151,12 +173,45 @@ export class Ctx {
   effectiveIni(u: Unit): number {
     let ini = u.ini;
     if (u.leader && !u.brokenMorale) ini += card(u.leader).bonusIni ?? 0;
+    const w = this.weather();
+    if (w === 'tempete' && !u.types.includes('Nomade')) ini -= 20;
+    if (w === 'jour' && u.types.includes('Elfe')) ini += 15;
     return ini + u.tempIni;
   }
 
   // ---------- Moral ----------
   checkBroken(u: Unit): void {
-    if (!u.brokenMorale && u.currentMor <= Math.floor(u.maxMor / 3)) u.brokenMorale = true;
+    if (!u.brokenMorale && u.currentMor <= Math.floor(u.maxMor / 3)) {
+      u.brokenMorale = true;
+      this.tryLiberate(u);
+    }
+  }
+  /** Libération (scénario) : un régiment désigné dont le Moral se brise change de camp, Moral plein. */
+  tryLiberate(u: Unit): void {
+    const lib = this.s.config.liberation;
+    if (!lib || u.controller !== lib.pid || !lib.cardIds.includes(u.cardId) || u.currentMor <= 0 || u.currentEnd <= 0) return;
+    const ref = this.slotOf(u.uid);
+    if (!ref || ref.zone === 'isole') return;
+    const q = opponentOf(u.controller);
+    const board = this.player(q).board;
+    const free = (zone: 'avant' | 'arriere') => {
+      let best = -1, dist = 99;
+      board[zone].forEach((x, i) => { if (!x && Math.abs(i - ref.idx) < dist) { dist = Math.abs(i - ref.idx); best = i; } });
+      return best;
+    };
+    let zone: 'avant' | 'arriere' = ref.zone, idx = free(zone);
+    if (idx < 0) { zone = zone === 'avant' ? 'arriere' : 'avant'; idx = free(zone); }
+    if (idx < 0) return;
+    this.setAt(ref, null);
+    this.discardLeader(u);
+    u.leader = null; u.leaderOwner = null;
+    u.controller = q;
+    u.currentMor = u.maxMor; u.brokenMorale = false;
+    u.justDeployed = true; u.stunned = false; u.pactShield = null;
+    board[zone][idx] = u;
+    if (this.s.scenario) this.s.scenario.liberated = (this.s.scenario.liberated ?? 0) + 1;
+    this.emit({ type: 'effect', key: 'liberated', player: q, cardId: u.cardId });
+    this.emit({ type: 'moved', uid: u.uid, cardId: u.cardId, from: ref, to: { player: q, zone, idx } });
   }
   /** Retire du Moral ; retourne la perte réellement appliquée (plancher du Chevalier Templier). */
   loseMoral(u: Unit, amount: number): number {
@@ -303,6 +358,11 @@ export class Ctx {
     const h = pl.hand.splice(i, 1)[0]!;
     if (!h.generated) this.discard(p, h.cardId);
     this.emit({ type: 'discarded', player: p, cardId: h.cardId, source });
+    // Cheikh des Dunes : chaque défausse adverse renforce son porteur.
+    for (const u of this.units(opponentOf(p))) {
+      const g = u.leader ? card(u.leader).atkPerEnemyDiscard as number | undefined : undefined;
+      if (g) { u.baseAtk += g; this.emit({ type: 'effect', key: 'cheikh', player: u.controller, cardId: u.leader!, data: { uid: u.uid } }); }
+    }
     return h.cardId;
   }
   discardLeader(u: Unit): void {
@@ -333,6 +393,12 @@ export class Ctx {
     if (u.leader && card(u.leader).recoversDemonOnCarrierDeath) this.queueChoice('recoverDemon', p, u.leader);
     const vital = this.s.config.mustSurvive[p];
     if (vital && vital === u.cardId) this.endGame(opponentOf(p), 'vitalDestroyed');
+    // Alarme de scénario : la première perte de `pid` donne l'alarme (renforts au début de son prochain tour).
+    const sc = this.s.scenario;
+    if (sc?.alarm && sc.alarm.pid === p && !sc.alarmRaised && !this.s.over) {
+      sc.alarmRaised = true;
+      this.emit({ type: 'effect', key: 'alarm', player: p, cardId: u.cardId });
+    }
 
     for (const e of this.units(opponentOf(p))) {
       const g = card(e.cardId).onEnemyDeathMoral;

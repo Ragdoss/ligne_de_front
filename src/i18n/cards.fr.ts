@@ -102,7 +102,7 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "halte_convoi": {
     "name": "Halte du Convoi",
-    "desc": "Gratuite. Le convoi saute sa prochaine avancée, et vous piochez une carte (scénario 3)."
+    "desc": "Gratuite. Ton convoi saute sa prochaine avancée, et tu pioches une carte (scénarios d’escorte)."
   },
   "assassinat": {
     "name": "Assassinat",
@@ -395,5 +395,105 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   "basilics_desert": {
     "name": "Basilics du Désert",
     "desc": "À son arrivée, gagne 5 END, 1 ARM, 3 INI et 1 Moral par carte dans la défausse adverse."
+  },
+  "diablotins": {
+    "name": "Diablotins",
+    "desc": "Minions (sa mort ne donne ni lassitude ni perte de Moral aux alliés). Quand il sert de sacrifice, tu gagnes 1 ressource."
+  },
+  "gargouille_cendres": {
+    "name": "Gargouille de Cendres",
+    "desc": "Sacrifice niveau 1+ requis. Armure élevée. Regagne 1 Moral chaque fois que tu sacrifies un régiment."
+  },
+  "seigneur_abysses": {
+    "name": "Seigneur des Abysses",
+    "desc": "Requiert Démon. +10 ATK, +2 Moral, Effrayant 2. Chaque fois que tu sacrifies un régiment, le porteur regagne 10 END et 1 Moral."
+  },
+  "oeuf_dragon": {
+    "name": "Œuf de Dragon",
+    "desc": "0 ATK. Au début de ton 3e tour après sa pose, éclot en Dragonnet Infernal (25 ATK, 50 END, 10 ARM, Effrayant 1) qui garde son Leader."
+  },
+  "dragonnet_infernal": {
+    "name": "Dragonnet Infernal",
+    "desc": "Né d'un Œuf de Dragon. Effrayant 1."
+  },
+  "dragon_infernal": {
+    "name": "Dragon Infernal",
+    "desc": "Sacrifice niveau 4+ requis. Effrayant 2. À son arrivée, tous les régiments adverses perdent 2 Moral."
+  },
+  "cavaliers_dunes": {
+    "name": "Cavaliers des Dunes",
+    "desc": "Cavalerie nomade. Arrive prêt (pas de pénalité d'apparition)."
+  },
+  "cheikh_dunes": {
+    "name": "Cheikh des Dunes",
+    "desc": "Requiert un porteur Nomade. +5 ATK, +2 Moral. Chaque fois que l'adversaire défausse une carte de sa main, le porteur gagne +5 ATK permanent."
+  },
+  "reine_basilics": {
+    "name": "Reine des Basilics",
+    "desc": "Effrayant 1. À son arrivée, reprends en main le Basilic de plus haut niveau de ta défausse."
+  },
+  "tempete_sable": {
+    "name": "Tempête de Sable",
+    "desc": "Ce tour-ci, tous les régiments adverses perdent Distance et 20 INI."
+  },
+  "oasis_cachee": {
+    "name": "Oasis cachée",
+    "desc": "Pioche 2 cartes, puis défausse 1 carte de ta main. +1 ressource si tu contrôles une Caravane Marchande."
+  },
+  "treant_millenaire": {
+    "name": "Tréant Millénaire",
+    "desc": "120 END. À chaque fin de ton tour, soigne tous tes régiments de 5 END."
+  },
+  "gardienne_lumiere": {
+    "name": "Gardienne de la Lumière",
+    "desc": "Distance. +15 ATK contre les Démons. À chaque fin de ton tour, soigne ton régiment le plus blessé de 10 END et 1 Moral."
+  },
+  "rite_purification": {
+    "name": "Rite de Purification",
+    "desc": "Le régiment adverse ciblé perd Effrayant et tous ses bonus permanents (ATK, ARM, END). Si c'est un Démon, il perd aussi 2 Moral."
+  },
+  "mercenaires": {
+    "name": "Mercenaires",
+    "desc": "Troupe de louage sans attache : jouable dans tous les decks."
+  },
+  "ravitaillement": {
+    "name": "Ravitaillement",
+    "desc": "Pioche 2 cartes."
+  },
+  "banniere_dechiree": {
+    "name": "Bannière Déchirée",
+    "desc": "Un régiment allié regagne 4 Moral s'il a le Moral brisé, 2 sinon."
+  },
+  "puits_sel_amar": {
+    "name": "Puits de Sel-Amar",
+    "desc": "Vital. 0 ATK. +1 ressource au début de chaque tour de son contrôleur."
+  },
+  "source_corrompue": {
+    "name": "Source corrompue",
+    "desc": "Vitale. 0 ATK. À chaque fin de tour des Démons, soigne leur régiment le plus blessé de 15 END."
+  },
+  "portail_infernal": {
+    "name": "Portail infernal",
+    "desc": "Vital. 0 ATK, 150 END, 10 ARM. Des Chiens Infernaux en surgissent à chaque tour."
+  },
+  "gardienne_nid": {
+    "name": "Gardienne du Nid",
+    "desc": "Vitale. Une Basilic géante qui veille sur les œufs de dragon."
+  },
+  "chariot_oeufs": {
+    "name": "Chariot des œufs",
+    "desc": "Le convoi des Démons : il avance d'une case tous les deux tours, de gauche à droite."
+  },
+  "oeuf_rituel": {
+    "name": "Œuf de l'offrande",
+    "desc": "Vital. L'œuf que le culte doit recevoir."
+  },
+  "legionnaire_desert": {
+    "name": "Légionnaire du désert",
+    "desc": "Fantassin impérial équipé pour le désert (carte de scénario)."
+  },
+  "garde_capitale": {
+    "name": "Garde de la capitale",
+    "desc": "Garde impériale (carte de scénario)."
   }
 };

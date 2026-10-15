@@ -28,7 +28,14 @@ export function endTurn(ctx: Ctx): void {
 
   const next = opponentOf(ending);
   ctx.s.active = next;
-  if (ending === 'B') ctx.s.turn++;
+  if (ending === 'B') {
+    ctx.s.turn++;
+    // « Tenir jusqu'au tour X » : victoire dès que ce tour commence.
+    const w = ctx.s.config.winAtTurn;
+    for (const p of ['A', 'B'] as PlayerId[]) {
+      if (w?.[p] && ctx.s.turn >= w[p]!) { ctx.endGame(p, 'survived'); return; }
+    }
+  }
   startTurn(ctx, next);
 }
 
@@ -48,6 +55,22 @@ export function startTurn(ctx: Ctx, p: PlayerId): void {
   let peasants = 0;
   for (const u of ctx.units(p)) if (u.keywords.includes('GenerateurRessource')) peasants += pl.level >= 4 ? 2 : 1;
   if (peasants) { pl.resource += peasants; ctx.emit({ type: 'resource', player: p, amount: peasants, source: 'paysans' }); }
+
+  // Œuf de Dragon : éclot après quelques tours de son contrôleur.
+  for (const u of ctx.units(p)) {
+    const d = card(u.cardId);
+    const into = d.hatchesInto as string | undefined;
+    if (!into) continue;
+    u.counter = (u.counter ?? 0) + 1;
+    if (u.counter < ((d.hatchTurns as number | undefined) ?? 3)) continue;
+    const ref = ctx.slotOf(u.uid)!;
+    const baby = ctx.makeUnit(into, p, true);
+    baby.justDeployed = false;
+    if (u.leader) { baby.leader = u.leader; baby.leaderOwner = u.leaderOwner; }
+    ctx.setAt(ref, baby);
+    ctx.emit({ type: 'effect', key: 'hatch', player: p, cardId: u.cardId, data: { into } });
+    ctx.emit({ type: 'deployed', player: p, uid: baby.uid, cardId: into, slot: ref });
+  }
 
   // Cérémonie du Déclin : +1 lassitude au début du tour (qui rapporte aussi des ressources).
   for (const u of ctx.units(p)) {

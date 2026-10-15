@@ -18,7 +18,7 @@ function lowestMoral(list: (Unit | null | undefined)[]): Unit | null {
  */
 export function pickTarget(ctx: Ctx, a: Unit, p: PlayerId, zone: Zone, idx: number): Unit | null {
   const opp = ctx.player(opponentOf(p)).board;
-  const distance = a.keywords.includes('Distance');
+  const distance = ctx.hasDistance(a);
   if (zone === 'avant') {
     return opp.avant[idx] ?? lowestMoral(ctx.adjBack(idx).map(k => opp.arriere[k]));
   }
@@ -46,8 +46,14 @@ export function resolveCombat(ctx: Ctx, ending: PlayerId): void {
     let best: Unit | null = null, miss = 0;
     for (const x of ctx.units(ending)) if (x.maxEnd - x.currentEnd > miss) { best = x; miss = x.maxEnd - x.currentEnd; }
     if (!best) continue;
-    const r = ctx.heal(best, d.healsMostInjuredEachTurn, 0, healer.cardId);
+    const r = ctx.heal(best, d.healsMostInjuredEachTurn, (d.healMorWithHeal as number | undefined) ?? 0, healer.cardId);
     if (d.moralOnFullHeal && r.end > 0 && best.currentEnd >= best.maxEnd) ctx.heal(best, 0, d.moralOnFullHeal, healer.cardId);
+  }
+
+  // Tréant Millénaire : soigne tous les régiments de son contrôleur.
+  for (const healer of ctx.units(ending)) {
+    const n = card(healer.cardId).healsAllEachTurn as number | undefined;
+    if (n) for (const x of ctx.units(ending)) ctx.heal(x, n, 0, healer.cardId);
   }
 
   // Maître du Chenil Infernal : avant les attaques, comble le rang avant de son contrôleur de Chiens (Minions).
@@ -68,7 +74,7 @@ export function resolveCombat(ctx: Ctx, ending: PlayerId): void {
     const b = ctx.player(p).board;
     b.avant.forEach((u, idx) => { if (u) attackers.push({ u, p, zone: 'avant', idx }); });
     b.arriere.forEach((u, idx) => { if (u) attackers.push({ u, p, zone: 'arriere', idx }); });
-    if (b.isole && b.isole.keywords.includes('Distance')) attackers.push({ u: b.isole, p, zone: 'isole', idx: 0 });
+    if (b.isole && ctx.hasDistance(b.isole)) attackers.push({ u: b.isole, p, zone: 'isole', idx: 0 });
   }
   // Lent : n'attaque qu'au combat de fin de tour de son contrôleur.
   const eligible = attackers.filter(a => !(a.u.keywords.includes('Lent') && a.p !== ending));
@@ -83,7 +89,7 @@ export function resolveCombat(ctx: Ctx, ending: PlayerId): void {
   for (const a of eligible) {
     if (ctx.over) return;
     const pos = ctx.slotOf(a.u.uid);
-    if (!pos) continue; // détruit plus tôt dans ce combat
+    if (!pos || pos.player !== a.p) continue; // détruit (ou libéré : il a changé de camp) plus tôt dans ce combat
     if (a.u.stunned) {
       a.u.stunned = false;
       ctx.emit({ type: 'skipAttack', uid: a.u.uid, cardId: a.u.cardId, reason: 'stunned' });
@@ -107,6 +113,7 @@ export function resolveCombat(ctx: Ctx, ending: PlayerId): void {
       u.tempAtk = 0; u.tempDebuffAtk = 0; u.tempArm = 0; u.tempIni = 0;
       u.stunned = false;
       u.woundedByFrondeur = false;
+      u.blinded = false;
     }
   }
   if (ctx.over) return;
@@ -117,6 +124,8 @@ function attack(ctx: Ctx, a: Unit, target: Unit): void {
   let atk = ctx.effectiveAtk(a);
   const vsMounted = card(a.cardId).bonusVsMounted ?? (a.types.includes('Lancier') ? 10 : 0);
   if (vsMounted && target.types.includes('Monté') && !a.brokenMorale) atk += vsMounted;
+  const vsTypes = card(a.cardId).bonusVsTypes as Record<string, number> | undefined;
+  if (vsTypes && !a.brokenMorale) for (const [t, v] of Object.entries(vsTypes)) if (target.types.includes(t)) atk += v;
   // Pénétration d'armure X : l'attaquant ignore les X premiers points d'Armure de sa cible.
   const pen = a.keywords.find(k => k.startsWith('Pénétration'));
   const penVal = pen ? parseInt(pen.split(' ')[1] ?? '0', 10) || 0 : 0;
@@ -135,8 +144,7 @@ function attack(ctx: Ctx, a: Unit, target: Unit): void {
   }
   target.currentEnd = Math.max(0, target.currentEnd - damage);
   if (damage > 0 && card(a.cardId).woundInflictsFrondeurMill) target.woundedByFrondeur = true;
-  const fear = a.brokenMorale ? undefined : a.keywords.find(k => k.startsWith('Effrayant'));
-  const fearVal = fear ? parseInt(fear.split(' ')[1] ?? '0', 10) || 0 : 0;
+  const fearVal = a.brokenMorale ? 0 : ctx.fear(a);
   const moralLoss = ctx.loseMoral(target, 1 + fearVal);
   ctx.checkBroken(target);
   ctx.emit({

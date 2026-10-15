@@ -1532,5 +1532,425 @@ export const CARDS: Record<string, CardDef> = {
     "ini": 0,
     "mor": 1,
     "keywords": []
+  },
+  "diablotins": {
+    "id": "diablotins",
+    "cardType": "Regiment",
+    "faction": "demons",
+    "types": [
+      "Démon"
+    ],
+    "niveau": 2,
+    "cout": 1,
+    "slotType": "avant",
+    "atk": 8,
+    "end": 20,
+    "arm": 0,
+    "ini": 20,
+    "mor": 4,
+    "keywords": [
+      "Minions"
+    ],
+    "onSacrificedResource": 1
+  },
+  "gargouille_cendres": {
+    "id": "gargouille_cendres",
+    "cardType": "Regiment",
+    "faction": "demons",
+    "types": [
+      "Démon"
+    ],
+    "niveau": 2,
+    "cout": 2,
+    "slotType": "avant",
+    "atk": 10,
+    "end": 40,
+    "arm": 15,
+    "ini": 8,
+    "mor": 6,
+    "keywords": [],
+    "sacrificeMinLevel": 1,
+    "sacrificeGainsStats": false,
+    "moralOnAllySacrificed": 1
+  },
+  "seigneur_abysses": {
+    "id": "seigneur_abysses",
+    "cardType": "Leader",
+    "faction": "demons",
+    "niveau": 5,
+    "cout": 3,
+    "typesRequired": [
+      "Démon"
+    ],
+    "bonusAtk": 10,
+    "bonusMor": 2,
+    "grantsKeywordOnAttach": "Effrayant 2",
+    "healOnOwnSacrifice": 10
+  },
+  "oeuf_dragon": {
+    "id": "oeuf_dragon",
+    "cardType": "Regiment",
+    "faction": "demons",
+    "types": [
+      "Dragon"
+    ],
+    "niveau": 3,
+    "cout": 2,
+    "slotType": "arriere",
+    "atk": 0,
+    "end": 60,
+    "arm": 10,
+    "ini": 0,
+    "mor": 8,
+    "keywords": [],
+    "hatchesInto": "dragonnet_infernal",
+    "hatchTurns": 3
+  },
+  "dragonnet_infernal": {
+    "id": "dragonnet_infernal",
+    "cardType": "Regiment",
+    "faction": "demons",
+    "types": [
+      "Démon",
+      "Dragon"
+    ],
+    "niveau": 3,
+    "cout": 0,
+    "slotType": "arriere",
+    "atk": 25,
+    "end": 50,
+    "arm": 10,
+    "ini": 20,
+    "mor": 8,
+    "keywords": [
+      "Effrayant 1"
+    ]
+  },
+  "dragon_infernal": {
+    "id": "dragon_infernal",
+    "cardType": "Regiment",
+    "faction": "demons",
+    "types": [
+      "Démon",
+      "Dragon"
+    ],
+    "niveau": 5,
+    "cout": 7,
+    "slotType": "avant",
+    "atk": 30,
+    "end": 70,
+    "arm": 10,
+    "ini": 18,
+    "mor": 10,
+    "keywords": [
+      "Effrayant 2"
+    ],
+    "sacrificeMinLevel": 4,
+    "sacrificeGainsStats": false,
+    "onArrivalEnemyMoralLoss": 2
+  },
+  "cavaliers_dunes": {
+    "id": "cavaliers_dunes",
+    "cardType": "Regiment",
+    "faction": "nomades",
+    "types": [
+      "Humain",
+      "Nomade",
+      "Monté"
+    ],
+    "niveau": 2,
+    "cout": 3,
+    "slotType": "avant",
+    "atk": 14,
+    "end": 30,
+    "arm": 2,
+    "ini": 35,
+    "mor": 6,
+    "keywords": [],
+    "arrivesReady": true
+  },
+  "cheikh_dunes": {
+    "id": "cheikh_dunes",
+    "cardType": "Leader",
+    "faction": "nomades",
+    "niveau": 4,
+    "cout": 2,
+    "typesRequired": [
+      "Nomade"
+    ],
+    "bonusAtk": 5,
+    "bonusMor": 2,
+    "atkPerEnemyDiscard": 5
+  },
+  "reine_basilics": {
+    "id": "reine_basilics",
+    "cardType": "Regiment",
+    "faction": "nomades",
+    "types": [
+      "Basilic",
+      "Nomade"
+    ],
+    "niveau": 5,
+    "cout": 7,
+    "slotType": "avant",
+    "atk": 30,
+    "end": 60,
+    "arm": 10,
+    "ini": 15,
+    "mor": 9,
+    "keywords": [
+      "Effrayant 1"
+    ]
+  },
+  "tempete_sable": {
+    "id": "tempete_sable",
+    "cardType": "Tactique",
+    "faction": "nomades",
+    "niveau": 3,
+    "cout": 2,
+    "targetRule": "none",
+    "effect": "tempeteSable"
+  },
+  "oasis_cachee": {
+    "id": "oasis_cachee",
+    "cardType": "Tactique",
+    "faction": "nomades",
+    "niveau": 2,
+    "cout": 1,
+    "targetRule": "none",
+    "effect": "oasisCachee"
+  },
+  "treant_millenaire": {
+    "id": "treant_millenaire",
+    "cardType": "Regiment",
+    "faction": "elfe",
+    "types": [
+      "Élémentaux"
+    ],
+    "niveau": 5,
+    "cout": 7,
+    "slotType": "avant",
+    "atk": 20,
+    "end": 120,
+    "arm": 10,
+    "ini": 5,
+    "mor": 10,
+    "keywords": [],
+    "healsAllEachTurn": 5
+  },
+  "gardienne_lumiere": {
+    "id": "gardienne_lumiere",
+    "cardType": "Regiment",
+    "faction": "elfe",
+    "types": [
+      "Elfe",
+      "Clerc"
+    ],
+    "niveau": 4,
+    "cout": 4,
+    "slotType": "arriere",
+    "atk": 15,
+    "end": 40,
+    "arm": 5,
+    "ini": 20,
+    "mor": 7,
+    "keywords": [
+      "Distance"
+    ],
+    "bonusVsTypes": {
+      "Démon": 15
+    },
+    "healsMostInjuredEachTurn": 10,
+    "healMorWithHeal": 1
+  },
+  "rite_purification": {
+    "id": "rite_purification",
+    "cardType": "Tactique",
+    "faction": "elfe",
+    "niveau": 3,
+    "cout": 2,
+    "targetRule": "ennemi-quelconque",
+    "effect": "purification"
+  },
+  "mercenaires": {
+    "id": "mercenaires",
+    "cardType": "Regiment",
+    "faction": "neutre",
+    "types": [
+      "Humain"
+    ],
+    "niveau": 2,
+    "cout": 2,
+    "slotType": "avant",
+    "atk": 12,
+    "end": 35,
+    "arm": 3,
+    "ini": 15,
+    "mor": 5,
+    "keywords": []
+  },
+  "ravitaillement": {
+    "id": "ravitaillement",
+    "cardType": "Tactique",
+    "faction": "neutre",
+    "niveau": 1,
+    "cout": 1,
+    "targetRule": "none",
+    "effect": "ravitaillement"
+  },
+  "banniere_dechiree": {
+    "id": "banniere_dechiree",
+    "cardType": "Tactique",
+    "faction": "neutre",
+    "niveau": 3,
+    "cout": 1,
+    "targetRule": "allie-quelconque",
+    "effect": "banniereDechiree"
+  },
+  "puits_sel_amar": {
+    "id": "puits_sel_amar",
+    "cardType": "Regiment",
+    "faction": "nomades",
+    "types": [
+      "Puits"
+    ],
+    "niveau": 1,
+    "cout": 0,
+    "slotType": "arriere",
+    "atk": 0,
+    "end": 90,
+    "arm": 5,
+    "ini": 0,
+    "mor": 10,
+    "keywords": [],
+    "generatesResourceEachTurn": 1,
+    "excludeFromMoralTotal": true
+  },
+  "source_corrompue": {
+    "id": "source_corrompue",
+    "cardType": "Regiment",
+    "faction": "demons",
+    "types": [
+      "Source"
+    ],
+    "niveau": 1,
+    "cout": 0,
+    "slotType": "arriere",
+    "atk": 0,
+    "end": 80,
+    "arm": 5,
+    "ini": 0,
+    "mor": 12,
+    "keywords": [],
+    "healsMostInjuredEachTurn": 15,
+    "excludeFromMoralTotal": true
+  },
+  "portail_infernal": {
+    "id": "portail_infernal",
+    "cardType": "Regiment",
+    "faction": "demons",
+    "types": [
+      "Portail"
+    ],
+    "niveau": 1,
+    "cout": 0,
+    "slotType": "arriere",
+    "atk": 0,
+    "end": 150,
+    "arm": 10,
+    "ini": 0,
+    "mor": 20,
+    "keywords": [],
+    "excludeFromMoralTotal": true
+  },
+  "gardienne_nid": {
+    "id": "gardienne_nid",
+    "cardType": "Regiment",
+    "faction": "nomades",
+    "types": [
+      "Basilic",
+      "Nomade"
+    ],
+    "niveau": 3,
+    "cout": 0,
+    "slotType": "avant",
+    "atk": 20,
+    "end": 70,
+    "arm": 10,
+    "ini": 15,
+    "mor": 10,
+    "keywords": []
+  },
+  "chariot_oeufs": {
+    "id": "chariot_oeufs",
+    "cardType": "Regiment",
+    "faction": "demons",
+    "types": [
+      "Convoi"
+    ],
+    "niveau": 1,
+    "cout": 0,
+    "slotType": "arriere",
+    "atk": 0,
+    "end": 40,
+    "arm": 5,
+    "ini": 0,
+    "mor": 30,
+    "keywords": [],
+    "excludeFromMoralTotal": true
+  },
+  "oeuf_rituel": {
+    "id": "oeuf_rituel",
+    "cardType": "Regiment",
+    "faction": "demons",
+    "types": [
+      "Dragon"
+    ],
+    "niveau": 1,
+    "cout": 0,
+    "slotType": "arriere",
+    "atk": 0,
+    "end": 60,
+    "arm": 10,
+    "ini": 0,
+    "mor": 30,
+    "keywords": [],
+    "excludeFromMoralTotal": true
+  },
+  "legionnaire_desert": {
+    "id": "legionnaire_desert",
+    "cardType": "Regiment",
+    "faction": "empire",
+    "types": [
+      "Humain",
+      "Empire"
+    ],
+    "niveau": 2,
+    "cout": 2,
+    "slotType": "avant",
+    "atk": 12,
+    "end": 40,
+    "arm": 6,
+    "ini": 12,
+    "mor": 7,
+    "keywords": []
+  },
+  "garde_capitale": {
+    "id": "garde_capitale",
+    "cardType": "Regiment",
+    "faction": "empire",
+    "types": [
+      "Humain",
+      "Empire"
+    ],
+    "niveau": 2,
+    "cout": 0,
+    "slotType": "avant",
+    "atk": 12,
+    "end": 45,
+    "arm": 8,
+    "ini": 12,
+    "mor": 7,
+    "keywords": []
   }
 } as Record<string, CardDef>;

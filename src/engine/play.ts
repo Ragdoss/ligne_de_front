@@ -134,6 +134,7 @@ export function playCard(ctx: Ctx, p: PlayerId, handUid: number, target?: SlotRe
 }
 
 function deployRegiment(ctx: Ctx, p: PlayerId, c: CardDef, ref: SlotRef): void {
+  const pl = ctx.player(p);
   const u = ctx.makeUnit(c.id, p);
   const min = c.sacrificeMinLevel as number | undefined;
   if (min) {
@@ -149,8 +150,17 @@ function deployRegiment(ctx: Ctx, p: PlayerId, c: CardDef, ref: SlotRef): void {
       if (grant.arrivesReady) u.arrivesReady = true;
     }
     ctx.emit({ type: 'sacrificed', player: p, uid: sac.uid, cardId: sac.cardId, forCard: c.id });
+    const sacRes = card(sac.cardId).onSacrificedResource as number | undefined;
     ctx.destroy(sac, 'effect');
     if (ctx.over) return;
+    if (sacRes) { pl.resource += sacRes; ctx.emit({ type: 'resource', player: p, amount: sacRes, source: sac.cardId }); }
+    // Gargouille de Cendres (Moral) et Seigneur des Abysses (soin du porteur) : chaque sacrifice les renforce.
+    for (const x of ctx.units(p)) {
+      const m = card(x.cardId).moralOnAllySacrificed as number | undefined;
+      if (m) ctx.heal(x, 0, m, x.cardId);
+      const h = x.leader ? card(x.leader).healOnOwnSacrifice as number | undefined : undefined;
+      if (h) ctx.heal(x, h, 1, x.leader!);
+    }
   }
   if (u.types.includes('Basilic') && ctx.units(p).some(x => card(x.cardId).grantsBasilicsArriveReady)) u.arrivesReady = true;
   ctx.setAt(ref, u);
@@ -174,6 +184,17 @@ function deployRegiment(ctx: Ctx, p: PlayerId, c: CardDef, ref: SlotRef): void {
     }
   }
   if (c.recoversDemonOnArrival) ctx.queueChoice('recoverDemonOs', p, c.id);
+  // Dragon Infernal : tous les régiments adverses perdent du Moral à son arrivée.
+  const terror = c.onArrivalEnemyMoralLoss as number | undefined;
+  if (terror) {
+    const q = opponentOf(p);
+    for (const e of ctx.units(q)) {
+      const lost = ctx.loseMoral(e, terror);
+      if (lost) ctx.emit({ type: 'moralLoss', uid: e.uid, cardId: e.cardId, amount: lost, source: c.id });
+      ctx.checkBroken(e);
+    }
+    for (const e of ctx.units(q).filter(x => x.currentMor <= 0)) { if (ctx.over) return; if (ctx.isAlive(e)) ctx.destroy(e, 'moral'); }
+  }
 }
 
 function attachLeader(ctx: Ctx, p: PlayerId, c: CardDef, u: Unit): void {
@@ -241,6 +262,16 @@ function nomadArrival(ctx: Ctx, p: PlayerId, u: Unit): void {
     case 'chasseur_reliques': ctx.queueChoice('relics', p, u.cardId, { uid: u.uid }); break;
     case 'marchand_ombres': ctx.queueChoice('shadow', p, u.cardId); break;
     case 'caravane_marchande': ctx.queueChoice('caravane', p, u.cardId, { uid: u.uid }); break;
+    case 'reine_basilics': {
+      const pl = ctx.player(p);
+      const ids = pl.discard.filter(id => card(id).cardType === 'Regiment' && card(id).types?.includes('Basilic'));
+      if (!ids.length) { note('noTarget'); break; }
+      const best = ids.sort((a, b) => card(b).niveau - card(a).niveau)[0]!;
+      pl.discard.splice(pl.discard.indexOf(best), 1);
+      ctx.addToHand(p, best);
+      ctx.emit({ type: 'returnedToHand', player: p, cardId: best });
+      break;
+    }
     case 'basilics_desert': {
       const n = opp.discard.filter(id => card(id).cardType === 'Regiment').length;
       if (!n) { note('noTarget'); break; }
@@ -415,6 +446,37 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
       ctx.draw(p, c.id);
       break;
     }
+    // --- Nouvelles cartes ---
+    case 'tempeteSable': {
+      for (const u of ctx.units(q)) { u.blinded = true; u.tempIni -= 20; }
+      note('tempeteSable');
+      break;
+    }
+    case 'oasisCachee': {
+      for (let i = 0; i < 2 && !ctx.over; i++) ctx.draw(p, c.id);
+      if (ctx.over) break;
+      if (ctx.units(p).some(u => u.cardId === 'caravane_marchande')) { pl.resource += 1; ctx.emit({ type: 'resource', player: p, amount: 1, source: c.id }); }
+      ctx.queueChoice('handDiscard', p, c.id, { n: 1, sum: 0, thief: null, gainBase: 0 });
+      break;
+    }
+    case 'purification': {
+      const u = target!;
+      const d = card(u.cardId);
+      u.keywords = u.keywords.filter(k => !k.startsWith('Effrayant'));
+      u.baseAtk = Math.min(u.baseAtk, d.atk ?? 0);
+      u.baseArm = Math.min(u.baseArm, d.arm ?? 0);
+      if (u.maxEnd > (d.end ?? 1)) { u.maxEnd = d.end ?? 1; u.currentEnd = Math.min(u.currentEnd, u.maxEnd); }
+      note('purification', { uid: u.uid });
+      if (u.types.includes('Démon')) {
+        const lost = ctx.loseMoral(u, 2);
+        ctx.emit({ type: 'moralLoss', uid: u.uid, cardId: u.cardId, amount: lost, source: c.id });
+        ctx.checkBroken(u);
+        if (u.currentMor <= 0) ctx.destroy(u, 'moral');
+      }
+      break;
+    }
+    case 'ravitaillement': for (let i = 0; i < 2 && !ctx.over; i++) ctx.draw(p, c.id); break;
+    case 'banniereDechiree': ctx.heal(target!, 0, target!.brokenMorale ? 4 : 2, c.id); break;
     // --- Nomades ---
     case 'mirage': for (const u of ctx.units(p)) if (u.types.includes('Nomade')) nomadArrival(ctx, p, u); break;
     case 'embuscade': target!.tempIni += 50; nomadArrival(ctx, p, target!); break;

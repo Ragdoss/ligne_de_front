@@ -19,6 +19,8 @@ export function applyScenarioStart(ctx: Ctx, sc: ScenarioSetup): void {
         pl.board[zone][Number(idx)] = u;
       }
     }
+    const iso = sc.start?.[p]?.isole;
+    if (iso) { const u = ctx.makeUnit(iso, p); u.justDeployed = false; pl.board.isole = u; }
     for (const cardId of sc.startHand?.[p] ?? []) ctx.addToHand(p, cardId, { generated: true });
   }
 }
@@ -29,6 +31,21 @@ export function scenarioTurnStart(ctx: Ctx, p: PlayerId): void {
   if (!sc || ctx.over) return;
   moveConvoy(ctx, p);
   if (ctx.over) return;
+  // Météo : annoncée au début du tour de A quand elle change.
+  if (sc.weather && p === 'A') {
+    const now = ctx.weather(), before = ctx.s.turn > 1 ? ctx.weather(ctx.s.turn - 1) : null;
+    if (now !== before) ctx.emit({ type: 'effect', key: 'weather', player: p, cardId: '', data: { kind: now } });
+  }
+  // Alarme : donnée au tour prévu, renforts au début du tour de `pid` qui suit l'alarme.
+  const al = sc.alarm;
+  if (al && al.pid === p && !sc.alarmDone) {
+    if (!sc.alarmRaised && ctx.s.turn >= al.turn) { sc.alarmRaised = true; ctx.emit({ type: 'effect', key: 'alarm', player: p, cardId: '' }); }
+    if (sc.alarmRaised) {
+      sc.alarmDone = true;
+      runEvent(ctx, { turn: ctx.s.turn, pid: p, resource: al.resource, spawn: al.spawn, dialog: al.dialog });
+      if (ctx.over) return;
+    }
+  }
   for (const ev of sc.events) {
     if (ev.turn !== ctx.s.turn || ev.pid !== p) continue;
     const key = `${ev.turn}${ev.pid}`;
