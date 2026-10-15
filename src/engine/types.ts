@@ -249,6 +249,8 @@ export interface ScenarioEvent {
   /** Les cartes données peuvent être jouées sans le niveau requis. */
   levelFree?: boolean;
   spawn?: { cardId: string; zone: 'avant' | 'arriere'; idx: number }[];
+  /** Points de lassitude donnés au joueur (tutoriel : montrer la montée de niveau). */
+  lassitude?: number;
 }
 /** Météo périodique : actif `duration` tours tous les `every` tours à partir de `first`. Tempête, ou nuit (sinon jour). */
 export interface Weather { kind: 'tempete' | 'nuit'; first: number; every: number; duration: number }

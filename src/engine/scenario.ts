@@ -60,6 +60,7 @@ export function scenarioTurnStart(ctx: Ctx, p: PlayerId): void {
 function runEvent(ctx: Ctx, ev: ScenarioEvent): void {
   const p = ev.pid;
   const pl = ctx.player(p);
+  if (ev.lassitude) ctx.gainLassitude(p, ev.lassitude, 'scenario');
   if (ev.resource) {
     pl.resource += ev.resource;
     ctx.emit({ type: 'resource', player: p, amount: ev.resource, source: 'scenario' });

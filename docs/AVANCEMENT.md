@@ -130,3 +130,10 @@ aux outils avec `--patch` : `npm run sim -- 100 v2 --patch balance/equilibrage-1
 
 - Les défaites sont comptées par scénario (sauvegarde de campagne). En bas à droite du camp : « Essai n° X » et, toutes les
   3 défaites sur un même combat, une aide de +1 ressource au départ à choisir (jusqu'à +3). L'aide repart à zéro au scénario suivant.
+
+## Tutoriel
+
+- Accueil → « Tutoriel » : un seul combat guidé contre des Pillards (environ 5 minutes, 13 étapes). Une bulle en haut à droite
+  explique le plateau, la main et la ressource, le combat, le Moral, la lassitude et les niveaux, le rang arrière (Distance),
+  les Leaders, les tactiques, les mots-clés et les conditions de victoire ; les étapes « à toi de jouer » avancent seules.
+  Partie fixée dans `src/campaign/tutorial.ts` (main de départ imposée, renfort et niveau 2 au tour 2) ; textes dans `src/ui/Tutorial.tsx`.

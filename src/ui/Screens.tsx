@@ -9,10 +9,11 @@ import { checkDeck, DEFAULT_OPTIONS, profileCode, profileFromCode, resetEverythi
 import { mainFaction } from './Decks';
 import { FACTION_LABEL, PLAYABLE_FACTIONS } from './labels';
 
-export type HomeTarget = 'local' | 'online' | 'campaign' | 'collection' | 'options';
+export type HomeTarget = 'tutorial' | 'local' | 'online' | 'campaign' | 'collection' | 'options';
 
 export function Home({ profile, go }: { profile: Profile; go: (t: HomeTarget) => void }) {
   const items: [HomeTarget, string, string][] = [
+    ['tutorial', 'Tutoriel', 'Apprendre les règles en un combat guidé (5 minutes)'],
     ['local', 'Jouer en local', 'Contre l’ordinateur, à deux sur le même écran, ou en spectateur'],
     ['online', 'Jouer en ligne', 'Contre un ami, de navigateur à navigateur (premier jet)'],
     ['campaign', 'Campagne', 'Les campagnes solo et ta campagne en cours'],

@@ -12,6 +12,7 @@ import { DeckList } from './Decks';
 import { Dialog, GameScreen } from './GameScreen';
 import { OnlineLobby, useRemoteInbox, type OnlineStart } from './Online';
 import { Rewards } from './Rewards';
+import { Tutorial } from './Tutorial';
 import { CampaignMenu, Home, LocalPlay, OptionsScreen, resolveDeck, TopBar, type LocalSetup } from './Screens';
 
 /** Lien terminé par #autopilot : l'ordinateur joue aussi à ta place en campagne (pratique pour tester les scénarios). */
@@ -20,6 +21,7 @@ const AUTOPILOT = typeof location !== 'undefined' && location.hash === '#autopil
 type Screen =
   | { kind: 'home' }
   | { kind: 'local' }
+  | { kind: 'tutorial'; key: number }
   | { kind: 'online' }
   | { kind: 'onlineGame'; start: OnlineStart; key: number }
   | { kind: 'localGame'; setup: LocalSetup; key: number }
@@ -82,7 +84,7 @@ export function App() {
   let content: React.ReactNode;
 
   if (screen.kind === 'home') {
-    content = <Home profile={profile} go={t => setScreen(t === 'local' ? { kind: 'local' } : t === 'online' ? { kind: 'online' } : t === 'campaign' ? { kind: 'campaignMenu' } : t === 'collection' ? { kind: 'collection', tab: 'decks' } : t === 'options' ? { kind: 'options' } : { kind: 'home' })} />;
+    content = <Home profile={profile} go={t => setScreen(t === 'tutorial' ? { kind: 'tutorial', key: Date.now() } : t === 'local' ? { kind: 'local' } : t === 'online' ? { kind: 'online' } : t === 'campaign' ? { kind: 'campaignMenu' } : t === 'collection' ? { kind: 'collection', tab: 'decks' } : t === 'options' ? { kind: 'options' } : { kind: 'home' })} />;
   } else if (screen.kind === 'local') {
     content = <LocalPlay profile={profile} onBack={home} goDecks={() => setScreen({ kind: 'collection', tab: 'decks' })} onStart={setup => setScreen({ kind: 'localGame', setup, key: Date.now() })} />;
   } else if (screen.kind === 'localGame') {
@@ -115,6 +117,8 @@ export function App() {
         )}
       />
     );
+  } else if (screen.kind === 'tutorial') {
+    content = <Tutorial key={screen.key} gameOpts={{ animMul: o.animSpeed, aiMul: o.aiSpeed }} onExit={home} onCampaign={() => setScreen({ kind: 'campaignMenu' })} />;
   } else if (screen.kind === 'online') {
     content = <OnlineLobby profile={profile} onBack={home} goDecks={() => setScreen({ kind: 'collection', tab: 'decks' })} onStart={start => setScreen({ kind: 'onlineGame', start, key: Date.now() })} />;
   } else if (screen.kind === 'onlineGame') {

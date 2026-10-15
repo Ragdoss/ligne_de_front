@@ -367,3 +367,19 @@ button.danger { background: var(--danger); border: 1px solid var(--danger); colo
 .help-choice button { background: transparent; border: 1px solid #14234f60; border-radius: 4px; padding: 2px 10px; color: var(--slate-ink); }
 .help-choice button.on { background: var(--navy); color: var(--paper); border-color: var(--navy); }
 @media (max-width: 560px) { .hub-help { position: static; justify-items: start; text-align: left; margin-top: 8px; } .help-choice { justify-content: flex-start; } }
+
+/* ---------- Tutoriel ---------- */
+.tuto { position: fixed; top: 64px; right: 16px; z-index: 30; width: min(360px, calc(100vw - 32px)); max-height: calc(100vh - 160px); overflow-y: auto;
+  background: var(--paper); color: var(--slate-ink); border: 2px solid var(--navy); border-radius: 8px; box-shadow: 0 6px 24px #0008; padding: 10px 14px; display: grid; gap: 8px; font-size: .9rem; line-height: 1.45; }
+.tuto header { display: flex; align-items: center; gap: 8px; }
+.tuto header b { font-family: 'Cinzel', serif; color: var(--navy); flex: 1; }
+.tuto-count { font-size: .75rem; color: #4b5470; font-variant-numeric: tabular-nums; }
+.tuto-fold { background: none; border: 1px solid #14234f50; border-radius: 4px; color: var(--navy); padding: 0 8px; }
+.tuto-body p { margin: 0 0 6px; }
+.tuto-kw { margin: 0; padding-left: 18px; display: grid; gap: 3px; }
+.tuto-task { margin: 0; background: var(--slate); border-left: 3px solid var(--navy); padding: 6px 10px; font-weight: 600; }
+.tuto-nav { display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap; }
+.tuto-nav button { background: transparent; border: 1px solid #14234f60; color: var(--navy); border-radius: 4px; padding: 4px 12px; }
+.tuto-nav button.go { background: var(--navy); color: var(--paper); border-color: var(--navy); font-weight: 600; }
+.tuto.folded { width: auto; }
+@media (max-width: 700px) { .tuto { top: auto; bottom: 8px; right: 8px; left: 8px; width: auto; max-height: 45vh; } }

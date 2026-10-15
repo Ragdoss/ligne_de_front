@@ -47,7 +47,7 @@ function newPlayer(ctx: Ctx, id: PlayerId, setup: PlayerSetup): PlayerState {
   };
   // Main de départ : 3 régiments de niveau 1 garantis, puis complétée jusqu'à la taille de départ.
   const isLvl1Regiment = (c: string) => card(c).cardType === 'Regiment' && card(c).niveau === 1;
-  for (let i = 0, got = 0; i < pl.deck.length && got < 3;) {
+  for (let i = 0, got = 0; i < pl.deck.length && got < Math.min(3, ctx.s.config.startingHand);) {
     if (isLvl1Regiment(pl.deck[i]!)) { pl.hand.push({ uid: ctx.uid(), cardId: pl.deck.splice(i, 1)[0]! }); got++; }
     else i++;
   }

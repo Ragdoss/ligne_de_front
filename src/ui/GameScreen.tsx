@@ -44,6 +44,10 @@ export interface GameScreenProps {
   remote?: { side: PlayerId; send: (a: Action) => void; inbox: Action[] };
   /** Camp affiché en bas de l'écran (par défaut A, ou le joueur actif à deux sur le même écran). */
   bottomSide?: PlayerId;
+  /** Suivi de la partie (tutoriel) : appelé à chaque nouvel état. */
+  onGame?: (game: GameState) => void;
+  /** Contenu affiché par-dessus le plateau (bulle du tutoriel). */
+  overlay?: React.ReactNode;
 }
 
 function PlayerBar({ game, p, label, active }: { game: GameState; p: PlayerId; label: string; active: boolean }) {
@@ -72,7 +76,7 @@ function PlayerBar({ game, p, label, active }: { game: GameState; p: PlayerId; l
 
 interface Banner { id: number; who: string; cardId: string }
 
-export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, intro, renderEnd, onQuit, animMul = 1, aiMul = 1, initialReveal = false, onOver, remote, bottomSide }: GameScreenProps) {
+export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, intro, renderEnd, onQuit, animMul = 1, aiMul = 1, initialReveal = false, onOver, remote, bottomSide, onGame, overlay }: GameScreenProps) {
   const [game, setGame] = useState<GameState>(() => createGame(setup));
   const [shown, setShown] = useState<GameState | null>(null); // état affiché pendant une animation de combat
   const [highlight, setHighlight] = useState<Highlight | null>(null);
@@ -143,6 +147,8 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
     const t = setTimeout(() => { void apply(chooseAction(game, undefined, aiFilter)); }, (fast ? 250 : 450) * aiMul);
     return () => clearTimeout(t);
   }, [game, paused, acting, apply, human, fast, aiFilter, aiMul]);
+
+  useEffect(() => { onGame?.(game); }, [game, onGame]);
 
   // Jeu en ligne : on applique les actions reçues, une par une, quand l'écran est libre.
   const played = useRef(0);
@@ -269,6 +275,7 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
         </div>
       )}
 
+      {!dialogs.length && overlay}
       {game.over && !shown && !dialogs.length && !overClosed && renderEnd(game, () => setOverClosed(true))}
     </div>
   );
