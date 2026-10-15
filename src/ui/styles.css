@@ -359,3 +359,11 @@ button.danger { background: var(--danger); border: 1px solid var(--danger); colo
 .code-box { width: 100%; background: var(--bg); color: var(--parchment); border: 1px solid var(--line); border-radius: 4px; padding: 8px; font: .72rem/1.3 ui-monospace, monospace; word-break: break-all; resize: vertical; }
 .weather { border: 1px solid var(--brass); color: var(--brass-bright); border-radius: 12px; padding: 2px 10px; font-size: .8rem; align-self: center; }
 .weather.nuit { border-color: #6b5aa8; color: #b9a8f0; } .weather.tempete { border-color: #c79a4a; color: #e8c27a; }
+.hub-scene { position: relative; }
+.hub-help { position: absolute; right: 16px; bottom: 10px; display: grid; gap: 4px; justify-items: end; text-align: right; background: color-mix(in srgb, var(--paper) 88%, transparent); border: 1px solid #14234f40; border-radius: 6px; padding: 8px 12px; font-size: .85rem; color: var(--slate-ink); max-width: min(360px, calc(100% - 32px)); }
+.hub-help b { font-family: 'Cinzel', serif; color: var(--navy); }
+.hub-help .muted { color: #4b5470; opacity: 1; }
+.help-choice { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 4px; }
+.help-choice button { background: transparent; border: 1px solid #14234f60; border-radius: 4px; padding: 2px 10px; color: var(--slate-ink); }
+.help-choice button.on { background: var(--navy); color: var(--paper); border-color: var(--navy); }
+@media (max-width: 560px) { .hub-help { position: static; justify-items: start; text-align: left; margin-top: 8px; } .help-choice { justify-content: flex-start; } }

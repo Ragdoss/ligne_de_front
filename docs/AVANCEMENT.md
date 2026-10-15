@@ -125,3 +125,8 @@ aux outils avec `--patch` : `npm run sim -- 100 v2 --patch balance/equilibrage-1
   L'hôte tire au sort qui commence. +5 pièces par victoire. Limites : pas de reconnexion, pas de détection de triche
   (chaque navigateur connaît toute la partie), pas de chat.
 - **GitHub Pages** : `.github/workflows/pages.yml` publie le jeu à chaque push (à activer dans les réglages du dépôt).
+
+## Essais et aide en campagne
+
+- Les défaites sont comptées par scénario (sauvegarde de campagne). En bas à droite du camp : « Essai n° X » et, toutes les
+  3 défaites sur un même combat, une aide de +1 ressource au départ à choisir (jusqu'à +3). L'aide repart à zéro au scénario suivant.

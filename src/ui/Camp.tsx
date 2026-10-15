@@ -1,6 +1,6 @@
 // Le camp, entre deux combats de campagne : le décor, et la barre d'actions en bas.
 import { useState, type CSSProperties } from 'react';
-import { campaignDef, defaultDeckSelection, type CampaignSave } from '../campaign/campaign';
+import { bonusFor, bonusUnlocked, campaignDef, defaultDeckSelection, defeatsOn, FAILS_PER_BONUS, MAX_BONUS, type CampaignSave } from '../campaign/campaign';
 import type { CampaignScenario } from '../campaign/types';
 import campImg from './assets/camp.png';
 import campEmpireImg from './assets/camp_empire.webp';
@@ -19,9 +19,35 @@ const CAMP_ART: Record<string, CampArt> = {
   },
 };
 
-export function CampHub({ campaign, scenario, onDeck, onFight, onOptions, onMenu }: {
+/** En bas à droite du camp : nombre d'essais et aide au départ (+1, +2… ressources) après plusieurs défaites. */
+function AttemptsPanel({ campaign, scenario, onBonus }: { campaign: CampaignSave; scenario: CampaignScenario; onBonus: (b: number) => void }) {
+  const defeats = defeatsOn(campaign, scenario.id);
+  const unlocked = bonusUnlocked(campaign, scenario.id);
+  const chosen = bonusFor(campaign, scenario.id);
+  const nextAt = (unlocked + 1) * FAILS_PER_BONUS - defeats;
+  return (
+    <aside className="hub-help" aria-label="Essais et aide">
+      <b>Essai n° {defeats + 1}</b>
+      {defeats > 0 && <span>{defeats} défaite{defeats > 1 ? 's' : ''} sur ce combat</span>}
+      {unlocked > 0 && (
+        <div className="help-choice" role="radiogroup" aria-label="Ressources supplémentaires au départ">
+          <span>Ressources en plus au départ :</span>
+          {Array.from({ length: unlocked + 1 }, (_, b) => (
+            <button key={b} type="button" role="radio" aria-checked={chosen === b} className={chosen === b ? 'on' : ''} onClick={() => onBonus(b)}>
+              {b === 0 ? 'Aucune' : `+${b}`}
+            </button>
+          ))}
+        </div>
+      )}
+      {unlocked < MAX_BONUS && defeats > 0 && <span className="muted">Aide {unlocked ? 'suivante' : 'au départ'} dans {nextAt} défaite{nextAt > 1 ? 's' : ''}</span>}
+    </aside>
+  );
+}
+
+export function CampHub({ campaign, scenario, onDeck, onFight, onOptions, onMenu, onBonus }: {
   campaign: CampaignSave;
   scenario: CampaignScenario;
+  onBonus: (b: number) => void;
   onDeck: () => void;
   onFight: () => void;
   onOptions: () => void;
@@ -51,6 +77,7 @@ export function CampHub({ campaign, scenario, onDeck, onFight, onOptions, onMenu
             </button>
           )}
         </div>
+        {!campaign.finished && <AttemptsPanel campaign={campaign} scenario={scenario} onBonus={onBonus} />}
       </div>
       <nav className="hub-bar" aria-label="Actions du camp">
         <button type="button" onClick={onDeck}>Votre deck</button>

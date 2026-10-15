@@ -1,6 +1,6 @@
 // Application : accueil, parties locales, campagne, collection (decks, cartes, paquets), options.
 import { useCallback, useRef, useState } from 'react';
-import { addToPool, campaignDef, currentScenario, defaultDeckSelection, saveCampaign, scenarioAiFilter, scenarioGameSetup, selectionToDeck, type CampaignSave } from '../campaign/campaign';
+import { addToPool, bonusFor, bonusUnlocked, campaignDef, defeatsOn, currentScenario, defaultDeckSelection, saveCampaign, scenarioAiFilter, scenarioGameSetup, selectionToDeck, type CampaignSave } from '../campaign/campaign';
 import type { DialogLine, GameState } from '../engine/types';
 import { formatEvent } from '../i18n/log.fr';
 import { COINS_PER_WIN, loadProfile, mergeCampaignPool, saveProfile, type Profile } from '../profile/profile';
@@ -74,7 +74,7 @@ export function App() {
       update(p => { gained = mergeCampaignPool(p, done.pool, done.id); });
       return { kind: 'campEnd', campaign: done, gained };
     }
-    const next = { ...c, idx: c.idx + 1 };
+    const next = { ...c, idx: c.idx + 1, bonus: 0 };
     saveCampaign(next);
     return { kind: 'campHub', campaign: next };
   };
@@ -132,6 +132,7 @@ export function App() {
         onDeck={() => setScreen({ kind: 'campDeck', campaign: c })}
         onOptions={() => setScreen({ kind: 'campOptions', campaign: c })}
         onMenu={home}
+        onBonus={b => { const next = { ...c, bonus: b }; saveCampaign(next); setScreen({ kind: 'campHub', campaign: next }); }}
         onFight={() => {
           const sel = defaultDeckSelection(c);
           const size = Object.values(sel).reduce((a, b) => a + b, 0);
@@ -166,7 +167,7 @@ export function App() {
       <GameScreen
         key={screen.key}
         {...gameOpts}
-        setup={scenarioGameSetup(sc, screen.deck, screen.key)}
+        setup={scenarioGameSetup(sc, screen.deck, screen.key, bonusFor(c, sc.id))}
         names={names}
         human={{ A: !AUTOPILOT, B: false }}
         fast={AUTOPILOT}
@@ -174,7 +175,13 @@ export function App() {
         title={sc.title}
         intro={sc.intro}
         onQuit={() => setScreen({ kind: 'campHub', campaign: c })}
-        onOver={g => { if (g.over!.winner === 'A') update(p => { p.coins += COINS_PER_WIN; }); }}
+        onOver={g => {
+          if (g.over!.winner === 'A') { update(p => { p.coins += COINS_PER_WIN; }); return; }
+          // Défaite : comptée pour ce scénario (débloque l'aide au départ après plusieurs échecs).
+          const next = { ...c, attempts: { ...c.attempts, [sc.id]: (c.attempts[sc.id] ?? 0) + 1 } };
+          saveCampaign(next);
+          setScreen(cur => (cur.kind === 'campGame' ? { ...cur, campaign: next } : cur));
+        }}
         renderEnd={(g: GameState, close) => g.over!.winner === 'A' ? (
           <EndBox title="Scénario réussi !" text={formatEvent({ type: 'gameOver', winner: 'A', reason: g.over!.reason }, names) ?? ''} extra={<CoinGain />}>
             <button type="button" onClick={close}>Voir le plateau</button>
@@ -189,7 +196,8 @@ export function App() {
             }}>Continuer la campagne</button>
           </EndBox>
         ) : (
-          <EndBox title="Scénario échoué" text={formatEvent({ type: 'gameOver', winner: g.over!.winner, reason: g.over!.reason }, names) ?? ''}>
+          <EndBox title="Scénario échoué" text={formatEvent({ type: 'gameOver', winner: g.over!.winner, reason: g.over!.reason }, names) ?? ''}
+            extra={<p className="muted small">Défaites sur ce combat : {defeatsOn(c, sc.id)}.{bonusUnlocked(c, sc.id) > bonusFor(c, sc.id) ? ' Une aide est disponible au camp : des ressources en plus au départ.' : ''}</p>}>
             <button type="button" onClick={close}>Voir le plateau</button>
             <button type="button" onClick={() => setScreen({ kind: 'campHub', campaign: c })}>Retour au camp</button>
             <button type="button" className="primary" onClick={() => setScreen({ kind: 'campGame', campaign: c, deck: screen.deck, key: Date.now() })}>Réessayer le scénario</button>

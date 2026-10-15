@@ -1,7 +1,7 @@
 // Scénarios de campagne : mise en place, événements, convoi, règles de victoire.
 import { describe, expect, it } from 'vitest';
 import { chooseAction } from '../src/ai/heuristic';
-import { newCampaign, scenarioAiFilter, scenarioGameSetup } from '../src/campaign/campaign';
+import { bonusFor, bonusUnlocked, newCampaign, scenarioAiFilter, scenarioGameSetup } from '../src/campaign/campaign';
 import { CAMPAIGNS, SCENARIOS } from '../src/campaign/campaigns';
 import { applyAction, createGame } from '../src/engine/game';
 import type { GameState } from '../src/engine/types';
@@ -99,5 +99,15 @@ describe('Scénarios', () => {
       }
       expect(s.over, id).not.toBeNull();
     }
+  });
+  it('aide après plusieurs défaites : +1 ressource de départ toutes les 3 défaites (3 au plus)', () => {
+    const c = newCampaign('demons');
+    expect(bonusUnlocked(c, 'd1')).toBe(0);
+    c.attempts.d1 = 7; c.bonus = 3;
+    expect(bonusUnlocked(c, 'd1')).toBe(2);
+    expect(bonusFor(c, 'd1')).toBe(2);
+    const s = createGame(scenarioGameSetup(SCENARIOS.d1!, c.pool, 'x', bonusFor(c, 'd1')));
+    const base = createGame(scenarioGameSetup(SCENARIOS.d1!, c.pool, 'x'));
+    expect(s.players.A.resource).toBe(base.players.A.resource + 2);
   });
 });

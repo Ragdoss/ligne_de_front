@@ -18,18 +18,29 @@ export interface CampaignSave {
   /** Dernier deck choisi (carte → nombre), pour le proposer à nouveau. */
   deck: Record<string, number> | null;
   finished: boolean;
+  /** Défaites par scénario (identifiant → nombre). */
+  attempts: Record<string, number>;
+  /** Aide choisie pour le prochain combat : ressources en plus au départ. */
+  bonus: number;
 }
+
+/** Une aide de +1 ressource de départ se débloque toutes les 3 défaites sur un même scénario (3 au plus). */
+export const FAILS_PER_BONUS = 3;
+export const MAX_BONUS = 3;
+export const defeatsOn = (c: CampaignSave, id: string) => c.attempts[id] ?? 0;
+export const bonusUnlocked = (c: CampaignSave, id: string) => Math.min(MAX_BONUS, Math.floor(defeatsOn(c, id) / FAILS_PER_BONUS));
+export const bonusFor = (c: CampaignSave, id: string) => Math.max(0, Math.min(c.bonus, bonusUnlocked(c, id)));
 
 export const campaignDef = (c: CampaignSave | string): CampaignDef => CAMPAIGN_BY_ID[typeof c === 'string' ? c : c.campaign] ?? CAMPAIGN_BY_ID.empire!;
 
 export function newCampaign(campaign = 'empire'): CampaignSave {
   const def = campaignDef(campaign);
-  return { version: 1, id: `camp-${def.id}-${Date.now()}`, campaign: def.id, pool: def.scenarios[def.order[0]!]!.A.deckList!.slice(), idx: 0, deck: null, finished: false };
+  return { version: 1, id: `camp-${def.id}-${Date.now()}`, campaign: def.id, pool: def.scenarios[def.order[0]!]!.A.deckList!.slice(), idx: 0, deck: null, finished: false, attempts: {}, bonus: 0 };
 }
 export const currentScenario = (c: CampaignSave): CampaignScenario => SCENARIOS[campaignDef(c).order[c.idx]!]!;
 
 /** Construit la partie du moteur correspondant à un scénario, avec le deck choisi par le joueur. */
-export function scenarioGameSetup(sc: CampaignScenario, playerDeck: string[], seed: string | number): GameSetup {
+export function scenarioGameSetup(sc: CampaignScenario, playerDeck: string[], seed: string | number, bonus = 0): GameSetup {
   const per = <T>(m: Partial<Record<PlayerId, T>> | undefined, def: T): Record<PlayerId, T> => ({ A: m?.A ?? def, B: m?.B ?? def });
   return {
     seed,
@@ -57,6 +68,7 @@ export function scenarioGameSetup(sc: CampaignScenario, playerDeck: string[], se
       startOverrides: sc.startOverrides,
       weather: sc.weather,
       alarm: sc.alarm,
+      startResource: bonus ? { A: bonus } : undefined,
     },
   };
 }
@@ -137,6 +149,8 @@ export function sanitize(raw: unknown): CampaignSave | null {
     idx: Math.max(0, Math.min(def.order.length - 1, c.idx | 0)),
     deck: c.deck && typeof c.deck === 'object' ? c.deck : null,
     finished: !!c.finished,
+    attempts: c.attempts && typeof c.attempts === 'object' ? Object.fromEntries(Object.entries(c.attempts).filter(([, v]) => typeof v === 'number')) : {},
+    bonus: Math.max(0, Math.min(MAX_BONUS, Number(c.bonus) | 0)),
   };
 }
 export function saveCampaign(c: CampaignSave): void {

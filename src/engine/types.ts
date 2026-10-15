@@ -268,6 +268,8 @@ export interface ScenarioSetup extends ScenarioRules {
   startHand?: Partial<Record<PlayerId, string[]>>;
   startLevel?: Partial<Record<PlayerId, number>>;
   startOverrides?: Record<string, { mor?: number }>;
+  /** Ressources supplémentaires au départ (aide après plusieurs défaites en campagne). */
+  startResource?: Partial<Record<PlayerId, number>>;
 }
 export interface ScenarioRuntime extends ScenarioRules {
   fired: string[];
