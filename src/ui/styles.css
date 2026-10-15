@@ -383,3 +383,4 @@ button.danger { background: var(--danger); border: 1px solid var(--danger); colo
 .tuto-nav button.go { background: var(--navy); color: var(--paper); border-color: var(--navy); font-weight: 600; }
 .tuto.folded { width: auto; }
 @media (max-width: 700px) { .tuto { top: auto; bottom: 8px; right: 8px; left: 8px; width: auto; max-height: 45vh; } }
+.u-kw s { text-decoration: line-through; opacity: .6; } .u-kw s.kw-on { text-decoration: none; opacity: 1; }

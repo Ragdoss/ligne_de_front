@@ -292,7 +292,7 @@ Remplace l'ancienne stat "Portée". Un régiment portant le mot-clé **Distance*
 - Un régiment perd **1 point de Moral** à chaque fois qu'il **subit une attaque** (indépendamment des dégâts d'Endurance encaissés).
 - Un régiment perd **1 point de Moral** lorsqu'un **régiment allié** (du même contrôleur) est détruit.
 - Un régiment gagne **1 point de Moral** lorsqu'il **détruit** un autre régiment.
-- Lorsqu'un régiment a perdu **2/3 de son Moral** (il ne lui reste plus qu'un tiers ou moins de son Moral maximal), il perd ses **mots-clés positifs** : on dit alors qu'il a le **Moral brisé**.
+- Lorsqu'un régiment a perdu **2/3 de son Moral** (il ne lui reste plus qu'un tiers ou moins de son Moral maximal), il perd ses **mots-clés positifs**, y compris les mots-clés fonctionnels comme **Distance** et **Pénétration** (un archer au Moral brisé frappe alors comme un régiment arrière sans Distance) : on dit alors qu'il a le **Moral brisé**. Les mots-clés négatifs (Lent) restent, et Minions reste aussi (sinon il ne servirait presque jamais, un régiment mourant ayant souvent le Moral brisé).
 - **Destruction** : un régiment est détruit lorsque son Moral atteint **0**, *ou* lorsque son Endurance atteint **0** — les deux jauges sont fatales indépendamment l'une de l'autre (règle confirmée après premiers tests sur le simulateur, section 15).
 - **Récupération du Moral brisé** : un régiment qui regagne du Moral au point de dépasser à nouveau le seuil d'un tiers de son Moral maximal **retrouve ses mots-clés positifs** (le statut de Moral brisé n'est pas permanent, il se recalcule à chaque soin de Moral). Premier effet à exploiter cette règle : l'État Major (section 14), qui rallie chaque tour les régiments Empire au Moral brisé.
 

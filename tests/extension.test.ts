@@ -144,3 +144,14 @@ describe('Frondeur Nomade', () => {
     expect(s.players.B.board.avant[0]!.stunned).toBe(false);
   });
 });
+
+describe('Moral brisé', () => {
+  it('fait perdre les mots-clés fonctionnels : un archer brisé n’a plus Distance', () => {
+    const s = blankGame();
+    const a = place(s, 'A', 'arriere', 0, 'archer_imp');
+    const ctx = new Ctx(s);
+    expect(ctx.hasDistance(a)).toBe(true);
+    a.brokenMorale = true;
+    expect(ctx.hasDistance(a)).toBe(false);
+  });
+});

@@ -104,7 +104,8 @@ export class Ctx {
   }
   /** Le régiment frappe-t-il à distance ce tour-ci (Tempête de Sable, tempête de scénario) ? */
   hasDistance(u: Unit): boolean {
-    if (!u.keywords.includes('Distance') || u.blinded) return false;
+    // Moral brisé : le régiment perd ses mots-clés (Distance comprise).
+    if (u.brokenMorale || !u.keywords.includes('Distance') || u.blinded) return false;
     return !(this.weather() === 'tempete' && !u.types.includes('Nomade'));
   }
   /** Valeur d'Effrayant (la plus forte si plusieurs). */

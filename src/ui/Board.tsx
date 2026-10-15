@@ -52,7 +52,8 @@ function UnitCard({ u, ctx, highlight, faded }: { u: Unit; ctx: Ctx; highlight: 
       </div>
       {(kws.length > 0 || flags.length > 0 || u.vieTours !== null) && (
         <div className="u-kw">
-          {[...kws, ...(u.vieTours !== null ? [`${u.vieTours} tour(s)`] : []), ...flags].join(' · ')}
+          {kws.length > 0 && <s className={u.brokenMorale ? '' : 'kw-on'} title={u.brokenMorale ? 'Moral brisé : mots-clés perdus' : undefined}>{kws.join(' · ')}</s>}
+          {[...(kws.length ? [''] : []), ...(u.vieTours !== null ? [`${u.vieTours} tour(s)`] : []), ...flags].join(' · ')}
         </div>
       )}
       {highlight?.target === u.uid && highlight.damage !== undefined && (
