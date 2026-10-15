@@ -191,6 +191,13 @@ Liste non exhaustive des rôles envisagés à ce stade, avec leur tendance de co
 
 ---
 
+### Campagnes et jeu en ligne
+
+- **Quatre campagnes** racontent la même histoire de quatre côtés (détail : `docs/CAMPAGNES.md`) : Démons « Les Œufs du Dragon », Elfes « La Purification », Nomades « Les sables ne plient pas », Empire « La frontière de Kragz ». Toutes disponibles dès le départ, ordre conseillé : Démons → Elfes → Nomades → Empire.
+- **Jeu en ligne (premier jet)** : partie entre deux navigateurs, en pair-à-pair. Le moteur étant déterministe, seules les actions sont échangées. Connexion par code court (service de mise en relation gratuit) ou par codes à copier-coller. Une victoire rapporte 5 pièces. Un serveur ne deviendra nécessaire que pour un mode classé ou une économie protégée contre la triche.
+
+---
+
 ## 6. Ressource et pioche
 
 - **Ressource** : chaque joueur dispose au début de son tour d'une ressource **égale à son niveau actuel** (1 à 5) — pas de croissance cumulative indépendante, la ressource suit directement le système de niveau (section 7). **La ressource non dépensée en fin de tour est reportée au tour suivant**, en plus de la ressource de base du nouveau tour.

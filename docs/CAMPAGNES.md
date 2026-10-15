@@ -1,6 +1,6 @@
-# Campagnes — propositions (Nomades, Elfes, Démons)
+# Campagnes — Nomades, Elfes, Démons
 
-Ce document est une base de travail à retravailler ensemble. Chaque scénario indique sa **règle spéciale**, en distinguant :
+**Implémentées** (src/campaign/demons.ts, elfes.ts, nomades.ts), avec les nouvelles cartes et mécaniques ci-dessous. Les chiffres de difficulté sont dans reports/difficulte-scenarios.md. Écarts avec la proposition : D5 se tient jusqu'au tour 8 (et non 9), et plusieurs scénarios désactivent la défaite par pioche vide du joueur (pools encore petits). Ce document reste une base de travail. Chaque scénario indique sa **règle spéciale**, en distinguant :
 - **[existe]** : déjà dans le moteur ou les scénarios actuels (convoi, régiment vital, renforts par événement, niveau de départ, terrain 6/5, lassitude de fin de tour, ordinateur qui cesse de poser des régiments, pas de défaite par pioche vide…) ;
 - **[nouveau]** : mécanique à programmer.
 

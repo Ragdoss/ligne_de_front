@@ -33,7 +33,7 @@ for (const id of def.order) {
 
 const lines = ['# Difficulté des scénarios de campagne', ''];
 if (patch) lines.push(`Modifications testées (\`${patch}\`) :`, '', ...changes.map(x => `- ${x}`), '');
-lines.push(`${N} parties par scénario. L'Empire est joué par l'ordinateur avec tout son pool de campagne ; l'ordinateur joue moins bien qu'un humain : ces taux sont une borne basse.`, '',
+lines.push(`${N} parties par scénario. Le camp du joueur est joué par l'ordinateur avec tout son pool de campagne ; l'ordinateur joue moins bien qu'un humain : ces taux sont une borne basse.`, '',
   '| Scénario | Pool (cartes) | Réussite | Tours (moy.) | Défaites les plus fréquentes |', '|---|---|---|---|---|');
 const REASONS: Record<string, string> = { lassitude: 'lassitude', noRegiment: 'plus de régiment', emptyDeck: 'pioche vide', vitalDestroyed: 'régiment vital détruit', convoyArrived: 'convoi passé', survived: 'tenu jusqu’au tour limite', blocage: 'partie bloquée' };
 const t0 = Date.now();

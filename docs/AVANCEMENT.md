@@ -104,3 +104,24 @@ aux outils avec `--patch` : `npm run sim -- 100 v2 --patch balance/equilibrage-1
 - Jusqu'à 5 personnages sur scène (3e et suivants en retrait à côté des deux premiers).
 - Nouveau joueur : aucune carte (la campagne et les paquets en donnent ; option « toutes les cartes débloquées » pour tout essayer).
 - Options : « Tout réinitialiser » (collection, pièces, decks, options, campagne), avec confirmation.
+
+## Trois nouvelles campagnes, nouvelles cartes, jeu en ligne (premier jet)
+
+- **Campagnes** (`src/campaign/campaigns.ts`) : Démons « Les Œufs du Dragon » (5 scénarios), Elfes « La Purification » (4),
+  Nomades « Les sables ne plient pas » (5), Empire (4). Toutes disponibles ; ordre conseillé du fil rouge affiché dans le menu.
+  Une sauvegarde par campagne. Discussions de camp, dialogues, récompenses présentées par le héros de chaque campagne.
+- **Mécaniques de scénario** : victoire en tenant jusqu'au tour X (`winAtTurn`), alarme (l'ordinateur ne pose aucun régiment
+  avant l'alarme, donnée à un tour fixe ou à sa première perte), météo périodique (tempête de sable, nuit/jour), Libération
+  (un régiment adverse au Moral brisé change de camp et rejoint le pool), défaite par pioche vide réglable par joueur,
+  régiment isolé de départ.
+- **16 nouvelles cartes** : Démons (Diablotins, Gargouille de Cendres, Seigneur des Abysses, Œuf de Dragon → Dragonnet
+  Infernal, Dragon Infernal), Nomades (Cavaliers des Dunes, Cheikh des Dunes, Reine des Basilics, Tempête de Sable,
+  Oasis cachée), Elfes (Tréant Millénaire, Gardienne de la Lumière, Rite de Purification), Neutres (Mercenaires,
+  Ravitaillement, Bannière Déchirée). Dans les paquets comme les autres. Effrayant : la valeur la plus forte compte.
+- **Difficulté** (`npm run difficulty -- 40 all`, ordinateur dans le camp du joueur) : de 43-58 % au premier scénario à
+  10-18 % au dernier ; `tools/one-scenario.ts` donne le détail par scénario.
+- **Jeu en ligne** (`src/net/link.ts`, `src/ui/Online.tsx`) : pair-à-pair WebRTC, le moteur étant déterministe seules les
+  actions voyagent. Connexion par code court (service gratuit PeerJS) ou par codes à copier-coller (aucun service externe).
+  L'hôte tire au sort qui commence. +5 pièces par victoire. Limites : pas de reconnexion, pas de détection de triche
+  (chaque navigateur connaît toute la partie), pas de chat.
+- **GitHub Pages** : `.github/workflows/pages.yml` publie le jeu à chaque push (à activer dans les réglages du dépôt).
