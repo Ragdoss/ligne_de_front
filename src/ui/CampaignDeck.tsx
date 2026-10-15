@@ -1,7 +1,6 @@
 // Fenêtre de deck avant un scénario : on choisit, dans son pool, les cartes qui entrent dans le deck.
 import { useMemo, useState } from 'react';
-import { defaultDeckSelection, exportCode, poolCounts, type CampaignSave } from '../campaign/campaign';
-import { CAMPAIGN_ORDER } from '../campaign/scenarios';
+import { campaignDef, defaultDeckSelection, exportCode, poolCounts, type CampaignSave } from '../campaign/campaign';
 import { CARDS } from '../data/cards';
 import type { CampaignScenario } from '../campaign/types';
 import { cardDesc, cardName, TYPE_LABEL, visibleKeywords } from './labels';
@@ -45,7 +44,7 @@ export function CampaignDeck({ campaign, scenario, onLaunch, onBack }: {
     <div className="camp">
       <header className="topbar">
         <div>
-          <p className="b-who">Campagne — scénario {campaign.idx + 1} sur {CAMPAIGN_ORDER.length}</p>
+          <p className="b-who">{campaignDef(campaign).title} — combat {campaign.idx + 1} sur {campaignDef(campaign).order.length}</p>
           <h1>{scenario.title}</h1>
         </div>
         <div className="actions">

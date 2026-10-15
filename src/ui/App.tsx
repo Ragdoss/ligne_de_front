@@ -1,8 +1,7 @@
 // Application : accueil, parties locales, campagne, collection (decks, cartes, paquets), options.
 import { useCallback, useRef, useState } from 'react';
-import { currentScenario, defaultDeckSelection, saveCampaign, scenarioAiFilter, scenarioGameSetup, selectionToDeck, type CampaignSave } from '../campaign/campaign';
-import { CAMPAIGN_ORDER } from '../campaign/scenarios';
-import type { GameState } from '../engine/types';
+import { addToPool, campaignDef, currentScenario, defaultDeckSelection, saveCampaign, scenarioAiFilter, scenarioGameSetup, selectionToDeck, type CampaignSave } from '../campaign/campaign';
+import type { DialogLine, GameState } from '../engine/types';
 import { formatEvent } from '../i18n/log.fr';
 import { COINS_PER_WIN, loadProfile, mergeCampaignPool, saveProfile, type Profile } from '../profile/profile';
 import { CampHub } from './Camp';
@@ -11,6 +10,7 @@ import { CardTile } from './CardTile';
 import { MyCards } from './Collection';
 import { DeckList } from './Decks';
 import { Dialog, GameScreen } from './GameScreen';
+import { OnlineLobby, useRemoteInbox, type OnlineStart } from './Online';
 import { Rewards } from './Rewards';
 import { CampaignMenu, Home, LocalPlay, OptionsScreen, resolveDeck, TopBar, type LocalSetup } from './Screens';
 
@@ -20,13 +20,15 @@ const AUTOPILOT = typeof location !== 'undefined' && location.hash === '#autopil
 type Screen =
   | { kind: 'home' }
   | { kind: 'local' }
+  | { kind: 'online' }
+  | { kind: 'onlineGame'; start: OnlineStart; key: number }
   | { kind: 'localGame'; setup: LocalSetup; key: number }
   | { kind: 'campaignMenu' }
   | { kind: 'campHub'; campaign: CampaignSave }
   | { kind: 'campDeck'; campaign: CampaignSave }
   | { kind: 'campOptions'; campaign: CampaignSave }
   | { kind: 'campGame'; campaign: CampaignSave; deck: string[]; key: number }
-  | { kind: 'campVictory'; campaign: CampaignSave }
+  | { kind: 'campVictory'; campaign: CampaignSave; extra?: DialogLine[] }
   | { kind: 'campReward'; campaign: CampaignSave }
   | { kind: 'campEnd'; campaign: CampaignSave; gained: Record<string, number> }
   | { kind: 'collection'; tab: 'decks' | 'cards' }
@@ -65,7 +67,7 @@ export function App() {
 
   /** Passe au scénario suivant ou termine la campagne (fusion du pool dans la collection). */
   const advance = (c: CampaignSave): Screen => {
-    if (c.idx >= CAMPAIGN_ORDER.length - 1) {
+    if (c.idx >= campaignDef(c).order.length - 1) {
       const done = { ...c, finished: true };
       saveCampaign(done);
       let gained: Record<string, number> = {};
@@ -80,7 +82,7 @@ export function App() {
   let content: React.ReactNode;
 
   if (screen.kind === 'home') {
-    content = <Home profile={profile} go={t => setScreen(t === 'local' ? { kind: 'local' } : t === 'campaign' ? { kind: 'campaignMenu' } : t === 'collection' ? { kind: 'collection', tab: 'decks' } : t === 'options' ? { kind: 'options' } : { kind: 'home' })} />;
+    content = <Home profile={profile} go={t => setScreen(t === 'local' ? { kind: 'local' } : t === 'online' ? { kind: 'online' } : t === 'campaign' ? { kind: 'campaignMenu' } : t === 'collection' ? { kind: 'collection', tab: 'decks' } : t === 'options' ? { kind: 'options' } : { kind: 'home' })} />;
   } else if (screen.kind === 'local') {
     content = <LocalPlay profile={profile} onBack={home} goDecks={() => setScreen({ kind: 'collection', tab: 'decks' })} onStart={setup => setScreen({ kind: 'localGame', setup, key: Date.now() })} />;
   } else if (screen.kind === 'localGame') {
@@ -113,6 +115,11 @@ export function App() {
         )}
       />
     );
+  } else if (screen.kind === 'online') {
+    content = <OnlineLobby profile={profile} onBack={home} goDecks={() => setScreen({ kind: 'collection', tab: 'decks' })} onStart={start => setScreen({ kind: 'onlineGame', start, key: Date.now() })} />;
+  } else if (screen.kind === 'onlineGame') {
+    content = <OnlineGame key={screen.key} start={screen.start} gameOpts={gameOpts} onExit={() => setScreen({ kind: 'online' })}
+      onWin={() => update(p => { p.coins += COINS_PER_WIN; })} />;
   } else if (screen.kind === 'campaignMenu') {
     content = <CampaignMenu onBack={home} onPlay={c => { saveCampaign(c); setScreen({ kind: 'campHub', campaign: c }); }} />;
   } else if (screen.kind === 'campHub') {
@@ -171,7 +178,15 @@ export function App() {
         renderEnd={(g: GameState, close) => g.over!.winner === 'A' ? (
           <EndBox title="Scénario réussi !" text={formatEvent({ type: 'gameOver', winner: 'A', reason: g.over!.reason }, names) ?? ''} extra={<CoinGain />}>
             <button type="button" onClick={close}>Voir le plateau</button>
-            <button type="button" className="primary" onClick={() => setScreen({ kind: 'campVictory', campaign: c })}>Continuer la campagne</button>
+            <button type="button" className="primary" onClick={() => {
+              // Libération : les régiments libérés rejoignent le pool (4 au plus).
+              const freed = sc.liberation ? Math.min(4, g.scenario?.liberated ?? 0) : 0;
+              if (!freed) { setScreen({ kind: 'campVictory', campaign: c }); return; }
+              const next = structuredClone(c);
+              for (let k = 0; k < freed; k++) addToPool(next, sc.liberation!.cardIds[0]!);
+              saveCampaign(next);
+              setScreen({ kind: 'campVictory', campaign: next, extra: [{ who: '', text: `${freed} captif(s) libéré(s) rejoignent ton pool de cartes.` }] });
+            }}>Continuer la campagne</button>
           </EndBox>
         ) : (
           <EndBox title="Scénario échoué" text={formatEvent({ type: 'gameOver', winner: g.over!.winner, reason: g.over!.reason }, names) ?? ''}>
@@ -186,17 +201,18 @@ export function App() {
     const c = screen.campaign;
     const sc = currentScenario(c);
     const after = () => setScreen(sc.reward ? { kind: 'campReward', campaign: c } : advance(c));
-    content = <div className="camp-bg">{sc.victoryDialog?.length ? <Dialog title={sc.title} lines={sc.victoryDialog} onClose={after} /> : <Dialog lines={[{ who: '', text: 'Victoire !' }]} onClose={after} />}</div>;
+    const lines = [...(sc.victoryDialog?.length ? sc.victoryDialog : [{ who: '', text: 'Victoire !' }]), ...(screen.extra ?? [])];
+    content = <div className="camp-bg"><Dialog title={sc.title} lines={lines} onClose={after} /></div>;
   } else if (screen.kind === 'campReward') {
     const c = screen.campaign;
-    content = <div className="camp-bg"><Rewards campaign={c} reward={currentScenario(c).reward!} onDone={updated => setScreen(advance(updated))} /></div>;
+    content = <div className="camp-bg"><Rewards campaign={c} hero={campaignDef(c).hero} reward={currentScenario(c).reward!} onDone={updated => setScreen(advance(updated))} /></div>;
   } else if (screen.kind === 'campEnd') {
     const gained = Object.entries(screen.gained);
     const total = gained.reduce((n, [, k]) => n + k, 0);
     content = (
       <div className="camp">
-        <TopBar title="Fin de la campagne" onBack={home} />
-        <p>Sylvain est vaincu et la frontière est sauve. Les prochains scénarios arrivent bientôt.</p>
+        <TopBar title={campaignDef(screen.campaign).endTitle} onBack={home} />
+        <p>{campaignDef(screen.campaign).endText}</p>
         <h2 className="sub">{total ? `${total} carte(s) rejoignent ta collection` : 'Aucune nouvelle carte pour ta collection'}</h2>
         <p className="muted small">Pour chaque carte, ta collection monte au nombre d’exemplaires de ton pool de campagne (3 maximum). Une campagne n’est comptée qu’une fois.</p>
         {gained.length > 0 && (
@@ -233,4 +249,45 @@ export function App() {
   }
 
   return <div className="app-zoom" style={{ zoom: o.scale }}>{content}</div>;
+}
+
+/** Partie en ligne : notre camp est en bas, le camp adverse est joué à distance. */
+function OnlineGame({ start, gameOpts, onExit, onWin }: {
+  start: OnlineStart; gameOpts: { animMul: number; aiMul: number; initialReveal: boolean }; onExit: () => void; onWin: () => void;
+}) {
+  const { inbox, gone, send } = useRemoteInbox(start.link);
+  const [ended, setEnded] = useState(false);
+  const other = start.side === 'A' ? 'B' : 'A';
+  const quit = () => { try { start.link.send({ t: 'bye' }); } catch { /* déjà fermée */ } start.link.close(); onExit(); };
+  return (
+    <>
+      <GameScreen
+        animMul={gameOpts.animMul}
+        aiMul={gameOpts.aiMul}
+        setup={start.setup}
+        names={start.names}
+        human={{ A: start.side === 'A', B: start.side === 'B' }}
+        bottomSide={start.side}
+        remote={{ side: other, send, inbox }}
+        title="Partie en ligne"
+        onQuit={quit}
+        onOver={g => { setEnded(true); if (g.over!.winner === start.side) onWin(); }}
+        renderEnd={(g, close) => (
+          <EndBox
+            title={g.over!.winner === start.side ? 'Victoire !' : 'Défaite'}
+            text={`${formatEvent({ type: 'gameOver', winner: g.over!.winner, reason: g.over!.reason }, start.names)} (tour ${g.turn})`}
+            extra={g.over!.winner === start.side ? <CoinGain /> : null}
+          >
+            <button type="button" onClick={close}>Voir le plateau</button>
+            <button type="button" className="primary" onClick={quit}>Quitter</button>
+          </EndBox>
+        )}
+      />
+      {gone && !ended && (
+        <EndBox title="Connexion perdue" text="Ton adversaire a quitté la partie ou la connexion a été coupée.">
+          <button type="button" className="primary" onClick={quit}>Retour</button>
+        </EndBox>
+      )}
+    </>
+  );
 }

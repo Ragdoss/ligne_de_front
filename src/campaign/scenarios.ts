@@ -1,10 +1,10 @@
-// Les 4 scénarios de la campagne Empire contre Elfes (repris à l'identique du simulateur prototype).
+// Les 4 scénarios de la campagne Empire contre Elfes ; la liste des campagnes est dans campaigns.ts (repris à l'identique du simulateur prototype).
 import type { CampaignScenario } from './types';
 
 /** Aucune limite (lassitude sans défaite, règle « aucun régiment » désactivée…). */
 export const NO_LIMIT = 1e9;
 
-export const SCENARIOS: Record<string, CampaignScenario> = {
+export const EMPIRE_SCENARIOS: Record<string, CampaignScenario> = {
   "s1": {
     "id": "s1",
     "title": "Scénario 1 — Attaque à la frontière",
@@ -681,4 +681,3 @@ export const SCENARIOS: Record<string, CampaignScenario> = {
   }
 };
 
-export const CAMPAIGN_ORDER = ['s1', 's2', 's3', 's4'];

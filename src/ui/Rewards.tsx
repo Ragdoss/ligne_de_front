@@ -15,7 +15,7 @@ const listCards = (ids: string[]) => {
   return Object.entries(n).map(([id, k]) => `${k} ${cardName(id)}`).join(', ');
 };
 
-export function Rewards({ campaign, reward, onDone }: { campaign: CampaignSave; reward: Reward; onDone: (c: CampaignSave) => void }) {
+export function Rewards({ campaign, reward, onDone, hero = 'Commandant' }: { campaign: CampaignSave; reward: Reward; onDone: (c: CampaignSave) => void; hero?: string }) {
   const order: Step[] = (reward.order ?? ['exchange', 'gifts', 'picks']).filter(s =>
     (s === 'gifts' && reward.gifts?.length) ||
     (s === 'exchange' && reward.exchange && campaign.pool.filter(x => x === reward.exchange!.from).length >= reward.exchange.count) ||
@@ -30,7 +30,7 @@ export function Rewards({ campaign, reward, onDone }: { campaign: CampaignSave; 
   useEffect(() => { if (!order.length) onDone(c); }, []); // eslint-disable-line react-hooks/exhaustive-deps
   if (!step) return null;
 
-  const say = (fallback: string): DialogLine => reward.lines?.[step] ?? { who: 'Commandant', text: fallback };
+  const say = (fallback: string): DialogLine => reward.lines?.[step] ?? { who: hero, text: fallback };
   const count = `Récompense ${i + 1} / ${order.length}`;
   let line: DialogLine, center: React.ReactNode, actions: React.ReactNode, title: string;
 
@@ -64,7 +64,7 @@ export function Rewards({ campaign, reward, onDone }: { campaign: CampaignSave; 
     const pk = reward.picks!;
     title = pk.title ?? 'Récompense — Cartes';
     line = say(`${pk.text ?? 'Choisis une carte à ajouter à ton pool'} (choix ${pickNo} sur ${pk.count}).${pk.unique ? ' Chaque carte ne peut être prise qu’une fois.' : ''}`);
-    if (pickNo > 1 && !reward.lines?.picks) line = { who: 'Commandant', text: `Bon choix. Et ensuite ? (choix ${pickNo} sur ${pk.count})` };
+    if (pickNo > 1) line = { who: hero, text: `Bon choix. Et ensuite ? (choix ${pickNo} sur ${pk.count})` };
     center = (
       <div className="vn-cards picks">
         {options.map(id => (
@@ -81,5 +81,5 @@ export function Rewards({ campaign, reward, onDone }: { campaign: CampaignSave; 
     );
     actions = <span className="vn-hint">{taken.length ? `Déjà choisi : ${listCards(taken)}` : 'Clique sur une carte pour la prendre.'}</span>;
   }
-  return <VnScene title={title} cast={[...new Set(['Commandant', line.who].filter(Boolean))]} speaking={line.who} now={line} center={center} actions={actions} count={count} />;
+  return <VnScene title={title} cast={[...new Set([hero, line.who].filter(Boolean))]} speaking={line.who} now={line} center={center} actions={actions} count={count} />;
 }

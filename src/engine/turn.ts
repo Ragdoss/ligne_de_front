@@ -125,7 +125,7 @@ export function startTurn(ctx: Ctx, p: PlayerId): void {
   // Pioche. Main pleine (limite atteinte) : on défausse d'abord autant de cartes qu'on va en piocher (au choix),
   // puis on pioche — la pioche continue donc toujours de s'épuiser.
   // Sans défaite par pioche vide (certains scénarios), on ne pioche que ce qui reste.
-  const count = ctx.s.config.emptyDeckDefeat === false ? Math.min(drawCountFor(pl.level), pl.deck.length) : drawCountFor(pl.level);
+  const count = !ctx.emptyDeckLoses(p) ? Math.min(drawCountFor(pl.level), pl.deck.length) : drawCountFor(pl.level);
   if (count > 0 && pl.hand.length >= ctx.s.config.handLimit) {
     ctx.emit({ type: 'turnStart', player: p, turn: ctx.s.turn, resource: pl.resource, leftover, drawn: [], blocked: count });
     ctx.queueChoice('handDiscard', p, 'handLimit', { n: count, sum: 0, thief: null, gainBase: 0, drawAfter: count });

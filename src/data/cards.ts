@@ -1821,7 +1821,7 @@ export const CARDS: Record<string, CardDef> = {
     "end": 90,
     "arm": 5,
     "ini": 0,
-    "mor": 10,
+    "mor": 30,
     "keywords": [],
     "generatesResourceEachTurn": 1,
     "excludeFromMoralTotal": true

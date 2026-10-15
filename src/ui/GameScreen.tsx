@@ -14,6 +14,7 @@ const sameSlot = (a?: SlotRef, b?: SlotRef) => !!a && !!b && a.player === b.play
 import { Dialog } from './VnDialog';
 export { Dialog };
 
+const WEATHER_LABEL = { tempete: 'Tempête de sable', nuit: 'Nuit', jour: 'Jour' } as const;
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
 export interface GameScreenProps {
@@ -39,6 +40,10 @@ export interface GameScreenProps {
   initialReveal?: boolean;
   /** Appelé une fois quand la partie se termine. */
   onOver?: (game: GameState) => void;
+  /** Jeu en ligne : le camp `side` est joué à distance ; ses actions arrivent dans `inbox`, les nôtres partent par `send`. */
+  remote?: { side: PlayerId; send: (a: Action) => void; inbox: Action[] };
+  /** Camp affiché en bas de l'écran (par défaut A, ou le joueur actif à deux sur le même écran). */
+  bottomSide?: PlayerId;
 }
 
 function PlayerBar({ game, p, label, active }: { game: GameState; p: PlayerId; label: string; active: boolean }) {
@@ -67,7 +72,7 @@ function PlayerBar({ game, p, label, active }: { game: GameState; p: PlayerId; l
 
 interface Banner { id: number; who: string; cardId: string }
 
-export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, intro, renderEnd, onQuit, animMul = 1, aiMul = 1, initialReveal = false, onOver }: GameScreenProps) {
+export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, intro, renderEnd, onQuit, animMul = 1, aiMul = 1, initialReveal = false, onOver, remote, bottomSide }: GameScreenProps) {
   const [game, setGame] = useState<GameState>(() => createGame(setup));
   const [shown, setShown] = useState<GameState | null>(null); // état affiché pendant une animation de combat
   const [highlight, setHighlight] = useState<Highlight | null>(null);
@@ -85,7 +90,7 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
   const acting = actingPlayer(game);
   const paused = !!shown || dialogs.length > 0;
   const humanTurn = human[acting] && !game.over && !paused;
-  const bottom: PlayerId = flip ? game.active : 'A';
+  const bottom: PlayerId = bottomSide ?? (flip ? game.active : 'A');
   const top: PlayerId = bottom === 'A' ? 'B' : 'A';
   const watch = !human.A && !human.B;
 
@@ -95,10 +100,12 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
     setTimeout(() => setBanners(b => b.filter(x => x.id !== id)), ai ? 4200 : 2600);
   }, []);
 
-  const apply = useCallback(async (action: Action) => {
+  const apply = useCallback(async (action: Action, fromRemote = false) => {
     if (busy.current) return;
+    const actor = actingPlayer(game);
     const r = applyAction(game, action);
-    if (!r.ok) { setHint(`Action impossible : ${UNPLAYABLE[r.error] ?? r.error}`); return; }
+    if (!r.ok) { setHint(fromRemote ? `Désynchronisation avec l’adversaire (${r.error}).` : `Action impossible : ${UNPLAYABLE[r.error] ?? r.error}`); return; }
+    if (remote && !fromRemote && actor !== remote.side) remote.send(action);
     busy.current = true;
     setSel(null);
     setHint('');
@@ -128,14 +135,24 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
     if (dlg.length) setDialogs(d => [...d, ...dlg]);
     setGame(r.state);
     busy.current = false;
-  }, [game, names, human, pushBanner, fast, animMul]);
+  }, [game, names, human, pushBanner, fast, animMul, remote]);
 
   // Tour de l'ordinateur (et ses choix en attente). Il attend que les dialogues soient fermés.
   useEffect(() => {
-    if (game.over || paused || busy.current || human[acting]) return;
+    if (game.over || paused || busy.current || human[acting] || remote?.side === acting) return;
     const t = setTimeout(() => { void apply(chooseAction(game, undefined, aiFilter)); }, (fast ? 250 : 450) * aiMul);
     return () => clearTimeout(t);
   }, [game, paused, acting, apply, human, fast, aiFilter, aiMul]);
+
+  // Jeu en ligne : on applique les actions reçues, une par une, quand l'écran est libre.
+  const played = useRef(0);
+  useEffect(() => {
+    if (!remote || busy.current || shown) return;
+    const a = remote.inbox[played.current];
+    if (!a) return;
+    played.current++;
+    void apply(a, true);
+  }, [remote, remote?.inbox.length, game, shown, apply]);
 
   // Fin de partie signalée une seule fois au parent (gains de pièces…).
   const overSent = useRef(false);
@@ -178,6 +195,7 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
   useEffect(() => { logRef.current?.scrollTo({ top: logRef.current.scrollHeight }); }, [log]);
 
   const choice = game.pending[0];
+  const weather = new Ctx(view).weather();
   const handFor = (p: PlayerId) => (
     <Hand
       game={view}
@@ -196,7 +214,8 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
       <header className="topbar">
         <h1>{title ?? 'Ligne de Front'}</h1>
         <div className="actions">
-          {!watch && (!human.A || !human.B) && <button type="button" onClick={() => setRevealAI(v => !v)}>{revealAI ? 'Cacher' : 'Révéler'} la main de l’ordinateur</button>}
+          {weather && <span className={`weather ${weather}`}>{WEATHER_LABEL[weather]}</span>}
+          {!watch && !remote && (!human.A || !human.B) && <button type="button" onClick={() => setRevealAI(v => !v)}>{revealAI ? 'Cacher' : 'Révéler'} la main de l’ordinateur</button>}
           <button type="button" onClick={onQuit}>Quitter la partie</button>
         </div>
       </header>

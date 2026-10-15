@@ -1,21 +1,25 @@
-// Difficulté des scénarios : l'ordinateur joue l'Empire avec le pool de campagne attendu à chaque étape
-// (récompenses prises par défaut), contre l'ordinateur elfe avec ses règles de scénario.
-// Usage : npm run difficulty -- [parties par scénario, défaut 200] [--patch balance/fichier.json]
+// Difficulté des scénarios : l'ordinateur joue le camp du joueur avec le pool de campagne attendu à chaque étape
+// (récompenses prises par défaut), contre l'ordinateur adverse avec ses règles de scénario.
+// Usage : npm run difficulty -- [parties par scénario, défaut 200] [campagne : empire|demons|elfes|nomades|all] [--patch balance/fichier.json]
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { chooseAction } from '../src/ai/heuristic';
 import { addToPool, newCampaign, removeFromPool, scenarioAiFilter, scenarioGameSetup } from '../src/campaign/campaign';
-import { CAMPAIGN_ORDER, SCENARIOS } from '../src/campaign/scenarios';
+import { CAMPAIGNS, SCENARIOS } from '../src/campaign/campaigns';
 import { patchFromArgs } from '../src/data/patch';
 import { applyAction, createGame } from '../src/engine/game';
 import { cardName } from '../src/i18n/log.fr';
 
 const { args, patch, changes } = patchFromArgs(process.argv.slice(2));
 const N = Number(args[0] ?? 200);
+const which = args[1] ?? 'all';
+const camps = CAMPAIGNS.filter(d => which === 'all' || d.id === which);
+const CAMPAIGN_ORDER: string[] = camps.flatMap(d => d.order);
 
 // Pool à chaque étape : récompenses acceptées, et pour les choix les premières options proposées.
 const pools: string[][] = [];
-const c = newCampaign();
-for (const id of CAMPAIGN_ORDER) {
+for (const def of camps) {
+const c = newCampaign(def.id);
+for (const id of def.order) {
   pools.push(c.pool.slice());
   const rw = SCENARIOS[id]!.reward;
   if (!rw) continue;
@@ -25,14 +29,15 @@ for (const id of CAMPAIGN_ORDER) {
     if (step === 'picks' && rw.picks) rw.picks.options.slice(0, rw.picks.count).forEach(o => addToPool(c, o));
   }
 }
+}
 
 const lines = ['# Difficulté des scénarios de campagne', ''];
 if (patch) lines.push(`Modifications testées (\`${patch}\`) :`, '', ...changes.map(x => `- ${x}`), '');
 lines.push(`${N} parties par scénario. L'Empire est joué par l'ordinateur avec tout son pool de campagne ; l'ordinateur joue moins bien qu'un humain : ces taux sont une borne basse.`, '',
   '| Scénario | Pool (cartes) | Réussite | Tours (moy.) | Défaites les plus fréquentes |', '|---|---|---|---|---|');
-const REASONS: Record<string, string> = { lassitude: 'lassitude', noRegiment: 'plus de régiment', emptyDeck: 'pioche vide', vitalDestroyed: 'régiment vital détruit', convoyArrived: 'convoi passé', blocage: 'partie bloquée' };
+const REASONS: Record<string, string> = { lassitude: 'lassitude', noRegiment: 'plus de régiment', emptyDeck: 'pioche vide', vitalDestroyed: 'régiment vital détruit', convoyArrived: 'convoi passé', survived: 'tenu jusqu’au tour limite', blocage: 'partie bloquée' };
 const t0 = Date.now();
-CAMPAIGN_ORDER.forEach((id, k) => {
+CAMPAIGN_ORDER.forEach((id: string, k: number) => {
   const sc = SCENARIOS[id]!;
   const filter = scenarioAiFilter(sc);
   let wins = 0, turns = 0;
@@ -52,12 +57,12 @@ CAMPAIGN_ORDER.forEach((id, k) => {
   lines.push(`| ${sc.title} | ${pools[k]!.length} | **${Math.round((100 * wins) / N)} %** | ${(turns / N).toFixed(1)} | ${top || '—'} |`);
   process.stdout.write(`${sc.title} : ${Math.round((100 * wins) / N)} % (${Math.round((Date.now() - t0) / 1000)} s)\n`);
 });
-lines.push('', '## Pools utilisés', '', ...CAMPAIGN_ORDER.map((id, k) => {
+lines.push('', '## Pools utilisés', '', ...CAMPAIGN_ORDER.map((id: string, k: number) => {
   const n: Record<string, number> = {};
   for (const x of pools[k]!) n[x] = (n[x] ?? 0) + 1;
   return `- **${SCENARIOS[id]!.title}** : ${Object.entries(n).map(([x, m]) => `${m}× ${cardName(x)}`).join(', ')}`;
 }));
 mkdirSync('reports', { recursive: true });
-const file = `reports/difficulte-scenarios${patch ? `-${patch.replace(/^.*\//, '').replace(/\.json$/, '')}` : ''}.md`;
+const file = `reports/difficulte-scenarios${which === 'all' ? '' : `-${which}`}${patch ? `-${patch.replace(/^.*\//, '').replace(/\.json$/, '')}` : ''}.md`;
 writeFileSync(file, lines.join('\n') + '\n');
 console.log(`Rapport : ${file}`);

@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { chooseAction } from '../src/ai/heuristic';
 import { newCampaign, scenarioAiFilter, scenarioGameSetup } from '../src/campaign/campaign';
-import { SCENARIOS } from '../src/campaign/scenarios';
+import { CAMPAIGNS, SCENARIOS } from '../src/campaign/campaigns';
 import { applyAction, createGame } from '../src/engine/game';
 import type { GameState } from '../src/engine/types';
 import { act } from './helpers';
@@ -86,10 +86,11 @@ describe('Scénarios', () => {
     expect(filter(s, ok)).toBe(true);
     expect(filter(s, ko)).toBe(false);
   });
-  it('les 4 scénarios se jouent jusqu’au bout avec l’ordinateur des deux côtés', () => {
-    for (const id of ['s1', 's2', 's3', 's4']) {
+  it('tous les scénarios de toutes les campagnes se jouent jusqu’au bout avec l’ordinateur des deux côtés', () => {
+    for (const def of CAMPAIGNS) for (const id of def.order) {
       const sc = SCENARIOS[id]!;
-      let s = createGame(scenarioGameSetup(sc, newCampaign().pool, id));
+      const pool = id === def.order[0] ? newCampaign(def.id).pool : [...newCampaign(def.id).pool, ...def.scenarios[def.order[0]!]!.A.deckList!];
+      let s = createGame(scenarioGameSetup(sc, pool, id));
       const f = scenarioAiFilter(sc);
       for (let n = 0; n < 4000 && !s.over; n++) {
         const r = applyAction(s, chooseAction(s, undefined, s.active === 'B' ? f : undefined));

@@ -308,12 +308,19 @@ export class Ctx {
     this.addToHand(p, cardId, { generated: true });
     this.emit({ type: 'generated', player: p, cardId, source });
   }
+  /** La pioche vide fait-elle perdre ce joueur ? (réglage de scénario, global ou par joueur) */
+  emptyDeckLoses(p: PlayerId): boolean {
+    const e = this.s.config.emptyDeckDefeat;
+    if (e === undefined || e === true) return true;
+    if (e === false) return false;
+    return e[p] ?? true;
+  }
   /** Pioche une carte ; pioche vide = défaite. Retourne false si la partie s'arrête. */
   draw(p: PlayerId, source: string): boolean {
     const pl = this.player(p);
     const cardId = pl.deck.shift();
     if (cardId === undefined) {
-      if (this.s.config.emptyDeckDefeat === false) return true;
+      if (!this.emptyDeckLoses(p)) return true;
       this.endGame(opponentOf(p), 'emptyDeck'); return false;
     }
     this.deliverDrawn(p, cardId, source);

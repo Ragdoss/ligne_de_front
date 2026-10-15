@@ -1,7 +1,8 @@
 // Écrans de menu : accueil, jouer en local, campagnes, options.
 import { useState } from 'react';
 import { exportCode, importCode, loadCampaign, newCampaign, type CampaignSave } from '../campaign/campaign';
-import { CAMPAIGN_ORDER, SCENARIOS } from '../campaign/scenarios';
+import { CAMPAIGNS } from '../campaign/campaigns';
+import type { CampaignDef } from '../campaign/types';
 import { DEMO_DECKS } from '../data/decks';
 import type { Faction } from '../engine/types';
 import { checkDeck, DEFAULT_OPTIONS, profileCode, profileFromCode, resetEverything, type Options, type Profile } from '../profile/profile';
@@ -13,7 +14,7 @@ export type HomeTarget = 'local' | 'online' | 'campaign' | 'collection' | 'optio
 export function Home({ profile, go }: { profile: Profile; go: (t: HomeTarget) => void }) {
   const items: [HomeTarget, string, string][] = [
     ['local', 'Jouer en local', 'Contre l’ordinateur, à deux sur le même écran, ou en spectateur'],
-    ['online', 'Jouer en ligne', 'Bientôt'],
+    ['online', 'Jouer en ligne', 'Contre un ami, de navigateur à navigateur (premier jet)'],
     ['campaign', 'Campagne', 'Les campagnes solo et ta campagne en cours'],
     ['collection', 'Ma collection', 'Mes decks, mes cartes, ouverture de paquets'],
     ['options', 'Options', 'Taille de l’interface, vitesse du jeu…'],
@@ -24,7 +25,7 @@ export function Home({ profile, go }: { profile: Profile; go: (t: HomeTarget) =>
       <p className="muted">Jeu de cartes de régiments</p>
       <nav className="home-menu" aria-label="Menu principal">
         {items.map(([t, label, sub]) => (
-          <button key={t} type="button" className="home-item" disabled={t === 'online'} onClick={() => go(t)}>
+          <button key={t} type="button" className="home-item" onClick={() => go(t)}>
             <b>{label}</b><span>{sub}</span>
           </button>
         ))}
@@ -60,7 +61,7 @@ export function resolveDeck(profile: Profile, key: string): { cards: string[]; f
   return { cards: DEMO_DECKS[f]!, faction: f, label: FACTION_LABEL[f] };
 }
 
-function DeckSelect({ profile, value, onChange, label, human }: { profile: Profile; value: string; onChange: (v: string) => void; label: string; human: boolean }) {
+export function DeckSelect({ profile, value, onChange, label, human }: { profile: Profile; value: string; onChange: (v: string) => void; label: string; human: boolean }) {
   const mine = profile.decks.filter(d => checkDeck(d.cards, profile).ok);
   const demoAllowed = !human || profile.options.allUnlocked;
   return (
@@ -108,38 +109,52 @@ export function LocalPlay({ profile, onStart, onBack, goDecks }: { profile: Prof
 }
 
 // ---------- Campagnes ----------
-export function CampaignMenu({ onPlay, onBack }: { onPlay: (c: CampaignSave) => void; onBack: () => void }) {
-  const [saved] = useState(() => loadCampaign());
+function CampaignBlock({ def, onPlay }: { def: CampaignDef; onPlay: (c: CampaignSave) => void }) {
+  const [saved] = useState(() => loadCampaign(def.id));
   const [armed, setArmed] = useState(false);
   const [code, setCode] = useState('');
   const [codeError, setCodeError] = useState('');
   return (
-    <div className="setup">
-      <TopBar title="Campagne" onBack={onBack} />
-      <section className="menu-block">
-        <h2>Empire contre Elfes</h2>
-        <p className="muted">4 scénarios. Ton pool de campagne grandit après chaque victoire ; avant chaque combat, tu choisis ton deck. À la fin, les cartes gagnées rejoignent ta collection.</p>
-        <div className="choices row left">
-          {saved && (
-            <button type="button" className="primary" onClick={() => onPlay(saved)}>
-              {saved.finished ? 'Revoir la campagne (dernier scénario)' : `Continuer — ${SCENARIOS[CAMPAIGN_ORDER[saved.idx]!]!.title}`}
-            </button>
-          )}
-          <button type="button" className={saved ? '' : 'primary'} onClick={() => { if (saved && !armed) { setArmed(true); return; } onPlay(newCampaign()); }}>
-            {saved && armed ? 'Une campagne est en cours : cliquer encore pour recommencer' : 'Nouvelle campagne'}
-          </button>
+    <section className={`menu-block camp-block ${def.faction}`}>
+      <div className="camp-block-head">
+        <span className="rank" title="Ordre conseillé">{def.rank}</span>
+        <div>
+          <h2>{def.title}</h2>
+          <p className="muted small">{FACTION_LABEL[def.faction]} · {def.order.length} scénarios</p>
         </div>
-        <details>
-          <summary>Reprendre avec un code de sauvegarde</summary>
-          <div className="custom-deck">
-            <textarea rows={2} value={code} onChange={e => { setCode(e.target.value); setCodeError(''); }} aria-label="Code de sauvegarde de campagne" />
-            <button type="button" onClick={() => { const c = importCode(code); if (c) onPlay(c); else setCodeError('Code invalide ou incomplet.'); }}>Reprendre</button>
-            {codeError && <p className="warn">{codeError}</p>}
-            {saved && <p className="muted small">Code de ta campagne en cours : <code className="code">{exportCode(saved)}</code></p>}
-          </div>
-        </details>
-      </section>
-      <section className="menu-block muted"><h2>Autres campagnes</h2><p>À venir.</p></section>
+      </div>
+      <p>{def.pitch}</p>
+      <div className="choices row left">
+        {saved && (
+          <button type="button" className="primary" onClick={() => onPlay(saved)}>
+            {saved.finished ? 'Revoir (dernier scénario)' : `Continuer — combat ${saved.idx + 1} sur ${def.order.length}`}
+          </button>
+        )}
+        <button type="button" className={saved ? '' : 'primary'} onClick={() => { if (saved && !armed) { setArmed(true); return; } onPlay(newCampaign(def.id)); }}>
+          {saved && armed ? 'Une partie est en cours : cliquer encore pour recommencer' : 'Nouvelle campagne'}
+        </button>
+      </div>
+      <details>
+        <summary>Code de sauvegarde</summary>
+        <div className="custom-deck">
+          <textarea rows={2} value={code} onChange={e => { setCode(e.target.value); setCodeError(''); }} aria-label={`Code de sauvegarde — ${def.title}`} />
+          <button type="button" onClick={() => { const c = importCode(code); if (c) onPlay(c); else setCodeError('Code invalide ou incomplet.'); }}>Reprendre avec ce code</button>
+          {codeError && <p className="warn">{codeError}</p>}
+          {saved && <p className="muted small">Code de ta partie en cours : <code className="code">{exportCode(saved)}</code></p>}
+        </div>
+      </details>
+    </section>
+  );
+}
+
+export function CampaignMenu({ onPlay, onBack }: { onPlay: (c: CampaignSave) => void; onBack: () => void }) {
+  return (
+    <div className="setup wide">
+      <TopBar title="Campagnes" onBack={onBack} />
+      <p className="muted">Les quatre campagnes racontent la même histoire de quatre côtés. Ordre conseillé : Démons, Elfes, Nomades, puis Empire — mais chacune se joue seule. À la fin d’une campagne, les cartes gagnées rejoignent ta collection.</p>
+      <div className="camp-blocks">
+        {CAMPAIGNS.map(def => <CampaignBlock key={def.id} def={def} onPlay={onPlay} />)}
+      </div>
     </div>
   );
 }

@@ -2,26 +2,31 @@
 import { CARDS } from '../data/cards';
 import { DEFAULT_LEVEL_THRESHOLDS, type GameSetup } from '../engine/game';
 import type { Action, GameState, PlayerId } from '../engine/types';
-import { CAMPAIGN_ORDER, SCENARIOS } from './scenarios';
-import type { CampaignScenario } from './types';
+import { CAMPAIGN_BY_ID, SCENARIOS } from './campaigns';
+import type { CampaignDef, CampaignScenario } from './types';
 
 export interface CampaignSave {
   version: 1;
   /** Identifiant unique de cette partie de campagne (pour ne fusionner son pool qu'une fois dans la collection). */
   id: string;
+  /** Campagne jouée (empire, demons, elfes, nomades). */
+  campaign: string;
   /** Cartes possédées (avec répétitions). */
   pool: string[];
-  /** Index du scénario en cours dans CAMPAIGN_ORDER. */
+  /** Index du scénario en cours dans l'ordre de la campagne. */
   idx: number;
   /** Dernier deck choisi (carte → nombre), pour le proposer à nouveau. */
   deck: Record<string, number> | null;
   finished: boolean;
 }
 
-export function newCampaign(): CampaignSave {
-  return { version: 1, id: `camp-${Date.now()}`, pool: SCENARIOS.s1!.A.deckList!.slice(), idx: 0, deck: null, finished: false };
+export const campaignDef = (c: CampaignSave | string): CampaignDef => CAMPAIGN_BY_ID[typeof c === 'string' ? c : c.campaign] ?? CAMPAIGN_BY_ID.empire!;
+
+export function newCampaign(campaign = 'empire'): CampaignSave {
+  const def = campaignDef(campaign);
+  return { version: 1, id: `camp-${def.id}-${Date.now()}`, campaign: def.id, pool: def.scenarios[def.order[0]!]!.A.deckList!.slice(), idx: 0, deck: null, finished: false };
 }
-export const currentScenario = (c: CampaignSave): CampaignScenario => SCENARIOS[CAMPAIGN_ORDER[c.idx]!]!;
+export const currentScenario = (c: CampaignSave): CampaignScenario => SCENARIOS[campaignDef(c).order[c.idx]!]!;
 
 /** Construit la partie du moteur correspondant à un scénario, avec le deck choisi par le joueur. */
 export function scenarioGameSetup(sc: CampaignScenario, playerDeck: string[], seed: string | number): GameSetup {
@@ -39,6 +44,8 @@ export function scenarioGameSetup(sc: CampaignScenario, playerDeck: string[], se
       noRegimentDefeatFromTurn: per(sc.noRegimentDefeatFromTurn, 1),
       mustSurvive: sc.mustSurvive ?? {},
       emptyDeckDefeat: sc.emptyDeckDefeat ?? true,
+      winAtTurn: sc.winAtTurn,
+      liberation: sc.liberation,
     },
     scenario: {
       events: sc.events,
@@ -48,6 +55,8 @@ export function scenarioGameSetup(sc: CampaignScenario, playerDeck: string[], se
       startHand: { A: sc.A.startHand, B: sc.B.startHand },
       startLevel: sc.startLevel,
       startOverrides: sc.startOverrides,
+      weather: sc.weather,
+      alarm: sc.alarm,
     },
   };
 }
@@ -66,6 +75,8 @@ export function scenarioAiFilter(sc: CampaignScenario | null) {
     const c = CARDS[h.cardId]!;
     const from = sc.aiNoRegimentsFromTurn?.[p];
     if (from && s.turn >= from && c.cardType === 'Regiment') return false;
+    // Alarme : pas de régiment avant que l'alarme soit donnée.
+    if (s.scenario?.alarm?.pid === p && !s.scenario.alarmRaised && c.cardType === 'Regiment') return false;
     if (c.effect === 'tectonique' && sc.id === 's4') {
       const me = s.players[p].board, opp = s.players[p === 'A' ? 'B' : 'A'].board;
       const L = s.config.layout;
@@ -112,24 +123,27 @@ export function defaultDeckSelection(c: CampaignSave): Record<string, number> {
 export const selectionToDeck = (sel: Record<string, number>) => Object.entries(sel).flatMap(([id, n]) => Array<string>(n).fill(id));
 
 // ---------- Sauvegarde ----------
-const KEY = 'ligneDeFront.jeu.campagne.v1';
+/** Une sauvegarde par campagne (la campagne Empire garde la clé historique). */
+const keyOf = (campaign: string) => (campaign === 'empire' ? 'ligneDeFront.jeu.campagne.v1' : `ligneDeFront.jeu.campagne.${campaign}.v1`);
 export function sanitize(raw: unknown): CampaignSave | null {
   const c = raw as Partial<CampaignSave> | null;
   if (!c || !Array.isArray(c.pool) || typeof c.idx !== 'number') return null;
+  const def = campaignDef(typeof c.campaign === 'string' ? c.campaign : 'empire');
   return {
     version: 1,
     id: typeof c.id === 'string' ? c.id : `camp-${Date.now()}`,
+    campaign: def.id,
     pool: c.pool.filter(id => typeof id === 'string' && CARDS[id]),
-    idx: Math.max(0, Math.min(CAMPAIGN_ORDER.length - 1, c.idx | 0)),
+    idx: Math.max(0, Math.min(def.order.length - 1, c.idx | 0)),
     deck: c.deck && typeof c.deck === 'object' ? c.deck : null,
     finished: !!c.finished,
   };
 }
 export function saveCampaign(c: CampaignSave): void {
-  try { localStorage.setItem(KEY, JSON.stringify(c)); } catch { /* stockage indisponible : la partie continue sans sauvegarde */ }
+  try { localStorage.setItem(keyOf(c.campaign), JSON.stringify(c)); } catch { /* stockage indisponible : la partie continue sans sauvegarde */ }
 }
-export function loadCampaign(): CampaignSave | null {
-  try { const raw = localStorage.getItem(KEY); return raw ? sanitize(JSON.parse(raw)) : null; } catch { return null; }
+export function loadCampaign(campaign = 'empire'): CampaignSave | null {
+  try { const raw = localStorage.getItem(keyOf(campaign)); return raw ? sanitize(JSON.parse(raw)) : null; } catch { return null; }
 }
 export function exportCode(c: CampaignSave): string {
   return btoa(unescape(encodeURIComponent(JSON.stringify(c))));

@@ -2,7 +2,7 @@
 // Indice = scénario à venir (0 = avant le scénario 1) ; 'fin' = campagne terminée. Textes provisoires.
 import type { DialogLine } from '../engine/types';
 
-export const CAMP_TALKS: Record<string, DialogLine[]> = {
+export const EMPIRE_TALKS: Record<string, DialogLine[]> = {
   s1: [
     { who: '', text: 'Le camp de la frontière s’éveille. Les feux de la nuit fument encore.' },
     { who: 'Soldat', text: 'Commandant, les patrouilles ont encore vu des elfes rôder près de la forêt cette nuit.' },

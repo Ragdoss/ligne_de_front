@@ -227,7 +227,7 @@ export interface GameConfig {
   handLimit: number;
   startingHand: number;
   /** false : piocher dans une pioche vide ne fait pas perdre (on ne pioche simplement rien). Absent = true. */
-  emptyDeckDefeat?: boolean;
+  emptyDeckDefeat?: boolean | Partial<Record<PlayerId, boolean>>;
   /** Victoire du joueur dès que ce tour commence (« tenir jusqu'au tour X »). */
   winAtTurn?: Partial<Record<PlayerId, number>>;
   /** Libération : ces régiments de `pid` passent dans l'autre camp quand leur Moral se brise. */
