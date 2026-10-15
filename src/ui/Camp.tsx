@@ -4,6 +4,7 @@ import { bonusFor, bonusUnlocked, campaignDef, defaultDeckSelection, defeatsOn, 
 import type { CampaignScenario } from '../campaign/types';
 import campImg from './assets/camp.png';
 import campEmpireImg from './assets/camp_empire.webp';
+import campElfesImg from './assets/camp_elfes.webp';
 import { Dialog } from './VnDialog';
 
 /** Décor du camp par campagne (les autres campagnes gardent le décor par défaut). `troops` : zone cliquable « Discuter », en % de l'image. */
@@ -16,6 +17,10 @@ const CAMP_ART: Record<string, CampArt> = {
   empire: {
     src: campEmpireImg, ratio: 1400 / 933, alt: 'Le camp de l’armée impériale autour du feu, au pied des montagnes et du château',
     troops: { left: 21, top: 58, width: 48, height: 30 },
+  },
+  elfes: {
+    src: campElfesImg, ratio: 1400 / 933, alt: 'Le camp des Royaumes elfiques : tentes, bannières et archers autour du feu',
+    troops: { left: 6, top: 36, width: 68, height: 50 },
   },
 };
 
