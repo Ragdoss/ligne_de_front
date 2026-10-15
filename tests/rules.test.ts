@@ -168,11 +168,11 @@ describe('Combat de fin de tour', () => {
 });
 
 describe('Comparaison de Moral', () => {
-  it('le Moral total le plus bas prend le niveau max en lassitude ; égalité = rien', () => {
+  it('le Moral total le plus bas prend 1/1/2/2/3 lassitude selon le plus haut niveau (1 à 5) ; égalité = rien', () => {
     let s = blankGame();
     place(s, 'A', 'arriere', 0, 'paysans'); // 3 Moral, n'attaque pas
     place(s, 'B', 'arriere', 2, 'paysans', { currentMor: 2 });
-    s.players.B.level = 2;
+    s.players.B.level = 3;
     const r = act(s, endTurn);
     const mc = r.events.find(e => e.type === 'moralCheck');
     expect(mc).toMatchObject({ loser: 'B', amount: 2 });

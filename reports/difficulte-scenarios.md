@@ -1,27 +1,27 @@
 # Difficulté des scénarios de campagne
 
-40 parties par scénario. Le camp du joueur est joué par l'ordinateur avec tout son pool de campagne ; l'ordinateur joue moins bien qu'un humain : ces taux sont une borne basse.
+30 parties par scénario. Le camp du joueur est joué par l'ordinateur avec tout son pool de campagne ; l'ordinateur joue moins bien qu'un humain : ces taux sont une borne basse.
 
 | Scénario | Pool (cartes) | Réussite | Tours (moy.) | Défaites les plus fréquentes |
 |---|---|---|---|---|
-| Les Œufs — 1. Le nid des sables | 21 | **43 %** | 6.7 | lassitude (58 %) |
-| Les Œufs — 2. La traversée du désert | 26 | **43 %** | 7.9 | lassitude (48 %), régiment vital détruit (10 %) |
-| Les Œufs — 3. La frontière impériale | 28 | **18 %** | 5.6 | lassitude (78 %), plus de régiment (5 %) |
-| Les Œufs — 4. Les égouts de la capitale | 31 | **15 %** | 7.4 | lassitude (78 %), plus de régiment (8 %) |
-| Les Œufs — 5. L’offrande | 34 | **13 %** | 6.0 | régiment vital détruit (48 %), lassitude (40 %) |
-| La Purification — 1. La source souillée | 20 | **45 %** | 7.5 | lassitude (55 %) |
-| La Purification — 2. Les captifs | 24 | **38 %** | 8.0 | lassitude (63 %) |
-| La Purification — 3. La nuit sans fin | 25 | **23 %** | 6.8 | lassitude (55 %), plus de régiment (23 %) |
-| La Purification — 4. Le portail des Abysses | 28 | **18 %** | 6.6 | lassitude (70 %), plus de régiment (13 %) |
-| Les Sables — 1. Les éclaireurs de la Légion | 21 | **58 %** | 7.3 | lassitude (30 %), pioche vide (10 %) |
-| Les Sables — 2. Le puits de Sel-Amar | 24 | **55 %** | 7.2 | lassitude (45 %) |
-| Les Sables — 3. Razzia sur le ravitaillement | 26 | **13 %** | 5.8 | lassitude (88 %) |
-| Les Sables — 4. La tempête de sable | 29 | **10 %** | 15.3 | lassitude (68 %), plus de régiment (23 %) |
-| Les Sables — 5. La Forteresse dans les dunes | 32 | **35 %** | 5.1 | lassitude (63 %), plus de régiment (3 %) |
-| Scénario 1 — Attaque à la frontière | 20 | **3 %** | 5.2 | lassitude (98 %) |
-| Scénario 2 — Le siège de Kragz | 23 | **5 %** | 3.6 | régiment vital détruit (93 %), lassitude (3 %) |
-| Scénario 3 — Le convoi du col des Brumes | 28 | **8 %** | 6.6 | régiment vital détruit (93 %) |
-| Scénario 4 — Sylvain, le Gardien Élémentaire | 31 | **35 %** | 8.3 | lassitude (63 %), plus de régiment (3 %) |
+| Les Œufs — 1. Le nid des sables | 21 | **37 %** | 8.0 | lassitude (37 %), plus de régiment (27 %) |
+| Les Œufs — 2. La traversée du désert | 26 | **43 %** | 9.8 | lassitude (30 %), régiment vital détruit (27 %) |
+| Les Œufs — 3. La frontière impériale | 28 | **30 %** | 7.3 | lassitude (63 %), plus de régiment (3 %) |
+| Les Œufs — 4. Les égouts de la capitale | 31 | **47 %** | 9.0 | lassitude (43 %), plus de régiment (10 %) |
+| Les Œufs — 5. L’offrande | 34 | **37 %** | 5.9 | régiment vital détruit (63 %) |
+| La Purification — 1. La source souillée | 20 | **83 %** | 8.5 | lassitude (17 %) |
+| La Purification — 2. Les captifs | 24 | **77 %** | 9.6 | lassitude (23 %) |
+| La Purification — 3. La nuit sans fin | 25 | **53 %** | 6.4 | plus de régiment (47 %) |
+| La Purification — 4. Le portail des Abysses | 28 | **43 %** | 5.2 | plus de régiment (57 %) |
+| Les Sables — 1. Les éclaireurs de la Légion | 21 | **90 %** | 8.2 | pioche vide (10 %) |
+| Les Sables — 2. Le puits de Sel-Amar | 24 | **87 %** | 7.9 | régiment vital détruit (10 %), lassitude (3 %) |
+| Les Sables — 3. Razzia sur le ravitaillement | 26 | **60 %** | 7.4 | lassitude (40 %) |
+| Les Sables — 4. La tempête de sable | 29 | **37 %** | 17.2 | lassitude (43 %), plus de régiment (17 %) |
+| Les Sables — 5. La Forteresse dans les dunes | 32 | **87 %** | 6.2 | lassitude (13 %) |
+| Scénario 1 — Attaque à la frontière | 20 | **57 %** | 7.1 | lassitude (43 %) |
+| Scénario 2 — Le siège de Kragz | 23 | **7 %** | 3.9 | régiment vital détruit (90 %), lassitude (3 %) |
+| Scénario 3 — Le convoi du col des Brumes | 28 | **7 %** | 6.2 | régiment vital détruit (93 %) |
+| Scénario 4 — Sylvain, le Gardien Élémentaire | 31 | **33 %** | 8.3 | lassitude (63 %), plus de régiment (3 %) |
 
 ## Pools utilisés
 

@@ -232,7 +232,7 @@ Mécanique centrale qui différencie ce jeu d'un TCG classique et sert de garde-
 
 ### Sources de points de lassitude
 - **Régiment détruit** : à chaque fois qu'un régiment est détruit, **son contrôleur** (le joueur qui le possédait, pas celui qui l'a détruit) gagne un nombre de points de lassitude égal au **niveau de ce régiment**.
-- **Fin de tour** : à la fin de chaque tour, le joueur dont l'armée a le **Moral total le plus bas** gagne un nombre de points de lassitude égal au **niveau le plus élevé parmi les deux joueurs**.
+- **Fin de tour** : à la fin de chaque tour, le joueur dont l'armée a le **Moral total le plus bas** gagne des points de lassitude selon le **niveau le plus élevé parmi les deux joueurs** : **1 / 1 / 2 / 2 / 3** aux niveaux 1 / 2 / 3 / 4 / 5 (auparavant : autant que ce niveau).
 - **Effets de cartes** : certaines cartes en accordent directement (Tuteur Démoniaque, cf. section 4).
 
 ### Intention de design

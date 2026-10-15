@@ -163,11 +163,15 @@ function attack(ctx: Ctx, a: Unit, target: Unit): void {
   }
 }
 
-/** Le joueur au Moral total le plus bas gagne de la lassitude (niveau max des deux joueurs, ou réglage). */
+/** Lassitude de la comparaison de Moral selon le plus haut niveau des deux joueurs (niveaux 1 à 5). */
+export const MORAL_CHECK_LASSITUDE = [1, 1, 2, 2, 3];
+
+/** Le joueur au Moral total le plus bas gagne de la lassitude (selon le plus haut niveau des deux joueurs, ou réglage). */
 export function moralCheck(ctx: Ctx): void {
   const cfg = ctx.s.config;
   if (!cfg.moralCheck) return;
-  const lvl = cfg.moralCheckLassitude ?? Math.max(ctx.player('A').level, ctx.player('B').level);
+  const top = Math.max(ctx.player('A').level, ctx.player('B').level);
+  const lvl = cfg.moralCheckLassitude ?? MORAL_CHECK_LASSITUDE[Math.min(5, Math.max(1, top)) - 1]!;
   // Maréchal d'Empire : seul régiment en jeu + ce Leader = comparaison gagnée d'office.
   const solo = (p: PlayerId) => {
     const us = ctx.units(p);
