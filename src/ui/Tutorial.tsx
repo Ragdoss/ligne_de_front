@@ -128,7 +128,7 @@ const STEPS: Step[] = [
   },
 ];
 
-export function Tutorial({ onExit, onCampaign, gameOpts }: { onExit: () => void; onCampaign: () => void; gameOpts: { animMul: number; aiMul: number } }) {
+export function Tutorial({ onExit, onCampaign, gameOpts }: { onExit: () => void; onCampaign: () => void; gameOpts: { animMul: number; aiMul: number; bannerMul: number } }) {
   const [step, setStep] = useState(0);
   const [game, setGame] = useState<GameState | null>(null);
   const [hidden, setHidden] = useState(false);

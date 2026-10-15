@@ -34,6 +34,8 @@ export interface GameScreenProps {
   onQuit: () => void;
   /** Multiplicateur de durée des animations de combat (options). */
   animMul?: number;
+  /** Multiplicateur de la durée des bandeaux (options). */
+  bannerMul?: number;
   /** Multiplicateur du délai de réflexion de l'ordinateur (options). */
   aiMul?: number;
   /** Main de l'ordinateur visible dès le départ (options). */
@@ -76,7 +78,7 @@ function PlayerBar({ game, p, label, active }: { game: GameState; p: PlayerId; l
 
 interface Banner { id: number; who: string; cardId: string; on?: string }
 
-export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, intro, renderEnd, onQuit, animMul = 1, aiMul = 1, initialReveal = false, onOver, remote, bottomSide, onGame, overlay }: GameScreenProps) {
+export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, intro, renderEnd, onQuit, animMul = 1, aiMul = 1, bannerMul = 1, initialReveal = false, onOver, remote, bottomSide, onGame, overlay }: GameScreenProps) {
   const [game, setGame] = useState<GameState>(() => createGame(setup));
   const [shown, setShown] = useState<GameState | null>(null); // état affiché pendant une animation de combat
   const [highlight, setHighlight] = useState<Highlight | null>(null);
@@ -101,8 +103,8 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
   const pushBanner = useCallback((who: string, cardId: string, ai: boolean, on?: string) => {
     const id = Math.random();
     setBanners(b => [...b.slice(-2), { id, who, cardId, on }]);
-    setTimeout(() => setBanners(b => b.filter(x => x.id !== id)), ai ? 4200 : 2600);
-  }, []);
+    setTimeout(() => setBanners(b => b.filter(x => x.id !== id)), (ai ? 4200 : 2600) * bannerMul);
+  }, [bannerMul]);
 
   const apply = useCallback(async (action: Action, fromRemote = false) => {
     if (busy.current) return;

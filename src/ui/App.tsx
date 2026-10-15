@@ -65,7 +65,7 @@ export function App() {
   }, []);
   const home = () => setScreen({ kind: 'home' });
   const o = profile.options;
-  const gameOpts = { animMul: o.animSpeed, aiMul: o.aiSpeed, initialReveal: o.revealAiHand };
+  const gameOpts = { animMul: o.animSpeed, aiMul: o.aiSpeed, bannerMul: o.bannerSpeed, initialReveal: o.revealAiHand };
 
   /** Passe au scénario suivant ou termine la campagne (fusion du pool dans la collection). */
   const advance = (c: CampaignSave): Screen => {
@@ -118,7 +118,7 @@ export function App() {
       />
     );
   } else if (screen.kind === 'tutorial') {
-    content = <Tutorial key={screen.key} gameOpts={{ animMul: o.animSpeed, aiMul: o.aiSpeed }} onExit={home} onCampaign={() => setScreen({ kind: 'campaignMenu' })} />;
+    content = <Tutorial key={screen.key} gameOpts={{ animMul: o.animSpeed, aiMul: o.aiSpeed, bannerMul: o.bannerSpeed }} onExit={home} onCampaign={() => setScreen({ kind: 'campaignMenu' })} />;
   } else if (screen.kind === 'online') {
     content = <OnlineLobby profile={profile} onBack={home} goDecks={() => setScreen({ kind: 'collection', tab: 'decks' })} onStart={start => setScreen({ kind: 'onlineGame', start, key: Date.now() })} />;
   } else if (screen.kind === 'onlineGame') {
@@ -265,7 +265,7 @@ export function App() {
 
 /** Partie en ligne : notre camp est en bas, le camp adverse est joué à distance. */
 function OnlineGame({ start, gameOpts, onExit, onWin }: {
-  start: OnlineStart; gameOpts: { animMul: number; aiMul: number; initialReveal: boolean }; onExit: () => void; onWin: () => void;
+  start: OnlineStart; gameOpts: { animMul: number; aiMul: number; bannerMul: number; initialReveal: boolean }; onExit: () => void; onWin: () => void;
 }) {
   const { inbox, gone, send } = useRemoteInbox(start.link);
   const [ended, setEnded] = useState(false);
@@ -276,6 +276,7 @@ function OnlineGame({ start, gameOpts, onExit, onWin }: {
       <GameScreen
         animMul={gameOpts.animMul}
         aiMul={gameOpts.aiMul}
+        bannerMul={gameOpts.bannerMul}
         setup={start.setup}
         names={start.names}
         human={{ A: start.side === 'A', B: start.side === 'B' }}

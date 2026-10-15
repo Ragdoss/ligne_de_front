@@ -22,6 +22,8 @@ export interface Options {
   animSpeed: number;
   /** Délai de réflexion affiché de l'ordinateur (multiplicateur). */
   aiSpeed: number;
+  /** Durée d'affichage des bandeaux (tactiques, Leaders adverses) : multiplicateur. */
+  bannerSpeed: number;
   /** Main de l'ordinateur visible dès le début de la partie. */
   revealAiHand: boolean;
   /** Toutes les cartes utilisables en partie locale, même non possédées. */
@@ -38,7 +40,7 @@ export interface Profile {
   mergedCampaigns: string[];
 }
 
-export const DEFAULT_OPTIONS: Options = { scale: 1, animSpeed: 1, aiSpeed: 1, revealAiHand: false, allUnlocked: false };
+export const DEFAULT_OPTIONS: Options = { scale: 1, animSpeed: 1, aiSpeed: 1, bannerSpeed: 1, revealAiHand: false, allUnlocked: false };
 
 /** Nouveau joueur : aucune carte. La campagne en débloque ; l'option « toutes les cartes débloquées » permet de tout essayer. */
 export function newProfile(): Profile {
