@@ -51,13 +51,18 @@ export function chooseAction(s: GameState, w: AiWeights = DEFAULT_WEIGHTS, filte
   const acts = legalActions(s);
   if (acts.length === 1) return acts[0]!;
 
-  // Choix en attente : on évalue directement le résultat de chaque option.
+  // Choix en attente : on évalue le résultat de chaque option (en finissant le tour si c'est le nôtre,
+  // pour voir l'effet sur le combat : régiment sonné, etc.).
   if (s.pending.length) {
     let best = acts[0]!, bestV = -Infinity;
     for (const a of acts) {
       const r = applyAction(s, a);
       if (!r.ok) continue;
-      const v = evaluate(r.state, me, w);
+      let v = evaluate(r.state, me, w);
+      if (s.pending[0]!.kind === 'frondeurStun' && !r.state.pending.length && r.state.active === me && !r.state.over) {
+        const e = applyAction(r.state, { type: 'endTurn' });
+        if (e.ok) v = evaluate(e.state, me, w);
+      }
       if (v > bestV) { bestV = v; best = a; }
     }
     return best;

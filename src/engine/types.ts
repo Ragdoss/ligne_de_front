@@ -187,7 +187,8 @@ export type ChoiceKind =
   | 'relics'            // Chasseur de Reliques : régiment de la défausse adverse + stat gagnée
   | 'shadow'            // Marchand d'Ombres : carte de la main adverse à défausser
   | 'caravane'          // Caravane Marchande : carte de la défausse adverse à supprimer
-  | 'ransomDesert';     // Rançon du Désert : carte de la défausse adverse à supprimer
+  | 'ransomDesert'      // Rançon du Désert : carte de la défausse adverse à supprimer
+  | 'frondeurStun';     // Frondeur Nomade : régiment adverse à sonner
 
 export interface ChoiceOption {
   cardId?: string;
@@ -195,6 +196,8 @@ export interface ChoiceOption {
   value?: number;
   stat?: 'atk' | 'arm';
   skip?: boolean;
+  /** Position d'un régiment ciblé (affichage). */
+  where?: string;
 }
 
 /**

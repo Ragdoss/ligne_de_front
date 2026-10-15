@@ -225,11 +225,9 @@ function nomadArrival(ctx: Ctx, p: PlayerId, u: Unit): void {
       break;
     }
     case 'frondeur_nomade': {
-      const enemies = ctx.units(q);
-      if (!enemies.length) { note('noTarget'); break; }
-      const t = enemies[ctx.randomInt(enemies.length)]!;
-      t.stunned = true;
-      ctx.emit({ type: 'stunned', uid: t.uid, cardId: t.cardId, by: u.uid });
+      // Son contrôleur choisit le régiment adverse à sonner.
+      if (!ctx.units(q).length) { note('noTarget'); break; }
+      ctx.queueChoice('frondeurStun', p, u.cardId, { uid: u.uid });
       break;
     }
     case 'charmeur_basilics': {

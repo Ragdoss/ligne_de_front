@@ -326,7 +326,7 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "frondeur_nomade": {
     "name": "Frondeur Nomade",
-    "desc": "À son arrivée, sonne un régiment adverse au hasard. Si une cible qu'il a blessée ce tour-ci est détruite, l'adversaire met la carte du dessus de son deck dans sa défausse."
+    "desc": "À son arrivée, sonne un régiment adverse de ton choix. Si une cible qu'il a blessée ce tour-ci est détruite, l'adversaire met la carte du dessus de son deck dans sa défausse."
   },
   "saboteur_nomade": {
     "name": "Saboteur Nomade",

@@ -45,6 +45,11 @@ function computeOptions(ctx: Ctx, c: PendingChoice): ChoiceOption[] {
       return ctx.findUnit(Number(c.data.uid)) ? unique(opp.discard).map(cardId => ({ cardId })) : [];
     case 'ransomDesert':
       return unique(opp.discard).map(cardId => ({ cardId }));
+    case 'frondeurStun':
+      return ctx.units(opponentOf(c.player)).map(u => {
+        const r = ctx.slotOf(u.uid)!;
+        return { value: u.uid, cardId: u.cardId, where: r.zone === 'isole' ? 'isolé' : `${r.zone === 'avant' ? 'avant' : 'arrière'} ${r.idx + 1}` };
+      });
   }
 }
 
@@ -160,6 +165,13 @@ export function resolveChoice(ctx: Ctx, index: number): string | null {
       removeFrom(opp.discard, o.cardId!);
       if (u.vieTours !== null) u.vieTours += card(o.cardId!).niveau;
       note('caravane', { uid: u.uid, cardId: o.cardId });
+      break;
+    }
+    case 'frondeurStun': {
+      const t = ctx.findUnit(o.value!);
+      if (!t) break;
+      t.stunned = true;
+      ctx.emit({ type: 'stunned', uid: t.uid, cardId: t.cardId, by: Number(c.data.uid) });
       break;
     }
     case 'ransomDesert': {

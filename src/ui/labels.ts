@@ -43,6 +43,7 @@ export function choiceTitle(c: PendingChoice): string {
     case 'shadow': return 'Marchand d’Ombres : main adverse révélée, choisis la carte qu’il défausse';
     case 'caravane': return 'Caravane Marchande : supprime une carte de la défausse adverse (durée de vie + son niveau)';
     case 'ransomDesert': return 'Rançon du Désert : supprime une carte de la défausse adverse';
+    case 'frondeurStun': return 'Frondeur Nomade : choisis le régiment adverse à sonner (il n’attaquera pas à ce combat)';
   }
 }
 
@@ -52,6 +53,7 @@ export function optionLabel(c: PendingChoice, o: ChoiceOption): string {
     const d = card(o.cardId);
     return `${cardName(o.cardId)} → +${o.stat === 'atk' ? `${d.atk} ATK` : `${d.arm} ARM`}`;
   }
+  if (o.where && o.cardId) return `${cardName(o.cardId)} — ${o.where}`;
   if (o.cardId) {
     const d = card(o.cardId);
     return `${cardName(o.cardId)} — niv. ${d.niveau}, coût ${d.dynamicCost ? 'variable' : d.cout}`;

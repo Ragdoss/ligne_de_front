@@ -127,3 +127,20 @@ describe('Mécaniques de scénario', () => {
     expect(s.players.B.board.avant[1]?.cardId).toBe('garde_capitale');
   });
 });
+
+describe('Frondeur Nomade', () => {
+  it('son contrôleur choisit le régiment adverse sonné', () => {
+    let s = blankGame();
+    s.players.A.resource = 5;
+    place(s, 'B', 'avant', 0, 'recrue_imp');
+    const target = place(s, 'B', 'avant', 2, 'chevalier_prov');
+    const uid = give(s, 'A', 'frondeur_nomade');
+    s = act(s, { type: 'play', handUid: uid, target: slot('A', 'arriere', 1) }).state;
+    expect(s.pending[0]).toMatchObject({ kind: 'frondeurStun', player: 'A' });
+    const i = s.pending[0]!.options!.findIndex(o => o.value === target.uid);
+    expect(s.pending[0]!.options).toHaveLength(2);
+    s = act(s, { type: 'choose', option: i }).state;
+    expect(s.players.B.board.avant[2]!.stunned).toBe(true);
+    expect(s.players.B.board.avant[0]!.stunned).toBe(false);
+  });
+});
