@@ -7,6 +7,7 @@ import soldat from './assets/soldat.png';
 import empireChevalier from './assets/portraits/empire/1.webp';
 import empireEpeiste from './assets/portraits/empire/2.webp';
 import empireLancier from './assets/portraits/empire/3.webp';
+import empireArbaletrier from './assets/portraits/empire/4.webp';
 import elfeArchere from './assets/portraits/elfe/1.webp';
 import elfeGardien from './assets/portraits/elfe/2.webp';
 import demonsAcolyte from './assets/portraits/demons/2.webp';
@@ -19,13 +20,14 @@ import nomadesEclaireur from './assets/portraits/nomades/4.webp';
 /**
  * Portrait de chaque personnage, en buste ; le soldat sert de portrait provisoire aux autres.
  * Les planches complètes sont dans assets/portraits/<faction>/ (1 à 4, de gauche à droite sur la planche) :
- * non utilisés pour l'instant : empire/4 (arbalétrier), elfe/3, elfe/4, demons/1 (bâton à l'œil), demons/4.
+ * non utilisés pour l'instant : elfe/3, elfe/4, demons/1 (bâton à l'œil), demons/4.
  */
 const PORTRAITS: Record<string, string> = {
   // Empire
   'Commandant': empireChevalier,
   'Soldat': empireEpeiste,
   'Légat Varro': empireLancier,
+  'Sergent du convoi': empireArbaletrier,
   // Royaumes elfiques
   'Sylvain': elfeGardien,
   'Éclaireuse Lyra': elfeArchere,
