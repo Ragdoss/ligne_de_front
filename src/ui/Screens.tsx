@@ -166,8 +166,9 @@ const STAT_LABEL = { ai: 'Contre l’ordinateur', hotseat: 'À deux (joueur A)',
 
 /** Profils : chacun a sa collection, ses pièces, ses decks, ses campagnes, ses options et ses statistiques. */
 function ProfilesBlock({ profile, update, onSwitchProfile }: { profile: Profile; update: (fn: (p: Profile) => void) => void; onSwitchProfile: () => void }) {
-  const [list, setList] = useState(() => listProfiles());
   const active = activeProfileId();
+  // Le nom affiché dans la liste suit le nom enregistré dans le profil.
+  const [list, setList] = useState(() => { renameProfileEntry(active, profile.name); return listProfiles(); });
   const [newName, setNewName] = useState('');
   const [armed, setArmed] = useState<string | null>(null);
   const rename = (name: string) => { update(p => { p.name = name.slice(0, 24); }); renameProfileEntry(active, name.trim() || 'Joueur'); setList(listProfiles()); };
@@ -195,7 +196,7 @@ function ProfilesBlock({ profile, update, onSwitchProfile }: { profile: Profile;
           ))}
         </div>
       )}
-      <div className="join-row">
+      <div className="join-row plain">
         <input className="search" placeholder="Nom du nouveau profil" value={newName} maxLength={24} onChange={e => setNewName(e.target.value)} aria-label="Nom du nouveau profil" />
         <button type="button" disabled={!newName.trim()} onClick={() => {
           createProfileEntry(newName.trim());

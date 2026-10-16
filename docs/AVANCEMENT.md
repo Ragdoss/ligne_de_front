@@ -137,3 +137,20 @@ aux outils avec `--patch` : `npm run sim -- 100 v2 --patch balance/equilibrage-1
   explique le plateau, la main et la ressource, le combat, le Moral, la lassitude et les niveaux, le rang arrière (Distance),
   les Leaders, les tactiques, les mots-clés et les conditions de victoire ; les étapes « à toi de jouer » avancent seules.
   Partie fixée dans `src/campaign/tutorial.ts` (main de départ imposée, renfort et niveau 2 au tour 2) ; textes dans `src/ui/Tutorial.tsx`.
+
+## IA v2, profils, revanche, emotes, confort
+
+- **IA v2** (`src/ai/heuristic.ts`) : ne voit plus les informations cachées (elle joue sur un « état supposé » : main et
+  pioche adverses tirées au hasard parmi les cartes invisibles, sa propre pioche mélangée, hasard futur inconnu) et juge
+  chaque coup aussi après le combat de fin du tour adverse. Utilisée partout. Gagne ~60 % contre l'ancienne IA
+  (`npx tsx tools/ai-duel.ts 12`) ; l'ancienne reste disponible (`chooseActionV1`) pour comparer.
+- **Profils** (Options → Profils, `src/profile/store.ts`) : plusieurs profils dans le même navigateur, chacun avec sa
+  collection, ses pièces, ses decks, ses campagnes, ses options et ses statistiques (victoires/défaites contre l'ordinateur,
+  à deux, en ligne, en campagne). Le nom du profil est celui utilisé en ligne.
+- **Decks favoris** : étoile dans « Mes decks » ; les favoris passent en premier partout (listes de choix de deck).
+- **Revanche** : en local (série affichée) et en ligne (les deux joueurs l'acceptent ; l'autre joueur commence ; série dans
+  le titre et la fenêtre de fin).
+- **Emotes en ligne** : 5 répliques communes + 3 par faction, bulle de 3,5 s, bouton pour masquer celles de l'adversaire.
+- **Confort** : niveau affiché sur chaque régiment du plateau, zoom des cartes et des régiments au survol, glisser-déposer
+  d'une carte de la main sur une case en surbrillance, animation du tri de la main, pièce « œil » qui simule le combat de fin
+  de tour (pertes d'END/Moral par régiment, régiments détruits grisés, résumé lassitude), plateau teinté en bleu pendant la simulation.

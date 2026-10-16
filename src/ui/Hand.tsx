@@ -1,5 +1,5 @@
 // Main d'un joueur : cartes avec stats lisibles, coût actuel, tri (coût, type, niveau) et réorganisation manuelle.
-import { useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { card } from '../engine/ctx';
 import { costOf, whyUnplayable } from '../engine/game';
 import type { CardDef, GameState, HandCard, PlayerId } from '../engine/types';
@@ -60,11 +60,28 @@ export interface HandProps {
   hidden: boolean;
   selected: number | null;
   onSelect: (uid: number) => void;
+  /** Début du glisser d'une carte (pour la poser directement sur le plateau). */
+  onDragCard?: (uid: number) => void;
 }
 
-export function Hand({ game, player, order, setOrder, canAct, hidden, selected, onSelect }: HandProps) {
+export function Hand({ game, player, order, setOrder, canAct, hidden, selected, onSelect, onDragCard }: HandProps) {
   const hand = game.players[player].hand;
   const [drag, setDrag] = useState<number | null>(null);
+  // Animation du tri (technique FLIP) : chaque carte glisse de son ancienne place vers la nouvelle.
+  const els = useRef(new Map<number, HTMLElement>());
+  const prev = useRef(new Map<number, DOMRect>());
+  useLayoutEffect(() => {
+    const next = new Map<number, DOMRect>();
+    els.current.forEach((el, uid) => {
+      const r = el.getBoundingClientRect();
+      next.set(uid, r);
+      const p = prev.current.get(uid);
+      if (p && (Math.abs(p.left - r.left) > 2 || Math.abs(p.top - r.top) > 2) && typeof el.animate === 'function') {
+        el.animate([{ transform: `translate(${p.left - r.left}px, ${p.top - r.top}px)` }, { transform: 'none' }], { duration: 280, easing: 'cubic-bezier(.2,.8,.2,1)' });
+      }
+    });
+    prev.current = next;
+  });
   if (hidden) return <div className="hand-hidden">{hand.length} carte(s) en main (cachées)</div>;
   const byUid = new Map(hand.map(h => [h.uid, h]));
   const shown = [...order.filter(u => byUid.has(u)), ...hand.filter(h => !order.includes(h.uid)).map(h => h.uid)].map(u => byUid.get(u)!);
@@ -80,7 +97,7 @@ export function Hand({ game, player, order, setOrder, canAct, hidden, selected, 
         {(['cout', 'type', 'niveau'] as SortMode[]).map(m => (
           <button key={m} type="button" onClick={() => setOrder(sortHand(game, player, hand, m))}>{m === 'cout' ? 'coût' : m}</button>
         ))}
-        <span className="muted">· ou glisser les cartes / flèches ‹ ›</span>
+        <span className="muted">· glisse une carte sur le plateau pour la jouer, ou entre les autres pour la ranger</span>
       </div>
       <div className="hand" onDragOver={e => e.preventDefault()} onDrop={() => { if (drag !== null) move(drag, shown.length); setDrag(null); }}>
         {shown.length === 0 && <p className="muted">Main vide.</p>}
@@ -94,8 +111,10 @@ export function Hand({ game, player, order, setOrder, canAct, hidden, selected, 
               key={h.uid}
               role="button"
               tabIndex={0}
+              ref={el => { if (el) els.current.set(h.uid, el); else els.current.delete(h.uid); }}
               draggable
-              onDragStart={() => setDrag(h.uid)}
+              onDragStart={e => { setDrag(h.uid); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(h.uid)); if (playable) onDragCard?.(h.uid); }}
+              onDragEnd={() => setDrag(null)}
               onDragOver={e => e.preventDefault()}
               onDrop={e => { e.stopPropagation(); if (drag !== null) move(drag, i); setDrag(null); }}
               className={`hcard ${c.faction}${selected === h.uid ? ' selected' : ''}${playable ? '' : ' off'}`}

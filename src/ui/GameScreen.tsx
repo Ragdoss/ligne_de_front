@@ -15,6 +15,32 @@ import { Dialog } from './VnDialog';
 export { Dialog };
 
 const WEATHER_LABEL = { tempete: 'Tempête de sable', nuit: 'Nuit', jour: 'Jour' } as const;
+/** Résultat du combat si le joueur finit son tour maintenant : pertes d'END/Moral et destructions, par régiment. */
+export interface CombatPreview { units: Map<number, { end: number; mor: number; dead: boolean }>; summary: string }
+function simulateCombat(game: GameState): CombatPreview | null {
+  const r = applyAction(game, { type: 'endTurn' });
+  if (!r.ok) return null;
+  const units = new Map<number, { end: number; mor: number; dead: boolean }>();
+  const get = (uid: number) => { let x = units.get(uid); if (!x) { x = { end: 0, mor: 0, dead: false }; units.set(uid, x); } return x; };
+  const me = game.active, them = me === 'A' ? 'B' : 'A';
+  const lass: Record<string, number> = { A: 0, B: 0 };
+  const dead: Record<string, number> = { A: 0, B: 0 };
+  let started = false;
+  for (const e of r.events) {
+    if (e.type === 'combatStart') { started = true; continue; }
+    if (!started) continue;
+    if (e.type === 'turnStart') break;
+    if (e.type === 'attack') { const x = get(e.target); x.end -= e.damage; x.mor -= e.moralLoss; }
+    else if (e.type === 'moralLoss') get(e.uid).mor -= e.amount;
+    else if (e.type === 'heal') { const x = get(e.uid); x.end += e.end; x.mor += e.mor; }
+    else if (e.type === 'destroyed') { get(e.uid).dead = true; dead[e.player]!++; }
+    else if (e.type === 'lassitude' && e.amount > 0) lass[e.player]! += e.amount;
+  }
+  const parts = [`régiments détruits : ${dead[them]} chez l’adversaire, ${dead[me]} chez toi`, `lassitude : +${lass[me]} pour toi, +${lass[them]} pour l’adversaire`];
+  if (r.state.over) parts.push(r.state.over.winner === me ? 'la partie serait GAGNÉE' : 'la partie serait PERDUE');
+  return { units, summary: `Si tu finis ton tour : ${parts.join(' ; ')}.` };
+}
+
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
 export interface GameScreenProps {
@@ -89,6 +115,7 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
   const [banners, setBanners] = useState<Banner[]>([]);
   const [order, setOrder] = useState<Record<PlayerId, number[]>>({ A: [], B: [] });
   const [revealAI, setRevealAI] = useState(initialReveal);
+  const [peek, setPeek] = useState(false);
   const [overClosed, setOverClosed] = useState(false);
   const [dialogs, setDialogs] = useState<{ title?: string; lines: DialogLine[] }[]>(() => (intro?.length ? [{ title, lines: intro }] : []));
   const busy = useRef(false);
@@ -189,6 +216,16 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
       if (two) void apply(two);
     }
   };
+  /** Glisser une carte de la main : on la sélectionne pour que les cases valides s'allument (déposer = jouer). */
+  const onDragCard = (uid: number) => {
+    if (!humanTurn || game.pending.length || sel?.uid === uid) return;
+    if (whyUnplayable(game, uid)) return;
+    const ps = playsForHandCard(game, uid);
+    if (ps.length === 1 && ps[0]!.type === 'play' && !ps[0]!.target) return; // sans cible : un clic suffit
+    setSel({ uid });
+    const h = game.players[game.active].hand.find(x => x.uid === uid)!;
+    setHint(`${cardName(h.cardId)} : dépose-la sur une case en surbrillance.`);
+  };
   const onSelectCard = (uid: number) => {
     if (!humanTurn || game.pending.length) return;
     if (sel?.uid === uid) { setSel(null); setHint(''); return; }
@@ -204,6 +241,8 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
   const logRef = useRef<HTMLDivElement>(null);
   useEffect(() => { logRef.current?.scrollTo({ top: logRef.current.scrollHeight }); }, [log]);
 
+  // Simulation du combat de fin de tour (« pièce à l'œil ») : uniquement le plateau, visible des deux joueurs.
+  const preview = useMemo(() => (peek && humanTurn && !game.pending.length ? simulateCombat(game) : null), [peek, humanTurn, game]);
   const choice = game.pending[0];
   const weather = new Ctx(view).weather();
   const handFor = (p: PlayerId) => (
@@ -216,11 +255,12 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
       hidden={!human[p] && !revealAI && !watch}
       selected={game.active === p ? sel?.uid ?? null : null}
       onSelect={onSelectCard}
+      onDragCard={onDragCard}
     />
   );
 
   return (
-    <div className="game">
+    <div className={`game${preview ? ' previewing' : ''}`}>
       <header className="topbar">
         <h1>{title ?? 'Ligne de Front'}</h1>
         <div className="actions">
@@ -234,13 +274,19 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
         <h2 className="hand-title">Main — {names[top]}</h2>
         {handFor(top)}
         <PlayerBar game={view} p={top} label={names[top]} active={game.active === top} />
-        <Board game={view} player={top} bottom={false} isTarget={isTarget} isFirstPicked={r => sameSlot(sel?.first, r)} onSlot={onSlot} highlight={highlight} faded={faded} />
+        <Board game={view} player={top} bottom={false} isTarget={isTarget} isFirstPicked={r => sameSlot(sel?.first, r)} onSlot={onSlot} highlight={highlight} faded={faded} preview={preview?.units} />
       </section>
       <div className="frontline">ligne de front</div>
       <section className="side">
-        <Board game={view} player={bottom} bottom isTarget={isTarget} isFirstPicked={r => sameSlot(sel?.first, r)} onSlot={onSlot} highlight={highlight} faded={faded} />
+        <Board game={view} player={bottom} bottom isTarget={isTarget} isFirstPicked={r => sameSlot(sel?.first, r)} onSlot={onSlot} highlight={highlight} faded={faded} preview={preview?.units} />
         <PlayerBar game={view} p={bottom} label={names[bottom]} active={game.active === bottom} />
         <div className="controls">
+          <button type="button" className={`eye-coin${peek ? ' open' : ''}`} disabled={!humanTurn || !!game.pending.length} onClick={() => setPeek(v => !v)}
+            aria-pressed={peek} title={peek ? 'Masquer la simulation du combat' : 'Simuler le combat de fin de tour'}>
+            <span className="face closed" aria-hidden="true"><svg viewBox="0 0 40 40"><path d="M8 21 Q20 29 32 21" /><path d="M12 24 l-2 4 M20 26 v4 M28 24 l2 4" /></svg></span>
+            <span className="face opened" aria-hidden="true"><svg viewBox="0 0 40 40"><path d="M6 20 Q20 8 34 20 Q20 32 6 20 Z" /><circle cx="20" cy="20" r="5" /></svg></span>
+          </button>
+          {preview && <p className="preview-sum" aria-live="polite">{preview.summary}</p>}
           <p className="hint" aria-live="polite">{shown ? 'Résolution du combat…' : hint || (game.over ? '' : humanTurn ? `À ${names[game.active]} de jouer : choisis une carte, ou termine ton tour.` : paused ? '' : `${names[acting]} réfléchit…`)}</p>
           <button type="button" className="primary" disabled={!humanTurn || !!game.pending.length || busy.current} onClick={() => void apply({ type: 'endTurn' })}>Fin du tour</button>
         </div>

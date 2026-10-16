@@ -20,14 +20,17 @@ export interface BoardProps {
   onSlot: (ref: SlotRef) => void;
   highlight: Highlight | null;
   faded: Set<number>;
+  /** Simulation du combat : pertes et destructions prévues par régiment. */
+  preview?: Map<number, { end: number; mor: number; dead: boolean }>;
 }
 
-function UnitCard({ u, ctx, highlight, faded }: { u: Unit; ctx: Ctx; highlight: Highlight | null; faded: boolean }) {
+function UnitCard({ u, ctx, highlight, faded, pv }: { u: Unit; ctx: Ctx; highlight: Highlight | null; faded: boolean; pv?: { end: number; mor: number; dead: boolean } }) {
   const d = card(u.cardId);
   const atk = ctx.effectiveAtk(u), arm = ctx.effectiveArm(u), ini = ctx.effectiveIni(u);
   const cls = ['unit', d.faction];
   if (u.brokenMorale) cls.push('broken');
   if (faded) cls.push('dead');
+  if (pv?.dead) cls.push('pv-dead');
   if (highlight?.attacker === u.uid) cls.push('attacking');
   if (highlight?.target === u.uid) cls.push('hit');
   const kws = visibleKeywords(u.keywords);
@@ -35,7 +38,12 @@ function UnitCard({ u, ctx, highlight, faded }: { u: Unit; ctx: Ctx; highlight: 
   const tip = `${cardName(u.cardId)}${u.leader ? ` + ${cardName(u.leader)}` : ''}\n${cardDesc(u.cardId)}${u.leader ? `\n${cardName(u.leader)} : ${cardDesc(u.leader)}` : ''}`;
   return (
     <div className={cls.join(' ')} title={tip}>
-      <div className="u-name">{cardName(u.cardId)}</div>
+      <div className="u-name"><span>{cardName(u.cardId)}</span><span className="u-lvl" title={`Niveau ${u.niveau}`}>{u.niveau}</span></div>
+      {pv && (pv.end || pv.mor || pv.dead) ? (
+        <div className={`pv${pv.dead ? ' dead' : ''}`}>
+          {pv.dead ? 'Détruit' : [pv.end ? `${pv.end > 0 ? '+' : '−'}${Math.abs(pv.end)} END` : '', pv.mor ? `${pv.mor > 0 ? '+' : '−'}${Math.abs(pv.mor)} MOR` : ''].filter(Boolean).join(' · ')}
+        </div>
+      ) : null}
       {u.leader && <div className="u-leader">★ {cardName(u.leader)}</div>}
       <div className="u-stats">
         <span className={atk !== u.baseAtk ? 'mod' : ''}>ATK <b>{atk}</b></span>
@@ -63,7 +71,7 @@ function UnitCard({ u, ctx, highlight, faded }: { u: Unit; ctx: Ctx; highlight: 
   );
 }
 
-export function Board({ game, player, bottom, isTarget, isFirstPicked, onSlot, highlight, faded }: BoardProps) {
+export function Board({ game, player, bottom, isTarget, isFirstPicked, onSlot, highlight, faded, preview }: BoardProps) {
   const ctx = new Ctx(game);
   const b = game.players[player].board;
   const slot = (zone: Zone, idx: number, u: Unit | null) => {
@@ -78,10 +86,12 @@ export function Board({ game, player, bottom, isTarget, isFirstPicked, onSlot, h
         tabIndex={target ? 0 : -1}
         aria-disabled={!target}
         onClick={target ? () => onSlot(ref) : undefined}
+        onDragOver={target ? e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; } : undefined}
+        onDrop={target ? e => { e.preventDefault(); onSlot(ref); } : undefined}
         onKeyDown={target ? e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSlot(ref); } } : undefined}
         aria-label={`${zone === 'isole' ? 'Isolé' : zone === 'avant' ? `Avant ${idx + 1}` : `Arrière ${idx + 1}`}${u ? ` : ${cardName(u.cardId)}` : ' (vide)'}`}
       >
-        {u ? <UnitCard u={u} ctx={ctx} highlight={highlight} faded={faded.has(u.uid)} /> : <span className="slot-label">{zone === 'isole' ? 'Isolé' : zone === 'avant' ? 'Avant' : 'Arrière'}</span>}
+        {u ? <UnitCard u={u} ctx={ctx} highlight={highlight} faded={faded.has(u.uid)} pv={preview?.get(u.uid)} /> : <span className="slot-label">{zone === 'isole' ? 'Isolé' : zone === 'avant' ? 'Avant' : 'Arrière'}</span>}
       </div>
     );
   };
