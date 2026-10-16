@@ -15,12 +15,16 @@ export const BASE_EMOTES = ['salut', 'bravo'];
 /** Nombre d'emotes emportées en partie en ligne. */
 export const MAX_LOADOUT = 6;
 
-/** Images de profil : bustes des personnages (faction/numéro de la planche). */
+/** Images de profil : bustes des personnages (faction/numéro de la planche). 1 à 4 : série au crayon ; 5 à 8 : série enluminée (en couleurs). */
 export const AVATARS: Record<string, string> = {
   'empire.1': 'Chevalier impérial', 'empire.2': 'Épéiste impérial', 'empire.3': 'Lancier impérial', 'empire.4': 'Arbalétrier impérial',
   'elfe.1': 'Archère elfe', 'elfe.2': 'Gardien sylvestre', 'elfe.3': 'Lame sylvestre', 'elfe.4': 'Éclaireuse elfe',
   'demons.1': 'Voyant de l’Abîme', 'demons.2': 'Acolyte', 'demons.3': 'Hiérophante', 'demons.4': 'Faucheur',
   'nomades.1': 'Guide du désert', 'nomades.2': 'Cheikha', 'nomades.3': 'Pillard des dunes', 'nomades.4': 'Archer des sables',
+  'empire.5': 'Chevalier enluminé', 'empire.6': 'Épéiste enluminé', 'empire.7': 'Lancier enluminé', 'empire.8': 'Arbalétrier enluminé',
+  'elfe.5': 'Archère enluminée', 'elfe.6': 'Gardien enluminé', 'elfe.7': 'Lame enluminée', 'elfe.8': 'Éclaireuse enluminée',
+  'demons.5': 'Voyant enluminé', 'demons.6': 'Acolyte enluminé', 'demons.7': 'Hiérophante enluminé', 'demons.8': 'Faucheur enluminé',
+  'nomades.5': 'Guide enluminé', 'nomades.6': 'Cheikha enluminée', 'nomades.7': 'Pillard enluminé', 'nomades.8': 'Archer enluminé',
 };
 export const AVATAR_IDS = Object.keys(AVATARS);
 export const BASE_AVATAR = 'empire.2';
