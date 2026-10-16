@@ -11,13 +11,15 @@ import elfeArchere from './assets/portraits/elfe/1.webp';
 import elfeGardien from './assets/portraits/elfe/2.webp';
 import demonsAcolyte from './assets/portraits/demons/2.webp';
 import demonsHierophante from './assets/portraits/demons/3.webp';
+import nomadesGuide from './assets/portraits/nomades/1.webp';
 import nomadesCheikha from './assets/portraits/nomades/2.webp';
+import nomadesPillard from './assets/portraits/nomades/3.webp';
 import nomadesEclaireur from './assets/portraits/nomades/4.webp';
 
 /**
  * Portrait de chaque personnage, en buste ; le soldat sert de portrait provisoire aux autres.
  * Les planches complètes sont dans assets/portraits/<faction>/ (1 à 4, de gauche à droite sur la planche) :
- * non utilisés pour l'instant : empire/4 (arbalétrier), elfe/3, elfe/4, demons/1 (bâton à l'œil), demons/4, nomades/1, nomades/3.
+ * non utilisés pour l'instant : empire/4 (arbalétrier), elfe/3, elfe/4, demons/1 (bâton à l'œil), demons/4.
  */
 const PORTRAITS: Record<string, string> = {
   // Empire
@@ -33,6 +35,8 @@ const PORTRAITS: Record<string, string> = {
   // Nomades
   'Cheikha Zahra': nomadesCheikha,
   'Éclaireur Idris': nomadesEclaireur,
+  'Nomade': nomadesGuide,
+  'Cavalier des dunes': nomadesPillard,
 };
 const portraitOf = (who: string) => PORTRAITS[who] ?? soldat;
 
