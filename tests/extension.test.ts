@@ -1,6 +1,6 @@
 // Nouvelles cartes et nouvelles mécaniques de scénario (campagnes Nomade, Elfe, Démon).
 import { describe, expect, it } from 'vitest';
-import { Ctx } from '../src/engine/ctx';
+import { Ctx, addKeyword, keywordValue } from '../src/engine/ctx';
 import { createGame } from '../src/engine/game';
 import { act, blankGame, give, place } from './helpers';
 
@@ -41,6 +41,15 @@ describe('Nouvelles cartes', () => {
     const u = s.players.A.board.avant[0]!;
     expect(u.keywords.filter(k => k.startsWith('Effrayant'))).toEqual(['Effrayant 3']);
     expect(new Ctx(s).fear(u)).toBe(3);
+  });
+  it('Tout mot-clé chiffré s\'additionne (Pénétration 5 + Pénétration 3 = Pénétration 8)', () => {
+    const s = blankGame();
+    const u = place(s, 'A', 'arriere', 0, 'arbaletrier_imp');
+    addKeyword(u, 'Pénétration 3');
+    expect(u.keywords.filter(k => k.startsWith('Pénétration'))).toEqual(['Pénétration 8']);
+    expect(keywordValue(u, 'Pénétration')).toBe(8);
+    addKeyword(u, 'Lent');
+    expect(u.keywords.filter(k => k === 'Lent')).toHaveLength(1);
   });
   it('Fanatiques sacrifiés au Démon d\'Akantha : Effrayant 2 + 2 = Effrayant 4, arrive prêt', () => {
     let s = blankGame(); s.players.A.level = 4; s.players.A.resource = 10;

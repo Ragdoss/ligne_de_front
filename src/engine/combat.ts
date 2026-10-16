@@ -1,6 +1,6 @@
 // Combat de fin de tour et comparaison de Moral.
 
-import { Ctx, card, opponentOf } from './ctx';
+import { Ctx, card, keywordValue, opponentOf } from './ctx';
 import { scenarioMoralCheckLost } from './scenario';
 import type { PlayerId, Unit, Zone } from './types';
 
@@ -127,8 +127,7 @@ function attack(ctx: Ctx, a: Unit, target: Unit): void {
   const vsTypes = card(a.cardId).bonusVsTypes as Record<string, number> | undefined;
   if (vsTypes && !a.brokenMorale) for (const [t, v] of Object.entries(vsTypes)) if (target.types.includes(t)) atk += v;
   // Pénétration d'armure X : l'attaquant ignore les X premiers points d'Armure de sa cible.
-  const pen = a.brokenMorale ? undefined : a.keywords.find(k => k.startsWith('Pénétration'));
-  const penVal = pen ? parseInt(pen.split(' ')[1] ?? '0', 10) || 0 : 0;
+  const penVal = a.brokenMorale ? 0 : keywordValue(a, 'Pénétration'); // cumulée, comme tout mot-clé chiffré
   const arm = a.ignoreArmor ? 0 : Math.max(0, ctx.effectiveArm(target) - penVal);
   let damage = Math.max(0, atk - arm);
   if (target.pactShield && damage > 0) {

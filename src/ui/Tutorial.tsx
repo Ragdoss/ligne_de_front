@@ -109,8 +109,8 @@ const STEPS: Step[] = [
       <li><b>Distance</b> : depuis l’arrière, frappe le Moral le plus bas adverse.</li>
       <li><b>Lent</b> : n’attaque qu’au combat de fin de ton propre tour.</li>
       <li><b>Arrive prêt</b> : pas de pénalité d’apparition.</li>
-      <li><b>Effrayant X</b> : chaque coup retire X Moral de plus (plusieurs Effrayant s’additionnent).</li>
-      <li><b>Pénétration X</b> : ignore X points d’armure.</li>
+      <li><b>Effrayant X</b> : chaque coup retire X Moral de plus.</li>
+      <li><b>Pénétration X</b> : ignore X points d’armure. (Les mots-clés chiffrés s’additionnent : Effrayant 1 + Effrayant 2 = Effrayant 3.)</li>
       <li><b>Sonné</b> : saute sa prochaine attaque.</li>
       <li><b>Minions</b> : sa mort ne donne pas de lassitude et ne fait pas perdre de Moral aux alliés.</li>
       <li><b>Monté</b> : cavalerie, vulnérable aux Lanciers (+15 ATK contre elle).</li>

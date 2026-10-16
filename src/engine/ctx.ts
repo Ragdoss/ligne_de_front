@@ -15,12 +15,20 @@ export function card(id: string): CardDef {
   return c;
 }
 
-/** Ajoute un mot-clé à un régiment. Effrayant s'additionne à l'Effrayant déjà présent (une seule entrée « Effrayant N »). */
+/** Valeur cumulée d'un mot-clé chiffré (« Effrayant 2 », « Pénétration 5 »…) ; 0 s'il est absent. */
+export function keywordValue(u: Unit, name: string): number {
+  let v = 0;
+  for (const k of u.keywords) if (k.startsWith(name + ' ')) v += parseInt(k.slice(name.length + 1), 10) || 0;
+  return v;
+}
+
+/** Ajoute un mot-clé à un régiment. Les mots-clés chiffrés s'additionnent : X + Y = une seule entrée « Nom X+Y ». */
 export function addKeyword(u: Unit, k: string): void {
-  const m = /^Effrayant (\d+)$/.exec(k);
+  const m = /^(.+) (\d+)$/.exec(k);
   if (m) {
-    const i = u.keywords.findIndex(x => x.startsWith('Effrayant'));
-    if (i >= 0) { u.keywords[i] = `Effrayant ${(parseInt(u.keywords[i]!.split(' ')[1] ?? '0', 10) || 0) + Number(m[1])}`; return; }
+    const name = m[1]!;
+    const i = u.keywords.findIndex(x => x.startsWith(name + ' ') && /^\d+$/.test(x.slice(name.length + 1)));
+    if (i >= 0) { u.keywords[i] = `${name} ${keywordValue(u, name) + Number(m[2])}`; u.keywords = u.keywords.filter((x, j) => j === i || !x.startsWith(name + ' ')); return; }
   }
   if (!u.keywords.includes(k)) u.keywords.push(k);
 }
@@ -118,12 +126,8 @@ export class Ctx {
     if (u.brokenMorale || !u.keywords.includes('Distance') || u.blinded) return false;
     return !(this.weather() === 'tempete' && !u.types.includes('Nomade'));
   }
-  /** Valeur d'Effrayant (les Effrayant s'additionnent : Effrayant X + Effrayant Y = Effrayant X+Y). */
-  fear(u: Unit): number {
-    let v = 0;
-    for (const k of u.keywords) if (k.startsWith('Effrayant')) v += parseInt(k.split(' ')[1] ?? '0', 10) || 0;
-    return v;
-  }
+  /** Valeur d'Effrayant (cumulée : Effrayant X + Effrayant Y = Effrayant X+Y). */
+  fear(u: Unit): number { return keywordValue(u, 'Effrayant'); }
 
   makeUnit(cardId: string, controller: PlayerId, isToken = false): Unit {
     const c = card(cardId);
