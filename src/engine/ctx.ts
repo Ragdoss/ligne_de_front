@@ -15,6 +15,16 @@ export function card(id: string): CardDef {
   return c;
 }
 
+/** Ajoute un mot-clé à un régiment. Effrayant s'additionne à l'Effrayant déjà présent (une seule entrée « Effrayant N »). */
+export function addKeyword(u: Unit, k: string): void {
+  const m = /^Effrayant (\d+)$/.exec(k);
+  if (m) {
+    const i = u.keywords.findIndex(x => x.startsWith('Effrayant'));
+    if (i >= 0) { u.keywords[i] = `Effrayant ${(parseInt(u.keywords[i]!.split(' ')[1] ?? '0', 10) || 0) + Number(m[1])}`; return; }
+  }
+  if (!u.keywords.includes(k)) u.keywords.push(k);
+}
+
 export class Ctx {
   readonly events: GameEvent[] = [];
   constructor(public readonly s: GameState) {}
@@ -108,10 +118,10 @@ export class Ctx {
     if (u.brokenMorale || !u.keywords.includes('Distance') || u.blinded) return false;
     return !(this.weather() === 'tempete' && !u.types.includes('Nomade'));
   }
-  /** Valeur d'Effrayant (la plus forte si plusieurs). */
+  /** Valeur d'Effrayant (les Effrayant s'additionnent : Effrayant X + Effrayant Y = Effrayant X+Y). */
   fear(u: Unit): number {
     let v = 0;
-    for (const k of u.keywords) if (k.startsWith('Effrayant')) v = Math.max(v, parseInt(k.split(' ')[1] ?? '0', 10) || 0);
+    for (const k of u.keywords) if (k.startsWith('Effrayant')) v += parseInt(k.split(' ')[1] ?? '0', 10) || 0;
     return v;
   }
 

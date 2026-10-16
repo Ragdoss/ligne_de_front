@@ -33,11 +33,23 @@ describe('Nouvelles cartes', () => {
     new Ctx(s).destroy(dead2, 'end');
     expect(led.currentMor).toBe(m0 - 1);
   });
-  it('Effrayant : la valeur la plus forte compte (Seigneur des Abysses sur un Chien Infernal)', () => {
-    const s = blankGame();
-    const u = place(s, 'A', 'avant', 0, 'chien_infernal');
-    u.keywords.push('Effrayant 2');
-    expect(new Ctx(s).fear(u)).toBe(2);
+  it('Effrayant s\'additionne : Seigneur des Abysses sur un Chien Infernal = Effrayant 3', () => {
+    let s = blankGame(); s.players.A.level = 5; s.players.A.resource = 10;
+    place(s, 'A', 'avant', 0, 'chien_infernal');
+    const uid = give(s, 'A', 'seigneur_abysses');
+    s = act(s, { type: 'play', handUid: uid, target: slot('A', 'avant', 0) }).state;
+    const u = s.players.A.board.avant[0]!;
+    expect(u.keywords.filter(k => k.startsWith('Effrayant'))).toEqual(['Effrayant 3']);
+    expect(new Ctx(s).fear(u)).toBe(3);
+  });
+  it('Fanatiques sacrifiés au Démon d\'Akantha : Effrayant 2 + 2 = Effrayant 4, arrive prêt', () => {
+    let s = blankGame(); s.players.A.level = 4; s.players.A.resource = 10;
+    place(s, 'A', 'avant', 0, 'fanatiques');
+    const uid = give(s, 'A', 'demon_akantha');
+    s = act(s, { type: 'play', handUid: uid, target: slot('A', 'avant', 0) }).state;
+    const u = s.players.A.board.avant[0]!;
+    expect(u.keywords).toEqual(['Effrayant 4']);
+    expect(u.arrivesReady).toBe(true);
   });
   it('Œuf de Dragon : éclot au début du 3e tour de son contrôleur', () => {
     let s = blankGame();

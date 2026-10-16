@@ -1,7 +1,7 @@
 // Jouer une carte : coût, conditions, cibles valides, effets (régiments, Leaders, tactiques, effets d'arrivée).
 // Les effets qui demandent une décision passent par la file de choix (voir choices.ts).
 
-import { Ctx, card, opponentOf } from './ctx';
+import { Ctx, addKeyword, card, opponentOf } from './ctx';
 import type { CardDef, HandCard, PlayerId, SlotRef, Unit } from './types';
 
 // ---------- Coût ----------
@@ -143,10 +143,10 @@ function deployRegiment(ctx: Ctx, p: PlayerId, c: CardDef, ref: SlotRef): void {
     if (c.sacrificeGainsStats) {
       u.baseAtk += sac.baseAtk; u.maxEnd += sac.maxEnd; u.currentEnd += sac.maxEnd; u.baseArm += sac.baseArm; u.ini += sac.ini;
     }
-    if (c.sacrificeGainsKeywords) for (const k of sac.keywords) if (!u.keywords.includes(k)) u.keywords.push(k);
+    if (c.sacrificeGainsKeywords) for (const k of sac.keywords) addKeyword(u, k);
     const grant = card(sac.cardId).onSacrificeGrant as { keywords?: string[]; arrivesReady?: boolean } | undefined;
     if (grant) {
-      for (const k of grant.keywords ?? []) if (!u.keywords.includes(k)) u.keywords.push(k);
+      for (const k of grant.keywords ?? []) addKeyword(u, k);
       if (grant.arrivesReady) u.arrivesReady = true;
     }
     ctx.emit({ type: 'sacrificed', player: p, uid: sac.uid, cardId: sac.cardId, forCard: c.id });
@@ -206,7 +206,7 @@ function attachLeader(ctx: Ctx, p: PlayerId, c: CardDef, u: Unit): void {
   if (c.bonusEnd) { u.maxEnd += c.bonusEnd; u.currentEnd += c.bonusEnd; }
   if (c.healOnAttach) ctx.heal(u, c.healOnAttach, 0, c.id);
   if (c.healMorOnAttach) ctx.heal(u, 0, c.healMorOnAttach, c.id);
-  if (c.grantsKeywordOnAttach && !u.keywords.includes(c.grantsKeywordOnAttach)) u.keywords.push(c.grantsKeywordOnAttach);
+  if (c.grantsKeywordOnAttach) addKeyword(u, c.grantsKeywordOnAttach);
   if (c.bonusNiveauOnAttach) u.niveau += c.bonusNiveauOnAttach;
   if (c.grantsReadyOnAttach) u.arrivesReady = true;
   if (c.visionOnAttach) ctx.queueChoice('vision', p, c.id);
