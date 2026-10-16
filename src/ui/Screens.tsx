@@ -34,7 +34,7 @@ export function Home({ profile, go }: { profile: Profile; go: (t: HomeTarget) =>
           </button>
         ))}
       </nav>
-      <p className="home-who"><Avatar id={profile.avatar} size={44} /> <b>{profile.name}</b> <span className="pill coins">Pièces : <b>{profile.coins}</b></span></p>
+      <p className="home-who"><Avatar id={profile.avatar} size={88} /> <b>{profile.name}</b> <span className="pill coins">Pièces : <b>{profile.coins}</b></span></p>
     </div>
   );
 }
