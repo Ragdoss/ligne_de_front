@@ -28,6 +28,8 @@ export const AVATARS: Record<string, string> = {
 };
 export const AVATAR_IDS = Object.keys(AVATARS);
 export const BASE_AVATAR = 'empire.2';
+/** Poids de tirage dans les paquets : la série enluminée (numéros 5 et plus) sort 4 fois moins souvent que la série au crayon. */
+export const avatarWeight = (id: string) => (Number(id.split('.')[1]) >= 5 ? 1 : 4);
 
 /** Paquets : 1 chance sur 5 qu'une carte soit remplacée par une emote, 1 sur 10 par une image de profil. */
 export const EMOTE_CHANCE = 0.2;

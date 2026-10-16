@@ -14,6 +14,24 @@ describe('Profil joueur', () => {
     expect(p.emotes).toHaveLength(3);
     expect(p.avatars).toHaveLength(2);
   });
+  it('images de profil : la série enluminée (5 à 8) sort 4 fois moins souvent que la série au crayon', () => {
+    let seed = 12345;
+    const rand = () => { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; };
+    let rare = 0, common = 0;
+    for (let i = 0; i < 20000; i++) {
+      const p = newProfile();
+      p.coins = PACK_PRICE;
+      p.avatars = [];
+      let n = 0;
+      const r = openPack(p, () => (n++ < 2 ? 0.01 : rand()))!; // force l'image de profil, puis tirage libre
+      const a = r.cards.find(c => c.kind === 'avatar');
+      if (a) { if (Number(a.id.split('.')[1]) >= 5) rare++; else common++; }
+    }
+    // 16 images rares (poids 1) contre 16 communes (poids 4) : une image tirée sur 5 est une rare, soit 4 fois moins par image.
+    const share = rare / (rare + common);
+    expect(share).toBeGreaterThan(0.18);
+    expect(share).toBeLessThan(0.22);
+  });
   it('un nouveau joueur ne possède aucune carte ; avec « toutes les cartes débloquées », il construit un deck valide', () => {
     const p = newProfile();
     expect(COLLECTIBLE.every(id => !p.collection[id])).toBe(true);

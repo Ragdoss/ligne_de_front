@@ -1,6 +1,6 @@
 // Profil du joueur : collection de cartes, monnaie, decks, options. Sauvegardé dans le navigateur.
 import { CARDS } from '../data/cards';
-import { AVATAR_CHANCE, AVATAR_IDS, BASE_AVATAR, BASE_EMOTES, EMOTE_CHANCE, EMOTE_IDS, MAX_LOADOUT } from './cosmetics';
+import { AVATAR_CHANCE, AVATAR_IDS, avatarWeight, BASE_AVATAR, BASE_EMOTES, EMOTE_CHANCE, EMOTE_IDS, MAX_LOADOUT } from './cosmetics';
 import { clearActiveProfileData, keyFor } from './store';
 
 export const MAX_COPIES = 3;
@@ -112,15 +112,21 @@ export function openPack(p: Profile, rand: () => number = Math.random): PackResu
   p.coins -= PACK_PRICE;
   const out: PackResult = { cards: [], refund: 0 };
   const withEmote = rand() < EMOTE_CHANCE, withAvatar = rand() < AVATAR_CHANCE;
-  const cosmetic = (pool: string[], owned: string[], kind: 'emote' | 'avatar') => {
+  /** Tirage dans `list`, pondéré par `weight` (1 appel à `rand`). */
+  const pick = (list: string[], weight: (id: string) => number) => {
+    let r = rand() * list.reduce((t, x) => t + weight(x), 0);
+    for (const x of list) { r -= weight(x); if (r < 0) return x; }
+    return list[list.length - 1]!;
+  };
+  const cosmetic = (pool: string[], owned: string[], kind: 'emote' | 'avatar', weight: (id: string) => number = () => 1) => {
     const fresh = pool.filter(x => !owned.includes(x));
-    if (!fresh.length) { out.refund += COINS_PER_EXTRA; out.cards.push({ id: pool[Math.floor(rand() * pool.length)]!, isNew: false, extra: true, kind }); return; }
-    const id = fresh[Math.floor(rand() * fresh.length)]!;
+    if (!fresh.length) { out.refund += COINS_PER_EXTRA; out.cards.push({ id: pick(pool, weight), isNew: false, extra: true, kind }); return; }
+    const id = pick(fresh, weight);
     owned.push(id);
     out.cards.push({ id, isNew: true, extra: false, kind });
   };
   if (withEmote) cosmetic(EMOTE_IDS, p.emotes, 'emote');
-  if (withAvatar) cosmetic(AVATAR_IDS, p.avatars, 'avatar');
+  if (withAvatar) cosmetic(AVATAR_IDS, p.avatars, 'avatar', avatarWeight);
   while (out.cards.length < PACK_SIZE) {
     const id = COLLECTIBLE[Math.floor(rand() * COLLECTIBLE.length)]!;
     const have = p.collection[id] ?? 0;
