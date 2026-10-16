@@ -6,6 +6,7 @@ import campImg from './assets/camp.png';
 import campEmpireImg from './assets/camp_empire.webp';
 import campElfesImg from './assets/camp_elfes.webp';
 import campNomadesImg from './assets/camp_nomades.webp';
+import campDemonsImg from './assets/camp_demons.webp';
 import { Dialog } from './VnDialog';
 
 /** Décor du camp par campagne (les autres campagnes gardent le décor par défaut). `troops` : zone cliquable « Discuter », en % de l'image. */
@@ -26,6 +27,10 @@ const CAMP_ART: Record<string, CampArt> = {
   nomades: {
     src: campNomadesImg, ratio: 1400 / 933, alt: 'Le camp des Nomades du désert : tente, feu et chameaux à l’oasis',
     troops: { left: 9, top: 42, width: 40, height: 38 },
+  },
+  demons: {
+    src: campDemonsImg, ratio: 1400 / 933, alt: 'Le camp des Invocateurs de Démons : autel, braseros et statue cornue au milieu des ruines',
+    troops: { left: 6, top: 44, width: 40, height: 46 },
   },
 };
 
