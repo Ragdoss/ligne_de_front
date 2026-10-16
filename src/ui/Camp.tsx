@@ -5,6 +5,7 @@ import type { CampaignScenario } from '../campaign/types';
 import campImg from './assets/camp.png';
 import campEmpireImg from './assets/camp_empire.webp';
 import campElfesImg from './assets/camp_elfes.webp';
+import campNomadesImg from './assets/camp_nomades.webp';
 import { Dialog } from './VnDialog';
 
 /** Décor du camp par campagne (les autres campagnes gardent le décor par défaut). `troops` : zone cliquable « Discuter », en % de l'image. */
@@ -21,6 +22,10 @@ const CAMP_ART: Record<string, CampArt> = {
   elfes: {
     src: campElfesImg, ratio: 1400 / 933, alt: 'Le camp des Royaumes elfiques : tentes, bannières et archers autour du feu',
     troops: { left: 6, top: 36, width: 68, height: 50 },
+  },
+  nomades: {
+    src: campNomadesImg, ratio: 1400 / 933, alt: 'Le camp des Nomades du désert : tente, feu et chameaux à l’oasis',
+    troops: { left: 9, top: 42, width: 40, height: 38 },
   },
 };
 
