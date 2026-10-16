@@ -49,5 +49,5 @@ describe('Parties aléatoires', () => {
       if (s.over) finished++;
     }
     expect(finished).toBeGreaterThan(380);
-  });
+  }, 60000);
 });

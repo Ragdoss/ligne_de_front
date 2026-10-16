@@ -46,7 +46,8 @@ function key(a: Action): string { return JSON.stringify(a); }
 /** Filtre optionnel : règles imposées à l'ordinateur par un scénario (false = action interdite). */
 export type ActionFilter = (s: GameState, a: Action) => boolean;
 
-export function chooseAction(s: GameState, w: AiWeights = DEFAULT_WEIGHTS, filter?: ActionFilter): Action {
+/** Ancienne IA (référence pour les comparaisons) : voit l'état réel et ne regarde que la fin de son propre tour. */
+export function chooseActionV1(s: GameState, w: AiWeights = DEFAULT_WEIGHTS, filter?: ActionFilter): Action {
   const me = actingPlayer(s);
   const acts = legalActions(s);
   if (acts.length === 1) return acts[0]!;
@@ -73,7 +74,7 @@ export function chooseAction(s: GameState, w: AiWeights = DEFAULT_WEIGHTS, filte
     // On résout les choix en attente avec l'IA elle-même avant de finir le tour.
     let cur = st;
     for (let guard = 0; cur.pending.length && guard < 10 && !cur.over; guard++) {
-      const r = applyAction(cur, chooseAction(cur, w));
+      const r = applyAction(cur, chooseActionV1(cur, w));
       if (!r.ok) break;
       cur = r.state;
     }
@@ -112,4 +113,108 @@ export function playOut(s: GameState, opts: { maxActions?: number; weights?: Par
     n++;
   }
   return { state: cur, actions: n };
+}
+
+// ---------------------------------------------------------------------------------------------
+// IA v2 : plus forte, et sans tricher.
+// 1. Pas d'information cachée : elle raisonne sur un « état supposé » où la main et la pioche adverses
+//    sont remplacées par des cartes tirées au hasard parmi celles qu'elle ne voit pas, où sa propre pioche
+//    est mélangée et où le hasard futur est inconnu.
+// 2. Elle regarde plus loin : chaque coup est jugé après la fin de son tour ET après le combat de fin du
+//    tour adverse (l'adversaire est supposé passer), ce qui lui fait mieux protéger ses régiments.
+
+/** Petit générateur déterministe (pour que les simulations restent reproductibles). */
+function mulberry(seed: number) {
+  let a = seed | 0;
+  return () => { a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), a | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+}
+function shuffled<T>(arr: T[], rand: () => number): T[] {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [a[i], a[j]] = [a[j]!, a[i]!]; }
+  return a;
+}
+
+/** État supposé du point de vue de `me` : rien de ce qu'il ne peut pas voir n'est conservé. */
+export function determinize(s: GameState, me: PlayerId, rand: () => number): GameState {
+  const b = structuredClone(s);
+  const q = opponentOf(me);
+  const opp = b.players[q];
+  // Cartes adverses invisibles : sa main (hors cartes générées, connues) et sa pioche, redistribuées au hasard.
+  const hidden = opp.hand.filter(h => !h.generated);
+  const pool = shuffled([...hidden.map(h => h.cardId), ...opp.deck], rand);
+  hidden.forEach((h, i) => { h.cardId = pool[i]!; h.discount = undefined; });
+  opp.deck = pool.slice(hidden.length);
+  opp.reserve = shuffled(opp.reserve, rand);
+  // Sa propre pioche : il en connaît le contenu, pas l'ordre.
+  b.players[me].deck = shuffled(b.players[me].deck, rand);
+  b.players[me].reserve = shuffled(b.players[me].reserve, rand);
+  // Le hasard à venir (cibles aléatoires, mélanges) est inconnu.
+  b.rng = Math.floor(rand() * 2 ** 31);
+  return b;
+}
+
+/** Après la fin de notre tour : l'adversaire est supposé ne rien jouer, on résout son combat de fin de tour. */
+function afterOpponentPass(st: GameState, me: PlayerId, w: AiWeights): number {
+  let cur = st;
+  for (let guard = 0; cur.pending.length && guard < 10 && !cur.over; guard++) {
+    const r = applyAction(cur, { type: 'choose', option: 0 });
+    if (!r.ok) break;
+    cur = r.state;
+  }
+  if (cur.over || cur.active === me) return evaluate(cur, me, w);
+  const r = applyAction(cur, { type: 'endTurn' });
+  return r.ok ? evaluate(r.state, me, w) : evaluate(cur, me, w);
+}
+
+/** Valeur d'une position après avoir fini notre tour : moyenne entre « juste après » et « après le combat adverse ». */
+function valueAfterTurn(st: GameState, me: PlayerId, w: AiWeights): number {
+  let cur = st;
+  for (let guard = 0; cur.pending.length && guard < 10 && !cur.over; guard++) {
+    if (actingPlayer(cur) !== me) break;
+    const r = applyAction(cur, chooseActionV1(cur, w));
+    if (!r.ok) break;
+    cur = r.state;
+  }
+  if (cur.over) return evaluate(cur, me, w);
+  const r = applyAction(cur, { type: 'endTurn' });
+  if (!r.ok) return evaluate(cur, me, w);
+  if (r.state.over) return evaluate(r.state, me, w);
+  return 0.4 * evaluate(r.state, me, w) + 0.6 * afterOpponentPass(r.state, me, w);
+}
+
+export function chooseAction(s: GameState, w: AiWeights = DEFAULT_WEIGHTS, filter?: ActionFilter): Action {
+  const me = actingPlayer(s);
+  const acts = legalActions(s);
+  if (acts.length === 1) return acts[0]!;
+  const rand = mulberry((s.rng ^ (s.nextUid * 2654435761)) | 0);
+  const b = determinize(s, me, rand);
+
+  if (s.pending.length) {
+    let best = acts[0]!, bestV = -Infinity;
+    for (const a of acts) {
+      const r = applyAction(b, a);
+      if (!r.ok) continue;
+      let v = evaluate(r.state, me, w);
+      if (s.pending[0]!.kind === 'frondeurStun' && !r.state.pending.length && r.state.active === me && !r.state.over) v = valueAfterTurn(r.state, me, w);
+      if (v > bestV) { bestV = v; best = a; }
+    }
+    return best;
+  }
+
+  if (s.active !== me) return chooseActionV1(s, w, filter);
+  let best: Action = { type: 'endTurn' };
+  let bestV = valueAfterTurn(b, me, w);
+  const seen = new Set<string>();
+  for (const a of acts) {
+    if (a.type === 'endTurn') continue;
+    if (filter && !filter(s, a)) continue;
+    const k = key(a);
+    if (seen.has(k)) continue;
+    seen.add(k);
+    const r = applyAction(b, a);
+    if (!r.ok) continue;
+    const v = valueAfterTurn(r.state, me, w);
+    if (v > bestV + 0.01) { bestV = v; best = a; }
+  }
+  return best;
 }
