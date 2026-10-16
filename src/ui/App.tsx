@@ -10,6 +10,7 @@ import { CardTile } from './CardTile';
 import { MyCards } from './Collection';
 import { DeckList } from './Decks';
 import { Dialog, GameScreen } from './GameScreen';
+import { DraftScreen, DRAFT_FIRST_BONUS } from './Draft';
 import { EMOTES } from '../profile/cosmetics';
 import { Avatar } from './avatars';
 import { OnlineLobby, rematchMsg, startFromMsg, type OnlineStart } from './Online';
@@ -25,6 +26,7 @@ type Screen =
   | { kind: 'local' }
   | { kind: 'tutorial'; key: number }
   | { kind: 'online' }
+  | { kind: 'draft' }
   | { kind: 'onlineGame'; start: OnlineStart; key: number }
   | { kind: 'localGame'; setup: LocalSetup; key: number; series?: Record<PlayerId, number> }
   | { kind: 'campaignMenu' }
@@ -88,7 +90,7 @@ export function App() {
   let content: React.ReactNode;
 
   if (screen.kind === 'home') {
-    content = <Home profile={profile} go={t => setScreen(t === 'tutorial' ? { kind: 'tutorial', key: Date.now() } : t === 'local' ? { kind: 'local' } : t === 'online' ? { kind: 'online' } : t === 'campaign' ? { kind: 'campaignMenu' } : t === 'collection' ? { kind: 'collection', tab: 'decks' } : t === 'options' ? { kind: 'options' } : { kind: 'home' })} />;
+    content = <Home profile={profile} go={t => setScreen(t === 'tutorial' ? { kind: 'tutorial', key: Date.now() } : t === 'local' ? { kind: 'local' } : t === 'online' ? { kind: 'online' } : t === 'draft' ? { kind: 'draft' } : t === 'campaign' ? { kind: 'campaignMenu' } : t === 'collection' ? { kind: 'collection', tab: 'decks' } : t === 'options' ? { kind: 'options' } : { kind: 'home' })} />;
   } else if (screen.kind === 'local') {
     content = <LocalPlay profile={profile} onBack={home} goDecks={() => setScreen({ kind: 'collection', tab: 'decks' })} onStart={setup => setScreen({ kind: 'localGame', setup, key: Date.now() })} />;
   } else if (screen.kind === 'localGame') {
@@ -127,6 +129,9 @@ export function App() {
         )}
       />
     );
+  } else if (screen.kind === 'draft') {
+    content = <DraftScreen profile={profile} onExit={home} gameOpts={gameOpts}
+      reward={r => update(p => { if (r.win !== undefined) { if (r.win) p.coins += COINS_PER_WIN; p.stats.ai[r.win ? 'w' : 'l']++; } if (r.first) p.coins += DRAFT_FIRST_BONUS; })} />;
   } else if (screen.kind === 'tutorial') {
     content = <Tutorial key={screen.key} gameOpts={{ animMul: o.animSpeed, aiMul: o.aiSpeed, bannerMul: o.bannerSpeed }} onExit={home} onCampaign={() => setScreen({ kind: 'campaignMenu' })} />;
   } else if (screen.kind === 'online') {
@@ -228,7 +233,7 @@ export function App() {
     content = <div className="camp-bg"><Dialog title={sc.title} lines={lines} onClose={after} /></div>;
   } else if (screen.kind === 'campReward') {
     const c = screen.campaign;
-    content = <div className="camp-bg"><Rewards campaign={c} hero={campaignDef(c).hero} reward={currentScenario(c).reward!} onDone={updated => setScreen(advance(updated))} /></div>;
+    content = <div className="camp-bg"><Rewards campaign={c} hero={campaignDef(c).hero} reward={currentScenario(c).reward!} owned={id => profile.collection[id] ?? 0} onDone={updated => setScreen(advance(updated))} /></div>;
   } else if (screen.kind === 'campEnd') {
     const gained = Object.entries(screen.gained);
     const total = gained.reduce((n, [, k]) => n + k, 0);

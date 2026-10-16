@@ -450,3 +450,25 @@ button.danger { background: var(--danger); border: 1px solid var(--danger); colo
 .cosmo { background: var(--paper); color: var(--slate-ink); border-radius: 6px; border-top: 4px solid var(--navy); padding: 10px; display: grid; justify-items: center; gap: 6px; min-height: 180px; align-content: center; text-align: center; }
 .cosmo p { margin: 0; font-family: 'Cinzel', serif; font-size: .9rem; color: var(--navy); }
 .cosmo-type { font-size: .68rem; text-transform: uppercase; letter-spacing: .1em; color: #4b5470; }
+
+/* Récompenses : exemplaires déjà dans la collection */
+.count.owned { background: transparent; border: 1px solid #00000030; color: var(--ink-soft); font-weight: 400; font-size: .72rem; }
+.count.owned.new { background: var(--elfe); border-color: var(--elfe); color: var(--parchment); font-weight: 700; }
+.count.owned.full { opacity: .6; }
+
+/* Draft à 4 */
+.draft-intro { max-width: 72ch; display: grid; gap: 8px; }
+.draft-layout { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 16px; align-items: start; }
+@media (max-width: 760px) { .draft-layout { grid-template-columns: minmax(0, 1fr); } }
+.draft-picks { position: sticky; top: 8px; background: var(--bg-panel); border: 1px solid var(--line); border-radius: 6px; padding: 10px; display: grid; gap: 6px; }
+.draft-picks h2 { margin: 0; }
+.draft-list { display: grid; gap: 3px; max-height: 60vh; overflow: auto; }
+.draft-check { background: var(--bg-panel); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; display: grid; gap: 4px; }
+.draft-check .bad { color: var(--danger); margin: 0; }
+.draft-check .muted { margin: 0; }
+.draft-table { border-collapse: collapse; width: 100%; max-width: 640px; font-variant-numeric: tabular-nums; }
+.draft-table th, .draft-table td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+.draft-table td .avatar { margin-right: 6px; }
+.draft-table tr.me td { color: var(--brass-bright); font-weight: 700; }
+.draft-results { margin: 0; padding-left: 18px; color: var(--parchment-dim); }
+.draft-final { font-family: 'Cinzel', serif; font-size: 1.15rem; color: var(--brass-bright); margin: 0; }

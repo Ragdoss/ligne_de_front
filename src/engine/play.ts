@@ -35,6 +35,7 @@ export function unplayableReason(ctx: Ctx, p: PlayerId, h: HandCard): string | n
   const c = card(h.cardId);
   const pl = ctx.player(p);
   if (c.niveau > pl.level && !h.levelFree) return 'level';
+  if (c.unique && ctx.units(p).some(u => u.cardId === c.id)) return 'unique';
   if (c.dynamicCost && dynamicRawCost(ctx, c, p) <= 0 && !h.freeCopy) return 'noEffect';
   if (cardCost(ctx, p, h) > pl.resource) return 'resource';
   if (c.requiresOwnEmpireLeaderToCast && !ctx.units(p).some(u => u.types.includes('Empire') && u.leader)) return 'condition';

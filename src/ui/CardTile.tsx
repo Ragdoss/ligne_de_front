@@ -7,7 +7,8 @@ export function statsLine(id: string): string {
   if (c.cardType === 'Regiment') {
     const kw = visibleKeywords(c.keywords ?? []);
     const slot = c.slotTypes ? 'avant/arrière' : c.slotType === 'arriere' ? 'arrière' : c.slotType === 'isole' ? 'isolé' : 'avant';
-    return `ATK ${c.atk} · END ${c.end} · ARM ${c.arm} · INI ${c.ini} · MOR ${c.mor} · ${slot}${kw.length ? ` · ${kw.join(', ')}` : ''}`;
+    const all = [...(c.unique ? ['Unique'] : []), ...kw];
+    return `ATK ${c.atk} · END ${c.end} · ARM ${c.arm} · INI ${c.ini} · MOR ${c.mor} · ${slot}${all.length ? ` · ${all.join(', ')}` : ''}`;
   }
   if (c.cardType === 'Leader') {
     const b = ([['ATK', c.bonusAtk], ['ARM', c.bonusArm], ['INI', c.bonusIni], ['MOR', c.bonusMor], ['END', c.bonusEnd]] as const).filter(([, v]) => v).map(([k, v]) => `+${v} ${k}`);

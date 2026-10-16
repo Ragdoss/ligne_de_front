@@ -1,7 +1,7 @@
 // Nouvelles cartes et nouvelles mécaniques de scénario (campagnes Nomade, Elfe, Démon).
 import { describe, expect, it } from 'vitest';
 import { Ctx, addKeyword, keywordValue } from '../src/engine/ctx';
-import { createGame } from '../src/engine/game';
+import { createGame, whyUnplayable } from '../src/engine/game';
 import { act, blankGame, give, place } from './helpers';
 
 const slot = (player: 'A' | 'B', zone: 'avant' | 'arriere', idx: number) => ({ player, zone, idx });
@@ -32,6 +32,14 @@ describe('Nouvelles cartes', () => {
     const dead2 = place(s, 'A', 'avant', 3, 'chien_infernal');
     new Ctx(s).destroy(dead2, 'end');
     expect(led.currentMor).toBe(m0 - 1);
+  });
+  it('Régiment unique : un seul exemplaire en jeu par joueur', () => {
+    const s = blankGame(); s.players.A.level = 5; s.players.A.resource = 20;
+    const uid = give(s, 'A', 'sylvain');
+    expect(whyUnplayable(s, uid)).toBeNull();
+    place(s, 'A', 'avant', 0, 'sylvain');
+    expect(whyUnplayable(s, uid)).toBe('unique');
+    place(s, 'B', 'avant', 0, 'sylvain'); // l'adversaire peut avoir le sien
   });
   it('Effrayant s\'additionne : Seigneur des Abysses sur un Chien Infernal = Effrayant 3', () => {
     let s = blankGame(); s.players.A.level = 5; s.players.A.resource = 10;

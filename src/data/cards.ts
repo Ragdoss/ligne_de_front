@@ -221,6 +221,7 @@ export const CARDS: Record<string, CardDef> = {
   },
   "forteresse": {
     "id": "forteresse",
+    "unique": true,
     "cardType": "Regiment",
     "faction": "empire",
     "types": [
@@ -662,6 +663,7 @@ export const CARDS: Record<string, CardDef> = {
   },
   "sylvain": {
     "id": "sylvain",
+    "unique": true,
     "cardType": "Regiment",
     "faction": "elfe",
     "types": [
@@ -914,6 +916,7 @@ export const CARDS: Record<string, CardDef> = {
   },
   "demon_akantha": {
     "id": "demon_akantha",
+    "unique": true,
     "cardType": "Regiment",
     "faction": "demons",
     "types": [
@@ -1629,6 +1632,7 @@ export const CARDS: Record<string, CardDef> = {
   },
   "dragon_infernal": {
     "id": "dragon_infernal",
+    "unique": true,
     "cardType": "Regiment",
     "faction": "demons",
     "types": [
@@ -1685,6 +1689,7 @@ export const CARDS: Record<string, CardDef> = {
   },
   "reine_basilics": {
     "id": "reine_basilics",
+    "unique": true,
     "cardType": "Regiment",
     "faction": "nomades",
     "types": [
@@ -1723,6 +1728,7 @@ export const CARDS: Record<string, CardDef> = {
   },
   "treant_millenaire": {
     "id": "treant_millenaire",
+    "unique": true,
     "cardType": "Regiment",
     "faction": "elfe",
     "types": [
@@ -1741,6 +1747,7 @@ export const CARDS: Record<string, CardDef> = {
   },
   "gardienne_lumiere": {
     "id": "gardienne_lumiere",
+    "unique": true,
     "cardType": "Regiment",
     "faction": "elfe",
     "types": [

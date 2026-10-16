@@ -162,3 +162,12 @@ aux outils avec `--patch` : `npm run sim -- 100 v2 --patch balance/equilibrage-1
 - Paquets : 1 chance sur 5 qu'une carte soit remplacée par une emote, 1 sur 10 par une image de profil (déjà possédée : +1 pièce).
 - Options → Image de profil / Emotes en ligne : choix de l'image et des 6 emotes emportées en partie en ligne.
 - L'image s'affiche à l'accueil, dans la barre du joueur (local et en ligne, l'adversaire en ligne envoie la sienne) et dans les bulles d'emote.
+
+## Draft à 4, régiments uniques, récompenses (16/10/2026)
+- **Draft à 4** (accueil → « Draft à 4 ») : toi + 3 IA, 3 paquets de 15 cartes (3 niv. 1, 4 niv. 2, 4 niv. 3, 3 niv. 4, 1 niv. 5), on garde une carte et on passe le reste (gauche, droite, gauche). Toutes les cartes du jeu peuvent sortir ; rien ne rejoint la collection.
+- Construction : au moins 40 cartes parmi les 45 draftées + régiments de base à volonté (Recrue, Éclaireur, Cultiste, Jeune Nomade) ; au moins 3 régiments de niveau 1 ; avertissement sous 8 cartes de niveau 4-5. « Deck proposé » construit un deck comme l'IA.
+- IA de draft : note de chaque carte tirée du classement par simulation (`src/draft/ratings.ts`), puis préférence pour ses deux factions principales après 6 choix.
+- Tournoi chacun contre chacun en 3 rondes ; les matchs entre IA se jouent instantanément (IA rapide). Victoire : +5 pièces ; première place : +10. Le draft en cours est sauvegardé dans le profil.
+- **Régiments uniques** : un seul exemplaire en jeu à la fois par joueur (Forteresse, Sylvain, Tréant Millénaire, Démon d'Akantha, Dragon Infernal, Reine des Basilics, Gardienne de la Lumière).
+- **Récompenses de campagne** : chaque carte proposée indique « Nouvelle » ou « Collection x/3 ».
+- Accueil : image de profil agrandie.

@@ -8,7 +8,7 @@ import { cardDesc, cardName, TYPE_LABEL, UNPLAYABLE, visibleKeywords } from './l
 function Details({ c }: { c: CardDef }) {
   if (c.cardType === 'Regiment') {
     const slot = c.slotTypes ? 'Avant/Arr.' : c.slotType === 'avant' ? 'Avant' : c.slotType === 'arriere' ? 'Arrière' : 'Isolé';
-    const kws = visibleKeywords(c.keywords ?? []);
+    const kws = [...(c.unique ? ['Unique'] : []), ...visibleKeywords(c.keywords ?? [])];
     return (
       <>
         <div className="h-stats">

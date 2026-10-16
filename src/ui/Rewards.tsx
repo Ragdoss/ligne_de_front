@@ -15,7 +15,14 @@ const listCards = (ids: string[]) => {
   return Object.entries(n).map(([id, k]) => `${k} ${cardName(id)}`).join(', ');
 };
 
-export function Rewards({ campaign, reward, onDone, hero = 'Commandant' }: { campaign: CampaignSave; reward: Reward; onDone: (c: CampaignSave) => void; hero?: string }) {
+/** Pastille « dans ta collection » : aide à viser les cartes qui manquent encore. */
+const ownedBadge = (k: number) => k >= 3
+  ? <span className="count owned full" title="Tu as déjà les 3 exemplaires de cette carte">Collection 3/3</span>
+  : k === 0
+    ? <span className="count owned new" title="Tu n’as pas encore cette carte">Nouvelle</span>
+    : <span className="count owned" title="Exemplaires dans ta collection">Collection {k}/3</span>;
+
+export function Rewards({ campaign, reward, onDone, hero = 'Commandant', owned }: { campaign: CampaignSave; reward: Reward; onDone: (c: CampaignSave) => void; hero?: string; owned?: (id: string) => number }) {
   const order: Step[] = (reward.order ?? ['exchange', 'gifts', 'picks']).filter(s =>
     (s === 'gifts' && reward.gifts?.length) ||
     (s === 'exchange' && reward.exchange && campaign.pool.filter(x => x === reward.exchange!.from).length >= reward.exchange.count) ||
@@ -39,7 +46,7 @@ export function Rewards({ campaign, reward, onDone, hero = 'Commandant' }: { cam
     for (const id of reward.gifts!) n[id] = (n[id] ?? 0) + 1;
     title = 'Récompense — Renforts';
     line = say(`Des renforts nous rejoignent : ${listCards(reward.gifts!)}. Ils entrent dans ton pool de cartes.`);
-    center = <div className="vn-cards">{Object.entries(n).map(([id, k]) => <CardTile key={id} id={id} badge={<span className="count">×{k}</span>} />)}</div>;
+    center = <div className="vn-cards">{Object.entries(n).map(([id, k]) => <CardTile key={id} id={id} badge={<>{owned && ownedBadge(owned(id))}<span className="count">×{k}</span></>} />)}</div>;
     actions = <button type="button" className="vn-next" autoFocus onClick={() => { reward.gifts!.forEach(id => addToPool(c, id)); next(); }}>Accepter</button>;
   } else if (step === 'exchange') {
     const ex = reward.exchange!;
@@ -74,7 +81,7 @@ export function Rewards({ campaign, reward, onDone, hero = 'Commandant' }: { cam
             if (pk.unique) setOptions(o => o.filter(x => x !== id));
             if (pickNo >= pk.count) next(); else setPickNo(pickNo + 1);
           }}>
-            <CardTile id={id} />
+            <CardTile id={id} badge={owned ? ownedBadge(owned(id)) : undefined} />
           </button>
         ))}
       </div>

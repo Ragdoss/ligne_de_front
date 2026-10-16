@@ -12,13 +12,14 @@ import { activeProfileId, createProfileEntry, deleteProfileEntry, listProfiles, 
 import { mainFaction } from './Decks';
 import { FACTION_LABEL, PLAYABLE_FACTIONS } from './labels';
 
-export type HomeTarget = 'tutorial' | 'local' | 'online' | 'campaign' | 'collection' | 'options';
+export type HomeTarget = 'tutorial' | 'local' | 'online' | 'draft' | 'campaign' | 'collection' | 'options';
 
 export function Home({ profile, go }: { profile: Profile; go: (t: HomeTarget) => void }) {
   const items: [HomeTarget, string, string][] = [
     ['tutorial', 'Tutoriel', 'Apprendre les règles en un combat guidé (5 minutes)'],
     ['local', 'Jouer en local', 'Contre l’ordinateur, à deux sur le même écran, ou en spectateur'],
     ['online', 'Jouer en ligne', 'Contre un ami, de navigateur à navigateur (premier jet)'],
+    ['draft', 'Draft à 4', 'Draft contre 3 adversaires de l’ordinateur, puis tournoi'],
     ['campaign', 'Campagne', 'Les campagnes solo et ta campagne en cours'],
     ['collection', 'Ma collection', 'Mes decks, mes cartes, ouverture de paquets'],
     ['options', 'Options', 'Taille de l’interface, vitesse du jeu…'],
