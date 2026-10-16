@@ -11,6 +11,7 @@ import { Hand } from './Hand';
 import { cardDesc, cardName, choiceTitle, optionLabel, UNPLAYABLE } from './labels';
 
 const sameSlot = (a?: SlotRef, b?: SlotRef) => !!a && !!b && a.player === b.player && a.zone === b.zone && a.idx === b.idx;
+import { Avatar } from './avatars';
 import { Dialog } from './VnDialog';
 export { Dialog };
 
@@ -74,11 +75,13 @@ export interface GameScreenProps {
   bottomSide?: PlayerId;
   /** Suivi de la partie (tutoriel) : appelé à chaque nouvel état. */
   onGame?: (game: GameState) => void;
+  /** Images de profil affichées dans les barres des joueurs. */
+  avatars?: Partial<Record<PlayerId, string | undefined>>;
   /** Contenu affiché par-dessus le plateau (bulle du tutoriel). */
   overlay?: React.ReactNode;
 }
 
-function PlayerBar({ game, p, label, active }: { game: GameState; p: PlayerId; label: string; active: boolean }) {
+function PlayerBar({ game, p, label, active, avatar }: { game: GameState; p: PlayerId; label: string; active: boolean; avatar?: string }) {
   const pl = game.players[p];
   const ctx = new Ctx(game);
   const thr = game.config.levelThresholds[p] ?? DEFAULT_LEVEL_THRESHOLDS;
@@ -88,6 +91,7 @@ function PlayerBar({ game, p, label, active }: { game: GameState; p: PlayerId; l
   const moral = ctx.units(p).filter(u => !card(u.cardId).excludeFromMoralTotal).reduce((n, u) => n + u.currentMor, 0);
   return (
     <div className={`pbar${active ? ' active' : ''}`}>
+      {avatar && <Avatar id={avatar} size={34} />}
       <strong className={`pname ${pl.faction}`}>{label}{active ? ' — à toi' : ''}</strong>
       <span>Ressource <b>{pl.resource}</b></span>
       <span>Niveau <b>{pl.level}</b></span>
@@ -104,7 +108,7 @@ function PlayerBar({ game, p, label, active }: { game: GameState; p: PlayerId; l
 
 interface Banner { id: number; who: string; cardId: string; on?: string }
 
-export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, intro, renderEnd, onQuit, animMul = 1, aiMul = 1, bannerMul = 1, initialReveal = false, onOver, remote, bottomSide, onGame, overlay }: GameScreenProps) {
+export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, intro, renderEnd, onQuit, animMul = 1, aiMul = 1, bannerMul = 1, initialReveal = false, onOver, remote, bottomSide, onGame, overlay, avatars }: GameScreenProps) {
   const [game, setGame] = useState<GameState>(() => createGame(setup));
   const [shown, setShown] = useState<GameState | null>(null); // état affiché pendant une animation de combat
   const [highlight, setHighlight] = useState<Highlight | null>(null);
@@ -273,13 +277,13 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
       <section className="side">
         <h2 className="hand-title">Main — {names[top]}</h2>
         {handFor(top)}
-        <PlayerBar game={view} p={top} label={names[top]} active={game.active === top} />
+        <PlayerBar game={view} p={top} label={names[top]} active={game.active === top} avatar={avatars?.[top]} />
         <Board game={view} player={top} bottom={false} isTarget={isTarget} isFirstPicked={r => sameSlot(sel?.first, r)} onSlot={onSlot} highlight={highlight} faded={faded} preview={preview?.units} />
       </section>
       <div className="frontline">ligne de front</div>
       <section className="side">
         <Board game={view} player={bottom} bottom isTarget={isTarget} isFirstPicked={r => sameSlot(sel?.first, r)} onSlot={onSlot} highlight={highlight} faded={faded} preview={preview?.units} />
-        <PlayerBar game={view} p={bottom} label={names[bottom]} active={game.active === bottom} />
+        <PlayerBar game={view} p={bottom} label={names[bottom]} active={game.active === bottom} avatar={avatars?.[bottom]} />
         <div className="controls">
           <button type="button" className={`eye-coin${peek ? ' open' : ''}`} disabled={!humanTurn || !!game.pending.length} onClick={() => setPeek(v => !v)}
             aria-pressed={peek} title={peek ? 'Masquer la simulation du combat' : 'Simuler le combat de fin de tour'}>

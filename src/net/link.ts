@@ -8,9 +8,12 @@ import type { Action, Faction, PlayerId } from '../engine/types';
 
 export const PROTOCOL = 1;
 
+/** Un joueur en ligne : nom, deck, image de profil. */
+export interface Seat { name: string; faction: Faction; deck: string[]; avatar?: string }
+
 export type NetMsg =
-  | { t: 'hello'; v: number; name: string; faction: Faction; deck: string[] }
-  | { t: 'start'; seed: string; hostSide: PlayerId; A: { name: string; faction: Faction; deck: string[] }; B: { name: string; faction: Faction; deck: string[] } }
+  | { t: 'hello'; v: number; name: string; faction: Faction; deck: string[]; avatar?: string }
+  | { t: 'start'; seed: string; hostSide: PlayerId; A: Seat; B: Seat }
   | { t: 'act'; n: number; a: Action }
   | { t: 'emote'; id: string }
   | { t: 'rematch' }

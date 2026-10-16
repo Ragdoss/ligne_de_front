@@ -2,6 +2,18 @@ import { describe, expect, it } from 'vitest';
 import { autoComplete, checkDeck, COLLECTIBLE, mergeCampaignPool, newProfile, openPack, PACK_PRICE } from '../src/profile/profile';
 
 describe('Profil joueur', () => {
+  it('cosmétiques : 2 emotes et 1 image de départ ; un paquet peut contenir une emote et une image de profil', () => {
+    const p = newProfile();
+    expect(p.emotes).toHaveLength(2);
+    expect(p.avatars).toHaveLength(1);
+    p.coins = PACK_PRICE;
+    const r = openPack(p, () => 0.01)!; // < 1/10 : emote ET image de profil
+    expect(r.cards).toHaveLength(5);
+    expect(r.cards.filter(c => c.kind === 'emote')).toHaveLength(1);
+    expect(r.cards.filter(c => c.kind === 'avatar')).toHaveLength(1);
+    expect(p.emotes).toHaveLength(3);
+    expect(p.avatars).toHaveLength(2);
+  });
   it('un nouveau joueur ne possède aucune carte ; avec « toutes les cartes débloquées », il construit un deck valide', () => {
     const p = newProfile();
     expect(COLLECTIBLE.every(id => !p.collection[id])).toBe(true);
@@ -22,9 +34,9 @@ describe('Profil joueur', () => {
   it('un paquet : 5 cartes, coûte 5, les exemplaires au-delà de 3 rendent 1 pièce', () => {
     const p = newProfile();
     p.coins = PACK_PRICE;
-    const first = COLLECTIBLE[0]!;
+    const first = COLLECTIBLE[Math.floor(0.5 * COLLECTIBLE.length)]!;
     p.collection[first] = 2;
-    const r = openPack(p, () => 0.0)!; // tire toujours la même carte : 1 nouvel exemplaire, puis 4 en trop
+    const r = openPack(p, () => 0.5)!; // pas de cosmétique (0,5 ≥ 1/5) ; tire toujours la même carte : 1 nouvel exemplaire, puis 4 en trop
     expect(r.cards).toHaveLength(5);
     expect(p.collection[first]).toBe(3);
     expect(r.refund).toBe(4);

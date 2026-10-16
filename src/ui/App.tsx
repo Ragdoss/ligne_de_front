@@ -10,7 +10,9 @@ import { CardTile } from './CardTile';
 import { MyCards } from './Collection';
 import { DeckList } from './Decks';
 import { Dialog, GameScreen } from './GameScreen';
-import { EMOTES, emotesFor, OnlineLobby, rematchMsg, startFromMsg, type OnlineStart } from './Online';
+import { EMOTES } from '../profile/cosmetics';
+import { Avatar } from './avatars';
+import { OnlineLobby, rematchMsg, startFromMsg, type OnlineStart } from './Online';
 import { Rewards } from './Rewards';
 import { Tutorial } from './Tutorial';
 import { CampaignMenu, Home, LocalPlay, OptionsScreen, resolveDeck, TopBar, type LocalSetup } from './Screens';
@@ -104,6 +106,7 @@ export function App() {
         human={{ A: setup.mode !== 'watch', B: setup.mode === 'hotseat' }}
         flip={setup.mode === 'hotseat'}
         fast={setup.mode === 'watch'}
+        avatars={setup.mode !== 'watch' ? { A: profile.avatar } : undefined}
         onQuit={() => setScreen({ kind: 'local' })}
         onOver={g => {
           const winA = g.over!.winner === 'A';
@@ -129,7 +132,7 @@ export function App() {
   } else if (screen.kind === 'online') {
     content = <OnlineLobby profile={profile} onBack={home} goDecks={() => setScreen({ kind: 'collection', tab: 'decks' })} onStart={start => setScreen({ kind: 'onlineGame', start, key: Date.now() })} />;
   } else if (screen.kind === 'onlineGame') {
-    content = <OnlineGame key={screen.key} start={screen.start} gameOpts={gameOpts} onExit={() => setScreen({ kind: 'online' })}
+    content = <OnlineGame key={screen.key} start={screen.start} gameOpts={gameOpts} loadout={profile.emoteLoadout} onExit={() => setScreen({ kind: 'online' })}
       onResult={win => update(p => { if (win) p.coins += COINS_PER_WIN; p.stats.online[win ? 'w' : 'l']++; })} />;
   } else if (screen.kind === 'campaignMenu') {
     content = <CampaignMenu onBack={home} onPlay={c => { saveCampaign(c); setScreen({ kind: 'campHub', campaign: c }); }} />;
@@ -272,7 +275,8 @@ export function App() {
 }
 
 /** Partie en ligne : notre camp est en bas, le camp adverse est joué à distance. Revanche, série et emotes. */
-function OnlineGame({ start: first, gameOpts, onExit, onResult }: {
+function OnlineGame({ start: first, gameOpts, onExit, onResult, loadout }: {
+  loadout: string[];
   start: OnlineStart; gameOpts: { animMul: number; aiMul: number; bannerMul: number; initialReveal: boolean }; onExit: () => void; onResult: (win: boolean) => void;
 }) {
   const link = first.link;
@@ -322,7 +326,6 @@ function OnlineGame({ start: first, gameOpts, onExit, onResult }: {
   }, [rematch, start, link, newRound]);
 
   const other = start.side === 'A' ? 'B' : 'A';
-  const myFaction = start.setup[start.side].faction;
   const quit = () => { try { link.send({ t: 'bye' }); } catch { /* déjà fermée */ } link.close(); onExit(); };
   const emote = (id: string) => {
     if (Date.now() - lastEmote.current < 2000) return;
@@ -341,11 +344,11 @@ function OnlineGame({ start: first, gameOpts, onExit, onResult }: {
         <button type="button" onClick={() => setMuted(m => !m)} title={muted ? 'Réafficher les emotes adverses' : 'Masquer les emotes adverses'}>{muted ? '🔇' : '🔈'}</button>
         {emoteOpen && (
           <div className="emote-menu" role="menu">
-            {emotesFor(myFaction).map(id => <button key={id} type="button" role="menuitem" onClick={() => emote(id)}>{EMOTES[id]}</button>)}
+            {loadout.map(id => <button key={id} type="button" role="menuitem" onClick={() => emote(id)}>{EMOTES[id]}</button>)}
           </div>
         )}
       </div>
-      {bubbles.map(b => <div key={b.id} className={`emote-bubble ${b.mine ? 'mine' : 'theirs'}`}><b>{b.mine ? start.names[start.side] : start.names[other]}</b> {b.text}</div>)}
+      {bubbles.map(b => <div key={b.id} className={`emote-bubble ${b.mine ? 'mine' : 'theirs'}`}><Avatar id={start.avatars[b.mine ? start.side : other]} size={34} /><b>{b.mine ? start.names[start.side] : start.names[other]}</b> {b.text}</div>)}
     </>
   );
 
@@ -362,6 +365,7 @@ function OnlineGame({ start: first, gameOpts, onExit, onResult }: {
         bottomSide={start.side}
         remote={{ side: other, send: a => link.send({ t: 'act', n: sent.current++, a }), inbox }}
         title={`Partie en ligne — ${seriesText}`}
+        avatars={start.avatars}
         onQuit={quit}
         overlay={emoteUi}
         onOver={g => {

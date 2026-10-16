@@ -6,7 +6,7 @@ import { hostRoom, joinRoom, manualHost, manualJoin, newRoomCode, PROTOCOL, webr
 import { checkDeck, sortedDecks, type Profile } from '../profile/profile';
 import { DeckSelect, resolveDeck, TopBar } from './Screens';
 
-export interface OnlineStart { link: Link; setup: GameSetup; side: PlayerId; names: Record<PlayerId, string>; isHost: boolean; msg: Extract<NetMsg, { t: 'start' }> }
+export interface OnlineStart { link: Link; setup: GameSetup; side: PlayerId; names: Record<PlayerId, string>; avatars: Record<PlayerId, string | undefined>; isHost: boolean; msg: Extract<NetMsg, { t: 'start' }> }
 
 type Step =
   | { k: 'menu' }
@@ -27,7 +27,7 @@ export function OnlineLobby({ profile, onStart, onBack, goDecks }: { profile: Pr
   useEffect(() => () => cleanup.current?.(), []);
 
   const validDeck = deckKey.startsWith('my:') ? profile.decks.some(d => `my:${d.id}` === deckKey && checkDeck(d.cards, profile).ok) : profile.options.allUnlocked;
-  const mine = () => { const d = resolveDeck(profile, deckKey); return { name: name.trim() || 'Joueur', faction: d.faction, deck: d.cards }; };
+  const mine = () => { const d = resolveDeck(profile, deckKey); return { name: name.trim() || 'Joueur', faction: d.faction, deck: d.cards, avatar: profile.avatar }; };
 
   /** Une fois reliés : chacun se présente, puis l'hôte fixe la partie (graine, camp, decks) et l'envoie. */
   const handshake = (link: Link, isHost: boolean) => {
@@ -38,7 +38,7 @@ export function OnlineLobby({ profile, onStart, onBack, goDecks }: { profile: Pr
       if (m.t === 'hello' && isHost) {
         if (m.v !== PROTOCOL) { setError('Versions du jeu différentes : mettez tous les deux le jeu à jour.'); link.close(); return; }
         const hostSide: PlayerId = Math.random() < 0.5 ? 'A' : 'B';
-        const them = { name: m.name, faction: m.faction, deck: m.deck };
+        const them = { name: m.name, faction: m.faction, deck: m.deck, avatar: m.avatar };
         const start: NetMsg = { t: 'start', seed: `net-${Date.now()}-${Math.random()}`, hostSide, A: hostSide === 'A' ? me : them, B: hostSide === 'A' ? them : me };
         link.send(start);
         begin(link, start, hostSide, true);
@@ -189,7 +189,7 @@ export function OnlineLobby({ profile, onStart, onBack, goDecks }: { profile: Pr
 export function startFromMsg(link: Link, m: Extract<NetMsg, { t: 'start' }>, side: PlayerId, isHost: boolean): OnlineStart {
   const names = { A: m.A.name, B: m.B.name };
   if (names.A === names.B) { names.A += ' (A)'; names.B += ' (B)'; }
-  return { link, side, names, isHost, msg: m, setup: { seed: m.seed, A: { faction: m.A.faction, deck: m.A.deck }, B: { faction: m.B.faction, deck: m.B.deck } } };
+  return { link, side, names, avatars: { A: m.A.avatar, B: m.B.avatar }, isHost, msg: m, setup: { seed: m.seed, A: { faction: m.A.faction, deck: m.A.deck }, B: { faction: m.B.faction, deck: m.B.deck } } };
 }
 
 /** Revanche : l'hôte relance avec une nouvelle graine, et l'autre joueur commence cette fois. */
@@ -199,12 +199,3 @@ export function rematchMsg(prev: Extract<NetMsg, { t: 'start' }>): Extract<NetMs
   return { t: 'start', seed: `net-${Date.now()}-${Math.random()}`, hostSide, A: hostSide === 'A' ? host : guest, B: hostSide === 'A' ? guest : host };
 }
 
-/** Répliques (emotes) : communes, puis propres à la faction de celui qui les envoie. */
-export const EMOTES: Record<string, string> = {
-  salut: 'Salutations !', bravo: 'Bien joué !', merci: 'Merci !', oups: 'Oups…', reflexion: 'Laisse-moi réfléchir…',
-  'empire.1': 'Pour l’Empire !', 'empire.2': 'Tenez la ligne !', 'empire.3': 'La discipline vaincra.',
-  'elfe.1': 'La forêt se souvient.', 'elfe.2': 'Le vent est avec nous.', 'elfe.3': 'Que les racines vous retiennent !',
-  'demons.1': 'Vos âmes sont à nous.', 'demons.2': 'Le sacrifice est un honneur.', 'demons.3': 'L’Abîme a faim.',
-  'nomades.1': 'Le sable vous engloutira.', 'nomades.2': 'Vos réserves sont à moi.', 'nomades.3': 'Le désert ne pardonne pas.',
-};
-export const emotesFor = (faction: string) => ['salut', 'bravo', 'merci', 'oups', 'reflexion', ...[1, 2, 3].map(i => `${faction}.${i}`).filter(k => EMOTES[k])];

@@ -1,5 +1,6 @@
 // Profil du joueur : collection de cartes, monnaie, decks, options. Sauvegardé dans le navigateur.
 import { CARDS } from '../data/cards';
+import { AVATAR_CHANCE, AVATAR_IDS, BASE_AVATAR, BASE_EMOTES, EMOTE_CHANCE, EMOTE_IDS, MAX_LOADOUT } from './cosmetics';
 import { clearActiveProfileData, keyFor } from './store';
 
 export const MAX_COPIES = 3;
@@ -47,6 +48,11 @@ export interface Profile {
   /** Nom du profil (utilisé en ligne). */
   name: string;
   stats: Stats;
+  /** Cosmétiques possédés et choisis. */
+  emotes: string[];
+  emoteLoadout: string[];
+  avatars: string[];
+  avatar: string;
 }
 
 /** Decks triés : favoris d'abord, puis les plus récemment modifiés. */
@@ -65,6 +71,10 @@ export function newProfile(): Profile {
     mergedCampaigns: [],
     name: 'Joueur',
     stats: structuredClone(EMPTY_STATS),
+    emotes: BASE_EMOTES.slice(),
+    emoteLoadout: BASE_EMOTES.slice(),
+    avatars: [BASE_AVATAR],
+    avatar: BASE_AVATAR,
   };
 }
 
@@ -92,20 +102,34 @@ export function checkDeck(cards: string[], p?: Profile): DeckCheck {
 }
 
 // ---------- Paquets ----------
-export interface PackResult { cards: { id: string; isNew: boolean; extra: boolean }[]; refund: number }
+export interface PackItem { id: string; isNew: boolean; extra: boolean; kind?: 'card' | 'emote' | 'avatar' }
+export interface PackResult { cards: PackItem[]; refund: number }
 
-/** Ouvre un paquet de 5 cartes tirées dans toute la collection possible. `rand` renvoie un nombre dans [0, 1). */
+/** Ouvre un paquet de 5 cartes tirées dans toute la collection possible. `rand` renvoie un nombre dans [0, 1).
+ * Une carte peut être remplacée par une emote (1 chance sur 5) et une autre par une image de profil (1 sur 10). */
 export function openPack(p: Profile, rand: () => number = Math.random): PackResult | null {
   if (p.coins < PACK_PRICE) return null;
   p.coins -= PACK_PRICE;
   const out: PackResult = { cards: [], refund: 0 };
-  for (let i = 0; i < PACK_SIZE; i++) {
+  const withEmote = rand() < EMOTE_CHANCE, withAvatar = rand() < AVATAR_CHANCE;
+  const cosmetic = (pool: string[], owned: string[], kind: 'emote' | 'avatar') => {
+    const fresh = pool.filter(x => !owned.includes(x));
+    if (!fresh.length) { out.refund += COINS_PER_EXTRA; out.cards.push({ id: pool[Math.floor(rand() * pool.length)]!, isNew: false, extra: true, kind }); return; }
+    const id = fresh[Math.floor(rand() * fresh.length)]!;
+    owned.push(id);
+    out.cards.push({ id, isNew: true, extra: false, kind });
+  };
+  if (withEmote) cosmetic(EMOTE_IDS, p.emotes, 'emote');
+  if (withAvatar) cosmetic(AVATAR_IDS, p.avatars, 'avatar');
+  while (out.cards.length < PACK_SIZE) {
     const id = COLLECTIBLE[Math.floor(rand() * COLLECTIBLE.length)]!;
     const have = p.collection[id] ?? 0;
-    if (have >= MAX_COPIES) { out.refund += COINS_PER_EXTRA; out.cards.push({ id, isNew: false, extra: true }); continue; }
+    if (have >= MAX_COPIES) { out.refund += COINS_PER_EXTRA; out.cards.push({ id, isNew: false, extra: true, kind: 'card' }); continue; }
     p.collection[id] = have + 1;
-    out.cards.push({ id, isNew: have === 0, extra: false });
+    out.cards.push({ id, isNew: have === 0, extra: false, kind: 'card' });
   }
+  // Les cosmétiques ne sont pas toujours en tête du paquet.
+  for (let i = out.cards.length - 1; i > 0; i--) { const k = Math.floor(rand() * (i + 1)); [out.cards[i], out.cards[k]] = [out.cards[k]!, out.cards[i]!]; }
   p.coins += out.refund;
   return out;
 }
@@ -142,6 +166,12 @@ export function sanitizeProfile(raw: unknown): Profile {
     mergedCampaigns: Array.isArray(r.mergedCampaigns) ? r.mergedCampaigns.filter(x => typeof x === 'string') : [],
     name: typeof r.name === 'string' && r.name.trim() ? r.name.trim().slice(0, 24) : 'Joueur',
     stats: Object.fromEntries((Object.keys(EMPTY_STATS) as (keyof Stats)[]).map(k => [k, { w: Math.max(0, Number(r.stats?.[k]?.w) | 0), l: Math.max(0, Number(r.stats?.[k]?.l) | 0) }])) as unknown as Stats,
+    ...(() => {
+      const emotes = [...new Set([...BASE_EMOTES, ...(Array.isArray(r.emotes) ? r.emotes : []).filter(x => EMOTE_IDS.includes(x))])];
+      const avatars = [...new Set([BASE_AVATAR, ...(Array.isArray(r.avatars) ? r.avatars : []).filter(x => AVATAR_IDS.includes(x))])];
+      const loadout = (Array.isArray(r.emoteLoadout) ? r.emoteLoadout : emotes).filter(x => emotes.includes(x)).slice(0, MAX_LOADOUT);
+      return { emotes, avatars, emoteLoadout: loadout.length ? loadout : emotes.slice(0, MAX_LOADOUT), avatar: typeof r.avatar === 'string' && avatars.includes(r.avatar) ? r.avatar : BASE_AVATAR };
+    })(),
   };
 }
 export function loadProfile(): Profile {

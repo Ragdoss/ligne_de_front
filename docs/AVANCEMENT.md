@@ -154,3 +154,11 @@ aux outils avec `--patch` : `npm run sim -- 100 v2 --patch balance/equilibrage-1
 - **Confort** : niveau affiché sur chaque régiment du plateau, zoom des cartes et des régiments au survol, glisser-déposer
   d'une carte de la main sur une case en surbrillance, animation du tri de la main, pièce « œil » qui simule le combat de fin
   de tour (pertes d'END/Moral par régiment, régiments détruits grisés, résumé lassitude), plateau teinté en bleu pendant la simulation.
+
+## Cosmétiques : images de profil et emotes
+
+- 16 images de profil (bustes des personnages des 4 factions) et 22 emotes (`src/profile/cosmetics.ts`).
+- Nouveau profil : 2 emotes (« Salutations ! », « Bien joué ! ») et 1 image (Épéiste impérial).
+- Paquets : 1 chance sur 5 qu'une carte soit remplacée par une emote, 1 sur 10 par une image de profil (déjà possédée : +1 pièce).
+- Options → Image de profil / Emotes en ligne : choix de l'image et des 6 emotes emportées en partie en ligne.
+- L'image s'affiche à l'accueil, dans la barre du joueur (local et en ligne, l'adversaire en ligne envoie la sienne) et dans les bulles d'emote.

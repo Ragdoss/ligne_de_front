@@ -2,6 +2,8 @@
 import { useState } from 'react';
 import { CARDS } from '../data/cards';
 import { COLLECTIBLE, MAX_COPIES, openPack, PACK_PRICE, PACK_SIZE, type PackResult, type Profile } from '../profile/profile';
+import { AVATARS, EMOTES } from '../profile/cosmetics';
+import { Avatar } from './avatars';
 import { CardTile } from './CardTile';
 import { cardName, FACTION_LABEL, TYPE_LABEL } from './labels';
 
@@ -48,11 +50,15 @@ function PackReveal({ result, onClose }: { result: PackResult; onClose: () => vo
         <h2>Nouveau paquet</h2>
         <div className="pack">
           {result.cards.map((c, i) => (
-            <button key={i} type="button" className={`pack-slot${i < shown ? ' open' : ''}`} onClick={() => setShown(Math.max(shown, i + 1))} aria-label={i < shown ? cardName(c.id) : 'Retourner la carte'}>
+            <button key={i} type="button" className={`pack-slot${i < shown ? ' open' : ''}`} onClick={() => setShown(Math.max(shown, i + 1))} aria-label={i < shown ? (c.kind === 'emote' ? `Emote : ${EMOTES[c.id]}` : c.kind === 'avatar' ? `Image de profil : ${AVATARS[c.id]}` : cardName(c.id)) : 'Retourner la carte'}>
               {i < shown ? (
                 <>
-                  <CardTile id={c.id} />
-                  <span className={`tag${c.isNew ? ' new' : c.extra ? ' extra' : ''}`}>{c.isNew ? 'Nouvelle !' : c.extra ? `Déjà ${MAX_COPIES} : +1 pièce` : '+1 exemplaire'}</span>
+                  {c.kind === 'emote' ? (
+                    <div className="cosmo emote"><span className="cosmo-type">Emote</span><p>« {EMOTES[c.id]} »</p></div>
+                  ) : c.kind === 'avatar' ? (
+                    <div className="cosmo avatar-card"><span className="cosmo-type">Image de profil</span><Avatar id={c.id} size={110} /><p>{AVATARS[c.id]}</p></div>
+                  ) : <CardTile id={c.id} />}
+                  <span className={`tag${c.isNew ? ' new' : c.extra ? ' extra' : ''}`}>{c.isNew ? (c.kind && c.kind !== 'card' ? 'Débloquée !' : 'Nouvelle !') : c.extra ? (c.kind && c.kind !== 'card' ? 'Déjà possédée : +1 pièce' : `Déjà ${MAX_COPIES} : +1 pièce`) : '+1 exemplaire'}</span>
                 </>
               ) : <span className="pack-back">?</span>}
             </button>
@@ -87,7 +93,7 @@ export function MyCards({ profile, update }: { profile: Profile; update: (fn: (p
           if (res) setPack(res);
         }}>Ouvrir un paquet ({PACK_SIZE} cartes, {PACK_PRICE} pièces)</button>
       </div>
-      <p className="muted small">Chaque victoire contre l’ordinateur ou en campagne rapporte 5 pièces. Un exemplaire tiré au-delà de 3 rend 1 pièce. La fin d’une campagne ajoute ses cartes à ta collection.</p>
+      <p className="muted small">Chaque victoire contre l’ordinateur ou en campagne rapporte 5 pièces. Un exemplaire tiré au-delà de 3 rend 1 pièce. Un paquet peut aussi contenir une emote (1 chance sur 5) ou une image de profil (1 sur 10). La fin d’une campagne ajoute ses cartes à ta collection.</p>
       <FilterBar f={f} set={setF} />
       <div className="camp-grid">
         {ids.map(id => <CardTile key={id} id={id} dim={!have(id)} badge={<span className={`count${have(id) ? '' : ' zero'}`}>{have(id)} / {MAX_COPIES}</span>} />)}

@@ -434,3 +434,18 @@ button.danger { background: var(--danger); border: 1px solid var(--danger); colo
 .preview-sum { margin: 0; flex: 1 1 260px; font-size: .82rem; color: #9cc8ff; }
 .hcard.off:hover { opacity: .95; }
 .join-row.plain .search { text-transform: none; letter-spacing: normal; }
+.avatar { border-radius: 50%; object-fit: cover; object-position: 50% 6%; background: var(--paper); border: 2px solid var(--brass); flex: none; vertical-align: middle; }
+.pbar .avatar { margin-right: 4px; }
+.home-who { display: flex; align-items: center; gap: 10px; margin: 0; }
+.home-who b { font-family: 'Cinzel', serif; color: var(--parchment); }
+.avatar-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+.avatar-pick { display: grid; justify-items: center; gap: 4px; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 8px 4px; font-size: .72rem; }
+.avatar-pick.on { border-color: var(--brass-bright); box-shadow: 0 0 0 2px var(--brass-bright) inset; }
+.avatar-pick.locked .avatar { filter: grayscale(1) brightness(.4); }
+.emote-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 4px 12px; }
+.emote-pick { display: flex; gap: 8px; align-items: center; font-size: .88rem; }
+.emote-pick.locked { opacity: .5; }
+.emote-bubble { display: flex; align-items: center; gap: 8px; }
+.cosmo { background: var(--paper); color: var(--slate-ink); border-radius: 6px; border-top: 4px solid var(--navy); padding: 10px; display: grid; justify-items: center; gap: 6px; min-height: 180px; align-content: center; text-align: center; }
+.cosmo p { margin: 0; font-family: 'Cinzel', serif; font-size: .9rem; color: var(--navy); }
+.cosmo-type { font-size: .68rem; text-transform: uppercase; letter-spacing: .1em; color: #4b5470; }

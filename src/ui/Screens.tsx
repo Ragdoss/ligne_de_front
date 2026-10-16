@@ -6,6 +6,8 @@ import type { CampaignDef } from '../campaign/types';
 import { DEMO_DECKS } from '../data/decks';
 import type { Faction } from '../engine/types';
 import { checkDeck, DEFAULT_OPTIONS, newProfile, profileCode, profileFromCode, resetEverything, saveProfile, sortedDecks, type Options, type Profile } from '../profile/profile';
+import { AVATAR_IDS, AVATARS, EMOTE_IDS, EMOTES, MAX_LOADOUT } from '../profile/cosmetics';
+import { Avatar } from './avatars';
 import { activeProfileId, createProfileEntry, deleteProfileEntry, listProfiles, renameProfileEntry, setActiveProfile } from '../profile/store';
 import { mainFaction } from './Decks';
 import { FACTION_LABEL, PLAYABLE_FACTIONS } from './labels';
@@ -32,7 +34,7 @@ export function Home({ profile, go }: { profile: Profile; go: (t: HomeTarget) =>
           </button>
         ))}
       </nav>
-      <p className="pill coins">Pièces : <b>{profile.coins}</b></p>
+      <p className="home-who"><Avatar id={profile.avatar} size={44} /> <b>{profile.name}</b> <span className="pill coins">Pièces : <b>{profile.coins}</b></span></p>
     </div>
   );
 }
@@ -209,6 +211,46 @@ function ProfilesBlock({ profile, update, onSwitchProfile }: { profile: Profile;
   );
 }
 
+/** Apparence : image de profil et emotes emportées en ligne (parmi celles débloquées dans les paquets). */
+function CosmeticsBlock({ profile, update }: { profile: Profile; update: (fn: (p: Profile) => void) => void }) {
+  const toggle = (id: string) => update(p => {
+    const on = p.emoteLoadout.includes(id);
+    if (on) { if (p.emoteLoadout.length > 1) p.emoteLoadout = p.emoteLoadout.filter(x => x !== id); }
+    else if (p.emoteLoadout.length < MAX_LOADOUT) p.emoteLoadout = [...p.emoteLoadout, id];
+  });
+  return (
+    <section className="menu-block">
+      <h2>Image de profil</h2>
+      <div className="avatar-grid">
+        {AVATAR_IDS.map(id => {
+          const have = profile.avatars.includes(id);
+          return (
+            <button key={id} type="button" disabled={!have} className={`avatar-pick${profile.avatar === id ? ' on' : ''}${have ? '' : ' locked'}`}
+              title={have ? AVATARS[id] : `${AVATARS[id]} — à débloquer dans les paquets`} onClick={() => update(p => { p.avatar = id; })}>
+              <Avatar id={id} size={64} />
+              <span>{have ? AVATARS[id] : '🔒'}</span>
+            </button>
+          );
+        })}
+      </div>
+      <h2>Emotes en ligne <small className="muted">({profile.emoteLoadout.length} / {MAX_LOADOUT} choisies)</small></h2>
+      <div className="emote-grid">
+        {EMOTE_IDS.map(id => {
+          const have = profile.emotes.includes(id);
+          const on = profile.emoteLoadout.includes(id);
+          return (
+            <label key={id} className={`emote-pick${have ? '' : ' locked'}`} title={have ? '' : 'À débloquer dans les paquets'}>
+              <input type="checkbox" disabled={!have || (!on && profile.emoteLoadout.length >= MAX_LOADOUT)} checked={on} onChange={() => toggle(id)} />
+              {have ? `« ${EMOTES[id]} »` : '🔒 Emote à débloquer'}
+            </label>
+          );
+        })}
+      </div>
+      <p className="muted small">Les emotes et les images de profil se débloquent dans les paquets (Ma collection → Mes cartes).</p>
+    </section>
+  );
+}
+
 export function OptionsScreen({ profile, update, onBack, onSwitchProfile }: { profile: Profile; update: (fn: (p: Profile) => void) => void; onBack: () => void; onSwitchProfile: () => void }) {
   const o = profile.options;
   const set = <K extends keyof Options>(k: K, v: Options[K]) => update(p => { p.options[k] = v; });
@@ -225,6 +267,7 @@ export function OptionsScreen({ profile, update, onBack, onSwitchProfile }: { pr
     <div className="setup">
       <TopBar title="Options" onBack={onBack} />
       <ProfilesBlock profile={profile} update={update} onSwitchProfile={onSwitchProfile} />
+      <CosmeticsBlock profile={profile} update={update} />
       <section className="menu-block">
         {range('scale', 'Taille de l’interface', 0.8, 1.4, 0.05, v => `${Math.round(v * 100)} %`)}
         {range('animSpeed', 'Durée des animations de combat', 0.25, 2, 0.25, v => (v === 1 ? 'normale' : `×${v}`))}
@@ -250,7 +293,7 @@ export function OptionsScreen({ profile, update, onBack, onSwitchProfile }: { pr
       <section className="menu-block">
         <h2>Sauvegarde du profil</h2>
         <p className="muted small">Ta collection, tes pièces, tes decks et tes options sont enregistrés dans ce navigateur. Ce code permet de les transférer ailleurs.</p>
-        <code className="code">{profileCode(profile)}</code>
+        <details><summary>Afficher le code de ce profil</summary><code className="code">{profileCode(profile)}</code></details>
         <div className="custom-deck">
           <textarea rows={2} value={code} onChange={e => { setCode(e.target.value); setMsg(''); }} aria-label="Code de profil à importer" />
           <button type="button" onClick={() => { const p = profileFromCode(code); if (!p) { setMsg('Code invalide.'); return; } update(cur => Object.assign(cur, p)); setMsg('Profil importé.'); }}>Importer ce profil (remplace l’actuel)</button>
