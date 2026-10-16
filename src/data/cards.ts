@@ -878,7 +878,8 @@ export const CARDS: Record<string, CardDef> = {
     "bonusAtk": 5,
     "bonusArm": 0,
     "bonusIni": 0,
-    "bonusMor": 0
+    "bonusMor": 0,
+    "leaderNoAllyDeathMoralLoss": true
   },
   "pretre_sacrificiel": {
     "id": "pretre_sacrificiel",

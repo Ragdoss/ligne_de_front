@@ -214,7 +214,7 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "acolyte_damne": {
     "name": "Acolyte Damné",
-    "desc": "+5 ATK. Premier Leader Démon, aucun prérequis de Leader existant."
+    "desc": "+5 ATK. Le régiment porteur ne perd pas de Moral quand un régiment allié est détruit."
   },
   "pretre_sacrificiel": {
     "name": "Prêtre Sacrificiel",

@@ -19,6 +19,20 @@ describe('Nouvelles cartes', () => {
     expect(s.players.A.board.avant[2]!.currentMor).toBe(garg.currentMor + 1); // Minions : pas de perte de Moral
     expect(s.players.A.board.avant[3]!.currentEnd).toBe(lord.currentEnd + 10);
   });
+  it('Acolyte Damné : son porteur ne perd pas de Moral à la mort d\'un allié (sauf Moral brisé)', () => {
+    const s = blankGame();
+    const led = place(s, 'A', 'avant', 0, 'chien_infernal', { leader: 'acolyte_damne', leaderOwner: 'A' });
+    const other = place(s, 'A', 'avant', 1, 'cultiste');
+    const dead = place(s, 'A', 'avant', 2, 'chien_infernal');
+    const m0 = led.currentMor, o0 = other.currentMor;
+    new Ctx(s).destroy(dead, 'end');
+    expect(led.currentMor).toBe(m0);
+    expect(other.currentMor).toBe(o0 - 1);
+    led.brokenMorale = true;
+    const dead2 = place(s, 'A', 'avant', 3, 'chien_infernal');
+    new Ctx(s).destroy(dead2, 'end');
+    expect(led.currentMor).toBe(m0 - 1);
+  });
   it('Effrayant : la valeur la plus forte compte (Seigneur des Abysses sur un Chien Infernal)', () => {
     const s = blankGame();
     const u = place(s, 'A', 'avant', 0, 'chien_infernal');

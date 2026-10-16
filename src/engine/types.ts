@@ -86,6 +86,8 @@ export interface CardDef {
   excludeFromMoralTotal?: boolean;
   onEnemyDeathMoral?: number;
   onAllyDeathMoralGain?: number;
+  /** Leader : le régiment porteur ne perd pas de Moral quand un allié est détruit (hors Moral brisé). */
+  leaderNoAllyDeathMoralLoss?: boolean;
   onDeathDraw?: number;
   // Autres capacités (Démons, Nomades) pas encore portées : tolérées dans les données.
   [extra: string]: unknown;

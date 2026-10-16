@@ -440,7 +440,8 @@ export class Ctx {
 
     const allies = this.units(p);
     for (const a of allies) {
-      if (!minion) {
+      const steady = !!a.leader && !a.brokenMorale && !!card(a.leader).leaderNoAllyDeathMoralLoss; // Acolyte Damné
+      if (!minion && !steady) {
         const lost = this.loseMoral(a, 1);
         if (lost) this.emit({ type: 'moralLoss', uid: a.uid, cardId: a.cardId, amount: lost, source: 'allyDeath' });
       }
