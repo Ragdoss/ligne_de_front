@@ -10,11 +10,11 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "archer_imp": {
     "name": "Archer Impérial",
-    "desc": "Mot-clé Distance."
+    "desc": ""
   },
   "arbaletrier_imp": {
     "name": "Arbalétrier Impérial",
-    "desc": "Lent. Pénétration d'armure 5 (ignore les 5 premiers points d'Armure de sa cible)."
+    "desc": ""
   },
   "chevalier_prov": {
     "name": "Chevalier de Province",
@@ -26,11 +26,11 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "general_empire": {
     "name": "Général de l'Empire",
-    "desc": "+10 ATK, +5 ARM, +10 END permanents au porteur. Au début de chaque tour de son contrôleur, le porteur gagne 1 Moral par régiment Empire adjacent sur sa ligne."
+    "desc": "Au début de chaque tour de son contrôleur, le porteur gagne 1 Moral par régiment Empire adjacent sur sa ligne."
   },
   "soldat_kragz": {
     "name": "Soldat de Kragz",
-    "desc": "5 ARM de base ; +5 ARM tant qu'il porte un Leader."
+    "desc": "+5 ARM tant qu'il porte un Leader."
   },
   "porte_etendard": {
     "name": "Porte-Étendard",
@@ -42,7 +42,7 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "cadets_academie": {
     "name": "Cadets de l'Académie",
-    "desc": "Avant ou arrière. À son arrivée, crée un Lieutenant dans ta main."
+    "desc": "À son arrivée, crée un Lieutenant dans ta main."
   },
   "forteresse": {
     "name": "Forteresse l'Intuable",
@@ -50,15 +50,15 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "capitaine_garde": {
     "name": "Capitaine de la Garde",
-    "desc": "Leader : +10 ARM, +2 MOR."
+    "desc": ""
   },
   "aumonier_guerre": {
     "name": "Aumônier de Guerre",
-    "desc": "Leader : à son attache puis au début de chaque tour de son contrôleur, le porteur regagne 10 END et 1 Moral."
+    "desc": "À son attache puis au début de chaque tour de son contrôleur, le porteur regagne 10 END et 1 Moral."
   },
   "marechal_empire": {
     "name": "Maréchal d'Empire",
-    "desc": "Leader requérant Empire + Dragon : +20 ATK, +10 ARM, +6 MOR. Si le porteur est ton seul régiment, tu gagnes la comparaison de Moral de fin de tour."
+    "desc": "Si le porteur est ton seul régiment, tu gagnes la comparaison de Moral de fin de tour."
   },
   "ralliement": {
     "name": "Ralliement",
@@ -90,11 +90,11 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "lieutenant": {
     "name": "Lieutenant",
-    "desc": "+5 ATK, +5 INI, +2 Moral permanent au porteur."
+    "desc": ""
   },
   "etat_major": {
     "name": "État Major",
-    "desc": "Isolé. +2 ressources/tour ; rallie 3 Moral aux régiments Empire au Moral brisé de son contrôleur."
+    "desc": "+2 ressources/tour ; rallie 3 Moral aux régiments Empire au Moral brisé de son contrôleur."
   },
   "ordre_haut_commandement": {
     "name": "Ordre du Haut Commandement",
@@ -134,7 +134,7 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "clerc_foret": {
     "name": "Clerc de la Forêt",
-    "desc": "Isolé, Distance, durée de vie 3 tours. Génère Soin simple en main chaque tour."
+    "desc": "Durée de vie 3 tours. Génère Soin simple en main chaque tour."
   },
   "elem_terre": {
     "name": "Élémentaire de Terre",
@@ -142,11 +142,11 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "elem_eau": {
     "name": "Élémentaire d'Eau",
-    "desc": "Distance. À chaque fin de ton tour, soigne de 10 END ton régiment le plus blessé ; s'il atteint ainsi son END max, il gagne 1 Moral."
+    "desc": "À chaque fin de ton tour, soigne de 10 END ton régiment le plus blessé ; s'il atteint ainsi son END max, il gagne 1 Moral."
   },
   "elem_eveil_regiment": {
     "name": "Élémentaire Éveillé",
-    "desc": "Mot-clé Minions."
+    "desc": ""
   },
   "eveil_elementaire": {
     "name": "Éveil Élémentaire",
@@ -154,7 +154,7 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "vision": {
     "name": "Vision",
-    "desc": "Requiert Élémentaux. Les tactiques que tu joues coûtent 1 de moins (minimum 0, coûts variables compris). À l'attache : choisis une des 3 prochaines tactiques de ton deck, mélange le deck, puis mets-la en première carte."
+    "desc": "Les tactiques que tu joues coûtent 1 de moins (minimum 0, coûts variables compris). À l'attache : choisis une des 3 prochaines tactiques de ton deck, mélange le deck, puis mets-la en première carte."
   },
   "sylvain": {
     "name": "Sylvain, Gardien Élémentaire",
@@ -162,7 +162,7 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "druide_ancien": {
     "name": "Druide Ancien",
-    "desc": "+15 ATK, +10 ARM au porteur (double type requis)."
+    "desc": ""
   },
   "volee_fleches": {
     "name": "Volée de Flèches",
@@ -182,11 +182,11 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "rangers": {
     "name": "Rangers",
-    "desc": "Distance, Lent. Sa cible est Sonnée. Si un Elfe l'achève, Rangers + le tueur regagnent 2 Moral."
+    "desc": "Sa cible est Sonnée. Si un Elfe l'achève, Rangers + le tueur regagnent 2 Moral."
   },
   "palissade_regiment": {
     "name": "Palissade",
-    "desc": "Mot-clé Minions."
+    "desc": ""
   },
   "palissade_tactique": {
     "name": "Palissade",
@@ -206,7 +206,7 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "chien_infernal": {
     "name": "Chien Infernal",
-    "desc": "Effrayant 1. Sacrifice niveau 1+ requis (coût d'accès, aucun gain)."
+    "desc": "Sacrifice niveau 1+ requis (coût d'accès, aucun gain)."
   },
   "esclave_guerrier": {
     "name": "Esclave Guerrier",
@@ -214,7 +214,7 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "acolyte_damne": {
     "name": "Acolyte Damné",
-    "desc": "+5 ATK. Le régiment porteur ne perd pas de Moral quand un régiment allié est détruit."
+    "desc": "Le régiment porteur ne perd pas de Moral quand un régiment allié est détruit."
   },
   "pretre_sacrificiel": {
     "name": "Prêtre Sacrificiel",
@@ -222,11 +222,11 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "suppot_infernal": {
     "name": "Suppôt Infernal",
-    "desc": "+10 ATK, +5 ARM, +5 INI. Remplace le Leader déjà présent. Quand le régiment porteur est détruit : copie en main d'un régiment Démon de ta défausse, qui coûte 2 de moins à jouer."
+    "desc": "Remplace le Leader déjà présent. Quand le régiment porteur est détruit : copie en main d'un régiment Démon de ta défausse, qui coûte 2 de moins à jouer."
   },
   "demon_akantha": {
     "name": "Démon d'Akantha",
-    "desc": "Effrayant 2. Sacrifice niveau 3+ : récupère ATK/END/ARM/INI réels du sacrifié. Soin 15 END si un ennemi meurt de Moral."
+    "desc": "Sacrifice niveau 3+ : récupère ATK/END/ARM/INI réels du sacrifié. Soin 15 END si un ennemi meurt de Moral."
   },
   "effroi_demoniaque": {
     "name": "Effroi Démoniaque",
@@ -266,7 +266,7 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "chant_vent": {
     "name": "Chant du Vent",
-    "desc": "+25 INI permanents au porteur."
+    "desc": ""
   },
   "veilleuse_sources": {
     "name": "Veilleuse des Sources",
@@ -294,7 +294,7 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "abime_grandissant": {
     "name": "Abîme Grandissant",
-    "desc": "Requiert Démon. Le porteur gagne +5 ATK par tranche de 10 points de lassitude de son contrôleur."
+    "desc": "Le porteur gagne +5 ATK par tranche de 10 points de lassitude de son contrôleur."
   },
   "ceremonie_declin": {
     "name": "Cérémonie du Déclin",
@@ -302,7 +302,7 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "veilleur_os": {
     "name": "Veilleur d'Os",
-    "desc": "Distance. Sacrifice niveau 3+ requis (coût d'accès, aucun gain). À son arrivée, tu peux récupérer en main un régiment Démon de ta défausse (il quitte la défausse) ; tu gagnes autant de lassitude que son niveau."
+    "desc": "Sacrifice niveau 3+ requis (coût d'accès, aucun gain). À son arrivée, tu peux récupérer en main un régiment Démon de ta défausse (il quitte la défausse) ; tu gagnes autant de lassitude que son niveau."
   },
   "banquet_infernal": {
     "name": "Banquet Infernal",
@@ -318,7 +318,7 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "maitre_chenil_infernal": {
     "name": "Maître du Chenil Infernal",
-    "desc": "Distance, Effrayant 1. Sacrifice niveau 4+. Chaque fin de tour de son contrôleur, comble le rang avant de Chiens Infernaux (Minions)."
+    "desc": "Sacrifice niveau 4+. Chaque fin de tour de son contrôleur, comble le rang avant de Chiens Infernaux (Minions)."
   },
   "jeune_nomade": {
     "name": "Jeune Nomade",
@@ -346,11 +346,11 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "maitre_caravane": {
     "name": "Maître de Caravane",
-    "desc": "Requiert un porteur Nomade. À son attache, le porteur refait son effet d'arrivée en jeu."
+    "desc": "À son attache, le porteur refait son effet d'arrivée en jeu."
   },
   "archeotacticiens": {
     "name": "Archéotacticiens",
-    "desc": "Distance. À son arrivée, met dans la défausse adverse une carte Tactique, une carte Leader et un régiment au hasard parmi les plus chers du deck adverse. Tant qu'il est en jeu, toute Tactique qui arrive dans la défausse adverse autrement que parce que l'adversaire l'a jouée vous offre une copie gratuite en main (coût 0, détruite en fin de votre tour)."
+    "desc": "À son arrivée, met dans la défausse adverse une carte Tactique, une carte Leader et un régiment au hasard parmi les plus chers du deck adverse. Tant qu'il est en jeu, toute Tactique qui arrive dans la défausse adverse autrement que parce que l'adversaire l'a jouée vous offre une copie gratuite en main (coût 0, détruite en fin de votre tour)."
   },
   "chasseur_reliques": {
     "name": "Chasseur de Reliques",
@@ -362,7 +362,7 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "caravane_marchande": {
     "name": "Caravane Marchande",
-    "desc": "Isolé, durée de vie 3 tours. Au début de ton tour : +1 ressource. À son arrivée, supprime une carte de la défausse adverse (ton choix) : sa durée de vie augmente du niveau de cette carte."
+    "desc": "Durée de vie 3 tours. Au début de ton tour : +1 ressource. À son arrivée, supprime une carte de la défausse adverse (ton choix) : sa durée de vie augmente du niveau de cette carte."
   },
   "eleveur_basilics": {
     "name": "Éleveur de Basilics",
@@ -370,7 +370,7 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "guide_desert": {
     "name": "Guide du Désert",
-    "desc": "Requiert un porteur Nomade : +15 INI, et le porteur n'a plus de pénalité d'apparition."
+    "desc": "Le porteur n'a plus de pénalité d'apparition."
   },
   "marche_noir": {
     "name": "Marché Noir",
@@ -398,7 +398,7 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "diablotins": {
     "name": "Diablotins",
-    "desc": "Minions (sa mort ne donne ni lassitude ni perte de Moral aux alliés). Quand il sert de sacrifice, tu gagnes 1 ressource."
+    "desc": "Quand il sert de sacrifice, tu gagnes 1 ressource."
   },
   "gargouille_cendres": {
     "name": "Gargouille de Cendres",
@@ -406,7 +406,7 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "seigneur_abysses": {
     "name": "Seigneur des Abysses",
-    "desc": "Requiert Démon. +10 ATK, +2 Moral, Effrayant 2. Chaque fois que tu sacrifies un régiment, le porteur regagne 10 END et 1 Moral."
+    "desc": "Le porteur gagne Effrayant 2. Chaque fois que tu sacrifies un régiment, le porteur regagne 10 END et 1 Moral."
   },
   "oeuf_dragon": {
     "name": "Œuf de Dragon",
@@ -414,11 +414,11 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "dragonnet_infernal": {
     "name": "Dragonnet Infernal",
-    "desc": "Effrayant 1."
+    "desc": ""
   },
   "dragon_infernal": {
     "name": "Dragon Infernal",
-    "desc": "Sacrifice niveau 4+ requis. Effrayant 2. À son arrivée, tous les régiments adverses perdent 2 Moral."
+    "desc": "Sacrifice niveau 4+ requis. À son arrivée, tous les régiments adverses perdent 2 Moral."
   },
   "cavaliers_dunes": {
     "name": "Cavaliers des Dunes",
@@ -426,11 +426,11 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "cheikh_dunes": {
     "name": "Cheikh des Dunes",
-    "desc": "Requiert un porteur Nomade. +5 ATK, +2 Moral. Chaque fois que l'adversaire défausse une carte de sa main, le porteur gagne +5 ATK permanent."
+    "desc": "Chaque fois que l'adversaire défausse une carte de sa main, le porteur gagne +5 ATK permanent."
   },
   "reine_basilics": {
     "name": "Reine des Basilics",
-    "desc": "Effrayant 1. À son arrivée, reprends en main le Basilic de plus haut niveau de ta défausse."
+    "desc": "À son arrivée, reprends en main le Basilic de plus haut niveau de ta défausse."
   },
   "tempete_sable": {
     "name": "Tempête de Sable",
@@ -442,11 +442,11 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "treant_millenaire": {
     "name": "Tréant Millénaire",
-    "desc": "120 END. À chaque fin de ton tour, soigne tous tes régiments de 5 END."
+    "desc": "À chaque fin de ton tour, soigne tous tes régiments de 5 END."
   },
   "gardienne_lumiere": {
     "name": "Gardienne de la Lumière",
-    "desc": "Distance. +15 ATK contre les Démons. À chaque fin de ton tour, soigne ton régiment le plus blessé de 10 END et 1 Moral."
+    "desc": "+15 ATK contre les Démons. À chaque fin de ton tour, soigne ton régiment le plus blessé de 10 END et 1 Moral."
   },
   "rite_purification": {
     "name": "Rite de Purification",
@@ -478,22 +478,22 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "gardienne_nid": {
     "name": "Gardienne du Nid",
-    "desc": "Vitale."
+    "desc": "Vitale. Une Basilic géante qui veille sur les œufs de dragon."
   },
   "chariot_oeufs": {
     "name": "Chariot des œufs",
-    "desc": "Vital. Avance d'une case vers la droite tous les deux tours."
+    "desc": "Vital. Le convoi des Démons : il avance d'une case tous les deux tours, de gauche à droite."
   },
   "oeuf_rituel": {
     "name": "Œuf de l'offrande",
-    "desc": "Vital."
+    "desc": "Vital. L'œuf que le culte doit recevoir."
   },
   "legionnaire_desert": {
     "name": "Légionnaire du désert",
-    "desc": ""
+    "desc": "Fantassin impérial équipé pour le désert (carte de scénario)."
   },
   "garde_capitale": {
     "name": "Garde de la capitale",
-    "desc": ""
+    "desc": "Garde impériale (carte de scénario)."
   }
 };
