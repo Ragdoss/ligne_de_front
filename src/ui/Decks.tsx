@@ -1,7 +1,7 @@
 // Mes decks : liste des decks du joueur et créateur de deck (règles vérifiées en direct).
 import { useMemo, useState } from 'react';
 import { CARDS } from '../data/cards';
-import { autoComplete, checkDeck, MAX_COPIES, owned, type Profile, type SavedDeck } from '../profile/profile';
+import { autoComplete, checkDeck, MAX_COPIES, owned, sortedDecks, type Profile, type SavedDeck } from '../profile/profile';
 import { CardTile } from './CardTile';
 import { filterCards, FilterBar, NO_FILTER, type Filters } from './Collection';
 import { cardName, FACTION_LABEL, PLAYABLE_FACTIONS } from './labels';
@@ -41,15 +41,17 @@ export function DeckList({ profile, update }: { profile: Profile; update: (fn: (
       </div>
       {profile.decks.length === 0 && <p className="muted">Aucun deck pour l’instant. Crée ton premier deck : le bouton « Compléter automatiquement » te propose un deck valide à partir de ta collection.</p>}
       <div className="deck-list">
-        {profile.decks.map(d => {
+        {sortedDecks(profile.decks).map(d => {
           const chk = checkDeck(d.cards, profile);
           const f = mainFaction(d.cards);
           return (
-            <button key={d.id} type="button" className={`deck-row ${f}`} onClick={() => setEditing(d)}>
+            <div key={d.id} className={`deck-row ${f}`} role="button" tabIndex={0} onClick={() => setEditing(d)} onKeyDown={e => { if (e.key === 'Enter') setEditing(d); }}>
+              <button type="button" className={`fav${d.fav ? ' on' : ''}`} aria-pressed={!!d.fav} title={d.fav ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+                onClick={e => { e.stopPropagation(); update(p => { const x = p.decks.find(y => y.id === d.id); if (x) x.fav = !x.fav; }); }}>{d.fav ? '★' : '☆'}</button>
               <b>{d.name}</b>
               <span>{d.cards.length} cartes · {FACTION_LABEL[f as keyof typeof FACTION_LABEL] ?? f}</span>
               <span className={chk.ok ? 'ok' : 'warn'}>{chk.ok ? 'Valide' : `${chk.problems.length} problème(s)`}</span>
-            </button>
+            </div>
           );
         })}
       </div>

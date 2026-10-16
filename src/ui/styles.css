@@ -384,3 +384,23 @@ button.danger { background: var(--danger); border: 1px solid var(--danger); colo
 .tuto.folded { width: auto; }
 @media (max-width: 700px) { .tuto { top: auto; bottom: 8px; right: 8px; left: 8px; width: auto; max-height: 45vh; } }
 .u-kw s { text-decoration: line-through; opacity: .6; } .u-kw s.kw-on { text-decoration: none; opacity: 1; }
+.deck-row { grid-template-columns: auto 1fr auto auto; cursor: pointer; }
+.deck-row .fav { background: none; border: none; font-size: 1.3rem; color: var(--parchment-dim); padding: 0 4px; line-height: 1; }
+.deck-row .fav.on { color: var(--brass-bright); }
+@media (max-width: 520px) { .deck-row { grid-template-columns: auto 1fr; } }
+.stats-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+.profile-list { display: grid; gap: 6px; }
+.profile-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.profile-row b { flex: 1 1 120px; }
+.profile-row button:not(.danger) { background: transparent; border: 1px solid var(--line); border-radius: 4px; padding: 4px 10px; }
+.series { margin: 0; font-family: 'Cinzel', serif; color: var(--brass-bright); font-variant-numeric: tabular-nums; }
+.emote-bar { position: fixed; left: 16px; bottom: 16px; z-index: 25; display: flex; gap: 6px; align-items: flex-end; }
+.emote-bar > button { background: var(--bg-panel); border: 1px solid var(--line); border-radius: 18px; padding: 6px 12px; }
+.emote-bar > button:hover { border-color: var(--brass-bright); }
+.emote-menu { position: absolute; bottom: 44px; left: 0; display: grid; gap: 4px; background: var(--bg-panel); border: 1px solid var(--brass); border-radius: 8px; padding: 6px; min-width: 230px; box-shadow: 0 6px 20px #000a; }
+.emote-menu button { text-align: left; background: transparent; border: 1px solid transparent; border-radius: 4px; padding: 6px 10px; }
+.emote-menu button:hover { border-color: var(--brass-bright); background: color-mix(in srgb, var(--brass) 12%, transparent); }
+.emote-bubble { position: fixed; z-index: 26; left: 50%; transform: translateX(-50%); background: var(--parchment); color: var(--ink); border: 2px solid var(--brass); border-radius: 14px; padding: 8px 16px; font-size: 1rem; box-shadow: 0 6px 20px #000a; animation: drop .25s ease-out; max-width: min(420px, calc(100vw - 32px)); }
+.emote-bubble.theirs { top: 70px; }
+.emote-bubble.mine { bottom: 80px; }
+.emote-bubble b { font-family: 'Cinzel', serif; margin-right: 6px; }

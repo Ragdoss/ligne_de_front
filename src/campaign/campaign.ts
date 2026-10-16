@@ -1,5 +1,6 @@
 // Campagne : passage d'un scénario à une partie du moteur, pool de cartes, récompenses, sauvegarde.
 import { CARDS } from '../data/cards';
+import { keyFor } from '../profile/store';
 import { DEFAULT_LEVEL_THRESHOLDS, type GameSetup } from '../engine/game';
 import type { Action, GameState, PlayerId } from '../engine/types';
 import { CAMPAIGN_BY_ID, SCENARIOS } from './campaigns';
@@ -136,7 +137,7 @@ export const selectionToDeck = (sel: Record<string, number>) => Object.entries(s
 
 // ---------- Sauvegarde ----------
 /** Une sauvegarde par campagne (la campagne Empire garde la clé historique). */
-const keyOf = (campaign: string) => (campaign === 'empire' ? 'ligneDeFront.jeu.campagne.v1' : `ligneDeFront.jeu.campagne.${campaign}.v1`);
+const keyOf = (campaign: string) => keyFor(campaign === 'empire' ? 'ligneDeFront.jeu.campagne.v1' : `ligneDeFront.jeu.campagne.${campaign}.v1`);
 export function sanitize(raw: unknown): CampaignSave | null {
   const c = raw as Partial<CampaignSave> | null;
   if (!c || !Array.isArray(c.pool) || typeof c.idx !== 'number') return null;

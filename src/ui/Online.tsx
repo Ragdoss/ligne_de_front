@@ -3,10 +3,10 @@ import { useEffect, useRef, useState } from 'react';
 import type { GameSetup } from '../engine/game';
 import type { Action, PlayerId } from '../engine/types';
 import { hostRoom, joinRoom, manualHost, manualJoin, newRoomCode, PROTOCOL, webrtcAvailable, type Link, type NetMsg } from '../net/link';
-import { checkDeck, type Profile } from '../profile/profile';
+import { checkDeck, sortedDecks, type Profile } from '../profile/profile';
 import { DeckSelect, resolveDeck, TopBar } from './Screens';
 
-export interface OnlineStart { link: Link; setup: GameSetup; side: PlayerId; names: Record<PlayerId, string> }
+export interface OnlineStart { link: Link; setup: GameSetup; side: PlayerId; names: Record<PlayerId, string>; isHost: boolean; msg: Extract<NetMsg, { t: 'start' }> }
 
 type Step =
   | { k: 'menu' }
@@ -17,9 +17,9 @@ type Step =
   | { k: 'handshake' };
 
 export function OnlineLobby({ profile, onStart, onBack, goDecks }: { profile: Profile; onStart: (s: OnlineStart) => void; onBack: () => void; goDecks: () => void }) {
-  const firstMine = profile.decks.find(d => checkDeck(d.cards, profile).ok);
+  const firstMine = sortedDecks(profile.decks).find(d => checkDeck(d.cards, profile).ok);
   const [deckKey, setDeckKey] = useState(firstMine ? `my:${firstMine.id}` : 'demo:empire');
-  const [name, setName] = useState('Joueur');
+  const name = profile.name;
   const [step, setStep] = useState<Step>({ k: 'menu' });
   const [joinCode, setJoinCode] = useState('');
   const [error, setError] = useState('');
@@ -41,19 +41,17 @@ export function OnlineLobby({ profile, onStart, onBack, goDecks }: { profile: Pr
         const them = { name: m.name, faction: m.faction, deck: m.deck };
         const start: NetMsg = { t: 'start', seed: `net-${Date.now()}-${Math.random()}`, hostSide, A: hostSide === 'A' ? me : them, B: hostSide === 'A' ? them : me };
         link.send(start);
-        begin(link, start, hostSide);
+        begin(link, start, hostSide, true);
       } else if (m.t === 'start' && !isHost) {
-        begin(link, m, m.hostSide === 'A' ? 'B' : 'A');
+        begin(link, m, m.hostSide === 'A' ? 'B' : 'A', false);
       }
     };
     link.onClose = () => { setError('La connexion a été coupée.'); setStep({ k: 'menu' }); };
     link.send({ t: 'hello', v: PROTOCOL, ...me });
   };
-  const begin = (link: Link, m: Extract<NetMsg, { t: 'start' }>, side: PlayerId) => {
+  const begin = (link: Link, m: Extract<NetMsg, { t: 'start' }>, side: PlayerId, isHost: boolean) => {
     link.onMessage = null; link.onClose = null;
-    const names = { A: m.A.name, B: m.B.name };
-    if (names.A === names.B) { names.A += ' (A)'; names.B += ' (B)'; }
-    onStart({ link, side, names, setup: { seed: m.seed, A: { faction: m.A.faction, deck: m.A.deck }, B: { faction: m.B.faction, deck: m.B.deck } } });
+    onStart(startFromMsg(link, m, side, isHost));
   };
   const fail = (msg: string) => { setError(msg); setStep({ k: 'menu' }); cleanup.current?.(); cleanup.current = null; };
 
@@ -103,7 +101,7 @@ export function OnlineLobby({ profile, onStart, onBack, goDecks }: { profile: Pr
 
       {step.k === 'menu' && (
         <>
-          <label className="field"><span>Ton nom</span><input className="search" value={name} maxLength={24} onChange={e => setName(e.target.value)} /></label>
+          <p className="muted small">Tu joues sous le nom de ton profil : <b>{name}</b> (modifiable dans Options → Profils).</p>
           <DeckSelect profile={profile} value={deckKey} onChange={setDeckKey} human label="Ton deck" />
           {!validDeck && <p className="warn">Il te faut un deck valide. <button type="button" className="link" onClick={goDecks}>Créer un deck</button> — ou active « Toutes les cartes débloquées » dans les options.</p>}
           <section className="menu-block">
@@ -187,16 +185,26 @@ export function OnlineLobby({ profile, onStart, onBack, goDecks }: { profile: Pr
   );
 }
 
-/** Ordre et contenu des actions reçues pour la partie en cours. */
-export function useRemoteInbox(link: Link | null): { inbox: Action[]; gone: boolean; send: (a: Action) => void } {
-  const [inbox, setInbox] = useState<Action[]>([]);
-  const [gone, setGone] = useState(false);
-  const sent = useRef(0);
-  useEffect(() => {
-    if (!link) return;
-    link.onMessage = m => { if (m.t === 'act') setInbox(i => [...i, m.a]); if (m.t === 'bye') setGone(true); };
-    link.onClose = () => setGone(true);
-    return () => { link.onMessage = null; link.onClose = null; };
-  }, [link]);
-  return { inbox, gone, send: a => link?.send({ t: 'act', n: sent.current++, a }) };
+/** Partie à partir du message de départ de l'hôte. */
+export function startFromMsg(link: Link, m: Extract<NetMsg, { t: 'start' }>, side: PlayerId, isHost: boolean): OnlineStart {
+  const names = { A: m.A.name, B: m.B.name };
+  if (names.A === names.B) { names.A += ' (A)'; names.B += ' (B)'; }
+  return { link, side, names, isHost, msg: m, setup: { seed: m.seed, A: { faction: m.A.faction, deck: m.A.deck }, B: { faction: m.B.faction, deck: m.B.deck } } };
 }
+
+/** Revanche : l'hôte relance avec une nouvelle graine, et l'autre joueur commence cette fois. */
+export function rematchMsg(prev: Extract<NetMsg, { t: 'start' }>): Extract<NetMsg, { t: 'start' }> {
+  const hostSide: PlayerId = prev.hostSide === 'A' ? 'B' : 'A';
+  const host = prev.hostSide === 'A' ? prev.A : prev.B, guest = prev.hostSide === 'A' ? prev.B : prev.A;
+  return { t: 'start', seed: `net-${Date.now()}-${Math.random()}`, hostSide, A: hostSide === 'A' ? host : guest, B: hostSide === 'A' ? guest : host };
+}
+
+/** Répliques (emotes) : communes, puis propres à la faction de celui qui les envoie. */
+export const EMOTES: Record<string, string> = {
+  salut: 'Salutations !', bravo: 'Bien joué !', merci: 'Merci !', oups: 'Oups…', reflexion: 'Laisse-moi réfléchir…',
+  'empire.1': 'Pour l’Empire !', 'empire.2': 'Tenez la ligne !', 'empire.3': 'La discipline vaincra.',
+  'elfe.1': 'La forêt se souvient.', 'elfe.2': 'Le vent est avec nous.', 'elfe.3': 'Que les racines vous retiennent !',
+  'demons.1': 'Vos âmes sont à nous.', 'demons.2': 'Le sacrifice est un honneur.', 'demons.3': 'L’Abîme a faim.',
+  'nomades.1': 'Le sable vous engloutira.', 'nomades.2': 'Vos réserves sont à moi.', 'nomades.3': 'Le désert ne pardonne pas.',
+};
+export const emotesFor = (faction: string) => ['salut', 'bravo', 'merci', 'oups', 'reflexion', ...[1, 2, 3].map(i => `${faction}.${i}`).filter(k => EMOTES[k])];

@@ -1,5 +1,6 @@
 // Profil du joueur : collection de cartes, monnaie, decks, options. Sauvegardé dans le navigateur.
 import { CARDS } from '../data/cards';
+import { clearActiveProfileData, keyFor } from './store';
 
 export const MAX_COPIES = 3;
 export const COINS_PER_WIN = 5;
@@ -13,7 +14,12 @@ const NOT_COLLECTIBLE = new Set(['convoi', 'garnison', 'halte_convoi', 'palissad
   'dragonnet_infernal', 'puits_sel_amar', 'source_corrompue', 'portail_infernal', 'gardienne_nid', 'chariot_oeufs', 'oeuf_rituel', 'legionnaire_desert', 'garde_capitale']);
 export const COLLECTIBLE: string[] = Object.keys(CARDS).filter(id => !NOT_COLLECTIBLE.has(id));
 
-export interface SavedDeck { id: string; name: string; cards: string[]; updated: number }
+export interface SavedDeck { id: string; name: string; cards: string[]; updated: number; /** Deck favori : affiché en premier. */ fav?: boolean }
+
+/** Victoires et défaites par type de partie. */
+export interface Record2 { w: number; l: number }
+export interface Stats { ai: Record2; hotseat: Record2; online: Record2; campaign: Record2 }
+export const EMPTY_STATS: Stats = { ai: { w: 0, l: 0 }, hotseat: { w: 0, l: 0 }, online: { w: 0, l: 0 }, campaign: { w: 0, l: 0 } };
 
 export interface Options {
   /** Taille de l'interface (1 = normale). */
@@ -38,7 +44,13 @@ export interface Profile {
   options: Options;
   /** Campagnes déjà fusionnées dans la collection (identifiant de campagne + date). */
   mergedCampaigns: string[];
+  /** Nom du profil (utilisé en ligne). */
+  name: string;
+  stats: Stats;
 }
+
+/** Decks triés : favoris d'abord, puis les plus récemment modifiés. */
+export const sortedDecks = (decks: SavedDeck[]) => decks.slice().sort((a, b) => Number(!!b.fav) - Number(!!a.fav) || b.updated - a.updated);
 
 export const DEFAULT_OPTIONS: Options = { scale: 1, animSpeed: 1, aiSpeed: 1, bannerSpeed: 1, revealAiHand: false, allUnlocked: false };
 
@@ -51,6 +63,8 @@ export function newProfile(): Profile {
     decks: [],
     options: { ...DEFAULT_OPTIONS },
     mergedCampaigns: [],
+    name: 'Joueur',
+    stats: structuredClone(EMPTY_STATS),
   };
 }
 
@@ -126,18 +140,20 @@ export function sanitizeProfile(raw: unknown): Profile {
     decks: Array.isArray(r.decks) ? r.decks.filter(d => d && typeof d.name === 'string' && Array.isArray(d.cards)).map(d => ({ ...d, cards: d.cards.filter(id => CARDS[id]) })) : [],
     options: { ...DEFAULT_OPTIONS, ...(r.options ?? {}) },
     mergedCampaigns: Array.isArray(r.mergedCampaigns) ? r.mergedCampaigns.filter(x => typeof x === 'string') : [],
+    name: typeof r.name === 'string' && r.name.trim() ? r.name.trim().slice(0, 24) : 'Joueur',
+    stats: Object.fromEntries((Object.keys(EMPTY_STATS) as (keyof Stats)[]).map(k => [k, { w: Math.max(0, Number(r.stats?.[k]?.w) | 0), l: Math.max(0, Number(r.stats?.[k]?.l) | 0) }])) as unknown as Stats,
   };
 }
 export function loadProfile(): Profile {
-  try { const raw = localStorage.getItem(KEY); return raw ? sanitizeProfile(JSON.parse(raw)) : newProfile(); } catch { return newProfile(); }
+  try { const raw = localStorage.getItem(keyFor(KEY)); return raw ? sanitizeProfile(JSON.parse(raw)) : newProfile(); } catch { return newProfile(); }
 }
 /** Efface tout : collection, pièces, decks, options et campagne en cours. */
 export function resetEverything(): Profile {
-  try { for (const k of Object.keys(localStorage)) if (k.startsWith('ligneDeFront.jeu.')) localStorage.removeItem(k); } catch { /* stockage indisponible */ }
+  clearActiveProfileData();
   return newProfile();
 }
 export function saveProfile(p: Profile): void {
-  try { localStorage.setItem(KEY, JSON.stringify(p)); } catch { /* stockage indisponible */ }
+  try { localStorage.setItem(keyFor(KEY), JSON.stringify(p)); } catch { /* stockage indisponible */ }
 }
 export const profileCode = (p: Profile) => btoa(unescape(encodeURIComponent(JSON.stringify(p))));
 export function profileFromCode(code: string): Profile | null {

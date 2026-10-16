@@ -5,7 +5,8 @@ import { CAMPAIGNS } from '../campaign/campaigns';
 import type { CampaignDef } from '../campaign/types';
 import { DEMO_DECKS } from '../data/decks';
 import type { Faction } from '../engine/types';
-import { checkDeck, DEFAULT_OPTIONS, profileCode, profileFromCode, resetEverything, type Options, type Profile } from '../profile/profile';
+import { checkDeck, DEFAULT_OPTIONS, newProfile, profileCode, profileFromCode, resetEverything, saveProfile, sortedDecks, type Options, type Profile } from '../profile/profile';
+import { activeProfileId, createProfileEntry, deleteProfileEntry, listProfiles, renameProfileEntry, setActiveProfile } from '../profile/store';
 import { mainFaction } from './Decks';
 import { FACTION_LABEL, PLAYABLE_FACTIONS } from './labels';
 
@@ -63,13 +64,13 @@ export function resolveDeck(profile: Profile, key: string): { cards: string[]; f
 }
 
 export function DeckSelect({ profile, value, onChange, label, human }: { profile: Profile; value: string; onChange: (v: string) => void; label: string; human: boolean }) {
-  const mine = profile.decks.filter(d => checkDeck(d.cards, profile).ok);
+  const mine = sortedDecks(profile.decks).filter(d => checkDeck(d.cards, profile).ok);
   const demoAllowed = !human || profile.options.allUnlocked;
   return (
     <label className="field">
       <span>{label}</span>
       <select value={value} onChange={e => onChange(e.target.value)}>
-        {mine.length > 0 && <optgroup label="Mes decks">{mine.map(d => <option key={d.id} value={`my:${d.id}`}>{d.name} ({d.cards.length} cartes)</option>)}</optgroup>}
+        {mine.length > 0 && <optgroup label="Mes decks">{mine.map(d => <option key={d.id} value={`my:${d.id}`}>{d.fav ? '★ ' : ''}{d.name} ({d.cards.length} cartes)</option>)}</optgroup>}
         {demoAllowed && <optgroup label="Decks de démonstration">{PLAYABLE_FACTIONS.map(f => <option key={f} value={`demo:${f}`}>{FACTION_LABEL[f]}</option>)}</optgroup>}
       </select>
     </label>
@@ -77,7 +78,7 @@ export function DeckSelect({ profile, value, onChange, label, human }: { profile
 }
 
 export function LocalPlay({ profile, onStart, onBack, goDecks }: { profile: Profile; onStart: (s: LocalSetup) => void; onBack: () => void; goDecks: () => void }) {
-  const firstMine = profile.decks.find(d => checkDeck(d.cards, profile).ok);
+  const firstMine = sortedDecks(profile.decks).find(d => checkDeck(d.cards, profile).ok);
   const [mode, setMode] = useState<Mode>('ai');
   const [A, setA] = useState<string>(firstMine ? `my:${firstMine.id}` : 'demo:empire');
   const [B, setB] = useState<string>('demo:elfe');
@@ -161,7 +162,53 @@ export function CampaignMenu({ onPlay, onBack }: { onPlay: (c: CampaignSave) => 
 }
 
 // ---------- Options ----------
-export function OptionsScreen({ profile, update, onBack }: { profile: Profile; update: (fn: (p: Profile) => void) => void; onBack: () => void }) {
+const STAT_LABEL = { ai: 'Contre l’ordinateur', hotseat: 'À deux (joueur A)', online: 'En ligne', campaign: 'Campagnes' } as const;
+
+/** Profils : chacun a sa collection, ses pièces, ses decks, ses campagnes, ses options et ses statistiques. */
+function ProfilesBlock({ profile, update, onSwitchProfile }: { profile: Profile; update: (fn: (p: Profile) => void) => void; onSwitchProfile: () => void }) {
+  const [list, setList] = useState(() => listProfiles());
+  const active = activeProfileId();
+  const [newName, setNewName] = useState('');
+  const [armed, setArmed] = useState<string | null>(null);
+  const rename = (name: string) => { update(p => { p.name = name.slice(0, 24); }); renameProfileEntry(active, name.trim() || 'Joueur'); setList(listProfiles()); };
+  return (
+    <section className="menu-block">
+      <h2>Profils</h2>
+      <label className="field"><span>Nom du profil actif (utilisé en ligne)</span>
+        <input className="search" value={profile.name} maxLength={24} onChange={e => rename(e.target.value)} onBlur={e => { if (!e.target.value.trim()) rename('Joueur'); }} />
+      </label>
+      <div className="stats-grid">
+        {(Object.keys(STAT_LABEL) as (keyof typeof STAT_LABEL)[]).map(k => (
+          <span key={k} className="pill">{STAT_LABEL[k]} : <b>{profile.stats[k].w}</b> V – <b>{profile.stats[k].l}</b> D</span>
+        ))}
+      </div>
+      {list.length > 1 && (
+        <div className="profile-list">
+          {list.filter(p => p.id !== active).map(p => (
+            <div key={p.id} className="profile-row">
+              <b>{p.name}</b>
+              <button type="button" onClick={() => { setActiveProfile(p.id); onSwitchProfile(); setList(listProfiles()); }}>Utiliser ce profil</button>
+              {armed === p.id
+                ? <button type="button" className="danger" onClick={() => { deleteProfileEntry(p.id); setArmed(null); setList(listProfiles()); }}>Confirmer la suppression</button>
+                : <button type="button" onClick={() => setArmed(p.id)}>Supprimer</button>}
+            </div>
+          ))}
+        </div>
+      )}
+      <div className="join-row">
+        <input className="search" placeholder="Nom du nouveau profil" value={newName} maxLength={24} onChange={e => setNewName(e.target.value)} aria-label="Nom du nouveau profil" />
+        <button type="button" disabled={!newName.trim()} onClick={() => {
+          createProfileEntry(newName.trim());
+          const fresh = newProfile(); fresh.name = newName.trim();
+          saveProfile(fresh); setNewName(''); onSwitchProfile(); setList(listProfiles());
+        }}>Créer et utiliser</button>
+      </div>
+      <p className="muted small">Chaque profil a sa propre collection, ses pièces, ses decks, ses campagnes et ses options.</p>
+    </section>
+  );
+}
+
+export function OptionsScreen({ profile, update, onBack, onSwitchProfile }: { profile: Profile; update: (fn: (p: Profile) => void) => void; onBack: () => void; onSwitchProfile: () => void }) {
   const o = profile.options;
   const set = <K extends keyof Options>(k: K, v: Options[K]) => update(p => { p.options[k] = v; });
   const [code, setCode] = useState('');
@@ -176,6 +223,7 @@ export function OptionsScreen({ profile, update, onBack }: { profile: Profile; u
   return (
     <div className="setup">
       <TopBar title="Options" onBack={onBack} />
+      <ProfilesBlock profile={profile} update={update} onSwitchProfile={onSwitchProfile} />
       <section className="menu-block">
         {range('scale', 'Taille de l’interface', 0.8, 1.4, 0.05, v => `${Math.round(v * 100)} %`)}
         {range('animSpeed', 'Durée des animations de combat', 0.25, 2, 0.25, v => (v === 1 ? 'normale' : `×${v}`))}

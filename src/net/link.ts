@@ -12,6 +12,8 @@ export type NetMsg =
   | { t: 'hello'; v: number; name: string; faction: Faction; deck: string[] }
   | { t: 'start'; seed: string; hostSide: PlayerId; A: { name: string; faction: Faction; deck: string[] }; B: { name: string; faction: Faction; deck: string[] } }
   | { t: 'act'; n: number; a: Action }
+  | { t: 'emote'; id: string }
+  | { t: 'rematch' }
   | { t: 'bye' };
 
 export interface Link {

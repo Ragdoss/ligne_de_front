@@ -1,7 +1,7 @@
 // Application : accueil, parties locales, campagne, collection (decks, cartes, paquets), options.
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { addToPool, bonusFor, bonusUnlocked, campaignDef, defeatsOn, currentScenario, defaultDeckSelection, saveCampaign, scenarioAiFilter, scenarioGameSetup, selectionToDeck, type CampaignSave } from '../campaign/campaign';
-import type { DialogLine, GameState } from '../engine/types';
+import type { Action, DialogLine, GameState, PlayerId } from '../engine/types';
 import { formatEvent } from '../i18n/log.fr';
 import { COINS_PER_WIN, loadProfile, mergeCampaignPool, saveProfile, type Profile } from '../profile/profile';
 import { CampHub } from './Camp';
@@ -10,7 +10,7 @@ import { CardTile } from './CardTile';
 import { MyCards } from './Collection';
 import { DeckList } from './Decks';
 import { Dialog, GameScreen } from './GameScreen';
-import { OnlineLobby, useRemoteInbox, type OnlineStart } from './Online';
+import { EMOTES, emotesFor, OnlineLobby, rematchMsg, startFromMsg, type OnlineStart } from './Online';
 import { Rewards } from './Rewards';
 import { Tutorial } from './Tutorial';
 import { CampaignMenu, Home, LocalPlay, OptionsScreen, resolveDeck, TopBar, type LocalSetup } from './Screens';
@@ -24,7 +24,7 @@ type Screen =
   | { kind: 'tutorial'; key: number }
   | { kind: 'online' }
   | { kind: 'onlineGame'; start: OnlineStart; key: number }
-  | { kind: 'localGame'; setup: LocalSetup; key: number }
+  | { kind: 'localGame'; setup: LocalSetup; key: number; series?: Record<PlayerId, number> }
   | { kind: 'campaignMenu' }
   | { kind: 'campHub'; campaign: CampaignSave }
   | { kind: 'campDeck'; campaign: CampaignSave }
@@ -64,6 +64,8 @@ export function App() {
     setProfile(next);
   }, []);
   const home = () => setScreen({ kind: 'home' });
+  /** Changement de profil : on recharge toutes ses données. */
+  const switchProfile = () => { const p = loadProfile(); profileRef.current = p; setProfile(p); };
   const o = profile.options;
   const gameOpts = { animMul: o.animSpeed, aiMul: o.aiSpeed, bannerMul: o.bannerSpeed, initialReveal: o.revealAiHand };
 
@@ -103,15 +105,20 @@ export function App() {
         flip={setup.mode === 'hotseat'}
         fast={setup.mode === 'watch'}
         onQuit={() => setScreen({ kind: 'local' })}
-        onOver={g => { if (paid && g.over!.winner === 'A') update(p => { p.coins += COINS_PER_WIN; }); }}
+        onOver={g => {
+          const winA = g.over!.winner === 'A';
+          if (setup.mode !== 'watch') update(p => { if (paid && winA) p.coins += COINS_PER_WIN; p.stats[paid ? 'ai' : 'hotseat'][winA ? 'w' : 'l']++; });
+          setScreen(cur => (cur.kind === 'localGame' ? { ...cur, series: { A: (cur.series?.A ?? 0) + (winA ? 1 : 0), B: (cur.series?.B ?? 0) + (winA ? 0 : 1) } } : cur));
+        }}
         renderEnd={(g, close) => (
           <EndBox
             title={`Victoire : ${names[g.over!.winner]}`}
             text={`${formatEvent({ type: 'gameOver', winner: g.over!.winner, reason: g.over!.reason }, names)} (tour ${g.turn})`}
-            extra={paid && g.over!.winner === 'A' ? <CoinGain /> : null}
+            extra={<>{paid && g.over!.winner === 'A' ? <CoinGain /> : null}
+              <p className="series">Série : {names.A} {screen.series?.A ?? 0} – {screen.series?.B ?? 0} {names.B}</p></>}
           >
             <button type="button" onClick={close}>Voir le plateau</button>
-            <button type="button" onClick={() => setScreen({ kind: 'localGame', setup, key: Date.now() })}>Rejouer</button>
+            <button type="button" onClick={() => setScreen({ kind: 'localGame', setup, key: Date.now(), series: screen.series })}>Revanche</button>
             <button type="button" className="primary" onClick={home}>Accueil</button>
           </EndBox>
         )}
@@ -123,7 +130,7 @@ export function App() {
     content = <OnlineLobby profile={profile} onBack={home} goDecks={() => setScreen({ kind: 'collection', tab: 'decks' })} onStart={start => setScreen({ kind: 'onlineGame', start, key: Date.now() })} />;
   } else if (screen.kind === 'onlineGame') {
     content = <OnlineGame key={screen.key} start={screen.start} gameOpts={gameOpts} onExit={() => setScreen({ kind: 'online' })}
-      onWin={() => update(p => { p.coins += COINS_PER_WIN; })} />;
+      onResult={win => update(p => { if (win) p.coins += COINS_PER_WIN; p.stats.online[win ? 'w' : 'l']++; })} />;
   } else if (screen.kind === 'campaignMenu') {
     content = <CampaignMenu onBack={home} onPlay={c => { saveCampaign(c); setScreen({ kind: 'campHub', campaign: c }); }} />;
   } else if (screen.kind === 'campHub') {
@@ -147,7 +154,7 @@ export function App() {
     );
   } else if (screen.kind === 'campOptions') {
     const c = screen.campaign;
-    content = <OptionsScreen profile={profile} update={update} onBack={() => setScreen({ kind: 'campHub', campaign: c })} />;
+    content = <OptionsScreen profile={profile} update={update} onSwitchProfile={switchProfile} onBack={() => setScreen({ kind: 'campaignMenu' })} />;
   } else if (screen.kind === 'campDeck') {
     const c = screen.campaign;
     content = (
@@ -180,6 +187,7 @@ export function App() {
         intro={sc.intro}
         onQuit={() => setScreen({ kind: 'campHub', campaign: c })}
         onOver={g => {
+          update(p => { p.stats.campaign[g.over!.winner === 'A' ? 'w' : 'l']++; });
           if (g.over!.winner === 'A') { update(p => { p.coins += COINS_PER_WIN; }); return; }
           // Défaite : comptée pour ce scénario (débloque l'aide au départ après plusieurs échecs).
           const next = { ...c, attempts: { ...c.attempts, [sc.id]: (c.attempts[sc.id] ?? 0) + 1 } };
@@ -257,23 +265,94 @@ export function App() {
       </div>
     );
   } else {
-    content = <OptionsScreen profile={profile} update={update} onBack={home} />;
+    content = <OptionsScreen profile={profile} update={update} onSwitchProfile={switchProfile} onBack={home} />;
   }
 
   return <div className="app-zoom" style={{ zoom: o.scale }}>{content}</div>;
 }
 
-/** Partie en ligne : notre camp est en bas, le camp adverse est joué à distance. */
-function OnlineGame({ start, gameOpts, onExit, onWin }: {
-  start: OnlineStart; gameOpts: { animMul: number; aiMul: number; bannerMul: number; initialReveal: boolean }; onExit: () => void; onWin: () => void;
+/** Partie en ligne : notre camp est en bas, le camp adverse est joué à distance. Revanche, série et emotes. */
+function OnlineGame({ start: first, gameOpts, onExit, onResult }: {
+  start: OnlineStart; gameOpts: { animMul: number; aiMul: number; bannerMul: number; initialReveal: boolean }; onExit: () => void; onResult: (win: boolean) => void;
 }) {
-  const { inbox, gone, send } = useRemoteInbox(start.link);
+  const link = first.link;
+  const [start, setStart] = useState(first);
+  const [round, setRound] = useState(0);
+  const [inbox, setInbox] = useState<Action[]>([]);
+  const [gone, setGone] = useState(false);
   const [ended, setEnded] = useState(false);
+  const [series, setSeries] = useState({ me: 0, them: 0 });
+  const [rematch, setRematch] = useState({ me: false, them: false });
+  const [bubbles, setBubbles] = useState<{ id: number; mine: boolean; text: string }[]>([]);
+  const [muted, setMuted] = useState(false);
+  const [emoteOpen, setEmoteOpen] = useState(false);
+  const lastEmote = useRef(0);
+  const sent = useRef(0);
+  const startRef = useRef(start);
+  startRef.current = start;
+
+  const newRound = useCallback((st: OnlineStart) => {
+    setStart(st); setInbox([]); sent.current = 0; setEnded(false); setRematch({ me: false, them: false }); setRound(r => r + 1);
+  }, []);
+  const showBubble = useCallback((mine: boolean, id: string) => {
+    const text = EMOTES[id]; if (!text) return;
+    const key = Math.random();
+    setBubbles(b => [...b.filter(x => x.mine !== mine), { id: key, mine, text }]);
+    setTimeout(() => setBubbles(b => b.filter(x => x.id !== key)), 3500);
+  }, []);
+  useEffect(() => {
+    link.onMessage = m => {
+      if (m.t === 'act') setInbox(i => [...i, m.a]);
+      else if (m.t === 'bye') setGone(true);
+      else if (m.t === 'emote') { if (!mutedRef.current) showBubble(false, m.id); }
+      else if (m.t === 'rematch') setRematch(r => ({ ...r, them: true }));
+      else if (m.t === 'start' && !startRef.current.isHost) newRound(startFromMsg(link, m, m.hostSide === 'A' ? 'B' : 'A', false));
+    };
+    link.onClose = () => setGone(true);
+    return () => { link.onMessage = null; link.onClose = null; };
+  }, [link, newRound, showBubble]);
+  const mutedRef = useRef(muted);
+  mutedRef.current = muted;
+  // Revanche : quand les deux joueurs l'ont demandée, l'hôte relance (l'autre joueur commence).
+  useEffect(() => {
+    if (!rematch.me || !rematch.them || !start.isHost) return;
+    const m = rematchMsg(start.msg);
+    link.send(m);
+    newRound(startFromMsg(link, m, m.hostSide, true));
+  }, [rematch, start, link, newRound]);
+
   const other = start.side === 'A' ? 'B' : 'A';
-  const quit = () => { try { start.link.send({ t: 'bye' }); } catch { /* déjà fermée */ } start.link.close(); onExit(); };
+  const myFaction = start.setup[start.side].faction;
+  const quit = () => { try { link.send({ t: 'bye' }); } catch { /* déjà fermée */ } link.close(); onExit(); };
+  const emote = (id: string) => {
+    if (Date.now() - lastEmote.current < 2000) return;
+    lastEmote.current = Date.now();
+    try { link.send({ t: 'emote', id }); } catch { /* connexion coupée */ }
+    showBubble(true, id);
+    setEmoteOpen(false);
+  };
+  const askRematch = () => { setRematch(r => ({ ...r, me: true })); try { link.send({ t: 'rematch' }); } catch { /* connexion coupée */ } };
+  const seriesText = `Série : ${start.names[start.side]} ${series.me} – ${series.them} ${start.names[other]}`;
+
+  const emoteUi = (
+    <>
+      <div className="emote-bar">
+        <button type="button" onClick={() => setEmoteOpen(o => !o)} aria-expanded={emoteOpen}>💬 Emotes</button>
+        <button type="button" onClick={() => setMuted(m => !m)} title={muted ? 'Réafficher les emotes adverses' : 'Masquer les emotes adverses'}>{muted ? '🔇' : '🔈'}</button>
+        {emoteOpen && (
+          <div className="emote-menu" role="menu">
+            {emotesFor(myFaction).map(id => <button key={id} type="button" role="menuitem" onClick={() => emote(id)}>{EMOTES[id]}</button>)}
+          </div>
+        )}
+      </div>
+      {bubbles.map(b => <div key={b.id} className={`emote-bubble ${b.mine ? 'mine' : 'theirs'}`}><b>{b.mine ? start.names[start.side] : start.names[other]}</b> {b.text}</div>)}
+    </>
+  );
+
   return (
     <>
       <GameScreen
+        key={round}
         animMul={gameOpts.animMul}
         aiMul={gameOpts.aiMul}
         bannerMul={gameOpts.bannerMul}
@@ -281,22 +360,31 @@ function OnlineGame({ start, gameOpts, onExit, onWin }: {
         names={start.names}
         human={{ A: start.side === 'A', B: start.side === 'B' }}
         bottomSide={start.side}
-        remote={{ side: other, send, inbox }}
-        title="Partie en ligne"
+        remote={{ side: other, send: a => link.send({ t: 'act', n: sent.current++, a }), inbox }}
+        title={`Partie en ligne — ${seriesText}`}
         onQuit={quit}
-        onOver={g => { setEnded(true); if (g.over!.winner === start.side) onWin(); }}
+        overlay={emoteUi}
+        onOver={g => {
+          setEnded(true);
+          const win = g.over!.winner === start.side;
+          setSeries(x => (win ? { ...x, me: x.me + 1 } : { ...x, them: x.them + 1 }));
+          onResult(win);
+        }}
         renderEnd={(g, close) => (
           <EndBox
             title={g.over!.winner === start.side ? 'Victoire !' : 'Défaite'}
             text={`${formatEvent({ type: 'gameOver', winner: g.over!.winner, reason: g.over!.reason }, start.names)} (tour ${g.turn})`}
-            extra={g.over!.winner === start.side ? <CoinGain /> : null}
+            extra={<>{g.over!.winner === start.side ? <CoinGain /> : null}<p className="series">{seriesText}</p>
+              {rematch.them && !rematch.me && <p className="muted small">{start.names[other]} propose une revanche !</p>}
+              {rematch.me && !rematch.them && <p className="muted small">En attente de la réponse de {start.names[other]}…</p>}</>}
           >
             <button type="button" onClick={close}>Voir le plateau</button>
-            <button type="button" className="primary" onClick={quit}>Quitter</button>
+            <button type="button" onClick={quit}>Quitter</button>
+            <button type="button" className="primary" disabled={rematch.me || gone} onClick={askRematch}>{rematch.them ? 'Accepter la revanche' : 'Revanche'}</button>
           </EndBox>
         )}
       />
-      {gone && !ended && (
+      {gone && (
         <EndBox title="Connexion perdue" text="Ton adversaire a quitté la partie ou la connexion a été coupée.">
           <button type="button" className="primary" onClick={quit}>Retour</button>
         </EndBox>
