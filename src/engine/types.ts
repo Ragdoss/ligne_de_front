@@ -86,7 +86,7 @@ export interface CardDef {
   excludeFromMoralTotal?: boolean;
   onEnemyDeathMoral?: number;
   onAllyDeathMoralGain?: number;
-  /** Régiment unique : un seul exemplaire en jeu à la fois par joueur. */
+  /** Régiment unique : un seul exemplaire en jeu à la fois, tous joueurs confondus. */
   unique?: boolean;
   /** Leader : le régiment porteur ne perd pas de Moral quand un allié est détruit (hors Moral brisé). */
   leaderNoAllyDeathMoralLoss?: boolean;

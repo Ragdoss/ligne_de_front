@@ -20,7 +20,7 @@ export const UNPLAYABLE: Record<string, string> = {
   condition: 'condition non remplie',
   noTarget: 'aucune cible possible',
   scenarioOnly: 'carte de scénario',
-  unique: 'unique : tu en as déjà un en jeu',
+  unique: 'unique : déjà en jeu',
 };
 
 /** Mots-clés techniques (déjà expliqués par le texte de la carte) masqués à l'affichage. */

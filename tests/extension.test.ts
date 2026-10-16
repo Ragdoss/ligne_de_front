@@ -33,13 +33,15 @@ describe('Nouvelles cartes', () => {
     new Ctx(s).destroy(dead2, 'end');
     expect(led.currentMor).toBe(m0 - 1);
   });
-  it('Régiment unique : un seul exemplaire en jeu par joueur', () => {
+  it('Régiment unique : un seul exemplaire en jeu, tous joueurs confondus', () => {
     const s = blankGame(); s.players.A.level = 5; s.players.A.resource = 20;
     const uid = give(s, 'A', 'sylvain');
     expect(whyUnplayable(s, uid)).toBeNull();
+    place(s, 'B', 'avant', 0, 'sylvain');
+    expect(whyUnplayable(s, uid)).toBe('unique'); // celui de l'adversaire bloque aussi
+    s.players.B.board.avant[0] = null;
     place(s, 'A', 'avant', 0, 'sylvain');
     expect(whyUnplayable(s, uid)).toBe('unique');
-    place(s, 'B', 'avant', 0, 'sylvain'); // l'adversaire peut avoir le sien
   });
   it('Effrayant s\'additionne : Seigneur des Abysses sur un Chien Infernal = Effrayant 3', () => {
     let s = blankGame(); s.players.A.level = 5; s.players.A.resource = 10;

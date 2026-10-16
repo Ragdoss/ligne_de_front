@@ -168,6 +168,6 @@ aux outils avec `--patch` : `npm run sim -- 100 v2 --patch balance/equilibrage-1
 - Construction : au moins 40 cartes parmi les 45 draftées + régiments de base à volonté (Recrue, Éclaireur, Cultiste, Jeune Nomade) ; au moins 3 régiments de niveau 1 ; avertissement sous 8 cartes de niveau 4-5. « Deck proposé » construit un deck comme l'IA.
 - IA de draft : note de chaque carte tirée du classement par simulation (`src/draft/ratings.ts`), puis préférence pour ses deux factions principales après 6 choix.
 - Tournoi chacun contre chacun en 3 rondes ; les matchs entre IA se jouent instantanément (IA rapide). Victoire : +5 pièces ; première place : +10. Le draft en cours est sauvegardé dans le profil.
-- **Régiments uniques** : un seul exemplaire en jeu à la fois par joueur (Forteresse, Sylvain, Tréant Millénaire, Démon d'Akantha, Dragon Infernal, Reine des Basilics, Gardienne de la Lumière).
+- **Régiments uniques** : un seul exemplaire en jeu à la fois, tous joueurs confondus (le premier posé bloque l'autre) (Forteresse, Sylvain, Tréant Millénaire, Démon d'Akantha, Dragon Infernal, Reine des Basilics, Gardienne de la Lumière).
 - **Récompenses de campagne** : chaque carte proposée indique « Nouvelle » ou « Collection x/3 ».
 - Accueil : image de profil agrandie.
