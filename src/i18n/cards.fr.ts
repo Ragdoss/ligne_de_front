@@ -2,7 +2,7 @@
 export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   "recrue_imp": {
     "name": "Recrue Impériale",
-    "desc": "Soldat de base, sans spécialisation."
+    "desc": ""
   },
   "lancier_emp": {
     "name": "Lancier de l'Empire",
@@ -18,11 +18,11 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "chevalier_prov": {
     "name": "Chevalier de Province",
-    "desc": "Armure élevée, pas d'effet particulier."
+    "desc": ""
   },
   "dragon_imp": {
     "name": "Dragon Impérial",
-    "desc": "Grosse brute de fin de partie, pas d'effet particulier."
+    "desc": ""
   },
   "general_empire": {
     "name": "Général de l'Empire",
@@ -46,7 +46,7 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "forteresse": {
     "name": "Forteresse l'Intuable",
-    "desc": "Un Dragon massif (100 END, 20 ARM, 12 Moral) : l'Intuable."
+    "desc": ""
   },
   "capitaine_garde": {
     "name": "Capitaine de la Garde",
@@ -78,11 +78,11 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "convoi": {
     "name": "Convoi de Ravitaillement",
-    "desc": "Régiment de scénario. 0 ATK, très fragile mais d'un Moral très élevé (il n'est pas compté dans le Moral total de fin de tour). Avance d'un emplacement vers la droite à intervalle régulier ; sa destruction fait perdre le scénario, sa sortie du plateau le fait gagner."
+    "desc": "Ne compte pas dans le Moral total de fin de tour. Avance d'un emplacement vers la droite à intervalle régulier ; sa destruction fait perdre le scénario, sa sortie du plateau le fait gagner."
   },
   "garnison": {
     "name": "Garnison",
-    "desc": "Régiment de scénario. Commence avec 3 Moral (maximum 6). Gagne 1 Moral chaque fois qu'un régiment adverse est vaincu."
+    "desc": "Commence avec 3 Moral (maximum 6). Gagne 1 Moral chaque fois qu'un régiment adverse est vaincu."
   },
   "paysans": {
     "name": "Paysans",
@@ -94,7 +94,7 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "etat_major": {
     "name": "État Major",
-    "desc": "Isolé, 0 ATK. +2 ressources/tour ; rallie 3 Moral aux régiments Empire au Moral brisé de son contrôleur."
+    "desc": "Isolé. +2 ressources/tour ; rallie 3 Moral aux régiments Empire au Moral brisé de son contrôleur."
   },
   "ordre_haut_commandement": {
     "name": "Ordre du Haut Commandement",
@@ -118,7 +118,7 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "eclaireur_elfe": {
     "name": "Éclaireur Elfe",
-    "desc": "Soldat de base, sans spécialisation."
+    "desc": ""
   },
   "archer_bois": {
     "name": "Archer des Bois",
@@ -126,19 +126,19 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "cavalier_elfe": {
     "name": "Cavalier Elfe",
-    "desc": "Cavalerie rapide, pas d'effet particulier."
+    "desc": ""
   },
   "elem_feu": {
     "name": "Élémentaire de Feu",
-    "desc": "Forte ATK, faible END/MOR. Arrive prêt (pas de pénalité d'apparition)."
+    "desc": "Arrive prêt (pas de pénalité d'apparition)."
   },
   "clerc_foret": {
     "name": "Clerc de la Forêt",
-    "desc": "Isolé, Distance, 0 ATK, durée de vie 3 tours. Génère Soin simple en main chaque tour."
+    "desc": "Isolé, Distance, durée de vie 3 tours. Génère Soin simple en main chaque tour."
   },
   "elem_terre": {
     "name": "Élémentaire de Terre",
-    "desc": "Mur bon marché : 50 END, 5 ARM, 6 Moral. Active tes tactiques d'Élémentaux dès le niveau 1."
+    "desc": ""
   },
   "elem_eau": {
     "name": "Élémentaire d'Eau",
@@ -146,7 +146,7 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "elem_eveil_regiment": {
     "name": "Élémentaire Éveillé",
-    "desc": "Mot-clé Minions. Créé automatiquement par la tactique Éveil Élémentaire."
+    "desc": "Mot-clé Minions."
   },
   "eveil_elementaire": {
     "name": "Éveil Élémentaire",
@@ -158,7 +158,7 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "sylvain": {
     "name": "Sylvain, Gardien Élémentaire",
-    "desc": "Gros gabarit polyvalent, pas d'effet particulier."
+    "desc": ""
   },
   "druide_ancien": {
     "name": "Druide Ancien",
@@ -170,7 +170,7 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "soin_simple": {
     "name": "Soin simple",
-    "desc": "+10 Endurance à la cible. Générée par le Clerc de la Forêt."
+    "desc": "+10 Endurance à la cible."
   },
   "chamane_foret": {
     "name": "Chamane de la Forêt",
@@ -186,7 +186,7 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "palissade_regiment": {
     "name": "Palissade",
-    "desc": "Mot-clé Minions. Créée automatiquement par la tactique Palissade."
+    "desc": "Mot-clé Minions."
   },
   "palissade_tactique": {
     "name": "Palissade",
@@ -314,7 +314,7 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "fanatiques": {
     "name": "Fanatiques",
-    "desc": "0 ATK. S'il sert de sacrifice, le Démon invoqué gagne Effrayant 2 et arrive prêt."
+    "desc": "S'il sert de sacrifice, le Démon invoqué gagne Effrayant 2 et arrive prêt."
   },
   "maitre_chenil_infernal": {
     "name": "Maître du Chenil Infernal",
@@ -362,7 +362,7 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "caravane_marchande": {
     "name": "Caravane Marchande",
-    "desc": "Isolé, 0 ATK, durée de vie 3 tours. Au début de ton tour : +1 ressource. À son arrivée, supprime une carte de la défausse adverse (ton choix) : sa durée de vie augmente du niveau de cette carte."
+    "desc": "Isolé, durée de vie 3 tours. Au début de ton tour : +1 ressource. À son arrivée, supprime une carte de la défausse adverse (ton choix) : sa durée de vie augmente du niveau de cette carte."
   },
   "eleveur_basilics": {
     "name": "Éleveur de Basilics",
@@ -402,7 +402,7 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "gargouille_cendres": {
     "name": "Gargouille de Cendres",
-    "desc": "Sacrifice niveau 1+ requis. Armure élevée. Regagne 1 Moral chaque fois que tu sacrifies un régiment."
+    "desc": "Sacrifice niveau 1+ requis. Regagne 1 Moral chaque fois que tu sacrifies un régiment."
   },
   "seigneur_abysses": {
     "name": "Seigneur des Abysses",
@@ -410,11 +410,11 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "oeuf_dragon": {
     "name": "Œuf de Dragon",
-    "desc": "0 ATK. Au début de ton 3e tour après sa pose, éclot en Dragonnet Infernal (25 ATK, 50 END, 10 ARM, Effrayant 1) qui garde son Leader."
+    "desc": "Au début de ton 3e tour après sa pose, éclot en Dragonnet Infernal (25 ATK, 50 END, 10 ARM, Effrayant 1) qui garde son Leader."
   },
   "dragonnet_infernal": {
     "name": "Dragonnet Infernal",
-    "desc": "Né d'un Œuf de Dragon. Effrayant 1."
+    "desc": "Effrayant 1."
   },
   "dragon_infernal": {
     "name": "Dragon Infernal",
@@ -422,7 +422,7 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "cavaliers_dunes": {
     "name": "Cavaliers des Dunes",
-    "desc": "Cavalerie nomade. Arrive prêt (pas de pénalité d'apparition)."
+    "desc": "Arrive prêt (pas de pénalité d'apparition)."
   },
   "cheikh_dunes": {
     "name": "Cheikh des Dunes",
@@ -454,7 +454,7 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "mercenaires": {
     "name": "Mercenaires",
-    "desc": "Troupe de louage sans attache : jouable dans tous les decks."
+    "desc": "Jouable dans tous les decks."
   },
   "ravitaillement": {
     "name": "Ravitaillement",
@@ -466,34 +466,34 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "puits_sel_amar": {
     "name": "Puits de Sel-Amar",
-    "desc": "Vital. 0 ATK. +1 ressource au début de chaque tour de son contrôleur."
+    "desc": "Vital. +1 ressource au début de chaque tour de son contrôleur."
   },
   "source_corrompue": {
     "name": "Source corrompue",
-    "desc": "Vitale. 0 ATK. À chaque fin de tour des Démons, soigne leur régiment le plus blessé de 15 END."
+    "desc": "Vitale. À chaque fin de tour des Démons, soigne leur régiment le plus blessé de 15 END."
   },
   "portail_infernal": {
     "name": "Portail infernal",
-    "desc": "Vital. 0 ATK, 150 END, 10 ARM. Des Chiens Infernaux en surgissent à chaque tour."
+    "desc": "Vital. Des Chiens Infernaux en surgissent à chaque tour."
   },
   "gardienne_nid": {
     "name": "Gardienne du Nid",
-    "desc": "Vitale. Une Basilic géante qui veille sur les œufs de dragon."
+    "desc": "Vitale."
   },
   "chariot_oeufs": {
     "name": "Chariot des œufs",
-    "desc": "Le convoi des Démons : il avance d'une case tous les deux tours, de gauche à droite."
+    "desc": "Vital. Avance d'une case vers la droite tous les deux tours."
   },
   "oeuf_rituel": {
     "name": "Œuf de l'offrande",
-    "desc": "Vital. L'œuf que le culte doit recevoir."
+    "desc": "Vital."
   },
   "legionnaire_desert": {
     "name": "Légionnaire du désert",
-    "desc": "Fantassin impérial équipé pour le désert (carte de scénario)."
+    "desc": ""
   },
   "garde_capitale": {
     "name": "Garde de la capitale",
-    "desc": "Garde impériale (carte de scénario)."
+    "desc": ""
   }
 };
