@@ -1,9 +1,9 @@
 // Échelle de decks : les meilleurs decks d'une faction battent-ils les meilleurs des autres ?
-// 1. Qualifications (par faction) : 200 decks aléatoires mono-faction ; chacun joue 20 parties contre des decks de sa faction.
-//    Les 30 premiers rejouent 20 parties entre eux, et les 10 meilleurs de cette seconde manche sont qualifiés.
+// 1. Qualifications (par faction) : 200 decks aléatoires mono-faction ; chacun joue 60 parties contre des decks de sa faction.
+//    Les 30 premiers s'affrontent ensuite tous, 5 parties par paire ; les 10 meilleurs de cette seconde manche sont qualifiés.
 // 2. Finale : les 40 qualifiés s'affrontent, uniquement entre factions différentes (2 parties par paire, chacun commence une fois).
 // Usage :
-//   npx tsx tools/deck-ladder.ts qualif <faction> [decks=200] [parties=20]   → reports/echelle-<faction>.json
+//   npx tsx tools/deck-ladder.ts qualif <faction> [decks=200] [parties=60] [parties par paire en manche 2=5]   → reports/echelle-<faction>.json
 //   npx tsx tools/deck-ladder.ts finale                                      → reports/echelle-finale.md
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { chooseAction } from '../src/ai/heuristic';
@@ -16,7 +16,7 @@ import { COLLECTIBLE } from '../src/profile/profile';
 
 const F: Faction[] = ['empire', 'elfe', 'demons', 'nomades'];
 const LABEL: Record<string, string> = { empire: 'Empire', elfe: 'Elfes', demons: 'Démons', nomades: 'Nomades' };
-const [mode, arg1, arg2, arg3] = process.argv.slice(2);
+const [mode, arg1, arg2, arg3, arg4] = process.argv.slice(2);
 
 interface Entry { id: string; faction: Faction; deck: string[]; w1: number; g1: number; w2: number; g2: number }
 
@@ -58,16 +58,31 @@ function round(list: Entry[], games: number, tag: string, field: 'w1' | 'w2', co
   }
 }
 
+/** Toutes les paires de la liste s'affrontent `perPair` fois (chacun commence à tour de rôle). */
+function roundRobin(list: Entry[], perPair: number, tag: string): void {
+  const t0 = Date.now();
+  let k = 0;
+  const total = (list.length * (list.length - 1) / 2) * perPair;
+  for (let i = 0; i < list.length; i++) for (let j = i + 1; j < list.length; j++) {
+    for (let g = 0; g < perPair; g++) {
+      const [x, y] = g % 2 ? [list[j]!, list[i]!] : [list[i]!, list[j]!];
+      const r = play(x, y, `${tag}-${x.id}-${y.id}-${g}`);
+      r.winner.w2++; x.g2++; y.g2++;
+      if (++k % 200 === 0) process.stdout.write(`${tag} : ${k}/${total} parties (${Math.round((Date.now() - t0) / 1000)} s)\n`);
+    }
+  }
+}
+
 if (mode === 'qualif') {
   const f = arg1 as Faction;
-  const N = Number(arg2 ?? 200), G = Number(arg3 ?? 20);
+  const N = Number(arg2 ?? 200), G = Number(arg3 ?? 60), P2 = Number(arg4 ?? 5);
   const entries: Entry[] = Array.from({ length: N }, (_, i) => ({ id: `${f}-${i + 1}`, faction: f, deck: randomDeck(f), w1: 0, g1: 0, w2: 0, g2: 0 }));
   round(entries, G, `${f}-manche1`, 'w1', 'g1');
   const top30 = [...entries].sort((p, q) => q.w1 / q.g1 - p.w1 / p.g1).slice(0, 30);
-  round(top30, G, `${f}-manche2`, 'w2', 'g2');
+  roundRobin(top30, P2, `${f}-manche2`);
   const ranked = [...top30].sort((p, q) => (q.w2 / q.g2 - p.w2 / p.g2) || (q.w1 / q.g1 - p.w1 / p.g1));
   mkdirSync('reports', { recursive: true });
-  writeFileSync(`reports/echelle-${f}.json`, JSON.stringify({ faction: f, decks: N, games: G, top: ranked.slice(0, 10), all: entries.map(e => ({ id: e.id, w1: e.w1, g1: e.g1 })) }, null, 1));
+  writeFileSync(`reports/echelle-${f}.json`, JSON.stringify({ faction: f, decks: N, games: G, perPair2: P2, top: ranked.slice(0, 10), all: entries.map(e => ({ id: e.id, w1: e.w1, g1: e.g1 })) }, null, 1));
   console.log(`${LABEL[f]} : qualifiés ${ranked.slice(0, 10).map(e => `${e.id} (${e.w2}/${e.g2})`).join(', ')}`);
 } else if (mode === 'finale') {
   const quals: Entry[] = F.flatMap(f => (JSON.parse(readFileSync(`reports/echelle-${f}.json`, 'utf8')) as { top: Entry[] }).top);
@@ -92,8 +107,8 @@ if (mode === 'qualif') {
   const byF = (f: Faction) => quals.filter(e => e.faction === f).reduce((acc, e) => ({ w: acc.w + stats.get(e.id)!.w, g: acc.g + stats.get(e.id)!.g }), { w: 0, g: 0 });
   const ranked = [...quals].sort((p, q) => stats.get(q.id)!.w / stats.get(q.id)!.g - stats.get(p.id)!.w / stats.get(p.id)!.g);
   const qualifRate = (f: Faction) => {
-    const j = JSON.parse(readFileSync(`reports/echelle-${f}.json`, 'utf8')) as { decks: number; games: number };
-    return `${j.decks} decks, ${j.games} parties chacun`;
+    const j = JSON.parse(readFileSync(`reports/echelle-${f}.json`, 'utf8')) as { decks: number; games: number; perPair2?: number };
+    return `${j.decks} decks, ${j.games} parties chacun ; les 30 premiers s'affrontent tous (${j.perPair2 ?? 5} parties par paire)`;
   };
   const composition = (e: Entry) => {
     const c: Record<string, number> = {};
@@ -102,7 +117,7 @@ if (mode === 'qualif') {
   };
   const lines = [
     '# Échelle de decks : les meilleurs decks de chaque faction face à ceux des autres', '',
-    `Qualifications : par faction, ${qualifRate('empire')} contre des decks de leur faction ; les 30 premiers rejouent ${''}20 parties entre eux ; les 10 meilleurs de cette seconde manche sont qualifiés.`,
+    `Qualifications : par faction, ${qualifRate('empire')} ; les 10 meilleurs de cette seconde manche sont qualifiés.`,
     `Finale : ${n} parties entre les 40 qualifiés, uniquement entre factions différentes (2 parties par paire, chacun commence une fois) ; ${Math.round((Date.now() - t0) / 1000)} s. IA v2 des deux côtés.`, '',
     '## Résultat par faction (finale)', '', '| Faction | Victoires | Taux |', '|---|---|---|',
     ...F.map(f => { const x = byF(f); return `| ${LABEL[f]} | ${x.w} / ${x.g} | ${pct(x.w, x.g)} |`; }), '',
