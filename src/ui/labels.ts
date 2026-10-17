@@ -25,6 +25,8 @@ export const UNPLAYABLE: Record<string, string> = {
 
 /** Mots-clés techniques (déjà expliqués par le texte de la carte) masqués à l'affichage. */
 export const visibleKeywords = (kws: string[]) => kws.filter(k => !/^[A-Z][a-zé]+[A-Z]/.test(k));
+/** Mots-clés gardés au Moral brisé : les mots-clés négatifs (Lent) et Minions. */
+export const KEPT_WHEN_BROKEN = ['Lent', 'Minions'];
 
 export function choiceTitle(c: PendingChoice): string {
   const remaining = Number(c.data.n);

@@ -72,7 +72,7 @@ const STEPS: Step[] = [
   {
     title: 'Le Moral',
     body: <>
-      <p>À un tiers de son Moral, un régiment a le <b>Moral brisé</b> : il perd les bonus de son Leader et de ses tactiques, et <b>tous ses mots-clés</b> (même Distance).</p>
+      <p>À un tiers de son Moral, un régiment a le <b>Moral brisé</b> : il perd les bonus de son Leader et de ses tactiques, et <b>ses mots-clés</b> (même Distance), sauf les mots-clés négatifs comme <b>Lent</b>, qu’il garde.</p>
       <p>Quand un régiment est détruit, <b>tous ses alliés perdent 1 Moral</b>. Une défaite peut en entraîner d’autres !</p>
       <p>Après chaque combat, on compare le <b>Moral total</b> des deux camps : le plus bas gagne de la <b>lassitude</b>.</p>
     </>,

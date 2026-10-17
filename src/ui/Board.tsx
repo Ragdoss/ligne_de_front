@@ -2,7 +2,7 @@
 import { card, Ctx } from '../engine/ctx';
 import type { GameState, PlayerId, SlotRef, Unit, Zone } from '../engine/types';
 import { ArtBackdrop, levelLabel } from './CardFace';
-import { cardDesc, cardName, visibleKeywords } from './labels';
+import { cardDesc, cardName, KEPT_WHEN_BROKEN, visibleKeywords } from './labels';
 
 export interface Highlight {
   attacker?: number;
@@ -37,7 +37,10 @@ function UnitCard({ u, ctx, highlight, faded, pv, onHover }: { u: Unit; ctx: Ctx
   if (pv?.dead) cls.push('pv-dead');
   if (highlight?.attacker === u.uid) cls.push('attacking');
   if (highlight?.target === u.uid) cls.push('hit');
-  const kws = visibleKeywords(u.keywords);
+  const allKws = visibleKeywords(u.keywords);
+  // Moral brisé : les mots-clés sont perdus, sauf les négatifs (Lent) et Minions.
+  const kept = u.brokenMorale ? allKws.filter(k => KEPT_WHEN_BROKEN.includes(k)) : [];
+  const kws = u.brokenMorale ? allKws.filter(k => !KEPT_WHEN_BROKEN.includes(k)) : allKws;
   const flags = [u.justDeployed && !u.arrivesReady ? 'déploiement' : '', u.stunned ? 'sonné' : '', u.pactShield ? 'pacte' : ''].filter(Boolean);
   const tip = `${cardName(u.cardId)}${u.leader ? ` + ${cardName(u.leader)}` : ''}\n${cardDesc(u.cardId)}${u.leader ? `\n${cardName(u.leader)} : ${cardDesc(u.leader)}` : ''}`;
   const base = (k: 'atk' | 'arm' | 'ini', v: number) => (v > ((k === 'atk' ? u.baseAtk : k === 'arm' ? u.baseArm : u.ini)) ? ' up' : v < (k === 'atk' ? u.baseAtk : k === 'arm' ? u.baseArm : u.ini) ? ' down' : '');
@@ -63,10 +66,10 @@ function UnitCard({ u, ctx, highlight, faded, pv, onHover }: { u: Unit; ctx: Ctx
       ) : null}
       <div className="u-low">
         <div className="u-name">{cardName(u.cardId)}{u.brokenMorale && <em className="u-broken"> · brisé</em>}</div>
-        {(kws.length > 0 || flags.length > 0 || u.vieTours !== null) && (
+        {(kws.length > 0 || kept.length > 0 || flags.length > 0 || u.vieTours !== null) && (
           <div className="u-kw">
             {kws.length > 0 && <s className={u.brokenMorale ? '' : 'kw-on'} title={u.brokenMorale ? 'Moral brisé : mots-clés perdus' : undefined}>{kws.join(' · ')}</s>}
-            {[...(kws.length ? [''] : []), ...(u.vieTours !== null ? [`${u.vieTours} tour(s)`] : []), ...flags].join(' · ')}
+            {[...(kws.length ? [''] : []), ...kept, ...(u.vieTours !== null ? [`${u.vieTours} tour(s)`] : []), ...flags].join(' · ')}
           </div>
         )}
         <div className="bar end" aria-label={`Endurance ${u.currentEnd} sur ${u.maxEnd}`}>

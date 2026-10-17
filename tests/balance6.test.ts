@@ -24,3 +24,14 @@ describe('Équilibrage 6 : Nomades', () => {
     expect(s.players.A.hand.some(h => h.cardId === 'zahra')).toBe(true);
   });
 });
+
+describe('Moral brisé : les mots-clés négatifs restent', () => {
+  it('Un régiment Lent au Moral brisé reste Lent (il n’attaque pas au combat du tour adverse)', () => {
+    let s = blankGame({ moralCheck: false, noRegimentDefeatFromTurn: { A: 999, B: 999 } });
+    place(s, 'B', 'avant', 0, 'recrue_imp', { keywords: ['Lent'], brokenMorale: true, currentMor: 1 });
+    place(s, 'A', 'avant', 0, 'forteresse');
+    const r = act(s, { type: 'endTurn' }); // combat de fin du tour de A : B est Lent, il n'attaque pas
+    expect(r.events.some(e => e.type === 'attack' && e.attackerCard === 'recrue_imp')).toBe(false);
+    s = r.state;
+  });
+});
