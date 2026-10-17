@@ -247,7 +247,7 @@ export function App() {
         <TopBar title={campaignDef(screen.campaign).endTitle} onBack={home} />
         <p>{campaignDef(screen.campaign).endText}</p>
         <h2 className="sub">{total ? `${total} carte(s) rejoignent ta collection` : 'Aucune nouvelle carte pour ta collection'}</h2>
-        <p className="muted small">Pour chaque carte, ta collection monte au nombre d’exemplaires de ton pool de campagne (3 maximum). Une campagne n’est comptée qu’une fois.</p>
+        <p className="muted small">Pour chaque carte, ta collection monte au nombre d’exemplaires de ton pool de campagne (3 maximum). Chaque campagne terminée compte : recommence-la en choisissant d’autres cartes pour compléter ta collection.</p>
         {gained.length > 0 && (
           <div className="camp-grid">
             {gained.map(([id, k]) => <CardTile key={id} id={id} badge={<span className="count">+{k}</span>} />)}
