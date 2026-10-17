@@ -3,6 +3,9 @@
   "fuite_dunes": { "cout": 2, "millCap": 2 },
   "voleurs_provisions": { "millOnAllyDeathNoStack": true },
   "puits_empoisonne": { "vieTours": 2 },
-  "archeotacticiens": { "archeoTypes": ["Tactique", "Regiment"] },
-  "jeune_nomade": { "end": 20 }
+  "archeotacticiens": { "archeoTypes": ["Tactique", "Regiment"], "cout": 5 },
+  "jeune_nomade": { "end": 20 },
+  "seigneur_caravanes": { "cout": 2 },
+  "terre_brulee": { "millCap": 2 },
+  "mirage_oasis": { "cout": 1 }
 }
