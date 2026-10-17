@@ -454,12 +454,12 @@ button.danger { background: var(--danger); border: 1px solid var(--danger); colo
   background: radial-gradient(circle at 50% 22%, color-mix(in srgb, var(--fac) 72%, #fff 10%), color-mix(in srgb, var(--fac) 40%, #000) 70%); }
 
 /* ---- Carte complète ---- */
-.face { position: relative; container-type: inline-size; width: 100%; aspect-ratio: 941 / 1672; border-radius: 5.2% / 2.9%; overflow: hidden; color: var(--card-ink);
+.cface { position: relative; container-type: inline-size; width: 100%; aspect-ratio: 941 / 1672; border-radius: 5.2% / 2.9%; overflow: hidden; color: var(--card-ink);
   background: #c3b39c; box-shadow: 0 0 0 2px var(--brass), 0 0 0 4px #2b2420; font-family: 'Spectral', Georgia, serif; text-align: center; }
-.face::after { content: ''; position: absolute; inset: 2.2cqw; border: 2px solid var(--fac); border-radius: 3.6cqw; box-shadow: inset 0 0 0 1px #d9bf8660; pointer-events: none; }
-.face.noart .art.none { bottom: 42%; height: auto; }
-.face.noart { background: linear-gradient(transparent 50%, #cdbd9f 62%, #d8c9ad); }
-.face.noart::before { content: ''; position: absolute; inset: 50% 0 0; background: linear-gradient(#cdbd9f00, #cdbd9f 18%, #d8c9ad); }
+.cface::after { content: ''; position: absolute; inset: 2.2cqw; border: 2px solid var(--fac); border-radius: 3.6cqw; box-shadow: inset 0 0 0 1px #d9bf8660; pointer-events: none; }
+.cface.noart .art.none { bottom: 42%; height: auto; }
+.cface.noart { background: linear-gradient(transparent 50%, #cdbd9f 62%, #d8c9ad); }
+.cface.noart::before { content: ''; position: absolute; inset: 50% 0 0; background: linear-gradient(#cdbd9f00, #cdbd9f 18%, #d8c9ad); }
 .f-cost { position: absolute; top: 4.8cqw; left: 4.8cqw; width: 15.5cqw; height: 15.5cqw; border-radius: 50%; display: grid; place-items: center; z-index: 1;
   background: radial-gradient(circle at 35% 30%, var(--fac-hi), var(--fac) 60%, #1d0f0b); border: 0.7cqw solid var(--card-brass);
   color: #fff3df; font: 700 8.5cqw/1 'Cinzel', serif; text-shadow: 0 1px 2px #000a; box-shadow: 0 2px 6px #0007; }

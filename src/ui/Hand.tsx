@@ -67,15 +67,17 @@ export function Hand({ game, player, order, setOrder, canAct, hidden, selected, 
   const [drag, setDrag] = useState<number | null>(null);
   // Animation du tri (technique FLIP) : chaque carte glisse de son ancienne place vers la nouvelle.
   const els = useRef(new Map<number, HTMLElement>());
-  const prev = useRef(new Map<number, DOMRect>());
+  // Positions de mise en page (offsetLeft/Top) : elles ignorent les transformations en cours (survol, carte
+  // soulevée, animation), sinon un simple survol, qui redessine la main, ferait voler les cartes.
+  const prev = useRef(new Map<number, { x: number; y: number }>());
   useLayoutEffect(() => {
-    const next = new Map<number, DOMRect>();
+    const next = new Map<number, { x: number; y: number }>();
     els.current.forEach((el, uid) => {
-      const r = el.getBoundingClientRect();
+      const r = { x: el.offsetLeft, y: el.offsetTop };
       next.set(uid, r);
       const p = prev.current.get(uid);
-      if (p && (Math.abs(p.left - r.left) > 2 || Math.abs(p.top - r.top) > 2) && typeof el.animate === 'function') {
-        el.animate([{ transform: `translate(${p.left - r.left}px, ${p.top - r.top}px)` }, { transform: 'none' }], { duration: 280, easing: 'cubic-bezier(.2,.8,.2,1)' });
+      if (p && (Math.abs(p.x - r.x) > 2 || Math.abs(p.y - r.y) > 2) && typeof el.animate === 'function') {
+        el.animate([{ transform: `translate(${p.x - r.x}px, ${p.y - r.y}px)` }, { transform: 'none' }], { duration: 280, easing: 'cubic-bezier(.2,.8,.2,1)' });
       }
     });
     prev.current = next;

@@ -55,7 +55,7 @@ export function CardFace({ id, cost, className = '' }: { id: string; cost?: numb
   const size = desc.length > 210 ? ' xlong' : desc.length > 130 ? ' long' : '';
   const shownCost = c.dynamicCost ? 'X' : cost ?? c.cout;
   return (
-    <div className={`face ${c.faction} ${c.cardType.toLowerCase()}${artOf(id) ? '' : ' noart'} ${className}`}>
+    <div className={`cface ${c.faction} ${c.cardType.toLowerCase()}${artOf(id) ? '' : ' noart'} ${className}`}>
       <ArtBackdrop id={id} />
       <span className={`f-cost${cost !== undefined && cost < c.cout ? ' cheaper' : ''}`} title="Coût">{shownCost}</span>
       <span className="f-lvl" title={`Niveau ${c.niveau}`}>Niv. {levelLabel(c.niveau)}</span>
