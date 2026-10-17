@@ -1,0 +1,9 @@
+{
+  "_description": "Proposition après la vague 1 : freiner l'usure des Nomades (fins de partie par pioche vide).",
+  "terre_brulee": { "cout": 3, "millCap": 4 },
+  "puits_empoisonne": { "cout": 3, "poisonsOpponentTurn": { "mill": 1, "handDiscard": 1 } },
+  "voleurs_provisions": { "cout": 2 },
+  "danseurs_sable": { "onDeathOpponentMill": 1 },
+  "gargouille_sentinelle": { "cout": 4 },
+  "legion_morvak": { "cout": 1 }
+}

@@ -597,7 +597,7 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
     }
     case 'terreBrulee': {
       const regs = pl.discard.filter(id => card(id).cardType === 'Regiment');
-      ctx.mill(q, regs.length, c.id);
+      ctx.mill(q, Math.min(regs.length, (c.millCap as number | undefined) ?? Infinity), c.id);
       pl.discard = pl.discard.filter(id => card(id).cardType !== 'Regiment');
       note('terreBrulee', { count: regs.length });
       break;

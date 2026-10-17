@@ -1,0 +1,7 @@
+{
+  "_description": "Variante : usure freinée, Démons inchangés.",
+  "terre_brulee": { "cout": 3, "millCap": 3 },
+  "puits_empoisonne": { "cout": 3, "poisonsOpponentTurn": { "mill": 1, "handDiscard": 1 } },
+  "voleurs_provisions": { "cout": 2 },
+  "danseurs_sable": { "onDeathOpponentMill": 1 }
+}
