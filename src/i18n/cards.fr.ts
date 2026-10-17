@@ -357,7 +357,7 @@ const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "archeotacticiens": {
     "name": "Archéotacticiens",
-    "desc": "À son arrivée, met dans la défausse adverse une carte Tactique, une carte Leader et un régiment au hasard parmi les plus chers du deck adverse. Tant qu'il est en jeu, toute Tactique qui arrive dans la défausse adverse autrement que parce que l'adversaire l'a jouée vous offre une copie gratuite en main (coût 0, détruite en fin de votre tour)."
+    "desc": "À son arrivée, met dans la défausse adverse une carte Tactique et un régiment au hasard parmi les plus chers du deck adverse. Tant qu'il est en jeu, toute Tactique qui arrive dans la défausse adverse autrement que parce que l'adversaire l'a jouée vous offre une copie gratuite en main (coût 0, détruite en fin de votre tour)."
   },
   "chasseur_reliques": {
     "name": "Chasseur de Reliques",
