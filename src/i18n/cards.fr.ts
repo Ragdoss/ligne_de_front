@@ -177,7 +177,7 @@ const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "chamane_foret": {
     "name": "Chamane de la Forêt",
-    "desc": "+15 END à l'arrivée puis +5 END à chaque fin de tour (des deux joueurs)."
+    "desc": "+25 END à l'arrivée puis +10 END à chaque fin de tour (des deux joueurs)."
   },
   "repositionnement": {
     "name": "Repositionnement",
@@ -269,7 +269,7 @@ const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "serenite_foret": {
     "name": "Sérénité de la Forêt",
-    "desc": "Tu perds 3 points de lassitude, 6 si tu contrôles un Élémentaux (le niveau ne redescend jamais). Pioche 1 carte."
+    "desc": "Tu perds 3 points de lassitude, 6 si tu contrôles un Élémentaux (le niveau ne redescend jamais). Pioche 2 cartes."
   },
   "chant_vent": {
     "name": "Chant du Vent",

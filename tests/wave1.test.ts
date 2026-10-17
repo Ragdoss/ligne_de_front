@@ -94,7 +94,7 @@ describe('Vague 1 : Elfes', () => {
     expect(p.maxEnd).toBe(25 + 5 * 5);
     expect(g.baseArm).toBe(30);
   });
-  it('Tactiques : Lettrée (−1), Danseuses (+5 ATK), Chœur (pioche toutes les 3), Chant de la sève (2e tactique : +10 ATK)', () => {
+  it('Tactiques : Lettrée (−1), Danseuses (+10 ATK), Chœur (pioche toutes les 2), Chant de la sève (2e tactique : +10 ATK)', () => {
     let s = blankGame(); s.players.A.resource = 10;
     place(s, 'A', 'arriere', 0, 'lettree_conclave');
     const dan = place(s, 'A', 'avant', 0, 'danseuses_lames');
@@ -102,13 +102,13 @@ describe('Vague 1 : Elfes', () => {
     const ids = [give(s, 'A', 'chant_seve'), give(s, 'A', 'chant_seve'), give(s, 'A', 'ravitaillement')];
     const before = s.players.A.hand.length;
     s = act(s, { type: 'play', handUid: ids[0]!, target: slot('A', 'avant', 0) }).state;
-    expect(s.players.A.board.avant[0]!.tempAtk).toBe(5);
+    expect(s.players.A.board.avant[0]!.tempAtk).toBe(10);
     s = act(s, { type: 'play', handUid: ids[1]!, target: slot('A', 'avant', 0) }).state;
-    expect(s.players.A.board.avant[0]!.tempAtk).toBe(5 + 10 + 5);
+    expect(s.players.A.board.avant[0]!.tempAtk).toBe(10 + 10 + 10);
     const res = s.players.A.resource;
     s = act(s, { type: 'play', handUid: ids[2]!, target: undefined }).state; // Ravitaillement : coût 1 − 1 = 0
     expect(s.players.A.resource).toBe(res);
-    expect(s.players.A.hand.length).toBe(before - 3 + 2 + 1); // 2 pioches de Ravitaillement + 1 du Chœur
+    expect(s.players.A.hand.length).toBe(before - 3 + 2 + 1); // 2 pioches de Ravitaillement + 1 du Chœur (à la 2e Tactique)
     void dan;
   });
   it('Lyra : 10 dégâts au régiment adverse à l’END la plus basse à chaque Tactique', () => {

@@ -1,5 +1,5 @@
 {
-  "_description": "Équilibrage 7 (proposition) : cartes Elfes peu jouées et sans effet sur les victoires (reports/impact-elfe.md).",
+  "_description": "Équilibrage 7 (appliqué sans Visez les faibles) : cartes Elfes peu jouées et sans effet sur les victoires (reports/impact-elfe.md).",
   "serenite_foret": { "drawAfter": 2 },
   "rite_purification": { "cout": 0 },
   "danseuses_lames": { "atk": 15, "end": 30, "atkPerTacticThisTurn": 10 },
@@ -10,5 +10,5 @@
   "volee_fleches": { "cout": 1 },
   "archer_bois": { "end": 30 },
   "marque_chasseur": { "markPen": 10 },
-  "visez_faibles": { "cout": 1 }
+  "_visez_faibles_non_retenu": { "cout": 1 }
 }

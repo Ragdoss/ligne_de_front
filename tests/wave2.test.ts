@@ -51,7 +51,7 @@ describe('Vague 2 : cibler les faibles', () => {
     const r = act(s, { type: 'endTurn' });
     expect(hitsBy(r.events, 'traqueuse_sylvestre')[0]!.target).toBe(hurt.uid);
   });
-  it('Marque du chasseur : les tireurs visent la cible et ignorent 5 ARM', () => {
+  it('Marque du chasseur : les tireurs visent la cible et ignorent 10 ARM', () => {
     let s = quiet(); s.players.A.level = 1; s.players.A.resource = 5;
     place(s, 'A', 'arriere', 0, 'traqueuse_sylvestre');
     place(s, 'B', 'avant', 0, 'recrue_imp', { currentEnd: 3 });
@@ -60,7 +60,7 @@ describe('Vague 2 : cibler les faibles', () => {
     const r = act(s, { type: 'endTurn' });
     const h = hitsBy(r.events, 'traqueuse_sylvestre')[0]!;
     expect(h.target).toBe(tank.uid);
-    expect(h.arm).toBe(Math.max(0, new Ctx(s).effectiveArm(s.players.B.board.avant[3]!) - 5));
+    expect(h.arm).toBe(Math.max(0, new Ctx(s).effectiveArm(s.players.B.board.avant[3]!) - 10));
     expect(r.state.players.B.board.avant[3]?.markedBy ?? null).toBeNull(); // « ce tour-ci »
   });
   it('Visez les faibles : la première ligne attaque le soutien désigné', () => {
