@@ -42,5 +42,5 @@ export const WAVE2B_TEXT_FR: Record<string, { name: string; desc: string }> = {
 
 /** Textes d'ambiance (affichés sur la carte quand il reste de la place). */
 export const FLAVOR_FR: Record<string, string> = {
-  rituel_sang_noir: 'J’étais là quand les Dieux sont tombés.',
+  archidemon_origines: 'J’étais là quand les Dieux sont tombés.',
 };
