@@ -9,6 +9,7 @@ import { applyAction, createGame } from '../src/engine/game';
 import { nextRandom, seedFrom } from '../src/engine/rng';
 import { cardName } from '../src/i18n/log.fr';
 import { patchFromArgs } from '../src/data/patch';
+import { COLLECTIBLE } from '../src/profile/profile';
 
 // Option « --patch balance/fichier.json » : modifications d'équilibrage appliquées avant la simulation.
 const { args: ARGS, patch: PATCH, changes: PATCH_CHANGES } = patchFromArgs(process.argv.slice(2));
@@ -21,7 +22,7 @@ const MAX_TURNS = 80;
 
 // Cartes de scénario, jetons et cartes générées : jamais dans un deck.
 const EXCLUDED = new Set(['convoi', 'garnison', 'halte_convoi', 'palissade_regiment', 'elem_eveil_regiment', 'soin_simple']);
-const POOL = Object.values(CARDS).filter(c => !EXCLUDED.has(c.id));
+const POOL = COLLECTIBLE.map(id => CARDS[id]!).filter(c => !EXCLUDED.has(c.id)); // cartes de collection seulement
 const LOW = POOL.filter(c => c.niveau <= 3).map(c => c.id);
 const HIGH = POOL.filter(c => c.niveau >= 4).map(c => c.id);
 

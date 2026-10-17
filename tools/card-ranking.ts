@@ -9,6 +9,8 @@ import { applyAction, createGame } from '../src/engine/game';
 import { nextRandom, seedFrom } from '../src/engine/rng';
 import { cardName } from '../src/i18n/log.fr';
 import { patchFromArgs } from '../src/data/patch';
+import { COLLECTIBLE } from '../src/profile/profile';
+import { WAVE1_IDS } from '../src/data/wave1';
 
 // Option « --patch balance/fichier.json » : modifications d'équilibrage appliquées avant la simulation.
 const { args: ARGS, patch: PATCH, changes: PATCH_CHANGES } = patchFromArgs(process.argv.slice(2));
@@ -18,7 +20,7 @@ const SEED = ARGS[1] ?? 'classement';
 const MAX_COPIES = 3;
 const MAX_TURNS = 80;
 const EXCLUDED = new Set(['convoi', 'garnison', 'halte_convoi', 'palissade_regiment', 'elem_eveil_regiment', 'soin_simple']);
-const POOL = Object.values(CARDS).filter(c => !EXCLUDED.has(c.id));
+const POOL = COLLECTIBLE.map(id => CARDS[id]!).filter(c => !EXCLUDED.has(c.id)); // cartes de collection seulement
 const LOW = POOL.filter(c => c.niveau <= 3).map(c => c.id);
 const HIGH = POOL.filter(c => c.niveau >= 4).map(c => c.id);
 const FACTION: Record<string, string> = { empire: 'Empire', elfe: 'Elfes', demons: 'Démons', nomades: 'Nomades', neutre: 'Neutre' };
@@ -89,12 +91,13 @@ const lines = [
   '**Écart de victoire** : taux de victoire des decks qui contiennent la carte, moins celui des decks qui ne la contiennent pas.',
   'Positif = la carte fait gagner. La marge (±) donne l\'incertitude : un écart plus petit que sa marge n\'est pas significatif.',
   '**Victoires quand jouée** : taux de victoire dans les parties où la carte a effectivement été posée (influencé par le fait qu\'on joue plus quand on gagne).', '',
-  '## Cartes Empire', '', ...header, ...empire.map((r, k) => row(r, k + 1)), '',
+  ...(['empire', 'elfe', 'demons', 'nomades', 'neutre'] as const).flatMap(f => [`## Cartes ${FACTION[f]}`, '', ...header, ...rows.filter(r => r.faction === f).map((r, k) => row(r, k + 1)), '']),
+  '## Première vague (17/10/2026)', '', ...header, ...rows.filter(r => WAVE1_IDS.includes(r.id)).map((r, k) => row(r, k + 1)), '',
   '## Toutes les cartes', '', ...header, ...rows.map((r, k) => row(r, k + 1)), '',
   '_IA heuristique : une carte dont l\'effet est mal exploité par l\'IA peut sembler plus faible qu\'elle ne l\'est._',
 ];
 mkdirSync('reports', { recursive: true });
 const file = `reports/classement-cartes-${SEED}${PATCH ? `-${PATCH.replace(/^.*\//, "").replace(/\.json$/, "")}` : ""}.md`;
 writeFileSync(file, lines.join('\n') + '\n');
-console.log(lines.slice(0, 8 + empire.length + 2).join('\n'));
+console.log(lines.slice(0, 8).join('\n'));
 console.log(`\nRapport complet : ${file}`);
