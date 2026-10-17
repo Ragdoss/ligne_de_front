@@ -12,7 +12,7 @@ export const COINS_PER_EXTRA = 1;
 
 /** Cartes de scénario, jetons et cartes générées : jamais dans une collection ni un deck. */
 const NOT_COLLECTIBLE = new Set(['convoi', 'garnison', 'halte_convoi', 'palissade_regiment', 'elem_eveil_regiment', 'soin_simple',
-  'dragonnet_infernal', 'puits_sel_amar', 'source_corrompue', 'portail_infernal', 'gardienne_nid', 'chariot_oeufs', 'oeuf_rituel', 'legionnaire_desert', 'garde_capitale']);
+  'dragonnet_infernal', 'puits_sel_amar', 'source_corrompue', 'portail_infernal', 'gardienne_nid', 'chariot_oeufs', 'oeuf_rituel', 'legionnaire_desert', 'garde_capitale', 'mercenaire_stagiaire']);
 export const COLLECTIBLE: string[] = Object.keys(CARDS).filter(id => !NOT_COLLECTIBLE.has(id));
 
 export interface SavedDeck { id: string; name: string; cards: string[]; updated: number; /** Deck favori : affiché en premier. */ fav?: boolean }

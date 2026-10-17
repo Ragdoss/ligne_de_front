@@ -1,7 +1,7 @@
 // Draft à 4 : paquets, choix des IA, decks et tournoi.
 import { describe, expect, it } from 'vitest';
 import { CARDS } from '../src/data/cards';
-import { autoFillBasics, checkDraftDeck, newDraft, PACK_SIZE, PACKS, pickCard, recordHumanMatch, SEATS, standings, nextOpponent, type DraftState } from '../src/draft/draft';
+import { autoFillBasics, checkDraftDeck, newDraft, PACK_SIZE, PACKS, pickCard, recordHumanMatch, recordHumanGame, SEATS, standings, nextOpponent, type DraftState } from '../src/draft/draft';
 
 const draftAll = () => {
   let st: DraftState = newDraft(42);
@@ -36,6 +36,20 @@ describe('Draft à 4', () => {
     const notMine = Object.keys(CARDS).find(id => !st.picks[0]!.includes(id) && CARDS[id]!.niveau === 3)!;
     expect(checkDraftDeck([...deck, notMine], st.picks[0]!).ok).toBe(false);
   });
+  it('Bo3 : un match se joue en 2 victoires', () => {
+    let st = newDraft(5, 3);
+    while (st.phase === 'pick') st = pickCard(st, 0);
+    st.decks[0] = autoFillBasics(st.picks[0]!, 'empire');
+    st.phase = 'tournament';
+    st = recordHumanGame(st, true, 10);
+    expect(st.current).toEqual([1, 0]);
+    expect(st.results).toHaveLength(0);
+    st = recordHumanGame(st, true, 10);
+    expect(st.current).toBeUndefined();
+    expect(st.results[0]!.score).toEqual([2, 0]);
+    const ai = st.results[1]!.score!;
+    expect(Math.max(...ai)).toBe(2);
+  }, 120000);
   it('tournoi : 3 rondes, 6 matchs, un classement', () => {
     let st = draftAll();
     st.decks[0] = autoFillBasics(st.picks[0]!, 'empire');

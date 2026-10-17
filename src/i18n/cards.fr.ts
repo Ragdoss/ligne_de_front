@@ -212,6 +212,10 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
     "name": "Esclave Guerrier",
     "desc": "Regagne 2 Moral quand un autre régiment allié est détruit (même s'il est Minions)."
   },
+  "mercenaire_stagiaire": {
+    "name": "Mercenaire stagiaire",
+    "desc": "Se bat pour l'argent, mais n'a trouvé qu'un stage non rémunéré. (Draft : à volonté.)"
+  },
   "acolyte_damne": {
     "name": "Acolyte Damné",
     "desc": "Le régiment porteur ne perd pas de Moral quand un régiment allié est détruit."

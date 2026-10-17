@@ -1,5 +1,5 @@
-// Draft à 4 joueurs (toi + 3 IA) : 3 paquets de 15 cartes, on en garde une et on passe le reste au voisin.
-// Chacun construit ensuite un deck avec ses cartes, puis tournoi « chacun contre chacun » (3 rondes).
+// Draft à 4 joueurs (toi + 3 IA) : 6 paquets de 8 cartes, on en garde une et on passe le reste au voisin.
+// Chacun construit ensuite un deck avec ses cartes, puis tournoi « chacun contre chacun » (3 rondes, matchs en Bo1, Bo3 ou Bo5).
 // Logique pure et déterministe (graine), sauvegardée telle quelle dans le profil actif.
 import { chooseActionV1 } from '../ai/heuristic';
 import { CARDS } from '../data/cards';
@@ -9,23 +9,26 @@ import { COLLECTIBLE } from '../profile/profile';
 import { CARD_RATING } from './ratings';
 
 export const SEATS = 4;
-export const PACKS = 3;
-export const PACK_SIZE = 15;
+export const PACKS = 6;
+export const PACK_SIZE = 8;
 export const DECK_MIN = 40;
 export const LVL1_MIN = 3;
 /** Niveau 4-5 conseillé (avertissement seulement). */
 export const HIGH_ADVISED = 8;
-/** Régiments de base disponibles à volonté pendant la construction (comme les terrains de base d'un draft). */
-export const BASICS = ['recrue_imp', 'eclaireur_elfe', 'cultiste', 'jeune_nomade'];
-/** Composition d'un paquet par niveau (15 cartes). */
-const PACK_LEVELS: Record<number, number> = { 1: 3, 2: 4, 3: 4, 4: 3, 5: 1 };
+/** Régiment de base disponible à volonté pendant la construction (comme les terrains de base d'un draft). */
+export const BASICS = ['mercenaire_stagiaire'];
+/** Composition d'un paquet par niveau (8 cartes). */
+const PACK_LEVELS: Record<number, number> = { 1: 2, 2: 2, 3: 2, 4: 1, 5: 1 };
+/** Format des matchs du tournoi : nombre de parties maximum (Bo1, Bo3, Bo5). */
+export type BestOf = 1 | 3 | 5;
+export const winsNeeded = (bo: BestOf) => Math.ceil(bo / 2);
 
 export const AI_NAMES = ['Capitaine Ardan', 'Veilleuse Ilyss', 'Sœur Moraga'];
 export const AI_AVATARS = ['empire.3', 'elfe.2', 'demons.1'];
 /** Image d'un adversaire selon la faction principale de son deck. */
 export const FACTION_AVATAR: Record<string, string> = { empire: 'empire.1', elfe: 'elfe.2', demons: 'demons.3', nomades: 'nomades.1', neutre: 'empire.3' };
 
-export interface MatchResult { round: number; a: number; b: number; winner: number; turns: number }
+export interface MatchResult { round: number; a: number; b: number; winner: number; turns: number; /** Parties gagnées par a et par b. */ score?: [number, number] }
 export interface DraftState {
   version: 1;
   seed: number;
@@ -39,6 +42,10 @@ export interface DraftState {
   /** Decks construits (null tant que le joueur n'a pas validé le sien). */
   decks: (string[] | null)[];
   results: MatchResult[];
+  /** Format des matchs (absent = Bo1, anciens drafts). */
+  bestOf?: BestOf;
+  /** Ton match en cours : parties gagnées par toi et par l'adversaire. */
+  current?: [number, number];
 }
 
 // ---------- Hasard déterministe ----------
@@ -66,8 +73,8 @@ function newPack(st: { rng: number }): string[] {
   return pack;
 }
 
-export function newDraft(seed = Date.now()): DraftState {
-  const st: DraftState = { version: 1, seed, rng: seed | 0, phase: 'pick', round: 0, packs: [], picks: [[], [], [], []], decks: [null, null, null, null], results: [] };
+export function newDraft(seed = Date.now(), bestOf: BestOf = 1): DraftState {
+  const st: DraftState = { version: 1, seed, rng: seed | 0, phase: 'pick', round: 0, packs: [], picks: [[], [], [], []], decks: [null, null, null, null], results: [], bestOf };
   st.packs = Array.from({ length: SEATS }, () => newPack(st));
   return st;
 }
@@ -169,31 +176,52 @@ export const SCHEDULE: [number, number][][] = [[[0, 1], [2, 3]], [[0, 2], [1, 3]
 
 export const currentRound = (st: DraftState) => st.results.filter(r => r.a === 0 || r.b === 0).length;
 
-/** Match IA contre IA, joué entièrement (IA rapide). Au-delà de 80 tours, la plus faible lassitude gagne. */
-export function simulateMatch(st: DraftState, a: number, b: number, round: number): MatchResult {
-  let s = createGame({ seed: `draft-${st.seed}-${round}-${a}-${b}`, A: { faction: deckFaction(st.decks[a]!), deck: st.decks[a]! }, B: { faction: deckFaction(st.decks[b]!), deck: st.decks[b]! } });
+/** Une partie IA contre IA (IA rapide). Au-delà de 80 tours, la plus faible lassitude gagne. Renvoie le gagnant. */
+function simulateGame(st: DraftState, a: number, b: number, seed: string): { winner: number; turns: number } {
+  let s = createGame({ seed, A: { faction: deckFaction(st.decks[a]!), deck: st.decks[a]! }, B: { faction: deckFaction(st.decks[b]!), deck: st.decks[b]! } });
   for (let n = 0; n < 4000 && !s.over && s.turn <= 80; n++) {
     const r = applyAction(s, chooseActionV1(s));
     if (!r.ok) break;
     s = r.state;
   }
   const winA = s.over ? s.over.winner === 'A' : s.players.A.points <= s.players.B.points;
-  return { round, a, b, winner: winA ? a : b, turns: s.turn };
+  return { winner: winA ? a : b, turns: s.turn };
 }
 
-/** Enregistre ton match de la ronde, joue l'autre match de la ronde, et termine le tournoi après la 3e ronde. */
-export function recordHumanMatch(prev: DraftState, youWon: boolean, turns: number): DraftState {
+/** Match IA contre IA au format du draft (chacun commence à tour de rôle). */
+export function simulateMatch(st: DraftState, a: number, b: number, round: number): MatchResult {
+  const need = winsNeeded(st.bestOf ?? 1);
+  const score: [number, number] = [0, 0];
+  let turns = 0;
+  for (let g = 0; score[0] < need && score[1] < need; g++) {
+    const [first, second] = g % 2 === 0 ? [a, b] : [b, a];
+    const r = simulateGame(st, first, second, `draft-${st.seed}-${round}-${a}-${b}-${g}`);
+    turns += r.turns;
+    score[r.winner === a ? 0 : 1]++;
+  }
+  return { round, a, b, winner: score[0] > score[1] ? a : b, turns, score };
+}
+
+/** Enregistre une de tes parties. Quand ton match est décidé, joue l'autre match de la ronde ; le tournoi s'arrête après la 3e ronde. */
+export function recordHumanGame(prev: DraftState, youWon: boolean, turns: number): DraftState {
   const st = structuredClone(prev);
   const round = currentRound(st);
   const pair = SCHEDULE[round];
   if (!pair) return st;
+  const cur: [number, number] = st.current ? [...st.current] : [0, 0];
+  cur[youWon ? 0 : 1]++;
+  const need = winsNeeded(st.bestOf ?? 1);
+  if (cur[0] < need && cur[1] < need) { st.current = cur; return st; }
+  st.current = undefined;
   const [, opp] = pair[0]!;
-  st.results.push({ round, a: 0, b: opp, winner: youWon ? 0 : opp, turns });
+  st.results.push({ round, a: 0, b: opp, winner: cur[0] > cur[1] ? 0 : opp, turns, score: cur });
   const [x, y] = pair[1]!;
   st.results.push(simulateMatch(st, x, y, round));
   if (round + 1 >= SCHEDULE.length) st.phase = 'done';
   return st;
 }
+/** Ancien nom (un match = une partie en Bo1). */
+export const recordHumanMatch = recordHumanGame;
 
 export interface Standing { seat: number; wins: number; losses: number }
 export function standings(st: DraftState): Standing[] {

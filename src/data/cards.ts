@@ -868,6 +868,24 @@ export const CARDS: Record<string, CardDef> = {
     "keywords": [],
     "onAllyDeathMoralGain": 2
   },
+  "mercenaire_stagiaire": {
+    "id": "mercenaire_stagiaire",
+    "cardType": "Regiment",
+    "faction": "neutre",
+    "types": [
+      "Humain",
+      "Recrue"
+    ],
+    "niveau": 1,
+    "cout": 1,
+    "slotType": "avant",
+    "atk": 10,
+    "end": 20,
+    "arm": 0,
+    "ini": 15,
+    "mor": 5,
+    "keywords": []
+  },
   "acolyte_damne": {
     "id": "acolyte_damne",
     "cardType": "Leader",

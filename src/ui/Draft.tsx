@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import { CARDS } from '../data/cards';
 import {
   AI_AVATARS, AI_NAMES, FACTION_AVATAR, BASICS, buildAiDeck, checkDraftDeck, deckFaction, DECK_MIN, newDraft, nextOpponent, PACK_SIZE, PACKS, pickCard,
-  recordHumanMatch, SCHEDULE, standings, type DraftState,
+  recordHumanGame, SCHEDULE, standings, winsNeeded, type BestOf, type DraftState,
 } from '../draft/draft';
 import { formatEvent } from '../i18n/log.fr';
 import { COINS_PER_WIN, type Profile } from '../profile/profile';
@@ -92,6 +92,9 @@ export function DraftScreen({ profile, onExit, gameOpts, reward }: {
 }) {
   const [st, setSt] = useState<DraftState | null>(() => loadDraft());
   const [game, setGame] = useState<{ opp: number; key: number } | null>(null);
+  const [bestOf, setBestOf] = useState<BestOf>(1);
+  /** Issue de la dernière partie jouée : match terminé ou non, score du match. */
+  const [after, setAfter] = useState<{ done: boolean; score: [number, number] } | null>(null);
   const set = (s: DraftState | null) => { saveDraft(s); setSt(s); };
   const names = useMemo(() => [profile.name, ...AI_NAMES], [profile.name]);
   const avatars = [profile.avatar, ...AI_AVATARS.map((a, i) => (st?.decks[i + 1] ? FACTION_AVATAR[deckFaction(st.decks[i + 1]!)]! : a))];
@@ -103,7 +106,7 @@ export function DraftScreen({ profile, onExit, gameOpts, reward }: {
       <GameScreen
         key={game.key}
         {...gameOpts}
-        setup={{ seed: `draft-${st.seed}-me-${opp}`, A: { faction: deckFaction(st.decks[0]!), deck: st.decks[0]! }, B: { faction: deckFaction(st.decks[opp]!), deck: st.decks[opp]! } }}
+        setup={{ seed: `draft-${st.seed}-me-${opp}-${game.key}`, A: { faction: deckFaction(st.decks[0]!), deck: st.decks[0]! }, B: { faction: deckFaction(st.decks[opp]!), deck: st.decks[opp]! } }}
         names={nm}
         human={{ A: true, B: false }}
         avatars={{ A: profile.avatar, B: avatars[opp] }}
@@ -111,9 +114,14 @@ export function DraftScreen({ profile, onExit, gameOpts, reward }: {
         onQuit={() => setGame(null)}
         onOver={g => {
           const win = g.over!.winner === 'A';
-          const nextSt = recordHumanMatch(st, win, g.turn);
-          const first = nextSt.phase === 'done' && standings(nextSt)[0]!.seat === 0;
-          reward({ win, first });
+          const nextSt = recordHumanGame(st, win, g.turn);
+          const done = !nextSt.current;
+          const score: [number, number] = done ? nextSt.results.filter(r => r.a === 0).at(-1)!.score ?? [win ? 1 : 0, win ? 0 : 1] : nextSt.current!;
+          setAfter({ done, score });
+          if (done) {
+            const first = nextSt.phase === 'done' && standings(nextSt)[0]!.seat === 0;
+            reward({ win: score[0] > score[1], first });
+          }
           set(nextSt);
         }}
         renderEnd={(g, close) => (
@@ -121,10 +129,13 @@ export function DraftScreen({ profile, onExit, gameOpts, reward }: {
             <div className="box">
               <h2>{g.over!.winner === 'A' ? 'Victoire !' : `Victoire : ${nm.B}`}</h2>
               <p>{formatEvent({ type: 'gameOver', winner: g.over!.winner, reason: g.over!.reason }, nm)} (tour {g.turn})</p>
-              {g.over!.winner === 'A' && <p className="coin-gain">+{COINS_PER_WIN} pièces</p>}
+              {(st.bestOf ?? 1) > 1 && after && <p className="series">Match : {names[0]} {after.score[0]} – {after.score[1]} {nm.B}{after.done ? (after.score[0] > after.score[1] ? ' — match gagné !' : ' — match perdu') : ''}</p>}
+              {after?.done && after.score[0] > after.score[1] && <p className="coin-gain">+{COINS_PER_WIN} pièces</p>}
               <div className="choices row">
                 <button type="button" onClick={close}>Voir le plateau</button>
-                <button type="button" className="primary" onClick={() => setGame(null)}>Retour au tournoi</button>
+                {after && !after.done
+                  ? <button type="button" className="primary" onClick={() => setGame({ opp, key: Date.now() })}>Partie suivante</button>
+                  : <button type="button" className="primary" onClick={() => setGame(null)}>Retour au tournoi</button>}
               </div>
             </div>
           </div>
@@ -141,9 +152,15 @@ export function DraftScreen({ profile, onExit, gameOpts, reward }: {
         {quit}
         <div className="draft-intro">
           <p>Toi et trois adversaires dirigés par l’ordinateur ouvrez chacun un paquet de {PACK_SIZE} cartes. Tu en gardes une, puis tu passes le reste à ton voisin, et ainsi de suite jusqu’à ce que le paquet soit vide. On recommence avec {PACKS} paquets au total : tu repars avec {PACKS * PACK_SIZE} cartes.</p>
-          <p>Tu construis ensuite un deck d’au moins {DECK_MIN} cartes avec tes cartes draftées, plus autant de régiments de base que tu veux. Puis tournoi : un match contre chaque adversaire. Chaque victoire rapporte {COINS_PER_WIN} pièces, la première place {DRAFT_FIRST_BONUS} de plus.</p>
+          <p>Tu construis ensuite un deck d’au moins {DECK_MIN} cartes avec tes cartes draftées, plus autant de Mercenaires stagiaires que tu veux. Puis tournoi : un match contre chaque adversaire. Chaque match gagné rapporte {COINS_PER_WIN} pièces, la première place {DRAFT_FIRST_BONUS} de plus.</p>
+          <fieldset className="draft-format">
+            <legend>Format des matchs</legend>
+            {([1, 3, 5] as BestOf[]).map(bo => (
+              <label key={bo}><input type="radio" name="bo" checked={bestOf === bo} onChange={() => setBestOf(bo)} /> Bo{bo}{bo > 1 ? ` (${winsNeeded(bo)} victoires pour gagner le match)` : ' (une partie)'}</label>
+            ))}
+          </fieldset>
           <p className="small muted">Toutes les cartes du jeu peuvent sortir, même celles que tu ne possèdes pas. Les cartes draftées ne rejoignent pas ta collection.</p>
-          <div className="choices row left"><button type="button" className="primary" onClick={() => set(newDraft())}>Commencer un draft</button></div>
+          <div className="choices row left"><button type="button" className="primary" onClick={() => set(newDraft(Date.now(), bestOf))}>Commencer un draft</button></div>
         </div>
       </div>
     );
@@ -207,13 +224,13 @@ export function DraftScreen({ profile, onExit, gameOpts, reward }: {
       </table>
       {st.results.length > 0 && (
         <ul className="draft-results small">
-          {st.results.map((r, i) => <li key={i}>Ronde {r.round + 1} : {names[r.a]} contre {names[r.b]} — victoire de <b>{names[r.winner]}</b></li>)}
+          {st.results.map((r, i) => <li key={i}>Ronde {r.round + 1} : {names[r.a]} contre {names[r.b]} — victoire de <b>{names[r.winner]}</b>{r.score && (st.bestOf ?? 1) > 1 ? ` (${Math.max(...r.score)}–${Math.min(...r.score)})` : ''}</li>)}
         </ul>
       )}
       {opp !== null && st.phase === 'tournament' && (
         <div className="choices row left">
           <button type="button" className="primary" onClick={() => setGame({ opp, key: Date.now() })}>
-            Jouer la ronde {round + 1} contre {names[opp]} ({FACTION_LABEL[deckFaction(st.decks[opp]!)]})
+            {st.current ? `Partie ${st.current[0] + st.current[1] + 1} contre ${names[opp]} (match : ${st.current[0]} – ${st.current[1]})` : `Jouer la ronde ${round + 1} contre ${names[opp]} (${FACTION_LABEL[deckFaction(st.decks[opp]!)]}${(st.bestOf ?? 1) > 1 ? `, Bo${st.bestOf}` : ''})`}
           </button>
         </div>
       )}

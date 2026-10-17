@@ -480,3 +480,5 @@ button.danger { background: var(--danger); border: 1px solid var(--danger); colo
 .sr-neutre .sr-tag { background: #4b547030; color: #3a4258; }
 .sr-nouveau .sr-tag { background: var(--navy); color: var(--slate); }
 .sr-neutre { color: #4b5470; }
+.draft-format { border: 1px solid var(--line); border-radius: 6px; padding: 8px 12px; display: flex; flex-wrap: wrap; gap: 6px 18px; }
+.draft-format legend { padding: 0 6px; color: var(--brass-bright); }

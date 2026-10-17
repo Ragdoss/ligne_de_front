@@ -164,8 +164,8 @@ aux outils avec `--patch` : `npm run sim -- 100 v2 --patch balance/equilibrage-1
 - L'image s'affiche à l'accueil, dans la barre du joueur (local et en ligne, l'adversaire en ligne envoie la sienne) et dans les bulles d'emote.
 
 ## Draft à 4, régiments uniques, récompenses (16/10/2026)
-- **Draft à 4** (accueil → « Draft à 4 ») : toi + 3 IA, 3 paquets de 15 cartes (3 niv. 1, 4 niv. 2, 4 niv. 3, 3 niv. 4, 1 niv. 5), on garde une carte et on passe le reste (gauche, droite, gauche). Toutes les cartes du jeu peuvent sortir ; rien ne rejoint la collection.
-- Construction : au moins 40 cartes parmi les 45 draftées + régiments de base à volonté (Recrue, Éclaireur, Cultiste, Jeune Nomade) ; au moins 3 régiments de niveau 1 ; avertissement sous 8 cartes de niveau 4-5. « Deck proposé » construit un deck comme l'IA.
+- **Draft à 4** (accueil → « Draft à 4 ») : toi + 3 IA, 6 paquets de 8 cartes (2 niv. 1, 2 niv. 2, 2 niv. 3, 1 niv. 4, 1 niv. 5), on garde une carte et on passe le reste (gauche, droite, gauche). Toutes les cartes du jeu peuvent sortir ; rien ne rejoint la collection.
+- Construction : au moins 40 cartes parmi les 48 draftées + Mercenaires stagiaires à volonté (niv. 1, coût 1, 10 ATK, 20 END, 0 ARM, 15 INI, 5 MOR) ; matchs en Bo1, Bo3 ou Bo5 au choix ; au moins 3 régiments de niveau 1 ; avertissement sous 8 cartes de niveau 4-5. « Deck proposé » construit un deck comme l'IA.
 - IA de draft : note de chaque carte tirée du classement par simulation (`src/draft/ratings.ts`), puis préférence pour ses deux factions principales après 6 choix.
 - Tournoi chacun contre chacun en 3 rondes ; les matchs entre IA se jouent instantanément (IA rapide). Victoire : +5 pièces ; première place : +10. Le draft en cours est sauvegardé dans le profil.
 - **Régiments uniques** : un seul exemplaire en jeu à la fois, tous joueurs confondus (le premier posé bloque l'autre) (Forteresse, Sylvain, Tréant Millénaire, Démon d'Akantha, Dragon Infernal, Reine des Basilics, Gardienne de la Lumière).
