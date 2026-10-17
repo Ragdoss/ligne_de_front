@@ -317,7 +317,7 @@ function nomadArrival(ctx: Ctx, p: PlayerId, u: Unit, asCard: string = u.cardId)
       break;
     }
     case 'archeotacticiens': {
-      for (const type of ['Tactique', 'Leader', 'Regiment'] as const) {
+      for (const type of ((card('archeotacticiens').archeoTypes as ('Tactique' | 'Leader' | 'Regiment')[] | undefined) ?? ['Tactique', 'Leader', 'Regiment'])) {
         const idxs = opp.deck.map((id, i) => [id, i] as const).filter(([id]) => card(id).cardType === type);
         if (!idxs.length) continue;
         const max = Math.max(...idxs.map(([id]) => card(id).cout));
@@ -598,7 +598,7 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
       ctx.setAt(t1!, null);
       ctx.addToHand(p, target!.cardId);
       ctx.emit({ type: 'returnedToHand', player: p, cardId: target!.cardId });
-      ctx.mill(q, lvl, c.id);
+      ctx.mill(q, Math.min(lvl, (c.millCap as number | undefined) ?? Infinity), c.id);
       break;
     }
     case 'terreBrulee': {

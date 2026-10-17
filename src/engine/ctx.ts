@@ -629,7 +629,8 @@ export class Ctx {
     const om = def.onDeathOpponentMill as number | undefined;
     if (om && !this.over) this.mill(opponentOf(p), om, u.cardId);
     // Voleurs de provisions : chaque régiment allié détruit fait défausser le dessus de la pioche adverse.
-    const thieves = this.units(p).reduce((n, x) => n + ((card(x.cardId).millOnAllyDeath as number | undefined) ?? 0), 0) + ((def.millOnAllyDeath as number | undefined) ?? 0);
+    let thieves = this.units(p).reduce((n, x) => n + ((card(x.cardId).millOnAllyDeath as number | undefined) ?? 0), 0) + ((def.millOnAllyDeath as number | undefined) ?? 0);
+    if (thieves && card('voleurs_provisions').millOnAllyDeathNoStack) thieves = Math.min(thieves, (card('voleurs_provisions').millOnAllyDeath as number | undefined) ?? 1); // plusieurs Voleurs ne se cumulent pas
     if (thieves && !this.over) this.mill(opponentOf(p), thieves, 'voleurs_provisions');
     // Démon d'Akantha : se soigne quand un ennemi meurt de son Moral.
     if (cause === 'moral' && !this.over) {

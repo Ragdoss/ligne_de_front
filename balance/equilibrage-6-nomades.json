@@ -1,0 +1,8 @@
+{
+  "_description": "Équilibrage 6 : les Nomades gagnent trop par pioche vide (42 % des parties de l'échelle). On freine les cartes d'usure qui pèsent le plus.",
+  "fuite_dunes": { "cout": 2, "millCap": 2 },
+  "voleurs_provisions": { "millOnAllyDeathNoStack": true },
+  "puits_empoisonne": { "vieTours": 2 },
+  "archeotacticiens": { "archeoTypes": ["Tactique", "Regiment"] },
+  "jeune_nomade": { "end": 20 }
+}
