@@ -231,7 +231,9 @@ export function resolveChoice(ctx: Ctx, index: number): string | null {
       const h = pl.hand.find(x => x.uid === o.handUid);
       if (h) { pl.hand = pl.hand.filter(x => x.uid !== h.uid); if (!h.generated) pl.deck.splice(placed, 0, h.cardId); }
       const left = Number(c.data.left) - 1;
-      if (left > 0 && pl.hand.length) ctx.s.pending.unshift({ ...c, options: null, data: { ...c.data, left, placed: placed + 1 } });
+      if (left > 0 && pl.hand.length) { ctx.s.pending.unshift({ ...c, options: null, data: { ...c.data, left, placed: placed + 1 } }); break; }
+      // Offrande payée : les cartes remises sont mélangées dans la pioche (on se débarrasse de 2 cartes inutiles).
+      if (Number(c.data.shuffle)) pl.deck = ctx.shuffle(pl.deck);
       break;
     }
     case 'augure': {

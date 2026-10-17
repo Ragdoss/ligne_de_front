@@ -696,9 +696,7 @@ export function applyOffrande(ctx: Ctx, p: PlayerId, cardId: string, paid: boole
     case 'grimoire': {
       for (let i = 0; i < 3 && !ctx.over; i++) ctx.draw(p, cardId);
       if (ctx.over) break;
-      const pl = ctx.player(p);
-      if (paid) pl.deck = ctx.shuffle(pl.deck);
-      ctx.queueChoice('grimoire', p, cardId, { left: 2, placed: 0 });
+      ctx.queueChoice('grimoire', p, cardId, { left: 2, placed: 0, shuffle: paid ? 1 : 0 });
       break;
     }
     case 'rempartChair': {

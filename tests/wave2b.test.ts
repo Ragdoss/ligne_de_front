@@ -109,6 +109,18 @@ describe('Vague 2 suite : Démons', () => {
     expect(s.players.A.deck.slice(0, 2)).toEqual(['archer_imp', 'lieutenant']);
     expect(s.players.A.hand.map(h => h.cardId)).toEqual(['paysans']);
   });
+  it('Grimoire interdit avec Offrande : les 2 cartes remises sont mélangées dans la pioche', () => {
+    let s = quiet(); s.players.A.level = 3; s.players.A.resource = 9;
+    s.players.A.deck = ['lieutenant', 'paysans', 'archer_imp', ...Array(20).fill('recrue_imp')];
+    const lass = s.players.A.points;
+    s = act(s, { type: 'play', handUid: give(s, 'A', 'grimoire_interdit') }).state;
+    s = choose(s, 1);
+    expect(s.players.A.points).toBe(lass + 1);
+    s = choose(s, 0); s = choose(s, 0);
+    expect(s.players.A.hand).toHaveLength(1);
+    expect(s.players.A.deck).toHaveLength(22);
+    expect(s.pending).toHaveLength(0);
+  });
   it('Chaînes de l’Abîme avec Offrande : sonné aussi au combat du tour adverse', () => {
     let s = quiet(); s.players.A.level = 3; s.players.A.resource = 9;
     place(s, 'A', 'avant', 0, 'forteresse');
