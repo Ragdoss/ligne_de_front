@@ -1,0 +1,1560 @@
+{
+ "faction": "elfe",
+ "decks": 200,
+ "games": 60,
+ "perPair2": 5,
+ "top": [
+  {
+   "id": "elfe-45",
+   "faction": "elfe",
+   "deck": [
+    "ravitaillement",
+    "elem_terre",
+    "lettree_conclave",
+    "brume_trompeuse",
+    "clerc_foret",
+    "cavalier_elfe",
+    "dryades_guerisseuses",
+    "lettree_conclave",
+    "retraite_sylvestre",
+    "elem_terre",
+    "elem_feu",
+    "pousse_sylve",
+    "changement_tectonique",
+    "changement_tectonique",
+    "garde_frontiere_sylvestre",
+    "rite_purification",
+    "danseuses_lames",
+    "retraite_sylvestre",
+    "danseuses_lames",
+    "gardien_ecorce",
+    "eclaireur_elfe",
+    "floraison",
+    "changement_tectonique",
+    "cavalier_elfe",
+    "cavalier_elfe",
+    "cor_ralliement",
+    "eclaireur_elfe",
+    "gardien_ecorce",
+    "gardien_ecorce",
+    "a_couvert",
+    "gardienne_lumiere",
+    "veilleuse_sources",
+    "ancien_canopee",
+    "sentinelle_chene",
+    "choc_et_effroi",
+    "treant_millenaire",
+    "druide_ancien",
+    "sylvain",
+    "sylvain",
+    "treant_millenaire",
+    "sylvain",
+    "treant_millenaire",
+    "sentinelle_chene",
+    "veilleuse_sources",
+    "fructification"
+   ],
+   "w1": 42,
+   "g1": 61,
+   "w2": 92,
+   "g2": 145
+  },
+  {
+   "id": "elfe-70",
+   "faction": "elfe",
+   "deck": [
+    "serenite_foret",
+    "brise_matin",
+    "pousse_sylve",
+    "lettree_conclave",
+    "garde_frontiere_sylvestre",
+    "a_couvert",
+    "veterans_louer",
+    "danseuses_lames",
+    "elem_terre",
+    "elem_terre",
+    "rangers",
+    "garde_frontiere_sylvestre",
+    "cor_ralliement",
+    "archer_bois",
+    "capitaine_mercenaire",
+    "elem_eau",
+    "serenite_foret",
+    "clerc_foret",
+    "a_couvert",
+    "repositionnement",
+    "gardien_ecorce",
+    "archer_bois",
+    "changement_tectonique",
+    "elem_terre",
+    "floraison",
+    "elem_eau",
+    "choeur_saisons",
+    "rite_purification",
+    "pousse_sylve",
+    "eclaireur_elfe",
+    "gardienne_lumiere",
+    "sentinelle_chene",
+    "lyra",
+    "veilleuse_sources",
+    "lyra",
+    "sentinelle_chene",
+    "sentinelle_chene",
+    "lyra",
+    "treant_millenaire",
+    "treant_millenaire",
+    "choc_et_effroi",
+    "choc_et_effroi",
+    "druide_ancien",
+    "sylvain",
+    "druide_ancien"
+   ],
+   "w1": 45,
+   "g1": 60,
+   "w2": 90,
+   "g2": 145
+  },
+  {
+   "id": "elfe-107",
+   "faction": "elfe",
+   "deck": [
+    "brume_trompeuse",
+    "danseuses_lames",
+    "banniere_dechiree",
+    "archer_bois",
+    "chevaucheurs_mirage",
+    "dryades_guerisseuses",
+    "elem_eau",
+    "a_couvert",
+    "bourgeonnement",
+    "ravitailleur",
+    "pousse_sylve",
+    "cavalier_elfe",
+    "pousse_sylve",
+    "choeur_saisons",
+    "changement_tectonique",
+    "archer_bois",
+    "eclaireur_elfe",
+    "ravitailleur",
+    "vision",
+    "chevaucheurs_mirage",
+    "danseuses_lames",
+    "mercenaires",
+    "chamane_foret",
+    "rite_purification",
+    "eveil_elementaire",
+    "chant_vent",
+    "retraite_sylvestre",
+    "chevaucheurs_mirage",
+    "a_couvert",
+    "changement_tectonique",
+    "lyra",
+    "fructification",
+    "sylvain",
+    "treant_millenaire",
+    "sentinelle_chene",
+    "sentinelle_chene",
+    "choc_et_effroi",
+    "treant_millenaire",
+    "sentinelle_chene",
+    "druide_ancien",
+    "gardienne_lumiere",
+    "gardienne_lumiere",
+    "fructification",
+    "ancien_canopee",
+    "treant_millenaire"
+   ],
+   "w1": 44,
+   "g1": 59,
+   "w2": 90,
+   "g2": 145
+  },
+  {
+   "id": "elfe-15",
+   "faction": "elfe",
+   "deck": [
+    "brise_matin",
+    "brise_matin",
+    "palissade_tactique",
+    "palissade_tactique",
+    "serenite_foret",
+    "elem_terre",
+    "dryades_guerisseuses",
+    "banniere_dechiree",
+    "pousse_sylve",
+    "eclaireur_elfe",
+    "bourgeonnement",
+    "bourgeonnement",
+    "brume_trompeuse",
+    "dryades_guerisseuses",
+    "chant_seve",
+    "mercenaires",
+    "cavalier_elfe",
+    "dryades_guerisseuses",
+    "elem_terre",
+    "chamane_foret",
+    "gardien_ecorce",
+    "pousse_sylve",
+    "changement_tectonique",
+    "mercenaires",
+    "elem_eau",
+    "brise_matin",
+    "pretresse_saisons",
+    "veterans_louer",
+    "archer_bois",
+    "archer_bois",
+    "gardienne_lumiere",
+    "sylvain",
+    "gardienne_lumiere",
+    "treant_millenaire",
+    "veilleuse_sources",
+    "sylvain",
+    "lyra",
+    "fructification",
+    "treant_millenaire",
+    "gardienne_lumiere",
+    "treant_millenaire",
+    "druide_ancien",
+    "fructification",
+    "lyra",
+    "sylvain"
+   ],
+   "w1": 40,
+   "g1": 60,
+   "w2": 90,
+   "g2": 145
+  },
+  {
+   "id": "elfe-150",
+   "faction": "elfe",
+   "deck": [
+    "chant_seve",
+    "chamane_foret",
+    "elem_feu",
+    "dryades_guerisseuses",
+    "eveil_elementaire",
+    "eveil_elementaire",
+    "repositionnement",
+    "vision",
+    "elem_terre",
+    "changement_tectonique",
+    "cavalier_elfe",
+    "archer_bois",
+    "elem_terre",
+    "repositionnement",
+    "bourgeonnement",
+    "ravitailleur",
+    "eveil_elementaire",
+    "gardien_ecorce",
+    "veterans_louer",
+    "pretresse_saisons",
+    "elem_terre",
+    "pousse_sylve",
+    "rangers",
+    "cavalier_elfe",
+    "clerc_foret",
+    "bourgeonnement",
+    "pousse_sylve",
+    "banniere_dechiree",
+    "lettree_conclave",
+    "chevaucheurs_mirage",
+    "choc_et_effroi",
+    "sentinelle_chene",
+    "fructification",
+    "sylvain",
+    "choc_et_effroi",
+    "choc_et_effroi",
+    "fructification",
+    "sylvain",
+    "treant_millenaire",
+    "lyra",
+    "gardienne_lumiere",
+    "sylvain",
+    "sentinelle_chene",
+    "ancien_canopee",
+    "fructification"
+   ],
+   "w1": 39,
+   "g1": 60,
+   "w2": 89,
+   "g2": 145
+  },
+  {
+   "id": "elfe-157",
+   "faction": "elfe",
+   "deck": [
+    "chant_seve",
+    "capitaine_mercenaire",
+    "brume_trompeuse",
+    "elem_terre",
+    "dryades_guerisseuses",
+    "eclaireur_elfe",
+    "pousse_sylve",
+    "lettree_conclave",
+    "cavalier_elfe",
+    "eveil_elementaire",
+    "gardien_ecorce",
+    "lettree_conclave",
+    "archer_bois",
+    "banniere_dechiree",
+    "a_couvert",
+    "garde_frontiere_sylvestre",
+    "choeur_saisons",
+    "veterans_louer",
+    "elem_terre",
+    "chevaucheurs_mirage",
+    "elem_feu",
+    "elem_eau",
+    "brume_trompeuse",
+    "ravitailleur",
+    "repositionnement",
+    "changement_tectonique",
+    "a_couvert",
+    "a_couvert",
+    "brise_matin",
+    "capitaine_mercenaire",
+    "gardienne_lumiere",
+    "choc_et_effroi",
+    "lyra",
+    "sentinelle_chene",
+    "treant_millenaire",
+    "treant_millenaire",
+    "ancien_canopee",
+    "ancien_canopee",
+    "veilleuse_sources",
+    "sylvain",
+    "gardienne_lumiere",
+    "sentinelle_chene",
+    "druide_ancien",
+    "sylvain",
+    "fructification"
+   ],
+   "w1": 42,
+   "g1": 59,
+   "w2": 87,
+   "g2": 145
+  },
+  {
+   "id": "elfe-10",
+   "faction": "elfe",
+   "deck": [
+    "elem_feu",
+    "chevaucheurs_mirage",
+    "bourgeonnement",
+    "elem_feu",
+    "elem_feu",
+    "elem_terre",
+    "elem_eau",
+    "chant_seve",
+    "choeur_saisons",
+    "garde_frontiere_sylvestre",
+    "archer_bois",
+    "lettree_conclave",
+    "elem_eau",
+    "eveil_elementaire",
+    "capitaine_mercenaire",
+    "pousse_sylve",
+    "lettree_conclave",
+    "chant_vent",
+    "mercenaires",
+    "rite_purification",
+    "chant_seve",
+    "eclaireur_elfe",
+    "ravitaillement",
+    "elem_terre",
+    "pousse_sylve",
+    "serenite_foret",
+    "vision",
+    "eclaireur_elfe",
+    "banniere_dechiree",
+    "palissade_tactique",
+    "choc_et_effroi",
+    "sylvain",
+    "fructification",
+    "druide_ancien",
+    "veilleuse_sources",
+    "fructification",
+    "druide_ancien",
+    "choc_et_effroi",
+    "gardienne_lumiere",
+    "treant_millenaire",
+    "sentinelle_chene",
+    "sylvain",
+    "sentinelle_chene",
+    "choc_et_effroi",
+    "sylvain"
+   ],
+   "w1": 38,
+   "g1": 60,
+   "w2": 86,
+   "g2": 145
+  },
+  {
+   "id": "elfe-32",
+   "faction": "elfe",
+   "deck": [
+    "elem_feu",
+    "vision",
+    "chant_seve",
+    "rite_purification",
+    "banniere_dechiree",
+    "chant_seve",
+    "vision",
+    "elem_terre",
+    "danseuses_lames",
+    "cor_ralliement",
+    "capitaine_mercenaire",
+    "garde_frontiere_sylvestre",
+    "eclaireur_elfe",
+    "eclaireur_elfe",
+    "elem_eau",
+    "elem_terre",
+    "danseuses_lames",
+    "changement_tectonique",
+    "chant_seve",
+    "veterans_louer",
+    "gardien_ecorce",
+    "banniere_dechiree",
+    "serenite_foret",
+    "rite_purification",
+    "eclaireur_elfe",
+    "dryade_corrompue",
+    "elem_terre",
+    "brume_trompeuse",
+    "veterans_louer",
+    "lettree_conclave",
+    "fructification",
+    "sentinelle_chene",
+    "druide_ancien",
+    "druide_ancien",
+    "veilleuse_sources",
+    "lyra",
+    "gardienne_lumiere",
+    "fructification",
+    "gardienne_lumiere",
+    "veilleuse_sources",
+    "fructification",
+    "ancien_canopee",
+    "choc_et_effroi",
+    "veilleuse_sources",
+    "lyra"
+   ],
+   "w1": 46,
+   "g1": 62,
+   "w2": 83,
+   "g2": 145
+  },
+  {
+   "id": "elfe-52",
+   "faction": "elfe",
+   "deck": [
+    "brume_trompeuse",
+    "elem_terre",
+    "serenite_foret",
+    "bourgeonnement",
+    "floraison",
+    "chamane_foret",
+    "lettree_conclave",
+    "capitaine_mercenaire",
+    "palissade_tactique",
+    "pousse_sylve",
+    "chant_vent",
+    "pousse_sylve",
+    "rangers",
+    "clerc_foret",
+    "eveil_elementaire",
+    "eclaireur_elfe",
+    "choeur_saisons",
+    "garde_frontiere_sylvestre",
+    "elem_terre",
+    "brume_trompeuse",
+    "lettree_conclave",
+    "lettree_conclave",
+    "elem_feu",
+    "brume_trompeuse",
+    "serenite_foret",
+    "eveil_elementaire",
+    "danseuses_lames",
+    "gardien_ecorce",
+    "eclaireur_elfe",
+    "ravitailleur",
+    "druide_ancien",
+    "ancien_canopee",
+    "choc_et_effroi",
+    "veilleuse_sources",
+    "choc_et_effroi",
+    "gardienne_lumiere",
+    "choc_et_effroi",
+    "sentinelle_chene",
+    "treant_millenaire",
+    "gardienne_lumiere",
+    "sentinelle_chene",
+    "druide_ancien",
+    "sentinelle_chene",
+    "druide_ancien",
+    "veilleuse_sources"
+   ],
+   "w1": 49,
+   "g1": 60,
+   "w2": 79,
+   "g2": 145
+  },
+  {
+   "id": "elfe-161",
+   "faction": "elfe",
+   "deck": [
+    "garde_frontiere_sylvestre",
+    "palissade_tactique",
+    "clerc_foret",
+    "eclaireur_elfe",
+    "brise_matin",
+    "elem_eau",
+    "retraite_sylvestre",
+    "elem_terre",
+    "mercenaires",
+    "elem_eau",
+    "eveil_elementaire",
+    "chant_vent",
+    "lettree_conclave",
+    "mercenaires",
+    "rangers",
+    "eclaireur_elfe",
+    "chant_vent",
+    "dryades_guerisseuses",
+    "mercenaires",
+    "ravitailleur",
+    "garde_frontiere_sylvestre",
+    "rangers",
+    "brise_matin",
+    "elem_terre",
+    "a_couvert",
+    "eveil_elementaire",
+    "eclaireur_elfe",
+    "elem_eau",
+    "palissade_tactique",
+    "eveil_elementaire",
+    "gardienne_lumiere",
+    "gardienne_lumiere",
+    "choc_et_effroi",
+    "gardienne_lumiere",
+    "sentinelle_chene",
+    "choc_et_effroi",
+    "sentinelle_chene",
+    "treant_millenaire",
+    "sentinelle_chene",
+    "druide_ancien",
+    "choc_et_effroi",
+    "sylvain",
+    "ancien_canopee",
+    "veilleuse_sources",
+    "fructification"
+   ],
+   "w1": 40,
+   "g1": 59,
+   "w2": 79,
+   "g2": 145
+  }
+ ],
+ "all": [
+  {
+   "id": "elfe-1",
+   "w1": 34,
+   "g1": 63
+  },
+  {
+   "id": "elfe-2",
+   "w1": 24,
+   "g1": 62
+  },
+  {
+   "id": "elfe-3",
+   "w1": 40,
+   "g1": 61
+  },
+  {
+   "id": "elfe-4",
+   "w1": 42,
+   "g1": 60
+  },
+  {
+   "id": "elfe-5",
+   "w1": 26,
+   "g1": 62
+  },
+  {
+   "id": "elfe-6",
+   "w1": 38,
+   "g1": 60
+  },
+  {
+   "id": "elfe-7",
+   "w1": 26,
+   "g1": 60
+  },
+  {
+   "id": "elfe-8",
+   "w1": 21,
+   "g1": 60
+  },
+  {
+   "id": "elfe-9",
+   "w1": 42,
+   "g1": 60
+  },
+  {
+   "id": "elfe-10",
+   "w1": 38,
+   "g1": 60
+  },
+  {
+   "id": "elfe-11",
+   "w1": 34,
+   "g1": 60
+  },
+  {
+   "id": "elfe-12",
+   "w1": 27,
+   "g1": 60
+  },
+  {
+   "id": "elfe-13",
+   "w1": 32,
+   "g1": 60
+  },
+  {
+   "id": "elfe-14",
+   "w1": 29,
+   "g1": 60
+  },
+  {
+   "id": "elfe-15",
+   "w1": 40,
+   "g1": 60
+  },
+  {
+   "id": "elfe-16",
+   "w1": 37,
+   "g1": 61
+  },
+  {
+   "id": "elfe-17",
+   "w1": 33,
+   "g1": 60
+  },
+  {
+   "id": "elfe-18",
+   "w1": 36,
+   "g1": 62
+  },
+  {
+   "id": "elfe-19",
+   "w1": 30,
+   "g1": 60
+  },
+  {
+   "id": "elfe-20",
+   "w1": 35,
+   "g1": 60
+  },
+  {
+   "id": "elfe-21",
+   "w1": 22,
+   "g1": 60
+  },
+  {
+   "id": "elfe-22",
+   "w1": 20,
+   "g1": 60
+  },
+  {
+   "id": "elfe-23",
+   "w1": 20,
+   "g1": 61
+  },
+  {
+   "id": "elfe-24",
+   "w1": 42,
+   "g1": 61
+  },
+  {
+   "id": "elfe-25",
+   "w1": 16,
+   "g1": 60
+  },
+  {
+   "id": "elfe-26",
+   "w1": 20,
+   "g1": 60
+  },
+  {
+   "id": "elfe-27",
+   "w1": 34,
+   "g1": 60
+  },
+  {
+   "id": "elfe-28",
+   "w1": 20,
+   "g1": 60
+  },
+  {
+   "id": "elfe-29",
+   "w1": 44,
+   "g1": 60
+  },
+  {
+   "id": "elfe-30",
+   "w1": 40,
+   "g1": 60
+  },
+  {
+   "id": "elfe-31",
+   "w1": 24,
+   "g1": 60
+  },
+  {
+   "id": "elfe-32",
+   "w1": 46,
+   "g1": 62
+  },
+  {
+   "id": "elfe-33",
+   "w1": 28,
+   "g1": 60
+  },
+  {
+   "id": "elfe-34",
+   "w1": 34,
+   "g1": 60
+  },
+  {
+   "id": "elfe-35",
+   "w1": 30,
+   "g1": 60
+  },
+  {
+   "id": "elfe-36",
+   "w1": 22,
+   "g1": 63
+  },
+  {
+   "id": "elfe-37",
+   "w1": 11,
+   "g1": 61
+  },
+  {
+   "id": "elfe-38",
+   "w1": 43,
+   "g1": 60
+  },
+  {
+   "id": "elfe-39",
+   "w1": 30,
+   "g1": 60
+  },
+  {
+   "id": "elfe-40",
+   "w1": 23,
+   "g1": 61
+  },
+  {
+   "id": "elfe-41",
+   "w1": 25,
+   "g1": 60
+  },
+  {
+   "id": "elfe-42",
+   "w1": 18,
+   "g1": 61
+  },
+  {
+   "id": "elfe-43",
+   "w1": 36,
+   "g1": 60
+  },
+  {
+   "id": "elfe-44",
+   "w1": 19,
+   "g1": 60
+  },
+  {
+   "id": "elfe-45",
+   "w1": 42,
+   "g1": 61
+  },
+  {
+   "id": "elfe-46",
+   "w1": 28,
+   "g1": 60
+  },
+  {
+   "id": "elfe-47",
+   "w1": 16,
+   "g1": 60
+  },
+  {
+   "id": "elfe-48",
+   "w1": 40,
+   "g1": 61
+  },
+  {
+   "id": "elfe-49",
+   "w1": 24,
+   "g1": 61
+  },
+  {
+   "id": "elfe-50",
+   "w1": 31,
+   "g1": 61
+  },
+  {
+   "id": "elfe-51",
+   "w1": 39,
+   "g1": 63
+  },
+  {
+   "id": "elfe-52",
+   "w1": 49,
+   "g1": 60
+  },
+  {
+   "id": "elfe-53",
+   "w1": 38,
+   "g1": 60
+  },
+  {
+   "id": "elfe-54",
+   "w1": 28,
+   "g1": 61
+  },
+  {
+   "id": "elfe-55",
+   "w1": 20,
+   "g1": 60
+  },
+  {
+   "id": "elfe-56",
+   "w1": 38,
+   "g1": 60
+  },
+  {
+   "id": "elfe-57",
+   "w1": 36,
+   "g1": 60
+  },
+  {
+   "id": "elfe-58",
+   "w1": 18,
+   "g1": 60
+  },
+  {
+   "id": "elfe-59",
+   "w1": 37,
+   "g1": 61
+  },
+  {
+   "id": "elfe-60",
+   "w1": 35,
+   "g1": 60
+  },
+  {
+   "id": "elfe-61",
+   "w1": 36,
+   "g1": 60
+  },
+  {
+   "id": "elfe-62",
+   "w1": 16,
+   "g1": 60
+  },
+  {
+   "id": "elfe-63",
+   "w1": 42,
+   "g1": 60
+  },
+  {
+   "id": "elfe-64",
+   "w1": 21,
+   "g1": 60
+  },
+  {
+   "id": "elfe-65",
+   "w1": 37,
+   "g1": 61
+  },
+  {
+   "id": "elfe-66",
+   "w1": 24,
+   "g1": 60
+  },
+  {
+   "id": "elfe-67",
+   "w1": 26,
+   "g1": 60
+  },
+  {
+   "id": "elfe-68",
+   "w1": 28,
+   "g1": 60
+  },
+  {
+   "id": "elfe-69",
+   "w1": 29,
+   "g1": 60
+  },
+  {
+   "id": "elfe-70",
+   "w1": 45,
+   "g1": 60
+  },
+  {
+   "id": "elfe-71",
+   "w1": 31,
+   "g1": 62
+  },
+  {
+   "id": "elfe-72",
+   "w1": 30,
+   "g1": 60
+  },
+  {
+   "id": "elfe-73",
+   "w1": 34,
+   "g1": 60
+  },
+  {
+   "id": "elfe-74",
+   "w1": 23,
+   "g1": 61
+  },
+  {
+   "id": "elfe-75",
+   "w1": 21,
+   "g1": 62
+  },
+  {
+   "id": "elfe-76",
+   "w1": 34,
+   "g1": 60
+  },
+  {
+   "id": "elfe-77",
+   "w1": 26,
+   "g1": 60
+  },
+  {
+   "id": "elfe-78",
+   "w1": 36,
+   "g1": 60
+  },
+  {
+   "id": "elfe-79",
+   "w1": 28,
+   "g1": 60
+  },
+  {
+   "id": "elfe-80",
+   "w1": 23,
+   "g1": 60
+  },
+  {
+   "id": "elfe-81",
+   "w1": 29,
+   "g1": 60
+  },
+  {
+   "id": "elfe-82",
+   "w1": 42,
+   "g1": 60
+  },
+  {
+   "id": "elfe-83",
+   "w1": 38,
+   "g1": 60
+  },
+  {
+   "id": "elfe-84",
+   "w1": 15,
+   "g1": 60
+  },
+  {
+   "id": "elfe-85",
+   "w1": 25,
+   "g1": 62
+  },
+  {
+   "id": "elfe-86",
+   "w1": 26,
+   "g1": 61
+  },
+  {
+   "id": "elfe-87",
+   "w1": 36,
+   "g1": 60
+  },
+  {
+   "id": "elfe-88",
+   "w1": 36,
+   "g1": 60
+  },
+  {
+   "id": "elfe-89",
+   "w1": 27,
+   "g1": 60
+  },
+  {
+   "id": "elfe-90",
+   "w1": 29,
+   "g1": 60
+  },
+  {
+   "id": "elfe-91",
+   "w1": 27,
+   "g1": 60
+  },
+  {
+   "id": "elfe-92",
+   "w1": 27,
+   "g1": 61
+  },
+  {
+   "id": "elfe-93",
+   "w1": 38,
+   "g1": 60
+  },
+  {
+   "id": "elfe-94",
+   "w1": 36,
+   "g1": 60
+  },
+  {
+   "id": "elfe-95",
+   "w1": 35,
+   "g1": 61
+  },
+  {
+   "id": "elfe-96",
+   "w1": 27,
+   "g1": 60
+  },
+  {
+   "id": "elfe-97",
+   "w1": 26,
+   "g1": 60
+  },
+  {
+   "id": "elfe-98",
+   "w1": 27,
+   "g1": 60
+  },
+  {
+   "id": "elfe-99",
+   "w1": 24,
+   "g1": 61
+  },
+  {
+   "id": "elfe-100",
+   "w1": 22,
+   "g1": 60
+  },
+  {
+   "id": "elfe-101",
+   "w1": 33,
+   "g1": 60
+  },
+  {
+   "id": "elfe-102",
+   "w1": 30,
+   "g1": 60
+  },
+  {
+   "id": "elfe-103",
+   "w1": 23,
+   "g1": 60
+  },
+  {
+   "id": "elfe-104",
+   "w1": 26,
+   "g1": 59
+  },
+  {
+   "id": "elfe-105",
+   "w1": 32,
+   "g1": 59
+  },
+  {
+   "id": "elfe-106",
+   "w1": 28,
+   "g1": 59
+  },
+  {
+   "id": "elfe-107",
+   "w1": 44,
+   "g1": 59
+  },
+  {
+   "id": "elfe-108",
+   "w1": 27,
+   "g1": 59
+  },
+  {
+   "id": "elfe-109",
+   "w1": 37,
+   "g1": 59
+  },
+  {
+   "id": "elfe-110",
+   "w1": 25,
+   "g1": 59
+  },
+  {
+   "id": "elfe-111",
+   "w1": 33,
+   "g1": 60
+  },
+  {
+   "id": "elfe-112",
+   "w1": 30,
+   "g1": 60
+  },
+  {
+   "id": "elfe-113",
+   "w1": 35,
+   "g1": 59
+  },
+  {
+   "id": "elfe-114",
+   "w1": 36,
+   "g1": 60
+  },
+  {
+   "id": "elfe-115",
+   "w1": 20,
+   "g1": 59
+  },
+  {
+   "id": "elfe-116",
+   "w1": 37,
+   "g1": 59
+  },
+  {
+   "id": "elfe-117",
+   "w1": 24,
+   "g1": 59
+  },
+  {
+   "id": "elfe-118",
+   "w1": 38,
+   "g1": 61
+  },
+  {
+   "id": "elfe-119",
+   "w1": 34,
+   "g1": 59
+  },
+  {
+   "id": "elfe-120",
+   "w1": 28,
+   "g1": 59
+  },
+  {
+   "id": "elfe-121",
+   "w1": 33,
+   "g1": 59
+  },
+  {
+   "id": "elfe-122",
+   "w1": 27,
+   "g1": 59
+  },
+  {
+   "id": "elfe-123",
+   "w1": 30,
+   "g1": 59
+  },
+  {
+   "id": "elfe-124",
+   "w1": 25,
+   "g1": 60
+  },
+  {
+   "id": "elfe-125",
+   "w1": 19,
+   "g1": 60
+  },
+  {
+   "id": "elfe-126",
+   "w1": 33,
+   "g1": 59
+  },
+  {
+   "id": "elfe-127",
+   "w1": 27,
+   "g1": 60
+  },
+  {
+   "id": "elfe-128",
+   "w1": 25,
+   "g1": 59
+  },
+  {
+   "id": "elfe-129",
+   "w1": 25,
+   "g1": 60
+  },
+  {
+   "id": "elfe-130",
+   "w1": 28,
+   "g1": 59
+  },
+  {
+   "id": "elfe-131",
+   "w1": 24,
+   "g1": 60
+  },
+  {
+   "id": "elfe-132",
+   "w1": 40,
+   "g1": 59
+  },
+  {
+   "id": "elfe-133",
+   "w1": 40,
+   "g1": 59
+  },
+  {
+   "id": "elfe-134",
+   "w1": 31,
+   "g1": 60
+  },
+  {
+   "id": "elfe-135",
+   "w1": 18,
+   "g1": 59
+  },
+  {
+   "id": "elfe-136",
+   "w1": 21,
+   "g1": 60
+  },
+  {
+   "id": "elfe-137",
+   "w1": 21,
+   "g1": 61
+  },
+  {
+   "id": "elfe-138",
+   "w1": 36,
+   "g1": 60
+  },
+  {
+   "id": "elfe-139",
+   "w1": 21,
+   "g1": 59
+  },
+  {
+   "id": "elfe-140",
+   "w1": 37,
+   "g1": 60
+  },
+  {
+   "id": "elfe-141",
+   "w1": 27,
+   "g1": 60
+  },
+  {
+   "id": "elfe-142",
+   "w1": 34,
+   "g1": 60
+  },
+  {
+   "id": "elfe-143",
+   "w1": 34,
+   "g1": 59
+  },
+  {
+   "id": "elfe-144",
+   "w1": 33,
+   "g1": 61
+  },
+  {
+   "id": "elfe-145",
+   "w1": 35,
+   "g1": 60
+  },
+  {
+   "id": "elfe-146",
+   "w1": 31,
+   "g1": 60
+  },
+  {
+   "id": "elfe-147",
+   "w1": 38,
+   "g1": 60
+  },
+  {
+   "id": "elfe-148",
+   "w1": 18,
+   "g1": 59
+  },
+  {
+   "id": "elfe-149",
+   "w1": 29,
+   "g1": 59
+  },
+  {
+   "id": "elfe-150",
+   "w1": 39,
+   "g1": 60
+  },
+  {
+   "id": "elfe-151",
+   "w1": 26,
+   "g1": 61
+  },
+  {
+   "id": "elfe-152",
+   "w1": 27,
+   "g1": 59
+  },
+  {
+   "id": "elfe-153",
+   "w1": 25,
+   "g1": 59
+  },
+  {
+   "id": "elfe-154",
+   "w1": 27,
+   "g1": 60
+  },
+  {
+   "id": "elfe-155",
+   "w1": 23,
+   "g1": 61
+  },
+  {
+   "id": "elfe-156",
+   "w1": 18,
+   "g1": 60
+  },
+  {
+   "id": "elfe-157",
+   "w1": 42,
+   "g1": 59
+  },
+  {
+   "id": "elfe-158",
+   "w1": 19,
+   "g1": 59
+  },
+  {
+   "id": "elfe-159",
+   "w1": 25,
+   "g1": 59
+  },
+  {
+   "id": "elfe-160",
+   "w1": 36,
+   "g1": 59
+  },
+  {
+   "id": "elfe-161",
+   "w1": 40,
+   "g1": 59
+  },
+  {
+   "id": "elfe-162",
+   "w1": 22,
+   "g1": 59
+  },
+  {
+   "id": "elfe-163",
+   "w1": 29,
+   "g1": 60
+  },
+  {
+   "id": "elfe-164",
+   "w1": 28,
+   "g1": 59
+  },
+  {
+   "id": "elfe-165",
+   "w1": 35,
+   "g1": 62
+  },
+  {
+   "id": "elfe-166",
+   "w1": 25,
+   "g1": 60
+  },
+  {
+   "id": "elfe-167",
+   "w1": 22,
+   "g1": 59
+  },
+  {
+   "id": "elfe-168",
+   "w1": 38,
+   "g1": 59
+  },
+  {
+   "id": "elfe-169",
+   "w1": 20,
+   "g1": 60
+  },
+  {
+   "id": "elfe-170",
+   "w1": 26,
+   "g1": 62
+  },
+  {
+   "id": "elfe-171",
+   "w1": 30,
+   "g1": 60
+  },
+  {
+   "id": "elfe-172",
+   "w1": 24,
+   "g1": 59
+  },
+  {
+   "id": "elfe-173",
+   "w1": 31,
+   "g1": 59
+  },
+  {
+   "id": "elfe-174",
+   "w1": 24,
+   "g1": 59
+  },
+  {
+   "id": "elfe-175",
+   "w1": 24,
+   "g1": 60
+  },
+  {
+   "id": "elfe-176",
+   "w1": 32,
+   "g1": 59
+  },
+  {
+   "id": "elfe-177",
+   "w1": 24,
+   "g1": 61
+  },
+  {
+   "id": "elfe-178",
+   "w1": 29,
+   "g1": 60
+  },
+  {
+   "id": "elfe-179",
+   "w1": 43,
+   "g1": 59
+  },
+  {
+   "id": "elfe-180",
+   "w1": 34,
+   "g1": 59
+  },
+  {
+   "id": "elfe-181",
+   "w1": 26,
+   "g1": 59
+  },
+  {
+   "id": "elfe-182",
+   "w1": 35,
+   "g1": 59
+  },
+  {
+   "id": "elfe-183",
+   "w1": 29,
+   "g1": 59
+  },
+  {
+   "id": "elfe-184",
+   "w1": 27,
+   "g1": 60
+  },
+  {
+   "id": "elfe-185",
+   "w1": 40,
+   "g1": 59
+  },
+  {
+   "id": "elfe-186",
+   "w1": 33,
+   "g1": 59
+  },
+  {
+   "id": "elfe-187",
+   "w1": 27,
+   "g1": 59
+  },
+  {
+   "id": "elfe-188",
+   "w1": 33,
+   "g1": 61
+  },
+  {
+   "id": "elfe-189",
+   "w1": 36,
+   "g1": 59
+  },
+  {
+   "id": "elfe-190",
+   "w1": 25,
+   "g1": 59
+  },
+  {
+   "id": "elfe-191",
+   "w1": 39,
+   "g1": 60
+  },
+  {
+   "id": "elfe-192",
+   "w1": 29,
+   "g1": 59
+  },
+  {
+   "id": "elfe-193",
+   "w1": 36,
+   "g1": 59
+  },
+  {
+   "id": "elfe-194",
+   "w1": 26,
+   "g1": 60
+  },
+  {
+   "id": "elfe-195",
+   "w1": 23,
+   "g1": 59
+  },
+  {
+   "id": "elfe-196",
+   "w1": 37,
+   "g1": 59
+  },
+  {
+   "id": "elfe-197",
+   "w1": 31,
+   "g1": 60
+  },
+  {
+   "id": "elfe-198",
+   "w1": 26,
+   "g1": 59
+  },
+  {
+   "id": "elfe-199",
+   "w1": 41,
+   "g1": 61
+  },
+  {
+   "id": "elfe-200",
+   "w1": 22,
+   "g1": 62
+  }
+ ]
+}
