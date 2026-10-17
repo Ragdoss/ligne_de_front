@@ -12,7 +12,7 @@ import { COLLECTIBLE } from '../src/profile/profile';
 import { act, blankGame, give, place } from './helpers';
 
 const slot = (player: 'A' | 'B', zone: 'avant' | 'arriere' | 'isole', idx: number) => ({ player, zone, idx });
-const quiet = () => blankGame({ moralCheck: false, noRegimentDefeatFromTurn: 999 });
+const quiet = () => blankGame({ moralCheck: false, noRegimentDefeatFromTurn: { A: 999, B: 999 } });
 type Hit = Extract<GameEvent, { type: 'attack' }>;
 const hitsBy = (ev: GameEvent[], cardId: string) => ev.filter((e): e is Hit => e.type === 'attack' && e.attackerCard === cardId);
 
@@ -156,7 +156,7 @@ describe('Vague 2 : placement et soutiens', () => {
     const b1 = place(s, 'B', 'arriere', 1, 'recrue_imp');
     const b3 = place(s, 'B', 'arriere', 3, 'recrue_imp');
     const r = act(s, { type: 'endTurn' });
-    const ev = r.events.filter(e => e.type === 'effect' && e.key === 'debordement').map(e => (e as { data: { uid: number } }).data.uid);
+    const ev = r.events.filter(e => e.type === 'effect' && e.key === 'debordement').map(e => (e as unknown as { data: { uid: number } }).data.uid);
     expect(ev.sort()).toEqual([b0.uid, b1.uid].sort());
     expect(ev).not.toContain(b3.uid);
   });
