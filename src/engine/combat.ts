@@ -206,7 +206,7 @@ export function attack(ctx: Ctx, a: Unit, target: Unit, mult = 1): void {
   if (a.leader && !a.brokenMorale && card(a.leader).leaderIniDiffAtk) atk += Math.max(0, ctx.effectiveIni(a) - ctx.effectiveIni(target));
   // Pénétration d'armure X : l'attaquant ignore les X premiers points d'Armure de sa cible.
   const penVal = (a.brokenMorale ? 0 : keywordValue(a, 'Pénétration')) // cumulée, comme tout mot-clé chiffré
-    + (target.markedBy === a.controller && ctx.hasDistance(a) ? 5 : 0); // Marque du chasseur
+    + (target.markedBy === a.controller && ctx.hasDistance(a) ? ((card('marque_chasseur').markPen as number | undefined) ?? 5) : 0); // Marque du chasseur
   const arm = a.ignoreArmor ? 0 : Math.max(0, ctx.effectiveArm(target) - penVal);
   let damage = Math.max(0, atk - arm);
   if (target.pactShield && damage > 0) {
