@@ -15,6 +15,7 @@ import { EMOTES } from '../profile/cosmetics';
 import { Avatar } from './avatars';
 import { OnlineLobby, rematchMsg, startFromMsg, type OnlineStart } from './Online';
 import { Rewards } from './Rewards';
+import { liveGameStore, ScenarioRulesBubble } from './ScenarioRules';
 import { Tutorial } from './Tutorial';
 import { CampaignMenu, Home, LocalPlay, OptionsScreen, resolveDeck, TopBar, type LocalSetup } from './Screens';
 
@@ -58,6 +59,8 @@ const CoinGain = () => <p className="coin-gain">+{COINS_PER_WIN} pièces</p>;
 export function App() {
   const [screen, setScreen] = useState<Screen>({ kind: 'home' });
   const [profile, setProfile] = useState<Profile>(() => loadProfile());
+  /** Partie de campagne en cours, suivie par la bulle des règles du scénario. */
+  const live = useRef(liveGameStore()).current;
   const profileRef = useRef(profile);
   /** Modifie le profil de façon synchrone (le résultat est disponible juste après l'appel) et le sauvegarde. */
   const update = useCallback((fn: (p: Profile) => void) => {
@@ -193,6 +196,8 @@ export function App() {
         aiFilter={scenarioAiFilter(sc)}
         title={sc.title}
         intro={sc.intro}
+        onGame={live.set}
+        overlay={<ScenarioRulesBubble sc={sc} live={live} />}
         onQuit={() => setScreen({ kind: 'campHub', campaign: c })}
         onOver={g => {
           update(p => { p.stats.campaign[g.over!.winner === 'A' ? 'w' : 'l']++; });

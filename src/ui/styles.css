@@ -472,3 +472,11 @@ button.danger { background: var(--danger); border: 1px solid var(--danger); colo
 .draft-table tr.me td { color: var(--brass-bright); font-weight: 700; }
 .draft-results { margin: 0; padding-left: 18px; color: var(--parchment-dim); }
 .draft-final { font-family: 'Cinzel', serif; font-size: 1.15rem; color: var(--brass-bright); margin: 0; }
+
+/* Bulle des règles du scénario (campagne) */
+.tuto.sr h3 { font-family: 'Cinzel', serif; font-size: .82rem; color: var(--navy); margin: 8px 0 3px; }
+.sr-list { margin: 0; padding-left: 16px; display: grid; gap: 3px; font-size: .85rem; }
+.sr-tag { display: inline-block; font-size: .66rem; text-transform: uppercase; letter-spacing: .04em; border-radius: 3px; padding: 0 5px; margin-right: 5px; vertical-align: 1px; }
+.sr-neutre .sr-tag { background: #4b547030; color: #3a4258; }
+.sr-nouveau .sr-tag { background: var(--navy); color: var(--slate); }
+.sr-neutre { color: #4b5470; }

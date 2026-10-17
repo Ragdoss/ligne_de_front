@@ -171,3 +171,4 @@ aux outils avec `--patch` : `npm run sim -- 100 v2 --patch balance/equilibrage-1
 - **Régiments uniques** : un seul exemplaire en jeu à la fois, tous joueurs confondus (le premier posé bloque l'autre) (Forteresse, Sylvain, Tréant Millénaire, Démon d'Akantha, Dragon Infernal, Reine des Basilics, Gardienne de la Lumière).
 - **Récompenses de campagne** : chaque carte proposée indique « Nouvelle » ou « Collection x/3 ».
 - Accueil : image de profil agrandie.
+- **Bulle « Règles du scénario »** en campagne (même style que le tutoriel, repliable) : conditions de victoire et de défaite (étiquettes « scénario » pour les nouvelles, « neutralisée » pour celles désactivées), règles spéciales (terrain, convoi, tempête, nuit/jour, alarme, libération, lassitude…), particularités de l'adversaire et météo du tour en cours. Tout est déduit de la configuration du scénario (`src/ui/ScenarioRules.tsx`).
