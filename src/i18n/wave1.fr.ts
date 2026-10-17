@@ -34,7 +34,7 @@ export const WAVE1_TEXT_FR: Record<string, { name: string; desc: string }> = {
   colporteur: { name: 'Colporteur', desc: '' },
   danseurs_sable: { name: 'Danseurs de sable', desc: 'À sa mort, l’adversaire défausse la carte du dessus de sa pioche.' },
   razzieurs_dunes: { name: 'Razzieurs des dunes', desc: '' },
-  puits_empoisonne: { name: 'Puits empoisonné', desc: 'Durée de vie 3 tours. Au début du tour adverse, l’adversaire défausse la carte du dessus de sa pioche et une carte de sa main.' },
+  puits_empoisonne: { name: 'Puits empoisonné', desc: 'Durée de vie 3 tours. Au début du tour adverse, l’adversaire défausse la carte du dessus de sa pioche.' },
   seigneur_caravanes: { name: 'Seigneur des caravanes perdues', desc: 'Au début de chaque tour, si ta lassitude dépasse celle de l’adversaire, il défausse la carte du dessus de sa pioche.' },
   fuite_dunes: { name: 'Fuite dans les dunes', desc: 'Un de tes régiments Nomades retourne en main, sans lassitude ni perte de Moral ; l’adversaire défausse autant de cartes du dessus de sa pioche que son niveau.' },
   terre_brulee: { name: 'Terre brûlée', desc: 'L’adversaire défausse autant de cartes du dessus de sa pioche que tu as de régiments dans ta défausse (3 au plus), puis ces régiments sont retirés de la partie.' },

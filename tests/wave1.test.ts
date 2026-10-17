@@ -254,8 +254,8 @@ describe('Vague 1 : Nomades', () => {
     expect(s.players.B.deck.length).toBe(deckB - 3);
     place(s, 'A', 'isole', 0, 'puits_empoisonne');
     const before = s.players.B.deck.length;
-    s = endTurn(s); // début du tour de B : −1 pioche (+ pioche normale) et une défausse de main
-    expect(s.pending[0]?.kind).toBe('handDiscard');
+    s = endTurn(s); // début du tour de B : −1 pioche (+ pioche normale)
+    expect(s.pending[0]?.kind).not.toBe('handDiscard');
     expect(s.players.B.deck.length).toBe(before - 1 - 1);
   });
   it('Marché : défausser une carte pour en piocher une', () => {

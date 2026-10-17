@@ -5,8 +5,9 @@ import { Ctx, card, opponentOf } from './ctx';
 import { scenarioTurnStart } from './scenario';
 import type { PlayerId } from './types';
 
+/** Cartes piochées en début de tour selon le niveau : 1 / 1 / 2 / 2 / 3. */
 export function drawCountFor(level: number): number {
-  return level >= 4 ? 3 : level >= 2 ? 2 : 1;
+  return level >= 5 ? 3 : level >= 3 ? 2 : 1;
 }
 
 export function endTurn(ctx: Ctx): void {

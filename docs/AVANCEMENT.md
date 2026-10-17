@@ -181,3 +181,5 @@ aux outils avec `--patch` : `npm run sim -- 100 v2 --patch balance/equilibrage-1
 - Moteur : adjacence (voisins), Ralliement, Formation, Croissance, Communion, déclencheurs de Tactiques, Offrande (choix), prise de contrôle temporaire ou définitive, regard sur la pioche (Augure, Chuchoteur), Mirage, Pillage, Marché, usure, Alliance, Leaders bicolores, double frappe, provocation des Distance, Dryade corrompue.
 - Tests : `tests/wave1.test.ts` (une vérification par mécanique + 120 parties aléatoires avec ces cartes). L'IA v2 les joue sans erreur.
 - Les nouvelles cartes sont collectionnables (paquets, draft) ; leur note pour l'IA de draft reste provisoire (niveau × 0,5) jusqu'au prochain équilibrage.
+- **Équilibrage 4** : pioche 1/1/2/2/3 selon le niveau ; Puits empoisonné sans défausse de main. **Decks champions** : le meilleur deck de chaque faction de l'échelle (reports/echelle-finale.md) est jouable en partie locale (`src/data/champions.ts`, groupe « Meilleurs decks du tournoi »).
+- À noter : la nouvelle courbe de pioche change aussi la difficulté des campagnes (non réglées depuis).

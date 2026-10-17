@@ -203,14 +203,16 @@ describe('Ressources, niveaux, pioche', () => {
     expect(s.players.A.reserve).toHaveLength(0);
     expect(s.players.A.deck).toContain('dragon_imp');
   });
-  it('pioche : 1 carte au niveau 1, 2 aux niveaux 2-3, 3 dès le niveau 4', () => {
-    let s = blankGame();
-    place(s, 'A', 'avant', 0, 'recrue_imp');
-    place(s, 'B', 'avant', 3, 'eclaireur_elfe');
-    s.players.B.level = 4;
-    s.config.moralCheck = false;
-    s = act(s, endTurn).state;
-    expect(s.players.B.hand).toHaveLength(3);
+  it('pioche : 1 / 1 / 2 / 2 / 3 cartes aux niveaux 1 à 5', () => {
+    for (const [lvl, n] of [[1, 1], [2, 1], [3, 2], [4, 2], [5, 3]] as const) {
+      let s = blankGame();
+      place(s, 'A', 'avant', 0, 'recrue_imp');
+      place(s, 'B', 'avant', 3, 'eclaireur_elfe');
+      s.players.B.level = lvl;
+      s.config.moralCheck = false;
+      s = act(s, endTurn).state;
+      expect(s.players.B.hand, `niveau ${lvl}`).toHaveLength(n);
+    }
   });
   it('défaites : 50 points de lassitude, aucun régiment en fin de tour, pioche vide', () => {
     let s = blankGame();
@@ -304,7 +306,7 @@ describe('Main pleine', () => {
     s.config.moralCheck = false;
     place(s, 'A', 'avant', 0, 'recrue_imp');
     place(s, 'B', 'avant', 3, 'eclaireur_elfe');
-    s.players.B.level = 2; // pioche 2 cartes
+    s.players.B.level = 3; // pioche 2 cartes
     for (let i = 0; i < 10; i++) give(s, 'B', 'chevalier_prov');
     const deckBefore = s.players.B.deck.length;
     s = act(s, { type: 'endTurn' }).state;

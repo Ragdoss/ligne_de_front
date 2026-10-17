@@ -58,7 +58,7 @@ const DEFS: Record<string, Def> = {
   colporteur: reg('nomades', 1, 1, 'arriere', ['Humain', 'Nomade'], [0, 20, 0, 10, 4], { keywords: ['Marché'] }),
   danseurs_sable: reg('nomades', 2, 2, 'avant', ['Humain', 'Nomade'], [8, 25, 0, 30, 5], { keywords: ['Mirage 1'], onDeathOpponentMill: 1 }),
   razzieurs_dunes: reg('nomades', 2, 3, 'avant', ['Humain', 'Nomade', 'Monté'], [14, 30, 2, 32, 6], { keywords: ['Pillage 2'] }),
-  puits_empoisonne: reg('nomades', 2, 3, 'isole', ['Puits'], [0, 20, 0, 0, 4], { vieTours: 3, poisonsOpponentTurn: { mill: 1, handDiscard: 1 } }),
+  puits_empoisonne: reg('nomades', 2, 3, 'isole', ['Puits'], [0, 20, 0, 0, 4], { vieTours: 3, poisonsOpponentTurn: { mill: 1, handDiscard: 0 } }),
   seigneur_caravanes: lead('nomades', 3, 1, { typesRequired: ['Nomade'], bonusIni: 5, millWhileMoreLassitude: 1 }),
   fuite_dunes: tac('nomades', 2, 1, 'nomade-allie', 'fuiteDunes'),
   terre_brulee: tac('nomades', 3, 3, 'none', 'terreBrulee', { millCap: 3 }),
