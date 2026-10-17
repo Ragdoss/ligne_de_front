@@ -53,6 +53,8 @@ export function startTurn(ctx: Ctx, p: PlayerId): void {
     for (const u of ctx.units(q)) {
       if (u.squareOwner === p) { u.squareArm = 0; u.squareOwner = null; }
       if (u.guardOwner === p) u.guardOwner = null; // Racines protectrices : jusqu'au prochain tour du lanceur
+      if (u.stunHold === p) u.stunHold = null; // Chaînes de l'Abîme (Offrande)
+      if (u.steadyOwner === p) u.steadyOwner = null; // Dernier carré
       if (u.pactShield?.owner === p) u.pactShield = null; // Pacte de Survie : fin au début du tour du lanceur
     }
   }
@@ -123,11 +125,20 @@ export function startTurn(ctx: Ctx, p: PlayerId): void {
   for (const u of ctx.units(p)) {
     const d = card(u.cardId);
     generators += d.generatesResourceEachTurn ?? 0;
+    if (u.leader) generators += (card(u.leader).leaderResourceEachTurn as number | undefined) ?? 0; // Quartier-maître
+    const rc = d.resourceIfCaravane as number | undefined; // Caravanier armé
+    if (rc && ctx.units(p).some(x => x.cardId === 'caravane_marchande')) generators += rc;
     rally = Math.max(rally, d.ralliesBrokenEmpireEachTurn ?? 0);
   }
   if (generators) { pl.resource += generators; ctx.emit({ type: 'resource', player: p, amount: generators, source: 'generator' }); }
   if (rally) {
     for (const u of ctx.units(p)) if (u.brokenMorale && u.types.includes('Empire')) ctx.heal(u, 0, rally, 'etat_major');
+  }
+
+  // Héraut impérial : tes porteurs de Leader regagnent du Moral.
+  for (const h of ctx.units(p)) {
+    const r = h.leader && !h.brokenMorale ? card(h.leader).leaderRallyCarriersEachTurn as number | undefined : undefined;
+    if (r) for (const x of ctx.units(p)) if (x.leader) ctx.heal(x, 0, r, h.leader!);
   }
 
   // Général de l'Empire : +1 Moral par régiment Empire adjacent sur sa ligne.
@@ -184,5 +195,9 @@ export function startTurn(ctx: Ctx, p: PlayerId): void {
 
 /** Marché : après la pioche, chaque régiment Marché propose de défausser une carte pour en piocher une. */
 export function queueMarket(ctx: Ctx, p: PlayerId): void {
-  for (const u of ctx.units(p)) if (u.keywords.includes('Marché') && !u.brokenMorale) ctx.queueChoice('marche', p, u.cardId);
+  const sellers = ctx.units(p).filter(u => u.keywords.includes('Marché') && !u.brokenMorale);
+  for (const u of sellers) ctx.queueChoice('marche', p, u.cardId);
+  // Al-Mansur le Magnifique : un passage de plus au Marché (s'il y a un Marché).
+  const extra = ctx.units(p).find(u => card(u.cardId).doubleMarket && !u.brokenMorale);
+  if (extra && sellers.length) ctx.queueChoice('marche', p, extra.cardId);
 }

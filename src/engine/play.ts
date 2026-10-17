@@ -196,6 +196,7 @@ function deployRegiment(ctx: Ctx, p: PlayerId, c: CardDef, ref: SlotRef): void {
     const sacRes = card(sac.cardId).onSacrificedResource as number | undefined;
     ctx.destroy(sac, 'effect');
     if (ctx.over) return;
+    sacrificedDraw(ctx, p, sac.cardId);
     if (sacRes) { pl.resource += sacRes; ctx.emit({ type: 'resource', player: p, amount: sacRes, source: sac.cardId }); }
     // Gargouille de Cendres (Moral) et Seigneur des Abysses (soin du porteur) : chaque sacrifice les renforce.
     for (const x of ctx.units(p)) {
@@ -226,6 +227,17 @@ export function arrivalEffects(ctx: Ctx, p: PlayerId, u: Unit, asCard: string, s
   const ad = c.onArrivalDraw as number | undefined; // Ravitailleur
   if (ad) for (let i = 0; i < ad && !ctx.over; i++) ctx.draw(p, asCard);
   if (asCard === 'chuchoteur_abysses' && sacLevel > 0) ctx.queueChoice('chuchoteur', p, asCard, { left: sacLevel });
+  const chains = c.chainsLossPerLevel as number | undefined; // Gardien des chaînes
+  if (chains) u.chainsLoss = chains * sacLevel;
+  if (c.arrivalDestroyHighestMoral) { // Archidémon des Origines
+    for (let k = 0; k < (sacLevel >= 5 ? 2 : 1) && !ctx.over; k++) {
+      let t: Unit | null = null;
+      for (const e of ctx.units(q)) if (!t || e.currentMor > t.currentMor) t = e;
+      if (!t) break;
+      ctx.emit({ type: 'effect', key: 'archidemon', player: p, cardId: asCard, data: { target: t.cardId } });
+      ctx.destroy(t, 'effect');
+    }
+  }
   if (asCard === 'marchand_ames') ctx.queueChoice('marchandAmes', p, asCard);
   if (asCard === 'morvak') {
     let t: Unit | null = null;
@@ -609,6 +621,45 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
       break;
     }
     case 'mirageOasis': addKeyword(target!, 'Mirage 1'); note('mirageOasis', { uid: target!.uid }); break;
+    // --- Vague 2 (suite) ---
+    case 'dernierCarre':
+      for (const x of pl.board.avant) if (x) { x.squareArm = Math.max(x.squareArm, 15); x.squareOwner = p; x.steadyOwner = p; }
+      break;
+    case 'chargeDecisive':
+      for (const x of ctx.units(p)) if (x.types.includes('Monté')) { x.tempAtk += 20; x.tempIni += 50; }
+      break;
+    case 'voileOmbre': case 'chainesAbime': case 'grimoire':
+      ctx.queueChoice('offrande', p, c.id, { x: (c.offrande as number) ?? 0, uid: target?.uid ?? null });
+      break;
+    case 'rituelSang': {
+      const lvl = target!.niveau, id = target!.cardId;
+      ctx.emit({ type: 'sacrificed', player: p, uid: target!.uid, cardId: id, forCard: c.id });
+      ctx.destroy(target!, 'effect');
+      for (let i = 0; i < lvl && !ctx.over; i++) ctx.draw(p, c.id);
+      if (!ctx.over) sacrificedDraw(ctx, p, id);
+      break;
+    }
+    case 'executionExemplaire': {
+      const id = target!.cardId;
+      ctx.emit({ type: 'sacrificed', player: p, uid: target!.uid, cardId: id, forCard: c.id });
+      ctx.destroy(target!, 'effect');
+      if (ctx.over) break;
+      sacrificedDraw(ctx, p, id);
+      for (const x of ctx.units(p)) ctx.heal(x, 0, 3, c.id);
+      break;
+    }
+    case 'tempeteLames': for (const x of ctx.units(p)) if (keywordValue(x, 'Mirage') > 0) x.tempAtk += 10; break;
+    case 'sermentTraite': for (const x of ctx.units(p)) if (x.leader) ctx.heal(x, 20, 0, c.id); break;
+    case 'contratConvoi':
+      pl.resource += 2; ctx.emit({ type: 'resource', player: p, amount: 2, source: c.id });
+      ctx.draw(q, c.id);
+      break;
+    case 'sangSeve': ctx.gainLassitude(p, 3, c.id); if (!ctx.over && ctx.isAlive(target!)) ctx.heal(target!, 30, 3, c.id); break;
+    case 'ventPorteur':
+      for (const x of ctx.units(p)) x.tempIni += 20;
+      if (ctx.controlsElemental(p)) ctx.draw(p, c.id);
+      break;
+    case 'vivresCampagne': for (const x of ctx.units(p)) ctx.heal(x, 10, 1, c.id); break;
     // --- Vague 2 (Elfes) ---
     case 'marqueChasseur': for (const e of ctx.units(q)) if (e.markedBy === p) e.markedBy = null; target!.markedBy = p; note('marqueChasseur', { uid: target!.uid }); break;
     case 'visezFaibles': target!.exposedTo = p; note('visezFaibles', { uid: target!.uid }); break;
@@ -633,6 +684,23 @@ export function applyOffrande(ctx: Ctx, p: PlayerId, cardId: string, paid: boole
       ctx.takeControl(target, p, !paid, cardId, paid);
       break;
     }
+    case 'voileOmbre':
+      if (target) { target.squareArm = Math.max(target.squareArm, paid ? 20 : 10); target.squareOwner = p; }
+      break;
+    case 'chainesAbime':
+      if (!target || target.controller === p) { ctx.emit({ type: 'effect', key: 'noTarget', player: p, cardId }); break; }
+      target.stunned = true; target.stunnedBy = null;
+      if (paid) target.stunHold = p;
+      ctx.emit({ type: 'stunned', uid: target.uid, cardId: target.cardId, by: -1 });
+      break;
+    case 'grimoire': {
+      for (let i = 0; i < 3 && !ctx.over; i++) ctx.draw(p, cardId);
+      if (ctx.over) break;
+      const pl = ctx.player(p);
+      if (paid) pl.deck = ctx.shuffle(pl.deck);
+      ctx.queueChoice('grimoire', p, cardId, { left: 2, placed: 0 });
+      break;
+    }
     case 'rempartChair': {
       const list = paid ? ctx.units(p).filter(u => u.types.includes('Démon')) : target ? [target] : [];
       for (const u of list) { u.squareArm = Math.max(u.squareArm, 15); u.squareOwner = p; }
@@ -640,4 +708,10 @@ export function applyOffrande(ctx: Ctx, p: PlayerId, cardId: string, paid: boole
       break;
     }
   }
+}
+
+/** La Garde d'Asura : un régiment sacrifié (invocation, Rituel, Exécution) fait piocher son contrôleur. */
+function sacrificedDraw(ctx: Ctx, p: PlayerId, cardId: string): void {
+  const n = card(cardId).onSacrificedDraw as number | undefined;
+  for (let i = 0; i < (n ?? 0) && !ctx.over; i++) ctx.draw(p, cardId);
 }

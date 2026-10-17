@@ -5,6 +5,7 @@ import { BALANCE_6 } from './balance6';
 import { BALANCE_7 } from './balance7';
 import { WAVE1 } from './wave1';
 import { WAVE2 } from './wave2';
+import { WAVE2B } from './wave2b';
 
 const BASE_CARDS: Record<string, CardDef> = {
   "recrue_imp": {
@@ -1987,5 +1988,5 @@ const BASE_CARDS: Record<string, CardDef> = {
 } as Record<string, CardDef>;
 
 /** Toutes les cartes : catalogue de base + vagues 1 et 2 de la première édition. */
-export const CARDS: Record<string, CardDef> = { ...BASE_CARDS, ...WAVE1, ...WAVE2 };
+export const CARDS: Record<string, CardDef> = { ...BASE_CARDS, ...WAVE1, ...WAVE2, ...WAVE2B };
 for (const [id, over] of Object.entries({ ...BALANCE_5, ...BALANCE_6, ...BALANCE_7 })) CARDS[id] = { ...CARDS[id]!, ...over } as CardDef;

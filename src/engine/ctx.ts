@@ -283,6 +283,7 @@ export class Ctx {
         const ref = this.slotOf(u.uid);
         if (ref) for (const n of this.rowNeighbors(ref)) if (!n.brokenMorale) atk += (card(n.cardId).formationAtkToNeighbors as number | undefined) ?? 0;
       }
+      atk += this.wave2bAtk(u);
     }
     if (this.weather() === 'nuit' && u.types.includes('Démon')) atk += 10;
     atk -= u.tempDebuffAtk;
@@ -309,7 +310,38 @@ export class Ctx {
       // Garde-frontière sylvestre : Alliance.
       const al = d.allianceArm as number | undefined;
       if (al && this.allianceActive(u)) arm += al;
+      arm += this.wave2bArm(u);
     }
+    return arm;
+  }
+  /** Vague 2 (suite) : bonus d'ATK de Formation et d'aura. */
+  wave2bAtk(u: Unit): number {
+    const d = card(u.cardId);
+    const ref = this.slotOf(u.uid);
+    let atk = 0;
+    const row = ref && ref.zone !== 'isole' ? this.rowNeighbors(ref) : [];
+    const mounted = d.formationAtkIfMountedNeighbor as number | undefined; // Écuyers de la Garde
+    if (mounted && row.some(n => n.types.includes('Monté'))) atk += mounted;
+    const perEmp = d.formationAtkPerEmpireNeighbor as number | undefined; // Arbalétriers en rang
+    if (perEmp) atk += perEmp * row.filter(n => n.types.includes('Empire')).length;
+    for (const n of row) if (n.leader && !n.brokenMorale) atk += (card(n.leader).leaderFormationAtk as number | undefined) ?? 0; // Connétable
+    if (u.leader) for (const x of this.units(u.controller)) if (!x.brokenMorale) atk += (card(x.cardId).auraLeaderCarriers as number | undefined) ?? 0; // Impératrice
+    const perBroken = d.atkPerBrokenOnBoard as number | undefined; // Bourreau de l'Abîme
+    if (perBroken) atk += perBroken * [...this.units('A'), ...this.units('B')].filter(x => x.uid !== u.uid && x.brokenMorale).length;
+    return atk;
+  }
+  /** Vague 2 (suite) : bonus d'ARM de Formation et d'aura. */
+  wave2bArm(u: Unit): number {
+    const d = card(u.cardId);
+    const ref = this.slotOf(u.uid);
+    let arm = 0;
+    const two = d.armIfTwoRowNeighbors as number | undefined; // Lanciers du rempart
+    if (two && ref && ref.zone !== 'isole' && this.rowNeighbors(ref).length >= 2) arm += two;
+    const human = d.armIfHumanNeighbor as number | undefined; // Milice de village
+    if (human && ref && this.neighbors(ref).some(n => n.types.includes('Humain'))) arm += human;
+    if (u.leader) for (const x of this.units(u.controller)) if (!x.brokenMorale) arm += (card(x.cardId).auraLeaderCarriers as number | undefined) ?? 0; // Impératrice
+    const iso = this.player(u.controller).board.isole; // Sentinelles de l'oasis
+    if (iso && !iso.brokenMorale && u.types.includes('Nomade')) arm += (card(iso.cardId).auraNomadeArm as number | undefined) ?? 0;
     return arm;
   }
   effectiveIni(u: Unit): number {
@@ -433,6 +465,10 @@ export class Ctx {
     this.checkLevel(p);
     // Maître des pactes : la première lassitude gagnée par l'effet d'une carte, à chaque tour, fait piocher.
     if (!this.over && !['destroyed', 'moralCheck', 'scenario'].includes(source)) {
+      for (const x of this.units(p)) {
+        const v = card(x.cardId).atkOnCardLassitude as number | undefined; // Sorcière du pacte
+        if (v && !x.brokenMorale) x.tempAtk += v;
+      }
       const marker = this.s.turn * 2 + (this.s.active === 'A' ? 0 : 1);
       const pact = this.units(p).find(x => x.leader && !x.brokenMorale && card(x.leader).drawOnFirstCardLassitude);
       if (pact && pl.pactDrawnAt !== marker) {
@@ -643,7 +679,7 @@ export class Ctx {
 
     const allies = this.units(p);
     for (const a of allies) {
-      const steady = !!a.leader && !a.brokenMorale && !!card(a.leader).leaderNoAllyDeathMoralLoss; // Acolyte Damné
+      const steady = (!!a.leader && !a.brokenMorale && !!card(a.leader).leaderNoAllyDeathMoralLoss) || !!a.steadyOwner; // Acolyte Damné, Dernier carré
       if (!minion && !steady) {
         const lost = this.loseMoral(a, 1);
         if (lost) this.emit({ type: 'moralLoss', uid: a.uid, cardId: a.cardId, amount: lost, source: 'allyDeath' });

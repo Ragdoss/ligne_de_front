@@ -158,6 +158,12 @@ export interface Unit {
   rootedBy?: PlayerId | null;
   /** Racines protectrices : ne peut pas être détruit jusqu'au prochain tour de ce joueur. */
   guardOwner?: PlayerId | null;
+  /** Gardien des chaînes : ATK retirée à ceux qui attaquent ses voisins. */
+  chainsLoss?: number;
+  /** Chaînes de l'Abîme (Offrande) : reste sonné jusqu'au prochain tour de ce joueur. */
+  stunHold?: PlayerId | null;
+  /** Dernier carré : ne perd pas de Moral à la mort d'un allié jusqu'au prochain tour de ce joueur. */
+  steadyOwner?: PlayerId | null;
 }
 
 export interface HandCard {
@@ -180,6 +186,8 @@ export interface Board {
 }
 
 export interface PlayerState {
+  /** Maître du bazar : tour du dernier bonus de Marché. */
+  bazarAt?: number;
   id: PlayerId;
   faction: Faction;
   resource: number;
@@ -219,6 +227,7 @@ export type ChoiceKind =
   | 'frondeurStun'      // Frondeur Nomade : régiment adverse à sonner
   | 'offrande'          // Offrande X : payer (ou non) la lassitude pour l'effet renforcé
   | 'augure'            // Augure de l'Abîme : chaque carte regardée, au-dessus ou en dessous
+  | 'grimoire'          // Grimoire interdit : cartes de la main remises sur la pioche
   | 'chuchoteur'        // Chuchoteur des abysses : garder ou défausser la carte du dessus
   | 'marchandAmes'      // Marchand d'âmes : régiment de la défausse adverse à retirer
   | 'marche'            // Marché : défausser une carte pour en piocher une (ou non)

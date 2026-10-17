@@ -64,6 +64,10 @@ function computeOptions(ctx: Ctx, c: PendingChoice): ChoiceOption[] {
       });
       return out;
     }
+    case 'grimoire': {
+      if (Number(c.data.left) <= 0 || !pl.hand.length) return [];
+      return pl.hand.map(h => ({ handUid: h.uid, cardId: h.cardId, label: `Remettre ${cardName(h.cardId)} sur la pioche` }));
+    }
     case 'chuchoteur': {
       const top = pl.deck[0];
       if (!top || Number(c.data.left) <= 0) return [];
@@ -221,6 +225,15 @@ export function resolveChoice(ctx: Ctx, index: number): string | null {
     case 'offrande':
       applyOffrande(ctx, p, c.source, o.value === 1, Number(c.data.x), c.data.uid === null ? null : Number(c.data.uid));
       break;
+    case 'grimoire': {
+      // La première carte remise sera la première piochée.
+      const placed = Number(c.data.placed ?? 0);
+      const h = pl.hand.find(x => x.uid === o.handUid);
+      if (h) { pl.hand = pl.hand.filter(x => x.uid !== h.uid); if (!h.generated) pl.deck.splice(placed, 0, h.cardId); }
+      const left = Number(c.data.left) - 1;
+      if (left > 0 && pl.hand.length) ctx.s.pending.unshift({ ...c, options: null, data: { ...c.data, left, placed: placed + 1 } });
+      break;
+    }
     case 'augure': {
       const rest = String(c.data.rest).split(',').filter(Boolean);
       const i = Math.floor(o.value! / 2);
@@ -269,6 +282,16 @@ export function resolveChoice(ctx: Ctx, index: number): string | null {
       if (o.skip) break;
       ctx.discardFromHand(p, o.handUid!, c.source);
       if (!ctx.over) ctx.draw(p, c.source);
+      {
+        // Maître du bazar : le premier échange de chaque tour rapporte une ressource.
+        const bazar = ctx.units(p).find(x => x.leader && !x.brokenMorale && card(x.leader).marketResource);
+        const marker = ctx.s.turn * 2 + (ctx.s.active === 'A' ? 0 : 1);
+        if (bazar && pl.bazarAt !== marker) {
+          pl.bazarAt = marker;
+          const n = card(bazar.leader!).marketResource as number;
+          pl.resource += n; ctx.emit({ type: 'resource', player: p, amount: n, source: bazar.leader! });
+        }
+      }
       break;
     case 'ransomDesert': {
       removeFrom(opp.discard, o.cardId!);

@@ -3,6 +3,7 @@
 // (ou .png / .jpg) : il suffit d'y déposer un fichier pour qu'il apparaisse partout dans le jeu.
 import { CARDS } from '../data/cards';
 import type { CardDef } from '../engine/types';
+import { FLAVOR_FR } from '../i18n/wave2b.fr';
 import { cardDesc, cardName, visibleKeywords } from './labels';
 
 const FILES = import.meta.glob('./assets/cards/*.{webp,png,jpg,jpeg}', { eager: true, import: 'default' }) as Record<string, string>;
@@ -68,6 +69,7 @@ export function CardFace({ id, cost, className = '' }: { id: string; cost?: numb
         )}
         {kws.length > 0 && <div className="f-kw">{kws.join(' · ')}</div>}
         {desc && <p className="f-desc">{desc}</p>}
+        {FLAVOR_FR[id] && <p className="f-flav">« {FLAVOR_FR[id]} »</p>}
         {c.cardType === 'Regiment' && (
           <div className="f-stats">
             {STAT_KEYS.map(k => <span key={k} className={`st-${k}`}><b>{c[k] as number}</b><i>{STAT_LABEL[k]}</i></span>)}

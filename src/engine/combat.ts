@@ -154,6 +154,12 @@ export function resolveCombat(ctx: Ctx, ending: PlayerId): void {
     if (!attacked[opponentOf(a.p)]) firstCount[a.p]++;
     attacked[a.p] = true;
     attack(ctx, a.u, target);
+    // Cuirassiers lourds : une seconde attaque après avoir détruit un régiment (une fois par combat).
+    if (!ctx.over && card(a.u.cardId).extraAttackOnKill && !ctx.isAlive(target) && ctx.isAlive(a.u) && !a.u.brokenMorale) {
+      const pos3 = ctx.slotOf(a.u.uid);
+      const t3 = pos3 && pos3.player === a.p ? pickTarget(ctx, a.u, a.p, pos3.zone, pos3.idx) : null;
+      if (t3) attack(ctx, a.u, t3);
+    }
     // Grand Maître d'armes : seconde frappe à moitié d'ATK.
     if (!ctx.over && a.u.leader && !a.u.brokenMorale && card(a.u.leader).leaderDoubleStrike) {
       const pos2 = ctx.slotOf(a.u.uid);
@@ -173,7 +179,7 @@ export function resolveCombat(ctx: Ctx, ending: PlayerId): void {
       u.justDeployed = false;
       u.ignoreArmor = false;
       u.tempAtk = 0; u.tempDebuffAtk = 0; u.tempArm = 0; u.tempIni = 0;
-      u.stunned = false;
+      u.stunned = !!u.stunHold; // Chaînes de l'Abîme avec Offrande : reste sonné jusqu'au prochain tour du lanceur
       u.woundedByFrondeur = false;
       u.blinded = false;
       u.markedBy = null; u.exposedTo = null; // Marque du chasseur, Visez les faibles : « ce tour-ci »
@@ -196,6 +202,9 @@ export function attack(ctx: Ctx, a: Unit, target: Unit, mult = 1): void {
   // Sentinelle de chêne : Communion, ses attaquants perdent de l'ATK.
   const loss = card(target.cardId).communionAttackerAtkLoss as number | undefined;
   if (loss && !target.brokenMorale && ctx.communion(target.controller)) atk = Math.max(0, atk - loss);
+  // Gardien des chaînes : attaquer un de ses voisins coûte de l'ATK.
+  const tPos = ctx.slotOf(target.uid);
+  if (tPos) for (const g of ctx.neighbors(tPos)) if (!g.brokenMorale && g.chainsLoss) atk = Math.max(0, atk - g.chainsLoss);
   const vsMounted = card(a.cardId).bonusVsMounted ?? (a.types.includes('Lancier') ? 10 : 0);
   if (vsMounted && target.types.includes('Monté') && !a.brokenMorale) atk += vsMounted;
   const vsTypes = card(a.cardId).bonusVsTypes as Record<string, number> | undefined;
@@ -255,6 +264,9 @@ export function attack(ctx: Ctx, a: Unit, target: Unit, mult = 1): void {
     const cause = target.currentEnd <= 0 && target.currentMor <= 0 ? 'both' : target.currentEnd <= 0 ? 'end' : 'moral';
     ctx.destroy(target, cause, a);
     if (ctx.over) return;
+    // Seigneur des tourments : chaque régiment détruit par le porteur donne de la lassitude à l'adversaire.
+    const kl = a.leader && !a.brokenMorale && !ctx.isAlive(target) ? card(a.leader).leaderKillLassitude as number | undefined : undefined;
+    if (kl) { ctx.gainLassitude(owner, kl, a.leader!); if (ctx.over) return; }
     if (ctx.isAlive(a) && !a.brokenMorale && !ctx.isAlive(target)) { // (Racines protectrices, Bénédiction : la cible a pu survivre)
       // Pillage X : l'adversaire défausse le dessus de sa pioche.
       const pil = keywordValue(a, 'Pillage');

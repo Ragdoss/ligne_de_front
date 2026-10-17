@@ -1,6 +1,7 @@
 // Noms et descriptions des cartes en français.
 import { WAVE1_TEXT_FR } from './wave1.fr';
 import { WAVE2_TEXT_FR } from './wave2.fr';
+import { WAVE2B_TEXT_FR } from './wave2b.fr';
 
 const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   "recrue_imp": {
@@ -505,4 +506,4 @@ const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   }
 };
 
-export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = { ...BASE_TEXT_FR, ...WAVE1_TEXT_FR, ...WAVE2_TEXT_FR };
+export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = { ...BASE_TEXT_FR, ...WAVE1_TEXT_FR, ...WAVE2_TEXT_FR, ...WAVE2B_TEXT_FR };
