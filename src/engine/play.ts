@@ -90,8 +90,8 @@ export function validFirstTarget(ctx: Ctx, p: PlayerId, c: CardDef, ref: SlotRef
     if (any && !any.some(t => u.types.includes(t))) return false;
     return (c.typesRequired ?? []).every(t => u.types.includes(t));
   }
-  // Prise de contrôle : régiment avant/arrière, niveau maximum, et une case libre de ton côté.
-  if (c.needsFreeSlot && (ref.zone === 'isole' || !ctx.freeSlotNear(p, ref.zone, ref.idx))) return false;
+  // Prise de contrôle : régiment avant ou arrière (sans case libre de ton côté, il partira en défausse).
+  if (c.needsFreeSlot && ref.zone === 'isole') return false;
   const maxLvl = c.maxTargetLevel as number | undefined;
   if (maxLvl !== undefined && u.niveau > maxLvl) return false;
   switch (c.targetRule) {
@@ -618,8 +618,7 @@ export function applyOffrande(ctx: Ctx, p: PlayerId, cardId: string, paid: boole
     case 'pacteMineur': for (let i = 0; i < (paid ? 3 : 1) && !ctx.over; i++) ctx.draw(p, cardId); break;
     case 'murmure': {
       if (!target || target.controller === p) { ctx.emit({ type: 'effect', key: 'noTarget', player: p, cardId }); break; }
-      if (!ctx.takeControl(target, p, !paid, cardId)) break;
-      if (paid) { target.currentMor = target.maxMor; target.brokenMorale = false; }
+      ctx.takeControl(target, p, !paid, cardId, paid);
       break;
     }
     case 'rempartChair': {

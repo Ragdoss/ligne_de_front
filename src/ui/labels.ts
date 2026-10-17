@@ -49,6 +49,7 @@ export function choiceTitle(c: PendingChoice): string {
     case 'augure': return 'Augure de l’Abîme : place chaque carte au-dessus ou en dessous de ta pioche (la première placée au-dessus sera piochée en premier)';
     case 'chuchoteur': return `Chuchoteur des abysses : garder la carte du dessus, ou la défausser (encore ${c.data.left} regard(s))`;
     case 'marchandAmes': return 'Marchand d’âmes : retire un régiment de la défausse adverse (ressources = son niveau)';
+    case 'placeControlled': return `${cardName(c.source)} : choisis où poser le régiment dont tu prends le contrôle`;
     case 'marche': return `${cardName(c.source)} — Marché : défausser une carte de ta main pour en piocher une ?`;
   }
 }

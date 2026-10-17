@@ -79,6 +79,7 @@ export function formatEvent(e: GameEvent, names: Record<PlayerId, string> = { A:
         controlTaken: `${cardName(e.cardId)} : ${n(e.player)} prend le contrôle de ${cardName(String(e.data?.target ?? ''))} jusqu’à la fin du tour.`,
         controlKept: `${cardName(e.cardId)} : ${cardName(String(e.data?.target ?? ''))} passe pour de bon du côté de ${n(e.player)}.`,
         controlReturned: `${cardName(e.cardId)} retourne auprès de ${n(e.player)}.`,
+        controlDiscarded: `${cardName(e.cardId)} : aucune case libre, ${cardName(String(e.data?.target ?? ''))} part dans la défausse de son propriétaire.`,
         controlLost: `${cardName(e.cardId)} ne trouve pas de place pour revenir : il part en défausse.`,
         mirage: `Mirage : l’attaque de ${cardName(String(e.data?.attacker ?? ''))} contre ${cardName(e.cardId)} frappe le vide.`,
         mirageGained: `${cardName(e.cardId)} gagne Mirage 1.`,

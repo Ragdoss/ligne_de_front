@@ -148,12 +148,15 @@ export class Ctx {
     }
     return null;
   }
-  /** Prise de contrôle d'un régiment (avant ou arrière) par `p` ; temporaire = rendu à la fin du tour. */
-  takeControl(u: Unit, p: PlayerId, temporary: boolean, source: string): boolean {
+  /** Prise de contrôle d'un régiment (avant ou arrière) par `p` : `p` choisit la case où le poser (aucune case libre = défausse). */
+  takeControl(u: Unit, p: PlayerId, temporary: boolean, source: string, fullMoral = false): void {
+    if (u.controller === p || !this.isAlive(u)) return;
+    this.queueChoice('placeControlled', p, source, { uid: u.uid, temporary: temporary ? 1 : 0, fullMoral: fullMoral ? 1 : 0 });
+  }
+  /** Pose le régiment pris dans la case choisie par son nouveau contrôleur. */
+  placeControlled(u: Unit, p: PlayerId, dest: SlotRef, temporary: boolean, source: string): void {
     const from = this.slotOf(u.uid);
-    if (!from || from.zone === 'isole' || u.controller === p) return false;
-    const dest = this.freeSlotNear(p, from.zone, from.idx);
-    if (!dest) return false;
+    if (!from || this.unitAt(dest)) return;
     const prev = u.controller;
     this.setAt(from, null);
     u.controller = p;
@@ -163,7 +166,15 @@ export class Ctx {
     this.setAt(dest, u);
     this.emit({ type: 'effect', key: temporary ? 'controlTaken' : 'controlKept', player: p, cardId: source, data: { uid: u.uid, target: u.cardId } });
     this.emit({ type: 'moved', uid: u.uid, cardId: u.cardId, from, to: dest });
-    return true;
+  }
+  /** Régiment pris sans case libre : il part dans la défausse de son propriétaire. */
+  discardControlled(u: Unit, p: PlayerId, source: string): void {
+    const from = this.slotOf(u.uid);
+    if (!from) return;
+    this.setAt(from, null);
+    if (!u.isToken) this.discard(u.borrowed?.owner ?? u.owner ?? u.controller, u.cardId);
+    this.discardLeader(u);
+    this.emit({ type: 'effect', key: 'controlDiscarded', player: p, cardId: source, data: { target: u.cardId } });
   }
   /** Fin du tour : les régiments empruntés retournent à leur propriétaire (case libre la plus proche, sinon en défausse). */
   returnBorrowed(): void {

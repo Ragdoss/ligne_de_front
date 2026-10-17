@@ -71,6 +71,16 @@ function computeOptions(ctx: Ctx, c: PendingChoice): ChoiceOption[] {
     }
     case 'marchandAmes':
       return unique(opp.discard.filter(x => card(x).cardType === 'Regiment')).map(cardId => ({ cardId }));
+    case 'placeControlled': {
+      const u = ctx.findUnit(Number(c.data.uid));
+      if (!u || u.controller === c.player) return [];
+      const L = ctx.s.config.layout;
+      const out: ChoiceOption[] = [];
+      for (const zone of ['avant', 'arriere'] as const) for (let idx = 0; idx < L[zone]; idx++) {
+        if (!pl.board[zone][idx]) out.push({ slot: { zone, idx }, label: `Poser ${cardName(u.cardId)} en ${zone === 'avant' ? 'avant' : 'arrière'} ${idx + 1}` });
+      }
+      return out;
+    }
     case 'marche': {
       if (!pl.hand.length || !pl.deck.length) return [];
       return [{ skip: true, label: 'Ne rien échanger' }, ...pl.hand.map(h => ({ handUid: h.uid, cardId: h.cardId, label: `Défausser ${cardName(h.cardId)} et piocher` }))];
@@ -89,6 +99,10 @@ function finishWithoutOptions(ctx: Ctx, c: PendingChoice): void {
     const gain = Math.max(0, Number(c.data.gainBase) - Number(c.data.sum));
     ctx.player(thief).resource += gain;
     ctx.emit({ type: 'resource', player: thief, amount: gain, source: c.source });
+  } else if (c.kind === 'placeControlled') {
+    // Aucune case libre : le régiment pris part dans la défausse de son propriétaire.
+    const u = ctx.findUnit(Number(c.data.uid));
+    if (u && u.controller !== c.player) ctx.discardControlled(u, c.player, c.source);
   } else if (c.kind !== 'handDiscard') {
     ctx.emit({ type: 'effect', key: 'choiceEmpty', player: c.player, cardId: c.source, data: { kind: c.kind } });
   }
@@ -230,6 +244,13 @@ export function resolveChoice(ctx: Ctx, index: number): string | null {
       ctx.emit({ type: 'resource', player: p, amount: lvl, source: c.source });
       note('marchandAmes', { cardId: o.cardId });
       ctx.gainLassitude(p, Math.max(0, lvl - (opp.discardedThisTurn ?? 0)), c.source);
+      break;
+    }
+    case 'placeControlled': {
+      const u = ctx.findUnit(Number(c.data.uid));
+      if (!u || u.controller === p) break;
+      ctx.placeControlled(u, p, { player: p, zone: o.slot!.zone, idx: o.slot!.idx }, c.data.temporary === 1, c.source);
+      if (c.data.fullMoral === 1) { u.currentMor = u.maxMor; u.brokenMorale = false; }
       break;
     }
     case 'marche':

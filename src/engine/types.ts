@@ -212,7 +212,8 @@ export type ChoiceKind =
   | 'augure'            // Augure de l'Abîme : chaque carte regardée, au-dessus ou en dessous
   | 'chuchoteur'        // Chuchoteur des abysses : garder ou défausser la carte du dessus
   | 'marchandAmes'      // Marchand d'âmes : régiment de la défausse adverse à retirer
-  | 'marche';           // Marché : défausser une carte pour en piocher une (ou non)
+  | 'marche'            // Marché : défausser une carte pour en piocher une (ou non)
+  | 'placeControlled';  // Prise de contrôle : case où poser le régiment pris (aucune case = défausse)
 
 export interface ChoiceOption {
   cardId?: string;
@@ -224,6 +225,8 @@ export interface ChoiceOption {
   where?: string;
   /** Libellé prêt à afficher (sinon calculé à partir des autres champs). */
   label?: string;
+  /** Case visée (pose d'un régiment pris). */
+  slot?: { zone: 'avant' | 'arriere'; idx: number };
 }
 
 /**

@@ -153,7 +153,10 @@ describe('Vague 1 : Démons', () => {
     place(s, 'B', 'avant', 0, 'recrue_imp');
     const uid = give(s, 'A', 'appat_invocateur');
     s = act(s, { type: 'play', handUid: uid, target: slot('B', 'avant', 2) }).state;
-    expect(new Ctx(s).slotOf(r.uid)?.player).toBe('A');
+    expect(s.pending[0]?.kind).toBe('placeControlled');
+    const pick = s.pending[0]!.options!.findIndex(o => o.slot?.zone === 'arriere' && o.slot.idx === 1);
+    s = choose(s, pick); // le joueur qui prend le contrôle choisit la case
+    expect(new Ctx(s).slotOf(r.uid)).toEqual({ player: 'A', zone: 'arriere', idx: 1 });
     s = endTurn(s);
     const back = new Ctx(s).findUnit(r.uid);
     if (back) expect(back.controller).toBe('B');
@@ -162,6 +165,7 @@ describe('Vague 1 : Démons', () => {
     let s = blankGame(); s.players.A.level = 3; s.players.A.resource = 10;
     place(s, 'B', 'avant', 0, 'recrue_imp');
     s = act(s, { type: 'play', handUid: give(s, 'A', 'appat_invocateur'), target: slot('B', 'avant', 0) }).state;
+    s = choose(s, 0);
     const at = new Ctx(s).slotOf(s.players.A.board.avant.find(Boolean)!.uid)!;
     s = act(s, { type: 'play', handUid: give(s, 'A', 'chien_infernal'), target: at }).state;
     expect(s.players.B.discard).toContain('recrue_imp');
@@ -171,11 +175,21 @@ describe('Vague 1 : Démons', () => {
     let s = blankGame(); s.players.A.level = 3; s.players.A.resource = 5;
     const t = place(s, 'B', 'avant', 0, 'soldat_kragz', { currentMor: 1, brokenMorale: true });
     s = act(s, { type: 'play', handUid: give(s, 'A', 'murmure_abime'), target: slot('B', 'avant', 0) }).state;
-    s = choose(s, 1);
+    s = choose(s, 1); // payer l'Offrande
+    s = choose(s, 0); // case choisie
     const u = new Ctx(s).findUnit(t.uid)!;
     expect(u.controller).toBe('A');
     expect(u.borrowed ?? null).toBeNull();
     expect(u.currentMor).toBe(u.maxMor);
+  });
+  it('Prise de contrôle sans case libre : le régiment part dans la défausse de son propriétaire', () => {
+    let s = blankGame(); s.players.A.level = 2; s.players.A.resource = 5;
+    for (let i = 0; i < 4; i++) place(s, 'A', 'avant', i, 'recrue_imp');
+    for (let i = 0; i < 3; i++) place(s, 'A', 'arriere', i, 'archer_imp');
+    const t = place(s, 'B', 'avant', 0, 'lancier_emp');
+    s = act(s, { type: 'play', handUid: give(s, 'A', 'appat_invocateur'), target: slot('B', 'avant', 0) }).state;
+    expect(new Ctx(s).findUnit(t.uid)).toBeNull();
+    expect(s.players.B.discard).toContain('lancier_emp');
   });
   it('Augure de l’Abîme : chaque carte au-dessus ou en dessous', () => {
     let s = blankGame(); s.players.A.resource = 5;
