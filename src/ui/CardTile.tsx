@@ -1,6 +1,7 @@
 // Tuile de carte réutilisable (collection, créateur de deck, campagne).
 import { CARDS } from '../data/cards';
-import { cardDesc, cardName, TYPE_LABEL, visibleKeywords } from './labels';
+import { CardFace } from './CardFace';
+import { cardDesc, cardName, visibleKeywords } from './labels';
 
 export function statsLine(id: string): string {
   const c = CARDS[id]!;
@@ -21,11 +22,8 @@ export function statsLine(id: string): string {
 export function CardTile({ id, dim, badge, children }: { id: string; dim?: boolean; badge?: React.ReactNode; children?: React.ReactNode }) {
   const c = CARDS[id]!;
   return (
-    <div className={`ccard ${c.faction}${dim ? '' : ' in'}`}>
-      <div className="cc-head"><b>{cardName(id)}</b><span>Niv. {c.niveau} · Coût {c.dynamicCost ? 'var.' : c.cout}</span></div>
-      <div className="cc-type">{TYPE_LABEL[c.cardType]}{c.types?.length ? ` · ${c.types.join(', ')}` : ''}</div>
-      <div className="cc-stats">{statsLine(id)}</div>
-      <div className="cc-desc">{cardDesc(id)}</div>
+    <div className={`ccard ${c.faction}${dim ? '' : ' in'}`} title={`${cardName(id)} — ${statsLine(id)}${cardDesc(id) ? `\n${cardDesc(id)}` : ''}`}>
+      <CardFace id={id} />
       {(badge || children) && <div className="cc-ctl">{badge}{children}</div>}
     </div>
   );

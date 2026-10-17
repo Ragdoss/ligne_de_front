@@ -7,6 +7,7 @@ import { drawCountFor } from '../engine/turn';
 import type { Action, DialogLine, GameEvent, GameState, PlayerId, SlotRef } from '../engine/types';
 import { formatEvent } from '../i18n/log.fr';
 import { Board, type Highlight } from './Board';
+import { CardFace } from './CardFace';
 import { Hand } from './Hand';
 import { cardDesc, cardName, choiceTitle, optionLabel, UNPLAYABLE } from './labels';
 
@@ -110,6 +111,10 @@ interface Banner { id: number; who: string; cardId: string; on?: string }
 
 export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, intro, renderEnd, onQuit, animMul = 1, aiMul = 1, bannerMul = 1, initialReveal = false, onOver, remote, bottomSide, onGame, overlay, avatars }: GameScreenProps) {
   const [game, setGame] = useState<GameState>(() => createGame(setup));
+  useEffect(() => { setZoomState(null); }, [game]); // une carte jouée ou détruite ne reste pas affichée
+  // Carte survolée, affichée en grand du côté opposé à la souris (fermée dès que le jeu change).
+  const [zoom, setZoomState] = useState<{ id: string; left: boolean } | null>(null);
+  const setZoom = useCallback((id: string | null, x?: number) => setZoomState(id ? { id, left: x !== undefined && x > window.innerWidth / 2 } : null), []);
   const [shown, setShown] = useState<GameState | null>(null); // état affiché pendant une animation de combat
   const [highlight, setHighlight] = useState<Highlight | null>(null);
   const [faded, setFaded] = useState<Set<number>>(new Set());
@@ -260,6 +265,7 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
       selected={game.active === p ? sel?.uid ?? null : null}
       onSelect={onSelectCard}
       onDragCard={onDragCard}
+      onHover={setZoom}
     />
   );
 
@@ -278,11 +284,11 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
         <h2 className="hand-title">Main — {names[top]}</h2>
         {handFor(top)}
         <PlayerBar game={view} p={top} label={names[top]} active={game.active === top} avatar={avatars?.[top]} />
-        <Board game={view} player={top} bottom={false} isTarget={isTarget} isFirstPicked={r => sameSlot(sel?.first, r)} onSlot={onSlot} highlight={highlight} faded={faded} preview={preview?.units} />
+        <Board game={view} player={top} bottom={false} isTarget={isTarget} isFirstPicked={r => sameSlot(sel?.first, r)} onSlot={onSlot} highlight={highlight} faded={faded} preview={preview?.units} onHover={setZoom} />
       </section>
       <div className="frontline">ligne de front</div>
       <section className="side">
-        <Board game={view} player={bottom} bottom isTarget={isTarget} isFirstPicked={r => sameSlot(sel?.first, r)} onSlot={onSlot} highlight={highlight} faded={faded} preview={preview?.units} />
+        <Board game={view} player={bottom} bottom isTarget={isTarget} isFirstPicked={r => sameSlot(sel?.first, r)} onSlot={onSlot} highlight={highlight} faded={faded} preview={preview?.units} onHover={setZoom} />
         <PlayerBar game={view} p={bottom} label={names[bottom]} active={game.active === bottom} avatar={avatars?.[bottom]} />
         <div className="controls">
           <button type="button" className={`eye-coin${peek ? ' open' : ''}`} disabled={!humanTurn || !!game.pending.length} onClick={() => setPeek(v => !v)}
@@ -328,6 +334,8 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
           </div>
         </div>
       )}
+
+      {zoom && <div className={`zoom${zoom.left ? ' left' : ''}`} aria-hidden="true"><CardFace id={zoom.id} /></div>}
 
       {!dialogs.length && overlay}
       {game.over && !shown && !dialogs.length && !overClosed && renderEnd(game, () => setOverClosed(true))}

@@ -3,34 +3,29 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import { card } from '../engine/ctx';
 import { costOf, whyUnplayable } from '../engine/game';
 import type { CardDef, GameState, HandCard, PlayerId } from '../engine/types';
+import { ArtBackdrop, bearerLabel, leaderBonuses, levelLabel, slotLabel, STAT_KEYS, STAT_LABEL } from './CardFace';
 import { cardDesc, cardName, TYPE_LABEL, UNPLAYABLE, visibleKeywords } from './labels';
 
-function Details({ c }: { c: CardDef }) {
+/** Résumé d'une carte en main : stats colorées, bonus de Leader ou début de l'effet. */
+function Summary({ c }: { c: CardDef }) {
   if (c.cardType === 'Regiment') {
-    const ZL: Record<string, string> = { avant: 'Avant', arriere: 'Arr.', isole: 'Isolé' };
-    const slot = c.slotTypes ? c.slotTypes.map(z => ZL[z]).join('/') : c.slotType === 'avant' ? 'Avant' : c.slotType === 'arriere' ? 'Arrière' : 'Isolé';
     const kws = [...(c.unique ? ['Unique'] : []), ...visibleKeywords(c.keywords ?? [])];
     return (
       <>
-        <div className="h-stats">
-          <span>ATK <b>{c.atk}</b></span><span>END <b>{c.end}</b></span>
-          <span>ARM <b>{c.arm}</b></span><span>INI <b>{c.ini}</b></span>
-          <span>MOR <b>{c.mor}</b></span><span>{slot}</span>
-        </div>
+        <div className="h-line">{STAT_KEYS.map((k, i) => <span key={k}>{i > 0 && ' · '}<b className={`v-${k}`} title={STAT_LABEL[k]}>{c[k] as number}</b></span>)}</div>
         {kws.length > 0 && <div className="h-kw">{kws.join(', ')}</div>}
       </>
     );
   }
   if (c.cardType === 'Leader') {
-    const b = ([['ATK', c.bonusAtk], ['ARM', c.bonusArm], ['INI', c.bonusIni], ['MOR', c.bonusMor], ['END', c.bonusEnd]] as const).filter(([, v]) => v);
     return (
       <>
-        {b.length > 0 && <div className="h-stats">{b.map(([k, v]) => <span key={k}>+{v} {k}</span>)}</div>}
-        <div className="h-kw">Porteur : {c.targetsEnemy ? 'régiment adverse' : (c.typesRequired?.length ? c.typesRequired.join(' + ') : 'quelconque')}</div>
+        <div className="h-line">{leaderBonuses(c).map(([k, v], i) => <span key={k}>{i > 0 && ' · '}<b className={`v-${k}`}>+{v} {k.toUpperCase()}</b></span>)}</div>
+        <div className="h-kw">Porteur : {bearerLabel(c)}</div>
       </>
     );
   }
-  return null;
+  return <div className="h-desc">{cardDesc(c.id)}</div>;
 }
 
 export type SortMode = 'cout' | 'type' | 'niveau';
@@ -63,9 +58,11 @@ export interface HandProps {
   onSelect: (uid: number) => void;
   /** Début du glisser d'une carte (pour la poser directement sur le plateau). */
   onDragCard?: (uid: number) => void;
+  /** Survol d'une carte : carte à afficher en grand (null en sortie). */
+  onHover?: (cardId: string | null, x?: number) => void;
 }
 
-export function Hand({ game, player, order, setOrder, canAct, hidden, selected, onSelect, onDragCard }: HandProps) {
+export function Hand({ game, player, order, setOrder, canAct, hidden, selected, onSelect, onDragCard, onHover }: HandProps) {
   const hand = game.players[player].hand;
   const [drag, setDrag] = useState<number | null>(null);
   // Animation du tri (technique FLIP) : chaque carte glisse de son ancienne place vers la nouvelle.
@@ -122,14 +119,18 @@ export function Hand({ game, player, order, setOrder, canAct, hidden, selected, 
               aria-disabled={!playable}
               title={`${cardName(c.id)}\n${cardDesc(c.id)}${why && why !== 'turn' ? `\nInjouable : ${UNPLAYABLE[why] ?? why}` : ''}`}
               onClick={() => onSelect(h.uid)}
+              onMouseEnter={e => onHover?.(c.id, e.clientX)}
+              onMouseLeave={() => onHover?.(null)}
               onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(h.uid); } }}
             >
-              <div className="h-type">{TYPE_LABEL[c.cardType]}{h.freeCopy ? ' · copie gratuite' : ''}</div>
-              <div className="h-name">{cardName(c.id)}</div>
-              {c.types && c.types.length > 0 && <div className="h-meta">{c.types.join(', ')}</div>}
-              <Details c={c} />
-              <div className="h-desc">{cardDesc(c.id)}</div>
-              <div className="h-cost"><span>Niv. {c.niveau}</span><span>Coût {cost}{c.dynamicCost ? ' (var.)' : ''}</span></div>
+              <ArtBackdrop id={c.id} />
+              <span className={`h-cost${cost < c.cout ? ' cheaper' : cost > c.cout ? ' dearer' : ''}`} title={`Coût ${cost}${c.dynamicCost ? ' (variable)' : ''}`}>{cost}</span>
+              <span className="h-lvl" title={`Niveau ${c.niveau}`}>{levelLabel(c.niveau)}</span>
+              <div className="h-low">
+                <div className="h-name">{cardName(c.id)}</div>
+                <div className="h-type">{TYPE_LABEL[c.cardType]}{c.cardType === 'Regiment' ? ` · ${slotLabel(c)}` : ''}{h.freeCopy ? ' · copie gratuite' : ''}</div>
+                <Summary c={c} />
+              </div>
               <button type="button" className="mv l" aria-label="Décaler à gauche" onClick={e => { e.stopPropagation(); move(h.uid, i - 1); }}>‹</button>
               <button type="button" className="mv r" aria-label="Décaler à droite" onClick={e => { e.stopPropagation(); move(h.uid, i + 1); }}>›</button>
             </div>

@@ -35,6 +35,8 @@ export interface Options {
   revealAiHand: boolean;
   /** Toutes les cartes utilisables en partie locale, même non possédées. */
   allUnlocked: boolean;
+  /** Niveaux des cartes en chiffres romains (sinon arabes). */
+  romanLevels?: boolean;
 }
 
 export interface Profile {
@@ -58,7 +60,7 @@ export interface Profile {
 /** Decks triés : favoris d'abord, puis les plus récemment modifiés. */
 export const sortedDecks = (decks: SavedDeck[]) => decks.slice().sort((a, b) => Number(!!b.fav) - Number(!!a.fav) || b.updated - a.updated);
 
-export const DEFAULT_OPTIONS: Options = { scale: 1, animSpeed: 1, aiSpeed: 1, bannerSpeed: 1, revealAiHand: false, allUnlocked: false };
+export const DEFAULT_OPTIONS: Options = { scale: 1, animSpeed: 1, aiSpeed: 1, bannerSpeed: 1, revealAiHand: false, allUnlocked: false, romanLevels: true };
 
 /** Nouveau joueur : aucune carte. La campagne en débloque ; l'option « toutes les cartes débloquées » permet de tout essayer. */
 export function newProfile(): Profile {

@@ -6,6 +6,7 @@ import { formatEvent } from '../i18n/log.fr';
 import { COINS_PER_WIN, loadProfile, mergeCampaignPool, saveProfile, type Profile } from '../profile/profile';
 import { CampHub } from './Camp';
 import { CampaignDeck } from './CampaignDeck';
+import { setRomanLevels } from './CardFace';
 import { CardTile } from './CardTile';
 import { MyCards } from './Collection';
 import { DeckList } from './Decks';
@@ -74,6 +75,7 @@ export function App() {
   /** Changement de profil : on recharge toutes ses données. */
   const switchProfile = () => { const p = loadProfile(); profileRef.current = p; setProfile(p); };
   const o = profile.options;
+  setRomanLevels(o.romanLevels !== false);
   const gameOpts = { animMul: o.animSpeed, aiMul: o.aiSpeed, bannerMul: o.bannerSpeed, initialReveal: o.revealAiHand };
 
   /** Passe au scénario suivant ou termine la campagne (fusion du pool dans la collection). */

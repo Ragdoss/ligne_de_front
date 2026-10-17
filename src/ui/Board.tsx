@@ -1,6 +1,7 @@
 // Plateau : rangs avant / arrière, emplacement isolé, régiments avec leurs statistiques effectives.
 import { card, Ctx } from '../engine/ctx';
 import type { GameState, PlayerId, SlotRef, Unit, Zone } from '../engine/types';
+import { ArtBackdrop, levelLabel } from './CardFace';
 import { cardDesc, cardName, visibleKeywords } from './labels';
 
 export interface Highlight {
@@ -22,9 +23,12 @@ export interface BoardProps {
   faded: Set<number>;
   /** Simulation du combat : pertes et destructions prévues par régiment. */
   preview?: Map<number, { end: number; mor: number; dead: boolean }>;
+  /** Survol d'un régiment ou de son Leader : carte à afficher en grand (null en sortie). */
+  onHover?: (cardId: string | null, x?: number) => void;
 }
 
-function UnitCard({ u, ctx, highlight, faded, pv }: { u: Unit; ctx: Ctx; highlight: Highlight | null; faded: boolean; pv?: { end: number; mor: number; dead: boolean } }) {
+type Pv = { end: number; mor: number; dead: boolean };
+function UnitCard({ u, ctx, highlight, faded, pv, onHover }: { u: Unit; ctx: Ctx; highlight: Highlight | null; faded: boolean; pv?: Pv; onHover?: (id: string | null, x?: number) => void }) {
   const d = card(u.cardId);
   const atk = ctx.effectiveAtk(u), arm = ctx.effectiveArm(u), ini = ctx.effectiveIni(u);
   const cls = ['unit', d.faction];
@@ -34,36 +38,46 @@ function UnitCard({ u, ctx, highlight, faded, pv }: { u: Unit; ctx: Ctx; highlig
   if (highlight?.attacker === u.uid) cls.push('attacking');
   if (highlight?.target === u.uid) cls.push('hit');
   const kws = visibleKeywords(u.keywords);
-  const flags = [u.justDeployed && !u.arrivesReady ? 'déploiement' : '', u.stunned ? 'sonné' : '', u.brokenMorale ? 'Moral brisé' : '', u.pactShield ? 'pacte' : ''].filter(Boolean);
+  const flags = [u.justDeployed && !u.arrivesReady ? 'déploiement' : '', u.stunned ? 'sonné' : '', u.pactShield ? 'pacte' : ''].filter(Boolean);
   const tip = `${cardName(u.cardId)}${u.leader ? ` + ${cardName(u.leader)}` : ''}\n${cardDesc(u.cardId)}${u.leader ? `\n${cardName(u.leader)} : ${cardDesc(u.leader)}` : ''}`;
+  const base = (k: 'atk' | 'arm' | 'ini', v: number) => (v > ((k === 'atk' ? u.baseAtk : k === 'arm' ? u.baseArm : u.ini)) ? ' up' : v < (k === 'atk' ? u.baseAtk : k === 'arm' ? u.baseArm : u.ini) ? ' down' : '');
   return (
-    <div className={cls.join(' ')} title={tip}>
-      <div className="u-name"><span>{cardName(u.cardId)}</span><span className="u-lvl" title={`Niveau ${u.niveau}`}>{u.niveau}</span></div>
+    <div className={cls.join(' ')} title={tip} onMouseEnter={e => onHover?.(u.cardId, e.clientX)} onMouseLeave={() => onHover?.(null)}>
+      <ArtBackdrop id={u.cardId} />
+      <div className="u-top">
+        <span className={`u-atk${base('atk', atk)}`} title="Attaque"><b>{atk}</b><i>ATK</i></span>
+        <span className="u-lvl" title={`Niveau ${u.niveau}`}>{levelLabel(u.niveau)}</span>
+        <span className={`u-arm${base('arm', arm)}`} title="Armure"><b>{arm}</b><i>ARM</i></span>
+      </div>
+      <div className="u-mid">
+        {u.leader ? (
+          <span className="u-leader" title={`${cardName(u.leader)} : ${cardDesc(u.leader)}`}
+            onMouseEnter={e => { e.stopPropagation(); onHover?.(u.leader!, e.clientX); }} onMouseLeave={e => onHover?.(u.cardId, e.clientX)}>{cardName(u.leader)}</span>
+        ) : <span />}
+        <span className={`u-ini${base('ini', ini)}`} title="Initiative">INI {ini}</span>
+      </div>
       {pv && (pv.end || pv.mor || pv.dead) ? (
         <div className={`pv${pv.dead ? ' dead' : ''}`}>
           {pv.dead ? 'Détruit' : [pv.end ? `${pv.end > 0 ? '+' : '−'}${Math.abs(pv.end)} END` : '', pv.mor ? `${pv.mor > 0 ? '+' : '−'}${Math.abs(pv.mor)} MOR` : ''].filter(Boolean).join(' · ')}
         </div>
       ) : null}
-      {u.leader && <div className="u-leader">★ {cardName(u.leader)}</div>}
-      <div className="u-stats">
-        <span className={atk !== u.baseAtk ? 'mod' : ''}>ATK <b>{atk}</b></span>
-        <span>ARM <b>{arm}</b></span>
-        <span>INI <b>{ini}</b></span>
-      </div>
-      <div className="bar end" aria-label={`Endurance ${u.currentEnd} sur ${u.maxEnd}`}>
-        <i style={{ width: `${(100 * u.currentEnd) / u.maxEnd}%` }} />
-        <em>END {u.currentEnd}/{u.maxEnd}</em>
-      </div>
-      <div className="bar mor" aria-label={`Moral ${u.currentMor} sur ${u.maxMor}`}>
-        <i style={{ width: `${(100 * u.currentMor) / u.maxMor}%` }} />
-        <em>MOR {u.currentMor}/{u.maxMor}</em>
-      </div>
-      {(kws.length > 0 || flags.length > 0 || u.vieTours !== null) && (
-        <div className="u-kw">
-          {kws.length > 0 && <s className={u.brokenMorale ? '' : 'kw-on'} title={u.brokenMorale ? 'Moral brisé : mots-clés perdus' : undefined}>{kws.join(' · ')}</s>}
-          {[...(kws.length ? [''] : []), ...(u.vieTours !== null ? [`${u.vieTours} tour(s)`] : []), ...flags].join(' · ')}
+      <div className="u-low">
+        <div className="u-name">{cardName(u.cardId)}{u.brokenMorale && <em className="u-broken"> · brisé</em>}</div>
+        {(kws.length > 0 || flags.length > 0 || u.vieTours !== null) && (
+          <div className="u-kw">
+            {kws.length > 0 && <s className={u.brokenMorale ? '' : 'kw-on'} title={u.brokenMorale ? 'Moral brisé : mots-clés perdus' : undefined}>{kws.join(' · ')}</s>}
+            {[...(kws.length ? [''] : []), ...(u.vieTours !== null ? [`${u.vieTours} tour(s)`] : []), ...flags].join(' · ')}
+          </div>
+        )}
+        <div className="bar end" aria-label={`Endurance ${u.currentEnd} sur ${u.maxEnd}`}>
+          <i style={{ width: `${(100 * u.currentEnd) / u.maxEnd}%` }} />
+          <em>END {u.currentEnd}/{u.maxEnd}</em>
         </div>
-      )}
+        <div className="bar mor" aria-label={`Moral ${u.currentMor} sur ${u.maxMor}`}>
+          <i style={{ width: `${(100 * u.currentMor) / u.maxMor}%` }} />
+          <em>MOR {u.currentMor}/{u.maxMor}</em>
+        </div>
+      </div>
       {highlight?.target === u.uid && highlight.damage !== undefined && (
         <div className="floater">−{highlight.damage} END{highlight.moral ? ` · −${highlight.moral} MOR` : ''}</div>
       )}
@@ -71,7 +85,7 @@ function UnitCard({ u, ctx, highlight, faded, pv }: { u: Unit; ctx: Ctx; highlig
   );
 }
 
-export function Board({ game, player, bottom, isTarget, isFirstPicked, onSlot, highlight, faded, preview }: BoardProps) {
+export function Board({ game, player, bottom, isTarget, isFirstPicked, onSlot, highlight, faded, preview, onHover }: BoardProps) {
   const ctx = new Ctx(game);
   const b = game.players[player].board;
   const slot = (zone: Zone, idx: number, u: Unit | null) => {
@@ -91,7 +105,7 @@ export function Board({ game, player, bottom, isTarget, isFirstPicked, onSlot, h
         onKeyDown={target ? e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSlot(ref); } } : undefined}
         aria-label={`${zone === 'isole' ? 'Isolé' : zone === 'avant' ? `Avant ${idx + 1}` : `Arrière ${idx + 1}`}${u ? ` : ${cardName(u.cardId)}` : ' (vide)'}`}
       >
-        {u ? <UnitCard u={u} ctx={ctx} highlight={highlight} faded={faded.has(u.uid)} pv={preview?.get(u.uid)} /> : <span className="slot-label">{zone === 'isole' ? 'Isolé' : zone === 'avant' ? 'Avant' : 'Arrière'}</span>}
+        {u ? <UnitCard u={u} ctx={ctx} highlight={highlight} faded={faded.has(u.uid)} pv={preview?.get(u.uid)} onHover={onHover} /> : <span className="slot-label">{zone === 'isole' ? 'Isolé' : zone === 'avant' ? 'Avant' : 'Arrière'}</span>}
       </div>
     );
   };
