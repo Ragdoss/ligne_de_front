@@ -54,64 +54,9 @@
     "volez_ravitaillement",
     "reine_basilics"
    ],
-   "w1": 43,
+   "w1": 48,
    "g1": 60,
-   "w2": 97,
-   "g2": 145
-  },
-  {
-   "id": "nomades-148",
-   "faction": "nomades",
-   "deck": [
-    "mirage_oasis",
-    "fuite_dunes",
-    "guide_desert",
-    "fuite_dunes",
-    "caravane_marchande",
-    "a_couvert",
-    "frondeur_nomade",
-    "frappez_ravitaillement",
-    "colporteur",
-    "razzieurs_dunes",
-    "saboteur_nomade",
-    "maitre_caravane",
-    "guide_desert",
-    "fuite_dunes",
-    "embuscade",
-    "mirage",
-    "frappez_ravitaillement",
-    "basilics_oasis",
-    "ravitaillement",
-    "jeune_nomade",
-    "marchand_ames",
-    "frondeur_nomade",
-    "razzieurs_dunes",
-    "maitre_caravane",
-    "voleurs_provisions",
-    "marche_noir",
-    "danseurs_sable",
-    "jeune_nomade",
-    "banniere_dechiree",
-    "razzieurs_dunes",
-    "choc_et_effroi",
-    "archeotacticiens",
-    "legat_varro",
-    "archeotacticiens",
-    "basilics_desert",
-    "reine_basilics",
-    "volez_ravitaillement",
-    "rancon_desert",
-    "choc_et_effroi",
-    "legat_varro",
-    "legat_varro",
-    "cheikh_dunes",
-    "zahra",
-    "reine_basilics",
-    "archeotacticiens"
-   ],
-   "w1": 43,
-   "g1": 61,
-   "w2": 92,
+   "w2": 103,
    "g2": 145
   },
   {
@@ -164,64 +109,119 @@
     "choc_et_effroi",
     "archeotacticiens"
    ],
-   "w1": 45,
+   "w1": 53,
    "g1": 59,
-   "w2": 91,
+   "w2": 94,
    "g2": 145
   },
   {
-   "id": "nomades-13",
+   "id": "nomades-148",
    "faction": "nomades",
    "deck": [
-    "danseurs_sable",
+    "mirage_oasis",
+    "fuite_dunes",
+    "guide_desert",
+    "fuite_dunes",
     "caravane_marchande",
-    "puits_empoisonne",
-    "jeune_nomade",
-    "maitre_caravane",
-    "capitaine_mercenaire",
+    "a_couvert",
     "frondeur_nomade",
-    "terre_brulee",
+    "frappez_ravitaillement",
+    "colporteur",
+    "razzieurs_dunes",
+    "saboteur_nomade",
+    "maitre_caravane",
+    "guide_desert",
+    "fuite_dunes",
+    "embuscade",
+    "mirage",
+    "frappez_ravitaillement",
+    "basilics_oasis",
+    "ravitaillement",
     "jeune_nomade",
-    "mercenaires",
-    "chevaucheurs_mirage",
+    "marchand_ames",
+    "frondeur_nomade",
+    "razzieurs_dunes",
+    "maitre_caravane",
+    "voleurs_provisions",
+    "marche_noir",
+    "danseurs_sable",
+    "jeune_nomade",
+    "banniere_dechiree",
+    "razzieurs_dunes",
+    "choc_et_effroi",
+    "archeotacticiens",
+    "legat_varro",
+    "archeotacticiens",
+    "basilics_desert",
+    "reine_basilics",
+    "volez_ravitaillement",
+    "rancon_desert",
+    "choc_et_effroi",
+    "legat_varro",
+    "legat_varro",
+    "cheikh_dunes",
+    "zahra",
+    "reine_basilics",
+    "archeotacticiens"
+   ],
+   "w1": 40,
+   "g1": 61,
+   "w2": 84,
+   "g2": 145
+  },
+  {
+   "id": "nomades-191",
+   "faction": "nomades",
+   "deck": [
     "fuite_dunes",
     "puits_empoisonne",
-    "marchand_ombres",
-    "colporteur",
+    "fuite_dunes",
+    "banniere_dechiree",
+    "chasseur_reliques",
+    "maitre_caravane",
+    "jeune_nomade",
+    "caravane_marchande",
+    "jeune_nomade",
     "capitaine_mercenaire",
-    "mirage_oasis",
-    "tempete_sable",
-    "guide_desert",
-    "palissade_tactique",
-    "basilics_oasis",
-    "basilics_oasis",
+    "puits_empoisonne",
+    "saboteur_nomade",
+    "cor_ralliement",
+    "cavaliers_dunes",
     "oasis_cachee",
-    "frondeur_nomade",
-    "basilics_oasis",
-    "seigneur_caravanes",
+    "caravane_marchande",
+    "voleurs_provisions",
+    "chasseur_reliques",
+    "puits_empoisonne",
+    "capitaine_mercenaire",
     "marche_noir",
+    "marche_noir",
+    "maitre_caravane",
+    "capitaine_mercenaire",
     "mercenaires",
-    "terre_brulee",
-    "terre_brulee",
-    "cheikh_dunes",
-    "rancon_desert",
+    "frappez_ravitaillement",
+    "frondeur_nomade",
+    "jeune_nomade",
+    "mercenaires",
+    "cavaliers_dunes",
     "basilics_desert",
-    "rancon_desert",
     "reine_basilics",
-    "archeotacticiens",
     "choc_et_effroi",
-    "volez_ravitaillement",
-    "volez_ravitaillement",
+    "legat_varro",
+    "legat_varro",
+    "basilics_desert",
+    "cheikh_dunes",
     "legat_varro",
     "volez_ravitaillement",
-    "cheikh_dunes",
-    "cheikh_dunes",
+    "zahra",
+    "volez_ravitaillement",
     "basilics_desert",
-    "rancon_desert"
+    "choc_et_effroi",
+    "choc_et_effroi",
+    "archeotacticiens"
    ],
-   "w1": 42,
-   "g1": 60,
-   "w2": 84,
+   "w1": 38,
+   "g1": 59,
+   "w2": 83,
    "g2": 145
   },
   {
@@ -274,446 +274,446 @@
     "choc_et_effroi",
     "volez_ravitaillement"
    ],
-   "w1": 41,
+   "w1": 46,
    "g1": 60,
-   "w2": 84,
+   "w2": 80,
    "g2": 145
   },
   {
-   "id": "nomades-195",
+   "id": "nomades-12",
    "faction": "nomades",
    "deck": [
-    "cavaliers_dunes",
+    "mercenaires",
+    "fuite_dunes",
     "jeune_nomade",
-    "mirage_oasis",
-    "banniere_dechiree",
-    "veterans_louer",
-    "frappez_ravitaillement",
-    "terre_brulee",
-    "palissade_tactique",
+    "danseurs_sable",
     "guide_desert",
+    "terre_brulee",
+    "razzieurs_dunes",
+    "cavaliers_dunes",
+    "mercenaires",
+    "frondeur_nomade",
+    "voleurs_provisions",
+    "caravane_marchande",
     "embuscade",
+    "caravane_marchande",
+    "frappez_ravitaillement",
+    "seigneur_caravanes",
+    "razzieurs_dunes",
+    "fuite_dunes",
+    "puits_empoisonne",
+    "guide_desert",
+    "ravitailleur",
+    "tempete_sable",
+    "mirage_oasis",
+    "danseurs_sable",
     "seigneur_caravanes",
     "fuite_dunes",
-    "embuscade",
-    "jeune_nomade",
+    "ravitailleur",
+    "razzieurs_dunes",
+    "eleveur_basilics",
     "mirage_oasis",
-    "chasseur_reliques",
-    "terre_brulee",
-    "razzieurs_dunes",
-    "chasseur_reliques",
-    "banniere_dechiree",
-    "voleurs_provisions",
-    "marchand_ombres",
-    "colporteur",
-    "capitaine_mercenaire",
-    "jeune_nomade",
-    "razzieurs_dunes",
-    "fuite_dunes",
-    "charmeur_basilics",
-    "terre_brulee",
-    "ravitaillement",
-    "reine_basilics",
-    "basilics_desert",
     "zahra",
-    "rancon_desert",
-    "volez_ravitaillement",
-    "reine_basilics",
+    "basilics_desert",
     "archeotacticiens",
-    "legat_varro",
-    "rancon_desert",
-    "archeotacticiens",
-    "rancon_desert",
+    "choc_et_effroi",
+    "cheikh_dunes",
     "zahra",
     "choc_et_effroi",
     "basilics_desert",
-    "legat_varro"
+    "volez_ravitaillement",
+    "archeotacticiens",
+    "basilics_desert",
+    "volez_ravitaillement",
+    "reine_basilics",
+    "archeotacticiens",
+    "choc_et_effroi"
    ],
-   "w1": 42,
-   "g1": 59,
-   "w2": 82,
+   "w1": 41,
+   "g1": 60,
+   "w2": 80,
    "g2": 145
   },
   {
-   "id": "nomades-114",
+   "id": "nomades-9",
    "faction": "nomades",
    "deck": [
-    "caravane_marchande",
-    "marchand_ames",
-    "basilics_oasis",
-    "frondeur_nomade",
-    "chasseur_reliques",
-    "razzieurs_dunes",
-    "razzieurs_dunes",
-    "ravitaillement",
+    "danseurs_sable",
+    "cavaliers_dunes",
     "voleurs_provisions",
-    "razzieurs_dunes",
+    "oasis_cachee",
+    "jeune_nomade",
+    "saboteur_nomade",
+    "caravane_marchande",
+    "saboteur_nomade",
+    "veterans_louer",
     "a_couvert",
+    "a_couvert",
+    "a_couvert",
+    "marchand_ames",
+    "colporteur",
+    "jeune_nomade",
+    "mirage",
+    "razzieurs_dunes",
+    "capitaine_mercenaire",
+    "marchand_ombres",
+    "chevaucheurs_mirage",
+    "cavaliers_dunes",
     "frondeur_nomade",
     "cavaliers_dunes",
-    "fuite_dunes",
-    "guide_desert",
-    "frappez_ravitaillement",
-    "voleurs_provisions",
-    "marchand_ames",
-    "chasseur_reliques",
+    "caravane_marchande",
+    "banniere_dechiree",
     "puits_empoisonne",
-    "danseurs_sable",
-    "capitaine_mercenaire",
-    "mirage",
-    "tempete_sable",
-    "saboteur_nomade",
-    "fuite_dunes",
-    "jeune_nomade",
-    "danseurs_sable",
-    "eleveur_basilics",
-    "embuscade",
+    "mirage_oasis",
+    "razzieurs_dunes",
+    "charmeur_basilics",
+    "basilics_oasis",
+    "archeotacticiens",
     "rancon_desert",
+    "reine_basilics",
+    "basilics_desert",
     "zahra",
-    "choc_et_effroi",
     "cheikh_dunes",
     "rancon_desert",
-    "archeotacticiens",
-    "choc_et_effroi",
-    "basilics_desert",
-    "basilics_desert",
+    "rancon_desert",
+    "legat_varro",
     "volez_ravitaillement",
     "zahra",
-    "volez_ravitaillement",
-    "reine_basilics",
-    "reine_basilics",
-    "zahra"
+    "archeotacticiens",
+    "cheikh_dunes",
+    "cheikh_dunes",
+    "reine_basilics"
    ],
-   "w1": 41,
-   "g1": 59,
+   "w1": 38,
+   "g1": 60,
    "w2": 79,
    "g2": 145
   },
   {
-   "id": "nomades-21",
+   "id": "nomades-93",
    "faction": "nomades",
    "deck": [
-    "colporteur",
-    "voleurs_provisions",
-    "frondeur_nomade",
-    "mercenaires",
-    "saboteur_nomade",
-    "banniere_dechiree",
-    "mercenaires",
-    "marche_noir",
+    "a_couvert",
     "marchand_ames",
-    "caravane_marchande",
-    "mirage_oasis",
-    "oasis_cachee",
     "ravitaillement",
     "capitaine_mercenaire",
-    "frondeur_nomade",
-    "seigneur_caravanes",
+    "puits_empoisonne",
     "caravane_marchande",
+    "danseurs_sable",
     "cor_ralliement",
-    "chevaucheurs_mirage",
-    "fuite_dunes",
-    "seigneur_caravanes",
-    "razzieurs_dunes",
+    "frondeur_nomade",
+    "banniere_dechiree",
     "voleurs_provisions",
-    "chasseur_reliques",
-    "maitre_caravane",
-    "eleveur_basilics",
-    "marche_noir",
-    "maitre_caravane",
+    "ravitaillement",
+    "saboteur_nomade",
+    "voleurs_provisions",
+    "danseurs_sable",
+    "frondeur_nomade",
+    "embuscade",
     "colporteur",
-    "tempete_sable",
-    "reine_basilics",
-    "zahra",
+    "guide_desert",
+    "guide_desert",
+    "marche_noir",
+    "marchand_ombres",
+    "fuite_dunes",
+    "chevaucheurs_mirage",
+    "banniere_dechiree",
+    "seigneur_caravanes",
+    "puits_empoisonne",
+    "frappez_ravitaillement",
+    "banniere_dechiree",
+    "seigneur_caravanes",
+    "choc_et_effroi",
     "archeotacticiens",
-    "rancon_desert",
-    "basilics_desert",
-    "basilics_desert",
-    "zahra",
-    "cheikh_dunes",
-    "zahra",
+    "legat_varro",
     "volez_ravitaillement",
     "archeotacticiens",
+    "cheikh_dunes",
     "legat_varro",
+    "reine_basilics",
     "basilics_desert",
+    "rancon_desert",
+    "rancon_desert",
+    "zahra",
+    "choc_et_effroi",
+    "rancon_desert",
+    "volez_ravitaillement"
+   ],
+   "w1": 43,
+   "g1": 60,
+   "w2": 77,
+   "g2": 145
+  },
+  {
+   "id": "nomades-52",
+   "faction": "nomades",
+   "deck": [
+    "ravitailleur",
+    "fuite_dunes",
+    "chasseur_reliques",
+    "palissade_tactique",
+    "banniere_dechiree",
+    "frondeur_nomade",
+    "caravane_marchande",
+    "a_couvert",
+    "marchand_ames",
+    "tempete_sable",
+    "ravitailleur",
+    "fuite_dunes",
+    "ravitailleur",
+    "puits_empoisonne",
+    "a_couvert",
+    "cor_ralliement",
+    "frondeur_nomade",
+    "terre_brulee",
+    "eleveur_basilics",
+    "palissade_tactique",
+    "seigneur_caravanes",
+    "fuite_dunes",
+    "maitre_caravane",
+    "cor_ralliement",
+    "razzieurs_dunes",
+    "maitre_caravane",
+    "mirage_oasis",
+    "saboteur_nomade",
+    "puits_empoisonne",
+    "marche_noir",
     "legat_varro",
-    "choc_et_effroi"
+    "zahra",
+    "volez_ravitaillement",
+    "choc_et_effroi",
+    "zahra",
+    "choc_et_effroi",
+    "volez_ravitaillement",
+    "basilics_desert",
+    "basilics_desert",
+    "choc_et_effroi",
+    "basilics_desert",
+    "cheikh_dunes",
+    "rancon_desert",
+    "cheikh_dunes",
+    "legat_varro"
+   ],
+   "w1": 40,
+   "g1": 60,
+   "w2": 77,
+   "g2": 145
+  },
+  {
+   "id": "nomades-79",
+   "faction": "nomades",
+   "deck": [
+    "saboteur_nomade",
+    "frappez_ravitaillement",
+    "mercenaires",
+    "tempete_sable",
+    "colporteur",
+    "basilics_oasis",
+    "fuite_dunes",
+    "jeune_nomade",
+    "basilics_oasis",
+    "fuite_dunes",
+    "a_couvert",
+    "jeune_nomade",
+    "voleurs_provisions",
+    "capitaine_mercenaire",
+    "tempete_sable",
+    "palissade_tactique",
+    "marchand_ames",
+    "saboteur_nomade",
+    "razzieurs_dunes",
+    "jeune_nomade",
+    "voleurs_provisions",
+    "chasseur_reliques",
+    "charmeur_basilics",
+    "razzieurs_dunes",
+    "eleveur_basilics",
+    "mirage_oasis",
+    "guide_desert",
+    "marchand_ames",
+    "terre_brulee",
+    "terre_brulee",
+    "choc_et_effroi",
+    "volez_ravitaillement",
+    "basilics_desert",
+    "archeotacticiens",
+    "reine_basilics",
+    "cheikh_dunes",
+    "volez_ravitaillement",
+    "rancon_desert",
+    "legat_varro",
+    "cheikh_dunes",
+    "choc_et_effroi",
+    "reine_basilics",
+    "archeotacticiens",
+    "choc_et_effroi",
+    "reine_basilics"
    ],
    "w1": 39,
    "g1": 60,
-   "w2": 79,
-   "g2": 145
-  },
-  {
-   "id": "nomades-109",
-   "faction": "nomades",
-   "deck": [
-    "frondeur_nomade",
-    "maitre_caravane",
-    "mercenaires",
-    "embuscade",
-    "voleurs_provisions",
-    "saboteur_nomade",
-    "cor_ralliement",
-    "marche_noir",
-    "eleveur_basilics",
-    "marchand_ames",
-    "banniere_dechiree",
-    "marche_noir",
-    "cor_ralliement",
-    "frondeur_nomade",
-    "oasis_cachee",
-    "caravane_marchande",
-    "chasseur_reliques",
-    "puits_empoisonne",
-    "frappez_ravitaillement",
-    "veterans_louer",
-    "capitaine_mercenaire",
-    "puits_empoisonne",
-    "guide_desert",
-    "marchand_ames",
-    "jeune_nomade",
-    "banniere_dechiree",
-    "jeune_nomade",
-    "colporteur",
-    "puits_empoisonne",
-    "a_couvert",
-    "cheikh_dunes",
-    "reine_basilics",
-    "rancon_desert",
-    "zahra",
-    "reine_basilics",
-    "cheikh_dunes",
-    "basilics_desert",
-    "choc_et_effroi",
-    "basilics_desert",
-    "basilics_desert",
-    "reine_basilics",
-    "legat_varro",
-    "cheikh_dunes",
-    "zahra",
-    "zahra"
-   ],
-   "w1": 45,
-   "g1": 60,
-   "w2": 76,
-   "g2": 145
-  },
-  {
-   "id": "nomades-131",
-   "faction": "nomades",
-   "deck": [
-    "guide_desert",
-    "danseurs_sable",
-    "eleveur_basilics",
-    "frondeur_nomade",
-    "terre_brulee",
-    "terre_brulee",
-    "tempete_sable",
-    "guide_desert",
-    "guide_desert",
-    "chasseur_reliques",
-    "puits_empoisonne",
-    "ravitailleur",
-    "mercenaires",
-    "palissade_tactique",
-    "mercenaires",
-    "chevaucheurs_mirage",
-    "maitre_caravane",
-    "jeune_nomade",
-    "marchand_ames",
-    "jeune_nomade",
-    "marchand_ames",
-    "embuscade",
-    "frondeur_nomade",
-    "jeune_nomade",
-    "eleveur_basilics",
-    "saboteur_nomade",
-    "basilics_oasis",
-    "banniere_dechiree",
-    "razzieurs_dunes",
-    "capitaine_mercenaire",
-    "basilics_desert",
-    "rancon_desert",
-    "rancon_desert",
-    "basilics_desert",
-    "choc_et_effroi",
-    "zahra",
-    "zahra",
-    "basilics_desert",
-    "archeotacticiens",
-    "rancon_desert",
-    "cheikh_dunes",
-    "volez_ravitaillement",
-    "reine_basilics",
-    "reine_basilics",
-    "zahra"
-   ],
-   "w1": 43,
-   "g1": 59,
-   "w2": 76,
+   "w2": 77,
    "g2": 145
   }
  ],
  "all": [
   {
    "id": "nomades-1",
-   "w1": 31,
+   "w1": 25,
    "g1": 60
   },
   {
    "id": "nomades-2",
-   "w1": 37,
+   "w1": 32,
    "g1": 61
   },
   {
    "id": "nomades-3",
-   "w1": 35,
+   "w1": 33,
    "g1": 62
   },
   {
    "id": "nomades-4",
-   "w1": 36,
+   "w1": 38,
    "g1": 60
   },
   {
    "id": "nomades-5",
-   "w1": 24,
+   "w1": 29,
    "g1": 60
   },
   {
    "id": "nomades-6",
-   "w1": 25,
+   "w1": 29,
    "g1": 61
   },
   {
    "id": "nomades-7",
-   "w1": 28,
+   "w1": 29,
    "g1": 60
   },
   {
    "id": "nomades-8",
-   "w1": 29,
+   "w1": 32,
    "g1": 62
   },
   {
    "id": "nomades-9",
-   "w1": 42,
+   "w1": 38,
    "g1": 60
   },
   {
    "id": "nomades-10",
-   "w1": 29,
+   "w1": 31,
    "g1": 60
   },
   {
    "id": "nomades-11",
-   "w1": 41,
+   "w1": 46,
    "g1": 60
   },
   {
    "id": "nomades-12",
-   "w1": 36,
+   "w1": 41,
    "g1": 60
   },
   {
    "id": "nomades-13",
-   "w1": 42,
+   "w1": 45,
    "g1": 60
   },
   {
    "id": "nomades-14",
-   "w1": 20,
+   "w1": 21,
    "g1": 60
   },
   {
    "id": "nomades-15",
-   "w1": 37,
+   "w1": 30,
    "g1": 60
   },
   {
    "id": "nomades-16",
-   "w1": 35,
+   "w1": 31,
    "g1": 60
   },
   {
    "id": "nomades-17",
-   "w1": 21,
+   "w1": 26,
    "g1": 61
   },
   {
    "id": "nomades-18",
-   "w1": 29,
+   "w1": 33,
    "g1": 60
   },
   {
    "id": "nomades-19",
-   "w1": 31,
+   "w1": 20,
    "g1": 61
   },
   {
    "id": "nomades-20",
-   "w1": 23,
+   "w1": 33,
    "g1": 60
   },
   {
    "id": "nomades-21",
-   "w1": 39,
+   "w1": 42,
    "g1": 60
   },
   {
    "id": "nomades-22",
-   "w1": 35,
+   "w1": 37,
    "g1": 60
   },
   {
    "id": "nomades-23",
-   "w1": 22,
+   "w1": 21,
    "g1": 61
   },
   {
    "id": "nomades-24",
-   "w1": 26,
+   "w1": 31,
    "g1": 61
   },
   {
    "id": "nomades-25",
-   "w1": 31,
+   "w1": 28,
    "g1": 60
   },
   {
    "id": "nomades-26",
-   "w1": 17,
+   "w1": 23,
    "g1": 61
   },
   {
    "id": "nomades-27",
-   "w1": 24,
+   "w1": 20,
    "g1": 60
   },
   {
    "id": "nomades-28",
-   "w1": 26,
+   "w1": 33,
    "g1": 60
   },
   {
    "id": "nomades-29",
-   "w1": 26,
+   "w1": 29,
    "g1": 60
   },
   {
    "id": "nomades-30",
-   "w1": 41,
+   "w1": 34,
    "g1": 62
   },
   {
    "id": "nomades-31",
-   "w1": 25,
+   "w1": 31,
    "g1": 60
   },
   {
    "id": "nomades-32",
-   "w1": 27,
+   "w1": 22,
    "g1": 60
   },
   {
@@ -723,112 +723,112 @@
   },
   {
    "id": "nomades-34",
-   "w1": 33,
+   "w1": 30,
    "g1": 60
   },
   {
    "id": "nomades-35",
-   "w1": 47,
+   "w1": 41,
    "g1": 63
   },
   {
    "id": "nomades-36",
-   "w1": 34,
+   "w1": 29,
    "g1": 60
   },
   {
    "id": "nomades-37",
-   "w1": 16,
+   "w1": 15,
    "g1": 60
   },
   {
    "id": "nomades-38",
-   "w1": 35,
+   "w1": 29,
    "g1": 60
   },
   {
    "id": "nomades-39",
-   "w1": 33,
+   "w1": 39,
    "g1": 60
   },
   {
    "id": "nomades-40",
-   "w1": 30,
+   "w1": 28,
    "g1": 60
   },
   {
    "id": "nomades-41",
-   "w1": 30,
-   "g1": 61
-  },
-  {
-   "id": "nomades-42",
-   "w1": 31,
-   "g1": 60
-  },
-  {
-   "id": "nomades-43",
-   "w1": 33,
-   "g1": 61
-  },
-  {
-   "id": "nomades-44",
    "w1": 36,
    "g1": 61
   },
   {
-   "id": "nomades-45",
-   "w1": 29,
-   "g1": 60
-  },
-  {
-   "id": "nomades-46",
-   "w1": 35,
-   "g1": 60
-  },
-  {
-   "id": "nomades-47",
-   "w1": 19,
-   "g1": 60
-  },
-  {
-   "id": "nomades-48",
-   "w1": 33,
-   "g1": 60
-  },
-  {
-   "id": "nomades-49",
-   "w1": 29,
-   "g1": 60
-  },
-  {
-   "id": "nomades-50",
+   "id": "nomades-42",
    "w1": 25,
    "g1": 60
   },
   {
-   "id": "nomades-51",
-   "w1": 17,
+   "id": "nomades-43",
+   "w1": 38,
    "g1": 61
   },
   {
-   "id": "nomades-52",
-   "w1": 41,
+   "id": "nomades-44",
+   "w1": 37,
+   "g1": 61
+  },
+  {
+   "id": "nomades-45",
+   "w1": 35,
    "g1": 60
   },
   {
-   "id": "nomades-53",
-   "w1": 19,
-   "g1": 61
+   "id": "nomades-46",
+   "w1": 38,
+   "g1": 60
   },
   {
-   "id": "nomades-54",
+   "id": "nomades-47",
    "w1": 18,
    "g1": 60
   },
   {
+   "id": "nomades-48",
+   "w1": 32,
+   "g1": 60
+  },
+  {
+   "id": "nomades-49",
+   "w1": 37,
+   "g1": 60
+  },
+  {
+   "id": "nomades-50",
+   "w1": 27,
+   "g1": 60
+  },
+  {
+   "id": "nomades-51",
+   "w1": 22,
+   "g1": 61
+  },
+  {
+   "id": "nomades-52",
+   "w1": 40,
+   "g1": 60
+  },
+  {
+   "id": "nomades-53",
+   "w1": 22,
+   "g1": 61
+  },
+  {
+   "id": "nomades-54",
+   "w1": 21,
+   "g1": 60
+  },
+  {
    "id": "nomades-55",
-   "w1": 43,
+   "w1": 46,
    "g1": 60
   },
   {
@@ -838,67 +838,67 @@
   },
   {
    "id": "nomades-57",
-   "w1": 29,
+   "w1": 26,
    "g1": 60
   },
   {
    "id": "nomades-58",
-   "w1": 26,
+   "w1": 23,
    "g1": 61
   },
   {
    "id": "nomades-59",
-   "w1": 43,
+   "w1": 48,
    "g1": 60
   },
   {
    "id": "nomades-60",
-   "w1": 29,
-   "g1": 60
-  },
-  {
-   "id": "nomades-61",
-   "w1": 36,
-   "g1": 61
-  },
-  {
-   "id": "nomades-62",
-   "w1": 29,
-   "g1": 60
-  },
-  {
-   "id": "nomades-63",
-   "w1": 23,
-   "g1": 60
-  },
-  {
-   "id": "nomades-64",
-   "w1": 36,
-   "g1": 60
-  },
-  {
-   "id": "nomades-65",
-   "w1": 38,
-   "g1": 60
-  },
-  {
-   "id": "nomades-66",
-   "w1": 35,
-   "g1": 60
-  },
-  {
-   "id": "nomades-67",
    "w1": 33,
    "g1": 60
   },
   {
-   "id": "nomades-68",
+   "id": "nomades-61",
+   "w1": 34,
+   "g1": 61
+  },
+  {
+   "id": "nomades-62",
+   "w1": 33,
+   "g1": 60
+  },
+  {
+   "id": "nomades-63",
+   "w1": 25,
+   "g1": 60
+  },
+  {
+   "id": "nomades-64",
+   "w1": 33,
+   "g1": 60
+  },
+  {
+   "id": "nomades-65",
+   "w1": 39,
+   "g1": 60
+  },
+  {
+   "id": "nomades-66",
    "w1": 30,
+   "g1": 60
+  },
+  {
+   "id": "nomades-67",
+   "w1": 28,
+   "g1": 60
+  },
+  {
+   "id": "nomades-68",
+   "w1": 24,
    "g1": 61
   },
   {
    "id": "nomades-69",
-   "w1": 13,
+   "w1": 19,
    "g1": 61
   },
   {
@@ -908,77 +908,77 @@
   },
   {
    "id": "nomades-71",
-   "w1": 39,
-   "g1": 60
-  },
-  {
-   "id": "nomades-72",
-   "w1": 37,
-   "g1": 60
-  },
-  {
-   "id": "nomades-73",
-   "w1": 19,
-   "g1": 60
-  },
-  {
-   "id": "nomades-74",
-   "w1": 18,
-   "g1": 60
-  },
-  {
-   "id": "nomades-75",
-   "w1": 27,
-   "g1": 60
-  },
-  {
-   "id": "nomades-76",
-   "w1": 27,
-   "g1": 60
-  },
-  {
-   "id": "nomades-77",
-   "w1": 23,
-   "g1": 60
-  },
-  {
-   "id": "nomades-78",
-   "w1": 34,
-   "g1": 60
-  },
-  {
-   "id": "nomades-79",
-   "w1": 38,
-   "g1": 60
-  },
-  {
-   "id": "nomades-80",
-   "w1": 31,
-   "g1": 60
-  },
-  {
-   "id": "nomades-81",
-   "w1": 29,
-   "g1": 60
-  },
-  {
-   "id": "nomades-82",
-   "w1": 17,
-   "g1": 60
-  },
-  {
-   "id": "nomades-83",
-   "w1": 28,
-   "g1": 60
-  },
-  {
-   "id": "nomades-84",
    "w1": 32,
    "g1": 60
   },
   {
-   "id": "nomades-85",
+   "id": "nomades-72",
+   "w1": 32,
+   "g1": 60
+  },
+  {
+   "id": "nomades-73",
+   "w1": 21,
+   "g1": 60
+  },
+  {
+   "id": "nomades-74",
+   "w1": 17,
+   "g1": 60
+  },
+  {
+   "id": "nomades-75",
+   "w1": 25,
+   "g1": 60
+  },
+  {
+   "id": "nomades-76",
+   "w1": 34,
+   "g1": 60
+  },
+  {
+   "id": "nomades-77",
+   "w1": 27,
+   "g1": 60
+  },
+  {
+   "id": "nomades-78",
+   "w1": 33,
+   "g1": 60
+  },
+  {
+   "id": "nomades-79",
+   "w1": 39,
+   "g1": 60
+  },
+  {
+   "id": "nomades-80",
+   "w1": 21,
+   "g1": 60
+  },
+  {
+   "id": "nomades-81",
+   "w1": 32,
+   "g1": 60
+  },
+  {
+   "id": "nomades-82",
+   "w1": 31,
+   "g1": 60
+  },
+  {
+   "id": "nomades-83",
+   "w1": 29,
+   "g1": 60
+  },
+  {
+   "id": "nomades-84",
    "w1": 40,
+   "g1": 60
+  },
+  {
+   "id": "nomades-85",
+   "w1": 39,
    "g1": 60
   },
   {
@@ -988,17 +988,17 @@
   },
   {
    "id": "nomades-87",
-   "w1": 37,
+   "w1": 32,
    "g1": 60
   },
   {
    "id": "nomades-88",
-   "w1": 26,
+   "w1": 28,
    "g1": 60
   },
   {
    "id": "nomades-89",
-   "w1": 39,
+   "w1": 32,
    "g1": 60
   },
   {
@@ -1008,32 +1008,32 @@
   },
   {
    "id": "nomades-91",
-   "w1": 26,
+   "w1": 17,
    "g1": 60
   },
   {
    "id": "nomades-92",
-   "w1": 35,
+   "w1": 36,
    "g1": 60
   },
   {
    "id": "nomades-93",
-   "w1": 41,
+   "w1": 43,
    "g1": 60
   },
   {
    "id": "nomades-94",
-   "w1": 31,
+   "w1": 27,
    "g1": 60
   },
   {
    "id": "nomades-95",
-   "w1": 18,
+   "w1": 26,
    "g1": 60
   },
   {
    "id": "nomades-96",
-   "w1": 16,
+   "w1": 13,
    "g1": 60
   },
   {
@@ -1043,52 +1043,52 @@
   },
   {
    "id": "nomades-98",
-   "w1": 15,
+   "w1": 19,
    "g1": 60
   },
   {
    "id": "nomades-99",
-   "w1": 35,
+   "w1": 34,
    "g1": 60
   },
   {
    "id": "nomades-100",
-   "w1": 35,
+   "w1": 26,
    "g1": 60
   },
   {
    "id": "nomades-101",
-   "w1": 27,
+   "w1": 29,
    "g1": 60
   },
   {
    "id": "nomades-102",
-   "w1": 27,
+   "w1": 25,
    "g1": 60
   },
   {
    "id": "nomades-103",
-   "w1": 21,
-   "g1": 60
-  },
-  {
-   "id": "nomades-104",
-   "w1": 38,
-   "g1": 59
-  },
-  {
-   "id": "nomades-105",
-   "w1": 31,
-   "g1": 59
-  },
-  {
-   "id": "nomades-106",
    "w1": 22,
    "g1": 60
   },
   {
+   "id": "nomades-104",
+   "w1": 32,
+   "g1": 59
+  },
+  {
+   "id": "nomades-105",
+   "w1": 24,
+   "g1": 59
+  },
+  {
+   "id": "nomades-106",
+   "w1": 28,
+   "g1": 60
+  },
+  {
    "id": "nomades-107",
-   "w1": 33,
+   "w1": 36,
    "g1": 59
   },
   {
@@ -1098,212 +1098,212 @@
   },
   {
    "id": "nomades-109",
-   "w1": 45,
+   "w1": 38,
    "g1": 60
   },
   {
    "id": "nomades-110",
-   "w1": 22,
+   "w1": 20,
    "g1": 59
   },
   {
    "id": "nomades-111",
-   "w1": 30,
+   "w1": 31,
    "g1": 61
   },
   {
    "id": "nomades-112",
-   "w1": 23,
+   "w1": 28,
    "g1": 60
   },
   {
    "id": "nomades-113",
-   "w1": 40,
+   "w1": 39,
    "g1": 62
   },
   {
    "id": "nomades-114",
-   "w1": 41,
+   "w1": 38,
    "g1": 59
   },
   {
    "id": "nomades-115",
-   "w1": 32,
+   "w1": 30,
    "g1": 59
   },
   {
    "id": "nomades-116",
-   "w1": 24,
+   "w1": 26,
    "g1": 59
   },
   {
    "id": "nomades-117",
-   "w1": 42,
+   "w1": 37,
    "g1": 60
   },
   {
    "id": "nomades-118",
-   "w1": 37,
+   "w1": 26,
    "g1": 61
   },
   {
    "id": "nomades-119",
-   "w1": 31,
+   "w1": 29,
    "g1": 61
   },
   {
    "id": "nomades-120",
-   "w1": 37,
+   "w1": 36,
    "g1": 61
   },
   {
    "id": "nomades-121",
-   "w1": 18,
+   "w1": 26,
    "g1": 60
   },
   {
    "id": "nomades-122",
-   "w1": 26,
+   "w1": 30,
    "g1": 63
   },
   {
    "id": "nomades-123",
-   "w1": 38,
+   "w1": 27,
    "g1": 60
   },
   {
    "id": "nomades-124",
-   "w1": 35,
+   "w1": 37,
    "g1": 59
   },
   {
    "id": "nomades-125",
-   "w1": 37,
-   "g1": 60
-  },
-  {
-   "id": "nomades-126",
-   "w1": 29,
-   "g1": 59
-  },
-  {
-   "id": "nomades-127",
-   "w1": 18,
-   "g1": 61
-  },
-  {
-   "id": "nomades-128",
-   "w1": 24,
-   "g1": 62
-  },
-  {
-   "id": "nomades-129",
-   "w1": 23,
-   "g1": 59
-  },
-  {
-   "id": "nomades-130",
-   "w1": 42,
-   "g1": 59
-  },
-  {
-   "id": "nomades-131",
-   "w1": 43,
-   "g1": 59
-  },
-  {
-   "id": "nomades-132",
-   "w1": 29,
-   "g1": 59
-  },
-  {
-   "id": "nomades-133",
-   "w1": 41,
-   "g1": 60
-  },
-  {
-   "id": "nomades-134",
-   "w1": 18,
-   "g1": 59
-  },
-  {
-   "id": "nomades-135",
-   "w1": 30,
-   "g1": 59
-  },
-  {
-   "id": "nomades-136",
-   "w1": 38,
-   "g1": 61
-  },
-  {
-   "id": "nomades-137",
-   "w1": 33,
-   "g1": 59
-  },
-  {
-   "id": "nomades-138",
-   "w1": 30,
-   "g1": 60
-  },
-  {
-   "id": "nomades-139",
-   "w1": 21,
-   "g1": 59
-  },
-  {
-   "id": "nomades-140",
-   "w1": 15,
-   "g1": 59
-  },
-  {
-   "id": "nomades-141",
-   "w1": 28,
-   "g1": 59
-  },
-  {
-   "id": "nomades-142",
-   "w1": 15,
-   "g1": 59
-  },
-  {
-   "id": "nomades-143",
-   "w1": 33,
-   "g1": 59
-  },
-  {
-   "id": "nomades-144",
-   "w1": 37,
-   "g1": 60
-  },
-  {
-   "id": "nomades-145",
-   "w1": 31,
-   "g1": 59
-  },
-  {
-   "id": "nomades-146",
-   "w1": 28,
-   "g1": 59
-  },
-  {
-   "id": "nomades-147",
-   "w1": 26,
-   "g1": 60
-  },
-  {
-   "id": "nomades-148",
-   "w1": 43,
-   "g1": 61
-  },
-  {
-   "id": "nomades-149",
    "w1": 34,
    "g1": 60
   },
   {
+   "id": "nomades-126",
+   "w1": 24,
+   "g1": 59
+  },
+  {
+   "id": "nomades-127",
+   "w1": 11,
+   "g1": 61
+  },
+  {
+   "id": "nomades-128",
+   "w1": 30,
+   "g1": 62
+  },
+  {
+   "id": "nomades-129",
+   "w1": 17,
+   "g1": 59
+  },
+  {
+   "id": "nomades-130",
+   "w1": 45,
+   "g1": 59
+  },
+  {
+   "id": "nomades-131",
+   "w1": 30,
+   "g1": 59
+  },
+  {
+   "id": "nomades-132",
+   "w1": 28,
+   "g1": 59
+  },
+  {
+   "id": "nomades-133",
+   "w1": 46,
+   "g1": 60
+  },
+  {
+   "id": "nomades-134",
+   "w1": 26,
+   "g1": 59
+  },
+  {
+   "id": "nomades-135",
+   "w1": 37,
+   "g1": 59
+  },
+  {
+   "id": "nomades-136",
+   "w1": 40,
+   "g1": 61
+  },
+  {
+   "id": "nomades-137",
+   "w1": 32,
+   "g1": 59
+  },
+  {
+   "id": "nomades-138",
+   "w1": 35,
+   "g1": 60
+  },
+  {
+   "id": "nomades-139",
+   "w1": 36,
+   "g1": 59
+  },
+  {
+   "id": "nomades-140",
+   "w1": 26,
+   "g1": 59
+  },
+  {
+   "id": "nomades-141",
+   "w1": 29,
+   "g1": 59
+  },
+  {
+   "id": "nomades-142",
+   "w1": 18,
+   "g1": 59
+  },
+  {
+   "id": "nomades-143",
+   "w1": 38,
+   "g1": 59
+  },
+  {
+   "id": "nomades-144",
+   "w1": 28,
+   "g1": 60
+  },
+  {
+   "id": "nomades-145",
+   "w1": 27,
+   "g1": 59
+  },
+  {
+   "id": "nomades-146",
+   "w1": 23,
+   "g1": 59
+  },
+  {
+   "id": "nomades-147",
+   "w1": 32,
+   "g1": 60
+  },
+  {
+   "id": "nomades-148",
+   "w1": 40,
+   "g1": 61
+  },
+  {
+   "id": "nomades-149",
+   "w1": 35,
+   "g1": 60
+  },
+  {
    "id": "nomades-150",
-   "w1": 42,
+   "w1": 31,
    "g1": 61
   },
   {
@@ -1313,17 +1313,17 @@
   },
   {
    "id": "nomades-152",
-   "w1": 37,
+   "w1": 39,
    "g1": 60
   },
   {
    "id": "nomades-153",
-   "w1": 39,
+   "w1": 41,
    "g1": 63
   },
   {
    "id": "nomades-154",
-   "w1": 21,
+   "w1": 25,
    "g1": 59
   },
   {
@@ -1333,77 +1333,77 @@
   },
   {
    "id": "nomades-156",
-   "w1": 32,
-   "g1": 59
-  },
-  {
-   "id": "nomades-157",
-   "w1": 29,
-   "g1": 59
-  },
-  {
-   "id": "nomades-158",
-   "w1": 10,
-   "g1": 59
-  },
-  {
-   "id": "nomades-159",
-   "w1": 34,
-   "g1": 60
-  },
-  {
-   "id": "nomades-160",
-   "w1": 37,
-   "g1": 59
-  },
-  {
-   "id": "nomades-161",
-   "w1": 41,
-   "g1": 59
-  },
-  {
-   "id": "nomades-162",
-   "w1": 14,
-   "g1": 59
-  },
-  {
-   "id": "nomades-163",
    "w1": 25,
    "g1": 59
   },
   {
+   "id": "nomades-157",
+   "w1": 30,
+   "g1": 59
+  },
+  {
+   "id": "nomades-158",
+   "w1": 16,
+   "g1": 59
+  },
+  {
+   "id": "nomades-159",
+   "w1": 31,
+   "g1": 60
+  },
+  {
+   "id": "nomades-160",
+   "w1": 34,
+   "g1": 59
+  },
+  {
+   "id": "nomades-161",
+   "w1": 34,
+   "g1": 59
+  },
+  {
+   "id": "nomades-162",
+   "w1": 15,
+   "g1": 59
+  },
+  {
+   "id": "nomades-163",
+   "w1": 22,
+   "g1": 59
+  },
+  {
    "id": "nomades-164",
-   "w1": 36,
+   "w1": 39,
    "g1": 61
   },
   {
    "id": "nomades-165",
-   "w1": 21,
+   "w1": 26,
    "g1": 61
   },
   {
    "id": "nomades-166",
-   "w1": 45,
+   "w1": 53,
    "g1": 59
   },
   {
    "id": "nomades-167",
-   "w1": 12,
+   "w1": 22,
    "g1": 59
   },
   {
    "id": "nomades-168",
-   "w1": 15,
+   "w1": 22,
    "g1": 60
   },
   {
    "id": "nomades-169",
-   "w1": 26,
+   "w1": 33,
    "g1": 59
   },
   {
    "id": "nomades-170",
-   "w1": 34,
+   "w1": 26,
    "g1": 59
   },
   {
@@ -1413,37 +1413,37 @@
   },
   {
    "id": "nomades-172",
-   "w1": 27,
+   "w1": 28,
    "g1": 59
   },
   {
    "id": "nomades-173",
-   "w1": 29,
+   "w1": 21,
    "g1": 60
   },
   {
    "id": "nomades-174",
-   "w1": 29,
+   "w1": 17,
    "g1": 59
   },
   {
    "id": "nomades-175",
-   "w1": 26,
+   "w1": 28,
    "g1": 59
   },
   {
    "id": "nomades-176",
-   "w1": 14,
+   "w1": 22,
    "g1": 60
   },
   {
    "id": "nomades-177",
-   "w1": 24,
+   "w1": 29,
    "g1": 59
   },
   {
    "id": "nomades-178",
-   "w1": 19,
+   "w1": 20,
    "g1": 60
   },
   {
@@ -1453,47 +1453,47 @@
   },
   {
    "id": "nomades-180",
-   "w1": 36,
+   "w1": 32,
    "g1": 59
   },
   {
    "id": "nomades-181",
-   "w1": 39,
+   "w1": 29,
    "g1": 59
   },
   {
    "id": "nomades-182",
-   "w1": 21,
+   "w1": 31,
    "g1": 59
   },
   {
    "id": "nomades-183",
-   "w1": 35,
+   "w1": 30,
    "g1": 60
   },
   {
    "id": "nomades-184",
-   "w1": 24,
+   "w1": 33,
    "g1": 59
   },
   {
    "id": "nomades-185",
-   "w1": 22,
-   "g1": 59
-  },
-  {
-   "id": "nomades-186",
    "w1": 27,
    "g1": 59
   },
   {
+   "id": "nomades-186",
+   "w1": 34,
+   "g1": 59
+  },
+  {
    "id": "nomades-187",
-   "w1": 41,
+   "w1": 38,
    "g1": 60
   },
   {
    "id": "nomades-188",
-   "w1": 26,
+   "w1": 20,
    "g1": 60
   },
   {
@@ -1503,57 +1503,57 @@
   },
   {
    "id": "nomades-190",
-   "w1": 39,
+   "w1": 29,
    "g1": 60
   },
   {
    "id": "nomades-191",
-   "w1": 44,
+   "w1": 38,
    "g1": 59
   },
   {
    "id": "nomades-192",
-   "w1": 18,
+   "w1": 27,
    "g1": 60
   },
   {
    "id": "nomades-193",
-   "w1": 38,
+   "w1": 36,
    "g1": 60
   },
   {
    "id": "nomades-194",
-   "w1": 39,
+   "w1": 32,
    "g1": 62
   },
   {
    "id": "nomades-195",
-   "w1": 42,
+   "w1": 36,
    "g1": 59
   },
   {
    "id": "nomades-196",
-   "w1": 26,
+   "w1": 20,
    "g1": 60
   },
   {
    "id": "nomades-197",
-   "w1": 35,
+   "w1": 31,
    "g1": 59
   },
   {
    "id": "nomades-198",
-   "w1": 33,
+   "w1": 31,
    "g1": 59
   },
   {
    "id": "nomades-199",
-   "w1": 34,
+   "w1": 35,
    "g1": 61
   },
   {
    "id": "nomades-200",
-   "w1": 37,
+   "w1": 32,
    "g1": 59
   }
  ]
