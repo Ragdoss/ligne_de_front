@@ -8,9 +8,12 @@ import { applyAction, createGame } from '../src/engine/game';
 import { nextRandom, seedFrom } from '../src/engine/rng';
 import type { Faction } from '../src/engine/types';
 import { COLLECTIBLE } from '../src/profile/profile';
+import { WAVE1_IDS } from '../src/data/wave1';
 
-const N = Number(process.argv[2] ?? 150);
-const SEED = process.argv[3] ?? 'factions';
+const BASE_ONLY = process.argv.includes('--sans-vague1');
+const ARGS = process.argv.slice(2).filter(a => !a.startsWith('--'));
+const N = Number(ARGS[0] ?? 150);
+const SEED = (ARGS[1] ?? 'factions') + (BASE_ONLY ? '-sans-vague1' : '');
 const F: Faction[] = ['empire', 'elfe', 'demons', 'nomades'];
 const LABEL: Record<string, string> = { empire: 'Empire', elfe: 'Elfes', demons: 'Démons', nomades: 'Nomades' };
 let rng = seedFrom(SEED);
@@ -20,7 +23,7 @@ const inFaction = (id: string, f: Faction) => {
   return c.faction === f || c.faction === 'neutre' || ((c.factions as string[] | undefined) ?? []).includes(f);
 };
 function deck(f: Faction): string[] {
-  const pool = COLLECTIBLE.filter(id => inFaction(id, f));
+  const pool = COLLECTIBLE.filter(id => inFaction(id, f) && !(BASE_ONLY && WAVE1_IDS.includes(id)));
   const low = pool.filter(id => CARDS[id]!.niveau <= 3), high = pool.filter(id => CARDS[id]!.niveau >= 4);
   for (;;) {
     const d: string[] = [];
@@ -53,7 +56,7 @@ const pct = (x: number, n: number) => `${Math.round((100 * x) / Math.max(1, n))}
 const lines = [
   '# Tournoi entre factions (decks aléatoires mono-faction)', '',
   `${decided} parties terminées, ${N} par paire de factions ; durée moyenne ${(turns / Math.max(1, decided)).toFixed(1)} tours ; ${Math.round((Date.now() - t0) / 1000)} s.`,
-  'Decks : 45 cartes tirées au hasard parmi la faction, les neutres et les bicolores de la faction (cartes de base + première vague). IA v2 des deux côtés.', '',
+  `Decks : 45 cartes tirées au hasard parmi la faction, les neutres et les bicolores de la faction (${BASE_ONLY ? 'cartes de base seulement' : 'cartes de base + première vague'}). IA v2 des deux côtés.`, '',
   '| Faction | Victoires | Taux |', '|---|---|---|',
   ...F.map(f => `| ${LABEL[f]} | ${wins[f] ?? 0} / ${games[f] ?? 0} | ${pct(wins[f] ?? 0, games[f] ?? 0)} |`), '',
   '| Ligne contre colonne | ' + F.map(f => LABEL[f]).join(' | ') + ' |', '|---|' + F.map(() => '---').join('|') + '|',
