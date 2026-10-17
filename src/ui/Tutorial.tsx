@@ -87,7 +87,7 @@ const STEPS: Step[] = [
   },
   {
     title: 'Le rang arrière',
-    body: <p>Les régiments <b>arrière</b> sont protégés tant que l’avant tient. L’<b>Archer Impérial</b> a le mot-clé <b>Distance</b> : depuis l’arrière, il frappe le régiment adverse au Moral le plus bas, où qu’il soit.</p>,
+    body: <p>Les régiments <b>arrière</b> sont protégés tant que l’avant tient. L’<b>Archer Impérial</b> a le mot-clé <b>Distance</b> : de l’arrière comme de l’avant, il frappe le régiment adverse au Moral le plus bas, où qu’il soit.</p>,
     task: 'Pose l’Archer Impérial à l’arrière.',
     wait: g => units(g).some(u => new Ctx(g).slotOf(u.uid)?.zone === 'arriere'),
   },
@@ -106,7 +106,7 @@ const STEPS: Step[] = [
   {
     title: 'Les mots-clés',
     body: <ul className="tuto-kw">
-      <li><b>Distance</b> : depuis l’arrière, frappe le Moral le plus bas adverse.</li>
+      <li><b>Distance</b> : de l’arrière comme de l’avant, frappe le Moral le plus bas adverse.</li>
       <li><b>Lent</b> : n’attaque qu’au combat de fin de ton propre tour.</li>
       <li><b>Arrive prêt</b> : pas de pénalité d’apparition.</li>
       <li><b>Effrayant X</b> : chaque coup retire X Moral de plus.</li>

@@ -162,7 +162,7 @@ export class Ctx {
     u.controller = p;
     if (temporary) u.borrowed = { owner: u.borrowed?.owner ?? prev };
     else { u.owner = u.borrowed?.owner ?? u.owner ?? prev; u.borrowed = null; }
-    u.pactShield = null; u.squareArm = 0; u.squareOwner = null; u.stunned = false;
+    u.pactShield = null; u.squareArm = 0; u.squareOwner = null; u.stunned = false; u.guardOwner = null; u.rootedBy = null; u.markedBy = null; u.exposedTo = null;
     this.setAt(dest, u);
     this.emit({ type: 'effect', key: temporary ? 'controlTaken' : 'controlKept', player: p, cardId: source, data: { uid: u.uid, target: u.cardId } });
     this.emit({ type: 'moved', uid: u.uid, cardId: u.cardId, from, to: dest });
@@ -568,9 +568,27 @@ export class Ctx {
     const p = u.controller;
     const ref = this.slotOf(u.uid);
     if (!ref) return;
+    // Racines protectrices, Bénédiction de la sylve : le régiment tient (pas contre un sacrifice).
+    if (cause !== 'effect') {
+      const blessed = !!u.leader && !!card(u.leader).leaderSavesOnce;
+      if (u.guardOwner || blessed) {
+        u.currentEnd = Math.max(1, u.currentEnd);
+        u.currentMor = Math.max(1, u.currentMor);
+        this.checkBroken(u);
+        const source = u.guardOwner ? 'racines_protectrices' : u.leader!;
+        if (!u.guardOwner) { this.discardLeader(u); u.leader = null; u.leaderOwner = null; }
+        this.emit({ type: 'effect', key: 'saved', player: p, cardId: source, data: { uid: u.uid, target: u.cardId } });
+        return;
+      }
+    }
     this.setAt(ref, null);
     const def = card(u.cardId);
     const minion = u.keywords.includes('Minions');
+    // Seigneure de la chasse : un régiment adverse au Moral brisé détruit coûte de la lassitude à son camp.
+    if (u.brokenMorale && !minion) {
+      const lv = this.units(opponentOf(p)).reduce((n, x) => n + (x.brokenMorale ? 0 : ((card(x.cardId).brokenEnemyDeathLassitude as number | undefined) ?? 0)), 0);
+      if (lv) { this.emit({ type: 'effect', key: 'seigneureChasse', player: opponentOf(p), cardId: 'seigneure_chasse', data: { target: u.cardId } }); this.gainLassitude(p, lv, 'seigneure_chasse'); if (this.over) return; }
+    }
     this.emit({ type: 'destroyed', player: p, uid: u.uid, cardId: u.cardId, cause, lassitude: minion ? 0 : u.niveau });
     if (!minion) this.gainLassitude(p, u.niveau, 'destroyed');
     if (!u.isToken) this.discard(u.borrowed?.owner ?? u.owner ?? p, u.cardId); // un régiment volé retourne dans la défausse de son propriétaire

@@ -52,6 +52,7 @@ export function startTurn(ctx: Ctx, p: PlayerId): void {
   for (const q of ['A', 'B'] as PlayerId[]) {
     for (const u of ctx.units(q)) {
       if (u.squareOwner === p) { u.squareArm = 0; u.squareOwner = null; }
+      if (u.guardOwner === p) u.guardOwner = null; // Racines protectrices : jusqu'au prochain tour du lanceur
       if (u.pactShield?.owner === p) u.pactShield = null; // Pacte de Survie : fin au début du tour du lanceur
     }
   }

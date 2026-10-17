@@ -31,7 +31,7 @@ export function formatEvent(e: GameEvent, names: Record<PlayerId, string> = { A:
     case 'attack':
       return `${cardName(e.attackerCard)} attaque ${cardName(e.targetCard)} : ${e.damage} dégâts (ATK ${e.atk} − ARM ${e.arm}), END ${e.end}, perd ${e.moralLoss} Moral (MOR ${e.mor}).`;
     case 'stunned': return `${cardName(e.cardId)} est sonné.`;
-    case 'skipAttack': return e.reason === 'stunned' ? `${cardName(e.cardId)} est sonné : il n'attaque pas.` : `${cardName(e.cardId)} n'a plus d'ATK : il n'attaque pas.`;
+    case 'skipAttack': return e.reason === 'stunned' ? `${cardName(e.cardId)} est sonné : il n'attaque pas.` : e.reason === 'rooted' ? `${cardName(e.cardId)} est immobilisé par les racines : il n'attaque pas.` : `${cardName(e.cardId)} n'a plus d'ATK : il n'attaque pas.`;
     case 'destroyed': {
       const why = e.cause === 'moral' ? ' (déroute)' : e.cause === 'end' ? '' : e.cause === 'both' ? ' (Endurance et Moral à 0)' : '';
       return `${cardName(e.cardId)} (${n(e.player)}) est détruit${why}${e.lassitude ? ` — +${e.lassitude} lassitude` : ''}.`;
@@ -86,6 +86,13 @@ export function formatEvent(e: GameEvent, names: Record<PlayerId, string> = { A:
         mirageOasis: `${cardName(e.cardId)} : un régiment gagne Mirage 1.`,
         lyraPing: `${cardName(e.cardId)} inflige ${e.data?.damage ?? 10} dégâts à ${cardName(String(e.data?.target ?? ''))}.`,
         growth: `${cardName(e.cardId)} grandit (Croissance).`,
+        marqueChasseur: `${cardName(e.cardId)} : les tireurs de ${n(e.player)} visent la cible marquée ce tour-ci.`,
+        visezFaibles: `${cardName(e.cardId)} : la première ligne de ${n(e.player)} attaque le soutien désigné ce tour-ci.`,
+        racinesProtectrices: `${cardName(e.cardId)} : le régiment ciblé ne peut pas tomber jusqu’au prochain tour de ${n(e.player)}.`,
+        racinesImmobilisantes: `${cardName(e.cardId)} : le régiment ciblé est immobilisé tant que ${n(e.player)} contrôle un Élémentaux.`,
+        saved: `${cardName(e.cardId)} : ${cardName(String(e.data?.target ?? ''))} tient bon et n’est pas détruit.`,
+        seigneureChasse: `Seigneure de la chasse : ${cardName(String(e.data?.target ?? ''))} brisé et détruit, 2 lassitude de plus pour son camp.`,
+        debordement: `Débordement : ${cardName(String(e.data?.target ?? ''))} subit ${e.data?.damage ?? 0} dégâts.`,
         dryade: `Dryade corrompue : le soin est annulé et devient une baisse de lassitude.`,
         chantSeve: `${cardName(e.cardId)} : deuxième Tactique du tour, +10 ATK.`,
         augure: `${n(e.player)} remet en ordre le dessus de sa pioche.`,

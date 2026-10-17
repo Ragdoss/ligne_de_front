@@ -2,6 +2,7 @@
 import type { CardDef } from '../engine/types';
 import { BALANCE_5 } from './balance5';
 import { WAVE1 } from './wave1';
+import { WAVE2 } from './wave2';
 
 const BASE_CARDS: Record<string, CardDef> = {
   "recrue_imp": {
@@ -1983,6 +1984,6 @@ const BASE_CARDS: Record<string, CardDef> = {
   }
 } as Record<string, CardDef>;
 
-/** Toutes les cartes : catalogue de base + première vague de la première édition. */
-export const CARDS: Record<string, CardDef> = { ...BASE_CARDS, ...WAVE1 };
+/** Toutes les cartes : catalogue de base + vagues 1 et 2 de la première édition. */
+export const CARDS: Record<string, CardDef> = { ...BASE_CARDS, ...WAVE1, ...WAVE2 };
 for (const [id, over] of Object.entries(BALANCE_5)) CARDS[id] = { ...CARDS[id]!, ...over } as CardDef;

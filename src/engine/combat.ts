@@ -12,26 +12,56 @@ function lowestMoral(list: (Unit | null | undefined)[]): Unit | null {
 
 /**
  * Cible d'un attaquant :
- * - avant : le régiment en miroir, sinon le plus faible en Moral parmi les arrières adjacents (percée) ;
- * - arrière avec Distance (ou isolé avec Distance) : le plus faible en Moral de tout l'avant et l'arrière adverses ;
+ * - avec Distance (avant, arrière ou isolé) : le plus faible en Moral de tout l'avant et l'arrière adverses
+ *   (Traqueuse sylvestre : la plus basse END ; Marque du chasseur : le régiment marqué) ;
+ * - avant sans Distance : le régiment en miroir, sinon le plus faible en Moral parmi les arrières adjacents (percée)
+ *   (Visez les faibles : le régiment arrière désigné) ;
  * - arrière sans Distance : le plus faible des deux avants adjacents, sinon l'arrière en miroir.
  */
 export function pickTarget(ctx: Ctx, a: Unit, p: PlayerId, zone: Zone, idx: number): Unit | null {
   const opp = ctx.player(opponentOf(p)).board;
   const distance = ctx.hasDistance(a);
-  // Sentinelle de chêne : les régiments à Distance doivent l'attaquer.
-  if (distance && zone !== 'avant') {
-    const taunts = [...opp.avant, ...opp.arriere].filter(u => u && !u.brokenMorale && card(u.cardId).tauntsDistance);
+  const all = [...opp.avant, ...opp.arriere];
+  if (distance) {
+    // Marque du chasseur : les régiments à Distance de ce joueur attaquent le régiment marqué.
+    const marked = all.find(u => u && u.markedBy === p);
+    if (marked) return marked;
+    // Sentinelle de chêne : les régiments à Distance doivent l'attaquer.
+    const taunts = all.filter(u => u && !u.brokenMorale && card(u.cardId).tauntsDistance);
     if (taunts.length) return lowestMoral(taunts);
+    if (card(a.cardId).targetsLowestEnd && !a.brokenMorale) { // Traqueuse sylvestre
+      let best: Unit | null = null;
+      for (const u of all) if (u && (!best || u.currentEnd < best.currentEnd)) best = u;
+      return best;
+    }
+    return lowestMoral(all);
   }
   if (zone === 'avant') {
+    const exposed = opp.arriere.find(u => u && u.exposedTo === p); // Visez les faibles
+    if (exposed) return exposed;
     return opp.avant[idx] ?? lowestMoral(ctx.adjBack(idx).map(k => opp.arriere[k]));
   }
-  if (zone === 'arriere') {
-    if (distance) return lowestMoral([...opp.avant, ...opp.arriere]);
-    return lowestMoral(ctx.adjFront(idx).map(i => opp.avant[i])) ?? opp.arriere[idx] ?? null;
+  if (zone === 'arriere') return lowestMoral(ctx.adjFront(idx).map(i => opp.avant[i])) ?? opp.arriere[idx] ?? null;
+  return null;
+}
+
+/** Chant de la traque : les régiments à Distance de `p` frappent tout de suite (par initiative décroissante). */
+export function volley(ctx: Ctx, p: PlayerId): void {
+  const shooters = ctx.units(p).filter(u => ctx.hasDistance(u) && ctx.effectiveAtk(u) > 0 && !u.stunned)
+    .sort((x, y) => ctx.effectiveIni(y) - ctx.effectiveIni(x));
+  for (const u of shooters) {
+    if (ctx.over) return;
+    const pos = ctx.slotOf(u.uid);
+    if (!pos || pos.player !== p || isRooted(ctx, u)) continue;
+    const t = pickTarget(ctx, u, p, pos.zone, pos.idx);
+    if (t) attack(ctx, u, t);
   }
-  return distance ? lowestMoral([...opp.avant, ...opp.arriere]) : null;
+  if (!ctx.over) for (const x of ctx.units(opponentOf(p))) if (x.markedBy === p) x.markedBy = null;
+}
+
+/** Racines immobilisantes : le régiment ne peut pas attaquer tant que le lanceur contrôle un Élémentaux. */
+function isRooted(ctx: Ctx, u: Unit): boolean {
+  return !!u.rootedBy && ctx.units(u.rootedBy).some(x => x.types.includes('Élémentaux'));
 }
 
 export function resolveCombat(ctx: Ctx, ending: PlayerId): void {
@@ -73,6 +103,16 @@ export function resolveCombat(ctx: Ctx, ending: PlayerId): void {
     });
   }
 
+  // Gardienne du seuil : avant les attaques, ses voisins de la ligne avant regagnent END et Moral (à chaque combat).
+  for (const p of ['A', 'B'] as PlayerId[]) {
+    for (const g of ctx.units(p)) {
+      const h = card(g.cardId).healsFrontNeighborsBeforeCombat as { end: number; mor: number } | undefined;
+      const ref = h && !g.brokenMorale ? ctx.slotOf(g.uid) : null;
+      if (!ref) continue;
+      for (const n of ctx.neighbors(ref)) if (ctx.slotOf(n.uid)?.zone === 'avant') ctx.heal(n, h!.end, h!.mor, g.cardId);
+    }
+  }
+
   type Att = { u: Unit; p: PlayerId; zone: Zone; idx: number };
   const attackers: Att[] = [];
   for (const p of ['A', 'B'] as PlayerId[]) {
@@ -103,6 +143,7 @@ export function resolveCombat(ctx: Ctx, ending: PlayerId): void {
       ctx.emit({ type: 'skipAttack', uid: a.u.uid, cardId: a.u.cardId, reason: 'stunned' });
       continue;
     }
+    if (isRooted(ctx, a.u)) { ctx.emit({ type: 'skipAttack', uid: a.u.uid, cardId: a.u.cardId, reason: 'rooted' }); continue; }
     if (ctx.effectiveAtk(a.u) <= 0) {
       if ((card(a.u.cardId).atk ?? 0) > 0) ctx.emit({ type: 'skipAttack', uid: a.u.uid, cardId: a.u.cardId, reason: 'noAtk' });
       continue;
@@ -135,13 +176,14 @@ export function resolveCombat(ctx: Ctx, ending: PlayerId): void {
       u.stunned = false;
       u.woundedByFrondeur = false;
       u.blinded = false;
+      u.markedBy = null; u.exposedTo = null; // Marque du chasseur, Visez les faibles : « ce tour-ci »
     }
   }
   if (ctx.over) return;
   moralCheck(ctx);
 }
 
-function attack(ctx: Ctx, a: Unit, target: Unit, mult = 1): void {
+export function attack(ctx: Ctx, a: Unit, target: Unit, mult = 1): void {
   // Mirage X : l'attaque frappe le vide (X fois par partie ; perdu avec le Moral brisé).
   const mirage = target.brokenMorale ? 0 : keywordValue(target, 'Mirage');
   if (mirage > 0) {
@@ -158,8 +200,13 @@ function attack(ctx: Ctx, a: Unit, target: Unit, mult = 1): void {
   if (vsMounted && target.types.includes('Monté') && !a.brokenMorale) atk += vsMounted;
   const vsTypes = card(a.cardId).bonusVsTypes as Record<string, number> | undefined;
   if (vsTypes && !a.brokenMorale) for (const [t, v] of Object.entries(vsTypes)) if (target.types.includes(t)) atk += v;
+  const vsBroken = card(a.cardId).bonusVsBroken as number | undefined; // Sentinelle des cimes
+  if (vsBroken && target.brokenMorale && !a.brokenMorale) atk += vsBroken;
+  // Maître des embuscades : + l'avance d'INI de l'attaquant sur sa cible.
+  if (a.leader && !a.brokenMorale && card(a.leader).leaderIniDiffAtk) atk += Math.max(0, ctx.effectiveIni(a) - ctx.effectiveIni(target));
   // Pénétration d'armure X : l'attaquant ignore les X premiers points d'Armure de sa cible.
-  const penVal = a.brokenMorale ? 0 : keywordValue(a, 'Pénétration'); // cumulée, comme tout mot-clé chiffré
+  const penVal = (a.brokenMorale ? 0 : keywordValue(a, 'Pénétration')) // cumulée, comme tout mot-clé chiffré
+    + (target.markedBy === a.controller && ctx.hasDistance(a) ? 5 : 0); // Marque du chasseur
   const arm = a.ignoreArmor ? 0 : Math.max(0, ctx.effectiveArm(target) - penVal);
   let damage = Math.max(0, atk - arm);
   if (target.pactShield && damage > 0) {
@@ -193,11 +240,22 @@ function attack(ctx: Ctx, a: Unit, target: Unit, mult = 1): void {
   let punish = 0;
   if (tRef) for (const g of ctx.neighbors(tRef)) if (!g.brokenMorale) punish += (card(g.cardId).punishesAttackersOfNeighbors as number | undefined) ?? 0;
   const owner = target.controller;
+  // Débordement X : frapper un régiment de première ligne blesse aussi les deux régiments derrière lui.
+  const over = a.brokenMorale ? 0 : keywordValue(a, 'Débordement');
+  if (over && tRef?.zone === 'avant') {
+    for (const k of ctx.adjBack(tRef.idx)) {
+      const b = ctx.player(owner).board.arriere[k];
+      if (!b) continue;
+      b.currentEnd = Math.max(0, b.currentEnd - over);
+      ctx.emit({ type: 'effect', key: 'debordement', player: a.controller, cardId: a.cardId, data: { uid: b.uid, target: b.cardId, damage: over } });
+      if (b.currentEnd <= 0) { ctx.destroy(b, 'end', a); if (ctx.over) return; }
+    }
+  }
   if (dead) {
     const cause = target.currentEnd <= 0 && target.currentMor <= 0 ? 'both' : target.currentEnd <= 0 ? 'end' : 'moral';
     ctx.destroy(target, cause, a);
     if (ctx.over) return;
-    if (ctx.isAlive(a) && !a.brokenMorale) {
+    if (ctx.isAlive(a) && !a.brokenMorale && !ctx.isAlive(target)) { // (Racines protectrices, Bénédiction : la cible a pu survivre)
       // Pillage X : l'adversaire défausse le dessus de sa pioche.
       const pil = keywordValue(a, 'Pillage');
       if (pil) ctx.mill(owner, pil, a.cardId);

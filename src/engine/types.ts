@@ -20,6 +20,7 @@ export type TargetRule =
   | 'ennemi-avec-leader'
   | 'ennemi-puis-case-vide'
   | 'ennemi-moral-brise'
+  | 'ennemi-arriere'
   | 'elfe-allie-puis-case';
 
 /** Définition d'une carte (données). Les champs optionnels décrivent les capacités spéciales. */
@@ -149,6 +150,14 @@ export interface Unit {
   borrowed?: { owner: PlayerId } | null;
   /** Propriétaire d'origine (carte volée pour de bon) : sa carte retourne dans cette défausse. */
   owner?: PlayerId;
+  /** Marque du chasseur : les régiments à Distance de ce joueur l'attaquent ce tour-ci. */
+  markedBy?: PlayerId | null;
+  /** Visez les faibles : les régiments avant de ce joueur l'attaquent ce tour-ci. */
+  exposedTo?: PlayerId | null;
+  /** Racines immobilisantes : ne peut pas attaquer tant que ce joueur contrôle un Élémentaux. */
+  rootedBy?: PlayerId | null;
+  /** Racines protectrices : ne peut pas être détruit jusqu'au prochain tour de ce joueur. */
+  guardOwner?: PlayerId | null;
 }
 
 export interface HandCard {
@@ -338,7 +347,7 @@ export type GameEvent =
   | { type: 'combatStart'; player: PlayerId }
   | { type: 'attack'; attacker: number; attackerCard: string; target: number; targetCard: string; atk: number; arm: number; damage: number; moralLoss: number; end: number; mor: number }
   | { type: 'stunned'; uid: number; cardId: string; by: number | null }
-  | { type: 'skipAttack'; uid: number; cardId: string; reason: 'stunned' | 'noAtk' }
+  | { type: 'skipAttack'; uid: number; cardId: string; reason: 'stunned' | 'noAtk' | 'rooted' }
   | { type: 'destroyed'; player: PlayerId; uid: number; cardId: string; cause: 'end' | 'moral' | 'both' | 'effect'; lassitude: number }
   | { type: 'heal'; uid: number; cardId: string; end: number; mor: number; source: string }
   | { type: 'moralLoss'; uid: number; cardId: string; amount: number; source: string }

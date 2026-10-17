@@ -1,6 +1,7 @@
 // Jouer une carte : coût, conditions, cibles valides, effets (régiments, Leaders, tactiques, effets d'arrivée).
 // Les effets qui demandent une décision passent par la file de choix (voir choices.ts).
 
+import { volley } from './combat';
 import { Ctx, addKeyword, card, keywordValue, opponentOf } from './ctx';
 import type { CardDef, HandCard, PlayerId, SlotRef, Unit } from './types';
 
@@ -68,7 +69,7 @@ export function targetCount(c: CardDef): 0 | 1 | 2 {
 }
 
 function targetsOpponent(c: CardDef): boolean {
-  return (c.cardType === 'Tactique' && (c.targetRule === 'ennemi-quelconque' || c.targetRule === 'ennemi-avec-leader' || c.targetRule === 'ennemi-puis-case-vide' || c.targetRule === 'ennemi-moral-brise'))
+  return (c.cardType === 'Tactique' && (c.targetRule === 'ennemi-quelconque' || c.targetRule === 'ennemi-avec-leader' || c.targetRule === 'ennemi-puis-case-vide' || c.targetRule === 'ennemi-moral-brise' || c.targetRule === 'ennemi-arriere'))
     || (c.cardType === 'Leader' && !!c.targetsEnemy);
 }
 
@@ -96,6 +97,7 @@ export function validFirstTarget(ctx: Ctx, p: PlayerId, c: CardDef, ref: SlotRef
   if (maxLvl !== undefined && u.niveau > maxLvl) return false;
   switch (c.targetRule) {
     case 'ennemi-moral-brise': return u.brokenMorale;
+    case 'ennemi-arriere': return ref.zone === 'arriere';
     case 'ennemi-puis-case-vide': return ref.zone !== 'isole';
     case 'elfe-allie-puis-case': return ref.zone !== 'isole' && u.types.includes('Elfe');
     case 'allie-quelconque': case 'ennemi-quelconque': return true;
@@ -607,6 +609,12 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
       break;
     }
     case 'mirageOasis': addKeyword(target!, 'Mirage 1'); note('mirageOasis', { uid: target!.uid }); break;
+    // --- Vague 2 (Elfes) ---
+    case 'marqueChasseur': for (const e of ctx.units(q)) if (e.markedBy === p) e.markedBy = null; target!.markedBy = p; note('marqueChasseur', { uid: target!.uid }); break;
+    case 'visezFaibles': target!.exposedTo = p; note('visezFaibles', { uid: target!.uid }); break;
+    case 'racinesProtectrices': target!.guardOwner = p; note('racinesProtectrices', { uid: target!.uid }); break;
+    case 'racinesImmobilisantes': target!.rootedBy = p; note('racinesImmobilisantes', { uid: target!.uid }); break;
+    case 'chantTraque': volley(ctx, p); break;
     case 'corRalliement': for (const x of ctx.units(p)) if (x.brokenMorale) ctx.heal(x, 0, 2, c.id); break;
     default:
       throw new Error(`Effet de tactique non implémenté : ${c.effect} (${c.id})`);
