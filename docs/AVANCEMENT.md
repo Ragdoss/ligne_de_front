@@ -172,3 +172,6 @@ aux outils avec `--patch` : `npm run sim -- 100 v2 --patch balance/equilibrage-1
 - **Récompenses de campagne** : chaque carte proposée indique « Nouvelle » ou « Collection x/3 ».
 - Accueil : image de profil agrandie.
 - **Bulle « Règles du scénario »** en campagne (même style que le tutoriel, repliable) : conditions de victoire et de défaite (étiquettes « scénario » pour les nouvelles, « neutralisée » pour celles désactivées), règles spéciales (terrain, convoi, tempête, nuit/jour, alarme, libération, lassitude…), particularités de l'adversaire et météo du tour en cours. Tout est déduit de la configuration du scénario (`src/ui/ScenarioRules.tsx`).
+
+## À faire lors du prochain équilibrage
+- **Notes de draft pour l'IA** : en plus des simulations en construit, lancer des drafts complets (4 IA) et mesurer l'écart de victoire de chaque carte dans des decks draftés. Remplacer `src/draft/ratings.ts` (aujourd'hui tiré du classement en construit, qui ne mesure pas les synergies) par ces notes, et noter aussi les cartes de la vague 1 une fois intégrées.
