@@ -242,7 +242,7 @@ describe('Vague 1 : Nomades', () => {
     expect(r.state.players.B.deck.length).toBeLessThanOrEqual(n - 2);
   });
   it('Usure : Voleurs, Terre brûlée, Fuite dans les dunes, Zahra, Puits', () => {
-    let s = blankGame({ moralCheck: false }); s.players.A.level = 3; s.players.A.resource = 10;
+    let s = blankGame({ moralCheck: false }); s.players.A.level = 3; s.players.A.resource = 12;
     s.players.A.discard = ['recrue_imp', 'recrue_imp', 'ravitaillement'];
     const deckB = s.players.B.deck.length;
     s = act(s, { type: 'play', handUid: give(s, 'A', 'terre_brulee') }).state;
@@ -254,9 +254,9 @@ describe('Vague 1 : Nomades', () => {
     expect(s.players.B.deck.length).toBe(deckB - 3);
     place(s, 'A', 'isole', 0, 'puits_empoisonne');
     const before = s.players.B.deck.length;
-    s = endTurn(s); // début du tour de B : −2 pioche (+ pioche normale) et une défausse de main
+    s = endTurn(s); // début du tour de B : −1 pioche (+ pioche normale) et une défausse de main
     expect(s.pending[0]?.kind).toBe('handDiscard');
-    expect(s.players.B.deck.length).toBe(before - 2 - 1);
+    expect(s.players.B.deck.length).toBe(before - 1 - 1);
   });
   it('Marché : défausser une carte pour en piocher une', () => {
     let s = blankGame({ moralCheck: false, noRegimentDefeatFromTurn: { A: 999, B: 999 } });
