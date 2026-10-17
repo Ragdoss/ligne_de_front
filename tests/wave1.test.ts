@@ -280,15 +280,27 @@ describe('Vague 1 : cross-faction et neutres', () => {
     new Ctx(s).loseMoral(u, 99);
     expect(u.currentMor).toBe(2);
   });
-  it('Dryade corrompue : les soins deviennent une baisse de lassitude (reliquat conservé)', () => {
+  it('Dryade corrompue : les soins font aussi baisser la lassitude (reliquat conservé)', () => {
     let s = blankGame(); s.players.A.resource = 5; s.players.A.points = 10;
     place(s, 'A', 'arriere', 0, 'dryade_corrompue');
     place(s, 'A', 'avant', 0, 'recrue_imp', { currentEnd: 5 });
     s = act(s, { type: 'play', handUid: give(s, 'A', 'soin_simple', { generated: true }), target: slot('A', 'avant', 0) }).state;
-    expect(s.players.A.board.avant[0]!.currentEnd).toBe(5);
+    expect(s.players.A.board.avant[0]!.currentEnd).toBe(15); // le soin n'est plus annulé
     expect(s.players.A.points).toBe(10);
     s = act(s, { type: 'play', handUid: give(s, 'A', 'soin_simple', { generated: true }), target: slot('A', 'avant', 0) }).state;
     expect(s.players.A.points).toBe(9);
+  });
+  it('Éveil Élémentaire : jeton posé dans la case choisie, deux avec Communion', () => {
+    let s = blankGame(); s.players.A.level = 2; s.players.A.resource = 5;
+    place(s, 'A', 'arriere', 0, 'eclaireur_elfe');
+    place(s, 'A', 'arriere', 1, 'elem_eau');
+    s = act(s, { type: 'play', handUid: give(s, 'A', 'eveil_elementaire') }).state;
+    expect(s.pending[0]?.kind).toBe('placeToken');
+    s = choose(s, 3); // avant 4
+    s = choose(s, 0); // avant 1
+    expect(s.players.A.board.avant[3]?.cardId).toBe('elem_eveil_regiment');
+    expect(s.players.A.board.avant[0]?.cardId).toBe('elem_eveil_regiment');
+    expect(s.players.A.board.avant[0]!.maxEnd).toBe(40);
   });
   it('Ravitailleur : pioche à l’arrivée et quand il est défaussé', () => {
     let s = blankGame(); s.players.A.resource = 5;
@@ -322,6 +334,7 @@ describe('Vague 1 : parties aléatoires', () => {
         const r = applyAction(s, a);
         if (!r.ok) throw new Error(`${r.error} ${JSON.stringify(a)}`);
         s = r.state;
+        if (s.over) break; // une partie peut s'arrêter au milieu d'une cascade de destructions
         const ctx = new Ctx(s);
         for (const p of ['A', 'B'] as const) for (const u of ctx.units(p)) {
           expect(u.controller).toBe(p);

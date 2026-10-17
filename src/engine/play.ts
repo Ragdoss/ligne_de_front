@@ -272,6 +272,8 @@ function attachLeader(ctx: Ctx, p: PlayerId, c: CardDef, u: Unit): void {
   if (c.healOnAttach) ctx.heal(u, c.healOnAttach, 0, c.id);
   if (c.healMorOnAttach) ctx.heal(u, 0, c.healMorOnAttach, c.id);
   if (c.grantsKeywordOnAttach) addKeyword(u, c.grantsKeywordOnAttach);
+  const cm = c.communionMorOnAttach as number | undefined; // Prêtresse des saisons
+  if (cm && ctx.communion(u.controller)) { u.maxMor += cm; u.currentMor += cm; }
   if (c.bonusNiveauOnAttach) u.niveau += c.bonusNiveauOnAttach;
   if (c.grantsReadyOnAttach) u.arrivesReady = true;
   if (c.visionOnAttach) ctx.queueChoice('vision', p, c.id);
@@ -401,10 +403,9 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
     case 'ralliement': ctx.heal(target!, 0, target!.brokenMorale ? 5 : 3, c.id); break;
     // --- Elfes ---
     case 'eveilElementaire': {
-      const i = pl.board.avant.findIndex(u => !u);
-      const u = ctx.makeUnit('elem_eveil_regiment', p, true);
-      pl.board.avant[i] = u;
-      ctx.emit({ type: 'deployed', player: p, uid: u.uid, cardId: u.cardId, slot: { player: p, zone: 'avant', idx: i } });
+      // Un jeton (deux avec Communion) ; le joueur choisit la case avant de chacun.
+      const n = ctx.communion(p) ? ((c.communionTokens as number | undefined) ?? 1) : 1;
+      ctx.queueChoice('placeToken', p, c.id, { cardId: 'elem_eveil_regiment', left: n });
       break;
     }
     case 'briseMatin': {
@@ -413,7 +414,10 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
       note('briseMatin', { count: n });
       break;
     }
-    case 'serenite': ctx.loseLassitude(p, c.doubledWithElemental && ctx.controlsElemental(p) ? 6 : 3, c.id); break;
+    case 'serenite':
+      ctx.loseLassitude(p, c.doubledWithElemental && ctx.controlsElemental(p) ? 6 : 3, c.id);
+      for (let i = 0; i < ((c.drawAfter as number | undefined) ?? 0) && !ctx.over; i++) ctx.draw(p, c.id);
+      break;
     case 'buffArchers': {
       for (const u of ctx.units(p)) if (u.types.includes('Archer')) u.tempAtk += 10;
       note('buffArchers');
@@ -441,7 +445,7 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
       break;
     }
     case 'bourgeonnement': case 'floraison': case 'fructification': {
-      const cfg = { bourgeonnement: { end: 10, mor: 1, next: 'floraison' }, floraison: { end: 30, mor: 2, next: 'fructification' }, fructification: { end: 50, mor: 5, next: null } }[c.effect];
+      const cfg = { bourgeonnement: { end: 10, mor: 1, next: 'floraison' }, floraison: { end: 30, mor: 3, next: 'fructification' }, fructification: { end: 50, mor: 5, next: null } }[c.effect];
       const elem = ctx.controlsElemental(p);
       ctx.heal(target!, cfg.end, cfg.mor, c.id);
       if (elem && cfg.next) ctx.generate(p, cfg.next, c.id);

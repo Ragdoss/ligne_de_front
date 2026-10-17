@@ -50,6 +50,7 @@ export function choiceTitle(c: PendingChoice): string {
     case 'chuchoteur': return `Chuchoteur des abysses : garder la carte du dessus, ou la défausser (encore ${c.data.left} regard(s))`;
     case 'marchandAmes': return 'Marchand d’âmes : retire un régiment de la défausse adverse (ressources = son niveau)';
     case 'placeControlled': return `${cardName(c.source)} : choisis où poser le régiment dont tu prends le contrôle`;
+    case 'placeToken': return `${cardName(c.source)} : choisis la case avant du jeton (encore ${c.data.left})`;
     case 'marche': return `${cardName(c.source)} — Marché : défausser une carte de ta main pour en piocher une ?`;
   }
 }

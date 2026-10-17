@@ -213,7 +213,8 @@ export type ChoiceKind =
   | 'chuchoteur'        // Chuchoteur des abysses : garder ou défausser la carte du dessus
   | 'marchandAmes'      // Marchand d'âmes : régiment de la défausse adverse à retirer
   | 'marche'            // Marché : défausser une carte pour en piocher une (ou non)
-  | 'placeControlled';  // Prise de contrôle : case où poser le régiment pris (aucune case = défausse)
+  | 'placeControlled'   // Prise de contrôle : case où poser le régiment pris (aucune case = défausse)
+  | 'placeToken';       // Jeton à poser dans une case avant vide choisie (Éveil Élémentaire)
 
 export interface ChoiceOption {
   cardId?: string;

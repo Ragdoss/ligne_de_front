@@ -378,28 +378,24 @@ export class Ctx {
   }
   /** Gain de Moral « brut » (plafonné), sans lever l'état Moral brisé (cas du tueur). */
   addMoralRaw(u: Unit, n: number): void {
-    if (this.dryadConverts(u, 0, n)) return;
+    const b = u.currentMor;
     u.currentMor = Math.min(u.maxMor, u.currentMor + n);
+    this.dryadBonus(u, 0, u.currentMor - b);
   }
-  /** Dryade corrompue : tout gain d'END ou de Moral d'un allié est annulé et devient une baisse de lassitude. */
-  private dryadConverts(u: Unit, end: number, mor: number): boolean {
-    const dry = this.units(u.controller).find(x => card(x.cardId).healsBecomeLassitude);
-    if (!dry) return false;
-    const step = card(dry.cardId).healsBecomeLassitude as number;
-    const wEnd = end > 0 ? Math.min(u.maxEnd, u.currentEnd + end) - u.currentEnd : 0;
-    const wMor = mor > 0 ? Math.min(u.maxMor, u.currentMor + mor) - u.currentMor : 0;
-    if (wEnd <= 0 && wMor <= 0) return true;
+  /** Dryade corrompue : chaque gain d'END ou de Moral d'un allié fait aussi baisser la lassitude (1 par tranche de 20 END, 1 par point de Moral). */
+  private dryadBonus(u: Unit, gEnd: number, gMor: number): void {
+    if (gEnd <= 0 && gMor <= 0) return;
+    const dry = this.units(u.controller).find(x => card(x.cardId).healsAlsoLowerLassitude);
+    if (!dry) return;
+    const step = card(dry.cardId).healsAlsoLowerLassitude as number;
     const pl = this.player(u.controller);
-    pl.dryadAcc = (pl.dryadAcc ?? 0) + wEnd;
-    const g = Math.floor(pl.dryadAcc / step) + wMor;
+    pl.dryadAcc = (pl.dryadAcc ?? 0) + gEnd;
+    const g = Math.floor(pl.dryadAcc / step) + gMor;
     pl.dryadAcc %= step;
-    this.emit({ type: 'effect', key: 'dryade', player: u.controller, cardId: dry.cardId, data: { uid: u.uid, end: wEnd, mor: wMor } });
-    if (g > 0) this.loseLassitude(u.controller, g, dry.cardId);
-    return true;
+    if (g > 0) { this.emit({ type: 'effect', key: 'dryade', player: u.controller, cardId: dry.cardId, data: { uid: u.uid } }); this.loseLassitude(u.controller, g, dry.cardId); }
   }
 
   heal(u: Unit, end: number, mor: number, source: string): { end: number; mor: number } {
-    if (this.dryadConverts(u, end, mor)) return { end: 0, mor: 0 };
     let gEnd = 0, gMor = 0;
     if (end > 0) { const b = u.currentEnd; u.currentEnd = Math.min(u.maxEnd, b + end); gEnd = u.currentEnd - b; }
     if (mor > 0) {
@@ -407,6 +403,7 @@ export class Ctx {
       if (u.brokenMorale && u.currentMor > Math.floor(u.maxMor / 3)) u.brokenMorale = false;
     }
     if (gEnd || gMor) this.emit({ type: 'heal', uid: u.uid, cardId: u.cardId, end: gEnd, mor: gMor, source });
+    this.dryadBonus(u, gEnd, gMor);
     if (gEnd > 0) {
       const owner = this.player(u.controller);
       const veil = this.units(u.controller).find(x => x.leader && card(x.leader).lassitudePerHealStep);

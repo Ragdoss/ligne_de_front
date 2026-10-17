@@ -152,11 +152,11 @@ const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "eveil_elementaire": {
     "name": "Éveil Élémentaire",
-    "desc": "Crée un Élémentaire Éveillé (Minions : 10 ATK, 30 END, 0 ARM, 1 INI, 4 Moral) dans le premier emplacement vide du rang avant."
+    "desc": "Crée un Élémentaire Éveillé (Minions : 15 ATK, 40 END, 5 ARM, 5 INI, 4 Moral) dans une case avant vide de ton choix ; deux avec Communion (un Elfe et un Élémentaux en jeu)."
   },
   "vision": {
     "name": "Vision",
-    "desc": "Les tactiques que tu joues coûtent 1 de moins (minimum 0, coûts variables compris). À l'attache : choisis une des 3 prochaines tactiques de ton deck, mélange le deck, puis mets-la en première carte."
+    "desc": "Porteur Elfe ou Élémentaux. Les tactiques que tu joues coûtent 1 de moins (minimum 0, coûts variables compris). À l'attache : choisis une des 3 prochaines tactiques de ton deck, mélange le deck, puis mets-la en première carte."
   },
   "sylvain": {
     "name": "Sylvain, Gardien Élémentaire",
@@ -260,7 +260,7 @@ const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "floraison": {
     "name": "Floraison",
-    "desc": "Soigne un régiment allié de 30 END et 2 Moral. Si tu contrôles un Élémentaux, crée une Fructification en main."
+    "desc": "Soigne un régiment allié de 30 END et 3 Moral. Si tu contrôles un Élémentaux, crée une Fructification en main."
   },
   "fructification": {
     "name": "Fructification",
@@ -268,7 +268,7 @@ const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "serenite_foret": {
     "name": "Sérénité de la Forêt",
-    "desc": "Tu perds 3 points de lassitude, 6 si tu contrôles un Élémentaux (le niveau ne redescend jamais)."
+    "desc": "Tu perds 3 points de lassitude, 6 si tu contrôles un Élémentaux (le niveau ne redescend jamais). Pioche 1 carte."
   },
   "chant_vent": {
     "name": "Chant du Vent",
@@ -276,11 +276,11 @@ const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "veilleuse_sources": {
     "name": "Veilleuse des Sources",
-    "desc": "Chaque fois qu'un de tes régiments regagne de l'Endurance, tu perds 1 point de lassitude par tranche de 20 END soignées (reliquat conservé)."
+    "desc": "Chaque fois qu'un de tes régiments regagne de l'Endurance, tu perds 1 point de lassitude par tranche de 10 END soignées (reliquat conservé)."
   },
   "dryades_guerisseuses": {
     "name": "Dryades Guérisseuses",
-    "desc": "À chaque fin de ton tour, soigne de 10 END ton régiment le plus blessé."
+    "desc": "À chaque fin de ton tour, soigne de 15 END et 1 Moral ton régiment le plus blessé."
   },
   "pacte_sang": {
     "name": "Pacte de Sang",

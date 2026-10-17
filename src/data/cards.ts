@@ -1,5 +1,6 @@
 // Catalogue des cartes (données). Source initiale : simulateur HTML, désormais la référence est ce fichier.
 import type { CardDef } from '../engine/types';
+import { BALANCE_5 } from './balance5';
 import { WAVE1 } from './wave1';
 
 const BASE_CARDS: Record<string, CardDef> = {
@@ -1984,3 +1985,4 @@ const BASE_CARDS: Record<string, CardDef> = {
 
 /** Toutes les cartes : catalogue de base + première vague de la première édition. */
 export const CARDS: Record<string, CardDef> = { ...BASE_CARDS, ...WAVE1 };
+for (const [id, over] of Object.entries(BALANCE_5)) CARDS[id] = { ...CARDS[id]!, ...over } as CardDef;

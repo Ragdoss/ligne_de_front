@@ -81,6 +81,10 @@ function computeOptions(ctx: Ctx, c: PendingChoice): ChoiceOption[] {
       }
       return out;
     }
+    case 'placeToken': {
+      if (Number(c.data.left) <= 0) return [];
+      return pl.board.avant.map((u, idx) => (u ? null : { slot: { zone: 'avant' as const, idx }, label: `Poser ${cardName(String(c.data.cardId))} en avant ${idx + 1}` })).filter((o): o is NonNullable<typeof o> => !!o);
+    }
     case 'marche': {
       if (!pl.hand.length || !pl.deck.length) return [];
       return [{ skip: true, label: 'Ne rien échanger' }, ...pl.hand.map(h => ({ handUid: h.uid, cardId: h.cardId, label: `Défausser ${cardName(h.cardId)} et piocher` }))];
@@ -251,6 +255,14 @@ export function resolveChoice(ctx: Ctx, index: number): string | null {
       if (!u || u.controller === p) break;
       ctx.placeControlled(u, p, { player: p, zone: o.slot!.zone, idx: o.slot!.idx }, c.data.temporary === 1, c.source);
       if (c.data.fullMoral === 1) { u.currentMor = u.maxMor; u.brokenMorale = false; }
+      break;
+    }
+    case 'placeToken': {
+      const t = ctx.makeUnit(String(c.data.cardId), p, true);
+      pl.board.avant[o.slot!.idx] = t;
+      ctx.emit({ type: 'deployed', player: p, uid: t.uid, cardId: t.cardId, slot: { player: p, zone: 'avant', idx: o.slot!.idx } });
+      const left = Number(c.data.left) - 1;
+      if (left > 0) ctx.s.pending.unshift({ ...c, options: null, data: { ...c.data, left } });
       break;
     }
     case 'marche':
