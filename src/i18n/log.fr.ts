@@ -75,6 +75,23 @@ export function formatEvent(e: GameEvent, names: Record<PlayerId, string> = { A:
         cheikh: `${cardName(e.cardId)} : la défausse adverse renforce son porteur (+5 ATK).`,
         tempeteSable: `${n(e.player)} soulève une tempête de sable : l’adversaire perd Distance et 20 INI ce tour-ci.`,
         purification: `${cardName(e.cardId)} purifie sa cible.`,
+        noTarget: `${cardName(e.cardId)} : aucune cible, sans effet.`,
+        controlTaken: `${cardName(e.cardId)} : ${n(e.player)} prend le contrôle de ${cardName(String(e.data?.target ?? ''))} jusqu’à la fin du tour.`,
+        controlKept: `${cardName(e.cardId)} : ${cardName(String(e.data?.target ?? ''))} passe pour de bon du côté de ${n(e.player)}.`,
+        controlReturned: `${cardName(e.cardId)} retourne auprès de ${n(e.player)}.`,
+        controlLost: `${cardName(e.cardId)} ne trouve pas de place pour revenir : il part en défausse.`,
+        mirage: `Mirage : l’attaque de ${cardName(String(e.data?.attacker ?? ''))} contre ${cardName(e.cardId)} frappe le vide.`,
+        mirageGained: `${cardName(e.cardId)} gagne Mirage 1.`,
+        mirageOasis: `${cardName(e.cardId)} : un régiment gagne Mirage 1.`,
+        lyraPing: `${cardName(e.cardId)} inflige ${e.data?.damage ?? 10} dégâts à ${cardName(String(e.data?.target ?? ''))}.`,
+        growth: `${cardName(e.cardId)} grandit (Croissance).`,
+        dryade: `Dryade corrompue : le soin est annulé et devient une baisse de lassitude.`,
+        chantSeve: `${cardName(e.cardId)} : deuxième Tactique du tour, +10 ATK.`,
+        augure: `${n(e.player)} remet en ordre le dessus de sa pioche.`,
+        chuchoteurKeep: `${n(e.player)} garde la carte du dessus de sa pioche.`,
+        marchandAmes: `${cardName(e.cardId)} retire ${cardName(String(e.data?.cardId ?? ''))} de la défausse adverse.`,
+        terreBrulee: `${cardName(e.cardId)} : ${e.data?.count ?? 0} régiment(s) de la défausse alimentent l’usure, puis sont retirés de la partie.`,
+        rempartChair: `${cardName(e.cardId)} : +15 ARM jusqu’au prochain tour (${e.data?.count ?? 0} régiment(s)).`,
       };
       return special[e.key] ?? `${cardName(e.cardId)} : effet appliqué.`;
     }

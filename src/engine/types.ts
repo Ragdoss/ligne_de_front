@@ -19,6 +19,7 @@ export type TargetRule =
   | 'ennemi-quelconque'
   | 'ennemi-avec-leader'
   | 'ennemi-puis-case-vide'
+  | 'ennemi-moral-brise'
   | 'elfe-allie-puis-case';
 
 /** Définition d'une carte (données). Les champs optionnels décrivent les capacités spéciales. */
@@ -142,6 +143,12 @@ export interface Unit {
   counter?: number;
   /** Tempête de Sable : perd Distance pour ce combat. */
   blinded?: boolean;
+  /** Croissance : nombre de fois où le régiment a déjà grandi. */
+  growthCount?: number;
+  /** Prise de contrôle temporaire : rendu à `owner` à la fin du tour. */
+  borrowed?: { owner: PlayerId } | null;
+  /** Propriétaire d'origine (carte volée pour de bon) : sa carte retourne dans cette défausse. */
+  owner?: PlayerId;
 }
 
 export interface HandCard {
@@ -177,6 +184,14 @@ export interface PlayerState {
   board: Board;
   /** Reliquat d'Endurance soignée pour la Veilleuse des Sources. */
   healAcc: number;
+  /** Tactiques jouées pendant le tour en cours. */
+  tacticsThisTurn?: number;
+  /** Cartes mises dans la défausse de ce joueur pendant le tour en cours. */
+  discardedThisTurn?: number;
+  /** Maître des pactes : tour (numéro de demi-tour) où la pioche a déjà été déclenchée. */
+  pactDrawnAt?: number;
+  /** Dryade corrompue : reliquat d'END de soins annulés. */
+  dryadAcc?: number;
 }
 
 export type ChoiceKind =
@@ -192,7 +207,12 @@ export type ChoiceKind =
   | 'shadow'            // Marchand d'Ombres : carte de la main adverse à défausser
   | 'caravane'          // Caravane Marchande : carte de la défausse adverse à supprimer
   | 'ransomDesert'      // Rançon du Désert : carte de la défausse adverse à supprimer
-  | 'frondeurStun';     // Frondeur Nomade : régiment adverse à sonner
+  | 'frondeurStun'      // Frondeur Nomade : régiment adverse à sonner
+  | 'offrande'          // Offrande X : payer (ou non) la lassitude pour l'effet renforcé
+  | 'augure'            // Augure de l'Abîme : chaque carte regardée, au-dessus ou en dessous
+  | 'chuchoteur'        // Chuchoteur des abysses : garder ou défausser la carte du dessus
+  | 'marchandAmes'      // Marchand d'âmes : régiment de la défausse adverse à retirer
+  | 'marche';           // Marché : défausser une carte pour en piocher une (ou non)
 
 export interface ChoiceOption {
   cardId?: string;
@@ -202,6 +222,8 @@ export interface ChoiceOption {
   skip?: boolean;
   /** Position d'un régiment ciblé (affichage). */
   where?: string;
+  /** Libellé prêt à afficher (sinon calculé à partir des autres champs). */
+  label?: string;
 }
 
 /**

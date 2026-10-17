@@ -1,6 +1,6 @@
 // Combat de fin de tour et comparaison de Moral.
 
-import { Ctx, card, keywordValue, opponentOf } from './ctx';
+import { Ctx, addKeyword, card, keywordValue, opponentOf } from './ctx';
 import { scenarioMoralCheckLost } from './scenario';
 import type { PlayerId, Unit, Zone } from './types';
 
@@ -19,6 +19,11 @@ function lowestMoral(list: (Unit | null | undefined)[]): Unit | null {
 export function pickTarget(ctx: Ctx, a: Unit, p: PlayerId, zone: Zone, idx: number): Unit | null {
   const opp = ctx.player(opponentOf(p)).board;
   const distance = ctx.hasDistance(a);
+  // Sentinelle de chêne : les régiments à Distance doivent l'attaquer.
+  if (distance && zone !== 'avant') {
+    const taunts = [...opp.avant, ...opp.arriere].filter(u => u && !u.brokenMorale && card(u.cardId).tauntsDistance);
+    if (taunts.length) return lowestMoral(taunts);
+  }
   if (zone === 'avant') {
     return opp.avant[idx] ?? lowestMoral(ctx.adjBack(idx).map(k => opp.arriere[k]));
   }
@@ -86,6 +91,9 @@ export function resolveCombat(ctx: Ctx, ending: PlayerId): void {
     return x.p === ending ? -1 : 1;
   });
 
+  // Chevaucheurs du mirage : nombre d'attaques de chaque camp avant la première attaque adverse.
+  const firstCount: Record<PlayerId, number> = { A: 0, B: 0 };
+  const attacked: Record<PlayerId, boolean> = { A: false, B: false };
   for (const a of eligible) {
     if (ctx.over) return;
     const pos = ctx.slotOf(a.u.uid);
@@ -102,7 +110,20 @@ export function resolveCombat(ctx: Ctx, ending: PlayerId): void {
     // La position est relue : un régiment peut avoir été déplacé avant son attaque.
     const target = pickTarget(ctx, a.u, a.p, pos.zone, pos.idx);
     if (!target) continue;
+    if (!attacked[opponentOf(a.p)]) firstCount[a.p]++;
+    attacked[a.p] = true;
     attack(ctx, a.u, target);
+    // Grand Maître d'armes : seconde frappe à moitié d'ATK.
+    if (!ctx.over && a.u.leader && !a.u.brokenMorale && card(a.u.leader).leaderDoubleStrike) {
+      const pos2 = ctx.slotOf(a.u.uid);
+      const t2 = pos2 && pos2.player === a.p ? pickTarget(ctx, a.u, a.p, pos2.zone, pos2.idx) : null;
+      if (t2) attack(ctx, a.u, t2, 0.5);
+    }
+  }
+  if (ctx.over) return;
+  for (const p of ['A', 'B'] as PlayerId[]) {
+    if (firstCount[p] < 3) continue;
+    for (const u of ctx.units(p)) if (card(u.cardId).mirageIfThreeFirstAttacks) { addKeyword(u, 'Mirage 1'); ctx.emit({ type: 'effect', key: 'mirageGained', player: p, cardId: u.cardId, data: { uid: u.uid } }); }
   }
 
   // Fin des effets ponctuels de combat et de la pénalité d'apparition.
@@ -120,8 +141,19 @@ export function resolveCombat(ctx: Ctx, ending: PlayerId): void {
   moralCheck(ctx);
 }
 
-function attack(ctx: Ctx, a: Unit, target: Unit): void {
-  let atk = ctx.effectiveAtk(a);
+function attack(ctx: Ctx, a: Unit, target: Unit, mult = 1): void {
+  // Mirage X : l'attaque frappe le vide (X fois par partie ; perdu avec le Moral brisé).
+  const mirage = target.brokenMorale ? 0 : keywordValue(target, 'Mirage');
+  if (mirage > 0) {
+    target.keywords = target.keywords.filter(k => !k.startsWith('Mirage '));
+    if (mirage > 1) target.keywords.push(`Mirage ${mirage - 1}`);
+    ctx.emit({ type: 'effect', key: 'mirage', player: target.controller, cardId: target.cardId, data: { uid: target.uid, attacker: a.cardId } });
+    return;
+  }
+  let atk = Math.round(ctx.effectiveAtk(a) * mult);
+  // Sentinelle de chêne : Communion, ses attaquants perdent de l'ATK.
+  const loss = card(target.cardId).communionAttackerAtkLoss as number | undefined;
+  if (loss && !target.brokenMorale && ctx.communion(target.controller)) atk = Math.max(0, atk - loss);
   const vsMounted = card(a.cardId).bonusVsMounted ?? (a.types.includes('Lancier') ? 10 : 0);
   if (vsMounted && target.types.includes('Monté') && !a.brokenMorale) atk += vsMounted;
   const vsTypes = card(a.cardId).bonusVsTypes as Record<string, number> | undefined;
@@ -156,9 +188,30 @@ function attack(ctx: Ctx, a: Unit, target: Unit): void {
     target.stunnedBy = a.uid;
     ctx.emit({ type: 'stunned', uid: target.uid, cardId: target.cardId, by: a.uid });
   }
+  // Gargouille sentinelle : attaquer un de ses alliés adjacents coûte du Moral à l'attaquant.
+  const tRef = ctx.slotOf(target.uid);
+  let punish = 0;
+  if (tRef) for (const g of ctx.neighbors(tRef)) if (!g.brokenMorale) punish += (card(g.cardId).punishesAttackersOfNeighbors as number | undefined) ?? 0;
+  const owner = target.controller;
   if (dead) {
     const cause = target.currentEnd <= 0 && target.currentMor <= 0 ? 'both' : target.currentEnd <= 0 ? 'end' : 'moral';
     ctx.destroy(target, cause, a);
+    if (ctx.over) return;
+    if (ctx.isAlive(a) && !a.brokenMorale) {
+      // Pillage X : l'adversaire défausse le dessus de sa pioche.
+      const pil = keywordValue(a, 'Pillage');
+      if (pil) ctx.mill(owner, pil, a.cardId);
+      // Cavaliers de la Garde : ses alliés adjacents regagnent du Moral.
+      const rally = card(a.cardId).killRalliesNeighbors as number | undefined;
+      const aRef = ctx.slotOf(a.uid);
+      if (rally && aRef) for (const n of ctx.neighbors(aRef)) ctx.heal(n, 0, rally, a.cardId);
+    }
+  }
+  if (punish && !ctx.over && ctx.isAlive(a)) {
+    const lost = ctx.loseMoral(a, punish);
+    if (lost) ctx.emit({ type: 'moralLoss', uid: a.uid, cardId: a.cardId, amount: lost, source: 'gargouille_sentinelle' });
+    ctx.checkBroken(a);
+    if (a.currentMor <= 0) ctx.destroy(a, 'moral');
   }
 }
 

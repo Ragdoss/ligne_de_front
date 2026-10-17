@@ -1,5 +1,7 @@
 // Noms et descriptions des cartes en français.
-export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
+import { WAVE1_TEXT_FR } from './wave1.fr';
+
+const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   "recrue_imp": {
     "name": "Recrue Impériale",
     "desc": ""
@@ -501,3 +503,5 @@ export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = {
     "desc": "Garde impériale (carte de scénario)."
   }
 };
+
+export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = { ...BASE_TEXT_FR, ...WAVE1_TEXT_FR };

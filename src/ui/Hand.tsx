@@ -7,7 +7,8 @@ import { cardDesc, cardName, TYPE_LABEL, UNPLAYABLE, visibleKeywords } from './l
 
 function Details({ c }: { c: CardDef }) {
   if (c.cardType === 'Regiment') {
-    const slot = c.slotTypes ? 'Avant/Arr.' : c.slotType === 'avant' ? 'Avant' : c.slotType === 'arriere' ? 'Arrière' : 'Isolé';
+    const ZL: Record<string, string> = { avant: 'Avant', arriere: 'Arr.', isole: 'Isolé' };
+    const slot = c.slotTypes ? c.slotTypes.map(z => ZL[z]).join('/') : c.slotType === 'avant' ? 'Avant' : c.slotType === 'arriere' ? 'Arrière' : 'Isolé';
     const kws = [...(c.unique ? ['Unique'] : []), ...visibleKeywords(c.keywords ?? [])];
     return (
       <>

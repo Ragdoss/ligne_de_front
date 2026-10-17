@@ -45,10 +45,16 @@ export function choiceTitle(c: PendingChoice): string {
     case 'caravane': return 'Caravane Marchande : supprime une carte de la défausse adverse (durée de vie + son niveau)';
     case 'ransomDesert': return 'Rançon du Désert : supprime une carte de la défausse adverse';
     case 'frondeurStun': return 'Frondeur Nomade : choisis le régiment adverse à sonner (il n’attaquera pas à ce combat)';
+    case 'offrande': return `${cardName(c.source)} : paies-tu l’Offrande (${c.data.x} lassitude) pour l’effet renforcé ?`;
+    case 'augure': return 'Augure de l’Abîme : place chaque carte au-dessus ou en dessous de ta pioche (la première placée au-dessus sera piochée en premier)';
+    case 'chuchoteur': return `Chuchoteur des abysses : garder la carte du dessus, ou la défausser (encore ${c.data.left} regard(s))`;
+    case 'marchandAmes': return 'Marchand d’âmes : retire un régiment de la défausse adverse (ressources = son niveau)';
+    case 'marche': return `${cardName(c.source)} — Marché : défausser une carte de ta main pour en piocher une ?`;
   }
 }
 
 export function optionLabel(c: PendingChoice, o: ChoiceOption): string {
+  if (o.label) return o.label;
   if (o.skip) return 'Ne rien récupérer';
   if (o.stat && o.cardId) {
     const d = card(o.cardId);

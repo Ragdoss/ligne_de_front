@@ -1,7 +1,8 @@
 // Catalogue des cartes (données). Source initiale : simulateur HTML, désormais la référence est ce fichier.
 import type { CardDef } from '../engine/types';
+import { WAVE1 } from './wave1';
 
-export const CARDS: Record<string, CardDef> = {
+const BASE_CARDS: Record<string, CardDef> = {
   "recrue_imp": {
     "id": "recrue_imp",
     "cardType": "Regiment",
@@ -1980,3 +1981,6 @@ export const CARDS: Record<string, CardDef> = {
     "keywords": []
   }
 } as Record<string, CardDef>;
+
+/** Toutes les cartes : catalogue de base + première vague de la première édition. */
+export const CARDS: Record<string, CardDef> = { ...BASE_CARDS, ...WAVE1 };

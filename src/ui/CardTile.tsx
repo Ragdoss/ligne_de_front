@@ -6,7 +6,8 @@ export function statsLine(id: string): string {
   const c = CARDS[id]!;
   if (c.cardType === 'Regiment') {
     const kw = visibleKeywords(c.keywords ?? []);
-    const slot = c.slotTypes ? 'avant/arrière' : c.slotType === 'arriere' ? 'arrière' : c.slotType === 'isole' ? 'isolé' : 'avant';
+    const ZL: Record<string, string> = { avant: 'avant', arriere: 'arrière', isole: 'isolé' };
+    const slot = (c.slotTypes ?? [c.slotType ?? 'avant']).map(z => ZL[z]).join('/');
     const all = [...(c.unique ? ['Unique'] : []), ...kw];
     return `ATK ${c.atk} · END ${c.end} · ARM ${c.arm} · INI ${c.ini} · MOR ${c.mor} · ${slot}${all.length ? ` · ${all.join(', ')}` : ''}`;
   }

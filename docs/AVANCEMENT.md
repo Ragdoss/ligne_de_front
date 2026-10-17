@@ -175,3 +175,9 @@ aux outils avec `--patch` : `npm run sim -- 100 v2 --patch balance/equilibrage-1
 
 ## À faire lors du prochain équilibrage
 - **Notes de draft pour l'IA** : en plus des simulations en construit, lancer des drafts complets (4 IA) et mesurer l'écart de victoire de chaque carte dans des decks draftés. Remplacer `src/draft/ratings.ts` (aujourd'hui tiré du classement en construit, qui ne mesure pas les synergies) par ces notes, et noter aussi les cartes de la vague 1 une fois intégrées.
+
+## Première vague de la première édition (17/10/2026)
+- 50 cartes (`src/data/wave1.ts`, textes `src/i18n/wave1.fr.ts`) intégrées d'après le tableur relu : 10 par faction, 6 cross-faction, 4 neutres. Tuteur suprême retiré, Légion de Morvak ajoutée.
+- Moteur : adjacence (voisins), Ralliement, Formation, Croissance, Communion, déclencheurs de Tactiques, Offrande (choix), prise de contrôle temporaire ou définitive, regard sur la pioche (Augure, Chuchoteur), Mirage, Pillage, Marché, usure, Alliance, Leaders bicolores, double frappe, provocation des Distance, Dryade corrompue.
+- Tests : `tests/wave1.test.ts` (une vérification par mécanique + 120 parties aléatoires avec ces cartes). L'IA v2 les joue sans erreur.
+- Les nouvelles cartes sont collectionnables (paquets, draft) ; leur note pour l'IA de draft reste provisoire (niveau × 0,5) jusqu'au prochain équilibrage.

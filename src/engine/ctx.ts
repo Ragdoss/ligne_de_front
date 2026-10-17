@@ -110,6 +110,97 @@ export class Ctx {
     return out;
   }
   controlsElemental(p: PlayerId): boolean { return this.units(p).some(u => u.types.includes('Élémentaux')); }
+  /** Voisins d'un emplacement : gauche-droite sur la même ligne, et devant-derrière (une case arrière touche les deux cases avant qui l'encadrent). */
+  neighbors(ref: SlotRef): Unit[] {
+    if (ref.zone === 'isole') return [];
+    const b = this.player(ref.player).board;
+    const out: (Unit | null | undefined)[] = [b[ref.zone][ref.idx - 1], b[ref.zone][ref.idx + 1]];
+    if (ref.zone === 'avant') for (const k of this.adjBack(ref.idx)) out.push(b.arriere[k]);
+    else for (const i of this.adjFront(ref.idx)) out.push(b.avant[i]);
+    return out.filter((u): u is Unit => !!u);
+  }
+  /** Voisins gauche-droite sur la même ligne seulement (Formation). */
+  rowNeighbors(ref: SlotRef): Unit[] {
+    if (ref.zone === 'isole') return [];
+    const row = this.player(ref.player).board[ref.zone];
+    return [row[ref.idx - 1], row[ref.idx + 1]].filter((u): u is Unit => !!u);
+  }
+  /** Deux régiments distincts de `p` : l'un du type `a`, l'autre du type `b` (Communion, Alliance). */
+  hasPair(p: PlayerId, a: string, b: string): boolean {
+    const us = this.units(p);
+    return us.some(x => x.types.includes(a) && us.some(y => y !== x && y.types.includes(b)));
+  }
+  /** Communion : un Elfe et un Élémentaux (deux régiments distincts) en jeu. */
+  communion(p: PlayerId): boolean { return this.hasPair(p, 'Elfe', 'Élémentaux'); }
+  /** Alliance d'une carte bicolore : un autre régiment de l'une de ses deux races en jeu. */
+  allianceActive(u: Unit): boolean {
+    const al = card(u.cardId).alliance as string[] | undefined;
+    if (!al) return false;
+    return this.units(u.controller).some(x => x !== u && al.some(t => x.types.includes(t)));
+  }
+  /** Case libre la plus proche pour `p` (même rangée d'abord, puis l'autre). */
+  freeSlotNear(p: PlayerId, zone: 'avant' | 'arriere', idx: number): SlotRef | null {
+    const b = this.player(p).board;
+    for (const z of [zone, zone === 'avant' ? 'arriere' : 'avant'] as const) {
+      let best = -1, dist = 99;
+      b[z].forEach((x, i) => { if (!x && Math.abs(i - idx) < dist) { dist = Math.abs(i - idx); best = i; } });
+      if (best >= 0) return { player: p, zone: z, idx: best };
+    }
+    return null;
+  }
+  /** Prise de contrôle d'un régiment (avant ou arrière) par `p` ; temporaire = rendu à la fin du tour. */
+  takeControl(u: Unit, p: PlayerId, temporary: boolean, source: string): boolean {
+    const from = this.slotOf(u.uid);
+    if (!from || from.zone === 'isole' || u.controller === p) return false;
+    const dest = this.freeSlotNear(p, from.zone, from.idx);
+    if (!dest) return false;
+    const prev = u.controller;
+    this.setAt(from, null);
+    u.controller = p;
+    if (temporary) u.borrowed = { owner: u.borrowed?.owner ?? prev };
+    else { u.owner = u.borrowed?.owner ?? u.owner ?? prev; u.borrowed = null; }
+    u.pactShield = null; u.squareArm = 0; u.squareOwner = null; u.stunned = false;
+    this.setAt(dest, u);
+    this.emit({ type: 'effect', key: temporary ? 'controlTaken' : 'controlKept', player: p, cardId: source, data: { uid: u.uid, target: u.cardId } });
+    this.emit({ type: 'moved', uid: u.uid, cardId: u.cardId, from, to: dest });
+    return true;
+  }
+  /** Fin du tour : les régiments empruntés retournent à leur propriétaire (case libre la plus proche, sinon en défausse). */
+  returnBorrowed(): void {
+    for (const p of ['A', 'B'] as PlayerId[]) {
+      for (const u of this.units(p)) {
+        if (!u.borrowed) continue;
+        const owner = u.borrowed.owner;
+        const from = this.slotOf(u.uid)!;
+        u.borrowed = null;
+        this.setAt(from, null);
+        u.controller = owner;
+        const dest = from.zone === 'isole' ? null : this.freeSlotNear(owner, from.zone, from.idx);
+        if (dest) {
+          this.setAt(dest, u);
+          this.emit({ type: 'effect', key: 'controlReturned', player: owner, cardId: u.cardId, data: { uid: u.uid } });
+          this.emit({ type: 'moved', uid: u.uid, cardId: u.cardId, from, to: dest });
+        } else {
+          if (!u.isToken) this.discard(owner, u.cardId);
+          this.discardLeader(u);
+          this.emit({ type: 'effect', key: 'controlLost', player: owner, cardId: u.cardId, data: { uid: u.uid } });
+        }
+      }
+    }
+  }
+  /** Défausse les `n` cartes du dessus de la pioche de `p` (usure) ; s'arrête si la pioche est vide. */
+  mill(p: PlayerId, n: number, source: string): number {
+    const pl = this.player(p);
+    let k = 0;
+    for (; k < n && pl.deck.length && !this.over; k++) {
+      const top = pl.deck.shift()!;
+      this.discard(p, top);
+      this.emit({ type: 'discarded', player: p, cardId: top, source });
+      const d = card(top).drawWhenDiscarded as number | undefined;
+      if (d) for (let i = 0; i < d && !this.over; i++) this.draw(p, top);
+    }
+    return k;
+  }
 
   // ---------- Météo de scénario ----------
   /** Météo du tour `turn` (par défaut le tour en cours) : tempête, nuit, jour, ou rien. */
@@ -171,7 +262,17 @@ export class Ctx {
       const step = l.lassitudeStep as number | undefined, per = l.atkPerLassitudeStep as number | undefined;
       if (step && per) atk += Math.floor(this.player(u.controller).points / step) * per;
     }
-    if (!u.brokenMorale) atk += u.tempAtk;
+    if (!u.brokenMorale) {
+      atk += u.tempAtk;
+      // Prêtresse des saisons : Communion.
+      const cb = u.leader ? card(u.leader).communionBonus as { atk?: number } | undefined : undefined;
+      if (cb?.atk && this.communion(u.controller)) atk += cb.atk;
+      // Gardes du drapeau : Formation, +ATK aux voisins Empire sur la ligne.
+      if (u.types.includes('Empire')) {
+        const ref = this.slotOf(u.uid);
+        if (ref) for (const n of this.rowNeighbors(ref)) if (!n.brokenMorale) atk += (card(n.cardId).formationAtkToNeighbors as number | undefined) ?? 0;
+      }
+    }
     if (this.weather() === 'nuit' && u.types.includes('Démon')) atk += 10;
     atk -= u.tempDebuffAtk;
     return Math.max(0, Math.round(atk));
@@ -182,12 +283,31 @@ export class Ctx {
       arm += card(u.leader).bonusArm ?? 0;
       arm += card(u.cardId).armBonusWithLeader ?? 0;
     }
-    if (!u.brokenMorale) arm += u.squareArm + u.tempArm;
+    if (!u.brokenMorale) {
+      arm += u.squareArm + u.tempArm;
+      const d = card(u.cardId);
+      const ref = (d.formationArmPerEmpireNeighbor || u.types.includes('Empire')) ? this.slotOf(u.uid) : null;
+      if (ref) {
+        const row = this.rowNeighbors(ref);
+        // Hallebardiers en ligne : +ARM par voisin Empire.
+        const per = d.formationArmPerEmpireNeighbor as number | undefined;
+        if (per) arm += per * row.filter(n => n.types.includes('Empire')).length;
+        // Colonel de la Ligne : +ARM aux régiments Empire voisins de son porteur.
+        if (u.types.includes('Empire')) for (const n of row) if (n.leader && !n.brokenMorale) arm += (card(n.leader).leaderFormationArm as number | undefined) ?? 0;
+      }
+      // Garde-frontière sylvestre : Alliance.
+      const al = d.allianceArm as number | undefined;
+      if (al && this.allianceActive(u)) arm += al;
+    }
     return arm;
   }
   effectiveIni(u: Unit): number {
     let ini = u.ini;
-    if (u.leader && !u.brokenMorale) ini += card(u.leader).bonusIni ?? 0;
+    if (u.leader && !u.brokenMorale) {
+      ini += card(u.leader).bonusIni ?? 0;
+      const cb = card(u.leader).communionBonus as { ini?: number } | undefined;
+      if (cb?.ini && this.communion(u.controller)) ini += cb.ini;
+    }
     const w = this.weather();
     if (w === 'tempete' && !u.types.includes('Nomade')) ini -= 20;
     if (w === 'jour' && u.types.includes('Elfe')) ini += 15;
@@ -240,13 +360,35 @@ export class Ctx {
     let after = Math.max(0, before - amount);
     const floor = card(u.cardId).moralFloorWithLeader;
     if (u.leader && floor && before >= floor) after = Math.max(floor, after);
+    const lf = u.leader ? card(u.leader).leaderMoralFloor as number | undefined : undefined; // Inquisiteur déchu
+    if (lf && before >= lf) after = Math.max(lf, after);
     u.currentMor = after;
     return before - after;
   }
   /** Gain de Moral « brut » (plafonné), sans lever l'état Moral brisé (cas du tueur). */
-  addMoralRaw(u: Unit, n: number): void { u.currentMor = Math.min(u.maxMor, u.currentMor + n); }
+  addMoralRaw(u: Unit, n: number): void {
+    if (this.dryadConverts(u, 0, n)) return;
+    u.currentMor = Math.min(u.maxMor, u.currentMor + n);
+  }
+  /** Dryade corrompue : tout gain d'END ou de Moral d'un allié est annulé et devient une baisse de lassitude. */
+  private dryadConverts(u: Unit, end: number, mor: number): boolean {
+    const dry = this.units(u.controller).find(x => card(x.cardId).healsBecomeLassitude);
+    if (!dry) return false;
+    const step = card(dry.cardId).healsBecomeLassitude as number;
+    const wEnd = end > 0 ? Math.min(u.maxEnd, u.currentEnd + end) - u.currentEnd : 0;
+    const wMor = mor > 0 ? Math.min(u.maxMor, u.currentMor + mor) - u.currentMor : 0;
+    if (wEnd <= 0 && wMor <= 0) return true;
+    const pl = this.player(u.controller);
+    pl.dryadAcc = (pl.dryadAcc ?? 0) + wEnd;
+    const g = Math.floor(pl.dryadAcc / step) + wMor;
+    pl.dryadAcc %= step;
+    this.emit({ type: 'effect', key: 'dryade', player: u.controller, cardId: dry.cardId, data: { uid: u.uid, end: wEnd, mor: wMor } });
+    if (g > 0) this.loseLassitude(u.controller, g, dry.cardId);
+    return true;
+  }
 
   heal(u: Unit, end: number, mor: number, source: string): { end: number; mor: number } {
+    if (this.dryadConverts(u, end, mor)) return { end: 0, mor: 0 };
     let gEnd = 0, gMor = 0;
     if (end > 0) { const b = u.currentEnd; u.currentEnd = Math.min(u.maxEnd, b + end); gEnd = u.currentEnd - b; }
     if (mor > 0) {
@@ -281,6 +423,15 @@ export class Ctx {
       this.emit({ type: 'resource', player: p, amount: n * ceremonies, source: 'ceremonie_declin' });
     }
     this.checkLevel(p);
+    // Maître des pactes : la première lassitude gagnée par l'effet d'une carte, à chaque tour, fait piocher.
+    if (!this.over && !['destroyed', 'moralCheck', 'scenario'].includes(source)) {
+      const marker = this.s.turn * 2 + (this.s.active === 'A' ? 0 : 1);
+      const pact = this.units(p).find(x => x.leader && !x.brokenMorale && card(x.leader).drawOnFirstCardLassitude);
+      if (pact && pl.pactDrawnAt !== marker) {
+        pl.pactDrawnAt = marker;
+        this.draw(p, pact.leader!);
+      }
+    }
   }
   loseLassitude(p: PlayerId, n: number, source: string): void {
     const pl = this.player(p);
@@ -364,7 +515,9 @@ export class Ctx {
    * l'adversaire contrôle des Archéotacticiens, l'adversaire en reçoit une copie gratuite.
    */
   discard(p: PlayerId, cardId: string, playedByOwner = false): void {
-    this.player(p).discard.push(cardId);
+    const pl = this.player(p);
+    pl.discard.push(cardId);
+    pl.discardedThisTurn = (pl.discardedThisTurn ?? 0) + 1;
     if (card(cardId).cardType !== 'Tactique' || playedByOwner) return;
     const q = opponentOf(p);
     if (this.units(q).some(u => card(u.cardId).grantsFreeTacticCopyOnEnemyDiscard)) {
@@ -380,6 +533,9 @@ export class Ctx {
     const h = pl.hand.splice(i, 1)[0]!;
     if (!h.generated) this.discard(p, h.cardId);
     this.emit({ type: 'discarded', player: p, cardId: h.cardId, source });
+    // Ravitailleur : défaussé de la main, il fait piocher.
+    const dw = card(h.cardId).drawWhenDiscarded as number | undefined;
+    if (dw) for (let i = 0; i < dw && !this.over; i++) this.draw(p, h.cardId);
     // Cheikh des Dunes : chaque défausse adverse renforce son porteur.
     for (const u of this.units(opponentOf(p))) {
       const g = u.leader ? card(u.leader).atkPerEnemyDiscard as number | undefined : undefined;
@@ -409,7 +565,7 @@ export class Ctx {
     const minion = u.keywords.includes('Minions');
     this.emit({ type: 'destroyed', player: p, uid: u.uid, cardId: u.cardId, cause, lassitude: minion ? 0 : u.niveau });
     if (!minion) this.gainLassitude(p, u.niveau, 'destroyed');
-    if (!u.isToken) this.discard(p, u.cardId);
+    if (!u.isToken) this.discard(u.borrowed?.owner ?? u.owner ?? p, u.cardId); // un régiment volé retourne dans la défausse de son propriétaire
     this.discardLeader(u);
     // Suppôt Infernal : le porteur détruit permet de récupérer une copie d'un Démon de la défausse.
     if (u.leader && card(u.leader).recoversDemonOnCarrierDeath) this.queueChoice('recoverDemon', p, u.leader);
@@ -443,6 +599,12 @@ export class Ctx {
       const top = this.player(p).deck.shift();
       if (top) { this.discard(p, top); this.emit({ type: 'discarded', player: p, cardId: top, source: 'frondeur_nomade' }); }
     }
+    // Danseurs de sable : à sa mort, l'adversaire défausse le dessus de sa pioche.
+    const om = def.onDeathOpponentMill as number | undefined;
+    if (om && !this.over) this.mill(opponentOf(p), om, u.cardId);
+    // Voleurs de provisions : chaque régiment allié détruit fait défausser le dessus de la pioche adverse.
+    const thieves = this.units(p).reduce((n, x) => n + ((card(x.cardId).millOnAllyDeath as number | undefined) ?? 0), 0) + ((def.millOnAllyDeath as number | undefined) ?? 0);
+    if (thieves && !this.over) this.mill(opponentOf(p), thieves, 'voleurs_provisions');
     // Démon d'Akantha : se soigne quand un ennemi meurt de son Moral.
     if (cause === 'moral' && !this.over) {
       for (const e of this.units(opponentOf(p))) {

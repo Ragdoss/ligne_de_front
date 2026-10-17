@@ -1,7 +1,8 @@
 // File des choix en attente : calcul des options quand un choix devient actif, et application du choix.
 
 import { Ctx, card, opponentOf } from './ctx';
-import { isDemonRegiment } from './play';
+import { applyOffrande, isDemonRegiment } from './play';
+import { CARD_TEXT_FR } from '../i18n/cards.fr';
 import type { ChoiceOption, PendingChoice } from './types';
 
 const unique = (ids: string[]) => Array.from(new Set(ids));
@@ -50,8 +51,33 @@ function computeOptions(ctx: Ctx, c: PendingChoice): ChoiceOption[] {
         const r = ctx.slotOf(u.uid)!;
         return { value: u.uid, cardId: u.cardId, where: r.zone === 'isole' ? 'isolé' : `${r.zone === 'avant' ? 'avant' : 'arrière'} ${r.idx + 1}` };
       });
+    case 'offrande': {
+      const x = Number(c.data.x);
+      return [{ value: 0, label: 'Ne pas payer l’Offrande' }, { value: 1, label: `Payer l’Offrande : +${x} lassitude` }];
+    }
+    case 'augure': {
+      const rest = String(c.data.rest ?? '').split(',').filter(Boolean);
+      const out: ChoiceOption[] = [];
+      rest.forEach((cardId, i) => {
+        out.push({ cardId, value: i * 2, label: `${cardName(cardId)} → au-dessus de la pioche` });
+        out.push({ cardId, value: i * 2 + 1, label: `${cardName(cardId)} → en dessous de la pioche` });
+      });
+      return out;
+    }
+    case 'chuchoteur': {
+      const top = pl.deck[0];
+      if (!top || Number(c.data.left) <= 0) return [];
+      return [{ cardId: top, value: 1, label: `Garder ${cardName(top)} sur le dessus` }, { cardId: top, value: 0, label: `Défausser ${cardName(top)} (+1 lassitude)` }];
+    }
+    case 'marchandAmes':
+      return unique(opp.discard.filter(x => card(x).cardType === 'Regiment')).map(cardId => ({ cardId }));
+    case 'marche': {
+      if (!pl.hand.length || !pl.deck.length) return [];
+      return [{ skip: true, label: 'Ne rien échanger' }, ...pl.hand.map(h => ({ handUid: h.uid, cardId: h.cardId, label: `Défausser ${cardName(h.cardId)} et piocher` }))];
+    }
   }
 }
+const cardName = (id: string) => CARD_TEXT_FR[id]?.name ?? id;
 
 /** Quand un choix n'a aucune option, il se termine sans effet (sauf la fin du vol de ravitaillement). */
 function finishWithoutOptions(ctx: Ctx, c: PendingChoice): void {
@@ -174,6 +200,43 @@ export function resolveChoice(ctx: Ctx, index: number): string | null {
       ctx.emit({ type: 'stunned', uid: t.uid, cardId: t.cardId, by: Number(c.data.uid) });
       break;
     }
+    case 'offrande':
+      applyOffrande(ctx, p, c.source, o.value === 1, Number(c.data.x), c.data.uid === null ? null : Number(c.data.uid));
+      break;
+    case 'augure': {
+      const rest = String(c.data.rest).split(',').filter(Boolean);
+      const i = Math.floor(o.value! / 2);
+      const id = rest.splice(i, 1)[0]!;
+      const top = String(c.data.top).split(',').filter(Boolean), bottom = String(c.data.bottom).split(',').filter(Boolean);
+      (o.value! % 2 === 0 ? top : bottom).push(id);
+      if (rest.length) { ctx.s.pending.unshift({ ...c, options: null, data: { ...c.data, rest: rest.join(','), top: top.join(','), bottom: bottom.join(',') } }); break; }
+      // La première carte placée au-dessus sera la première piochée.
+      pl.deck = [...top, ...pl.deck, ...bottom];
+      note('augure', { top: top.length, bottom: bottom.length });
+      break;
+    }
+    case 'chuchoteur': {
+      if (o.value === 1) { note('chuchoteurKeep'); break; }
+      ctx.mill(p, 1, c.source);
+      ctx.gainLassitude(p, 1, c.source);
+      const left = Number(c.data.left) - 1;
+      if (left > 0 && !ctx.over) ctx.s.pending.unshift({ ...c, options: null, data: { ...c.data, left } });
+      break;
+    }
+    case 'marchandAmes': {
+      removeFrom(opp.discard, o.cardId!);
+      const lvl = card(o.cardId!).niveau;
+      pl.resource += lvl;
+      ctx.emit({ type: 'resource', player: p, amount: lvl, source: c.source });
+      note('marchandAmes', { cardId: o.cardId });
+      ctx.gainLassitude(p, Math.max(0, lvl - (opp.discardedThisTurn ?? 0)), c.source);
+      break;
+    }
+    case 'marche':
+      if (o.skip) break;
+      ctx.discardFromHand(p, o.handUid!, c.source);
+      if (!ctx.over) ctx.draw(p, c.source);
+      break;
     case 'ransomDesert': {
       removeFrom(opp.discard, o.cardId!);
       const n = card(o.cardId!).niveau;

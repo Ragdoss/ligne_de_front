@@ -1,12 +1,13 @@
 // Jouer une carte : coût, conditions, cibles valides, effets (régiments, Leaders, tactiques, effets d'arrivée).
 // Les effets qui demandent une décision passent par la file de choix (voir choices.ts).
 
-import { Ctx, addKeyword, card, opponentOf } from './ctx';
+import { Ctx, addKeyword, card, keywordValue, opponentOf } from './ctx';
 import type { CardDef, HandCard, PlayerId, SlotRef, Unit } from './types';
 
 // ---------- Coût ----------
 export function tacticReduction(ctx: Ctx, p: PlayerId): number {
-  return ctx.units(p).reduce((n, u) => n + (u.leader ? card(u.leader).tacticCostReduction ?? 0 : 0), 0);
+  return ctx.units(p).reduce((n, u) => n + (u.leader ? card(u.leader).tacticCostReduction ?? 0 : 0)
+    + ((card(u.cardId).unitTacticCostReduction as number | undefined) ?? 0), 0); // Vision, Lettrée du Conclave
 }
 export function dynamicRawCost(ctx: Ctx, c: CardDef, p: PlayerId): number {
   if (c.dynamicCost === 'frontEmpty') return ctx.player(p).board.avant.filter(u => !u).length;
@@ -26,6 +27,7 @@ export function cardCost(ctx: Ctx, p: PlayerId, h: HandCard): number {
   }
   if (c.elementalDiscount && ctx.controlsElemental(p)) cost -= c.elementalDiscount;
   if (c.cardType === 'Tactique') cost -= tacticReduction(ctx, p);
+  if (c.cardType === 'Leader') for (const u of ctx.units(p)) cost -= (card(u.cardId).leaderCostReduction as number | undefined) ?? 0; // Le Commandant
   return Math.max(0, cost);
 }
 
@@ -35,7 +37,7 @@ export function unplayableReason(ctx: Ctx, p: PlayerId, h: HandCard): string | n
   const c = card(h.cardId);
   const pl = ctx.player(p);
   if (c.niveau > pl.level && !h.levelFree) return 'level';
-  if (c.unique && [...ctx.units('A'), ...ctx.units('B')].some(u => u.cardId === c.id)) return 'unique'; // un seul en jeu, tous joueurs confondus
+  if (c.unique && [...ctx.units('A'), ...ctx.units('B')].some(u => u.cardId === c.id || u.leader === c.id)) return 'unique'; // un seul en jeu, tous joueurs confondus
   if (c.dynamicCost && dynamicRawCost(ctx, c, p) <= 0 && !h.freeCopy) return 'noEffect';
   if (cardCost(ctx, p, h) > pl.resource) return 'resource';
   if (c.requiresOwnEmpireLeaderToCast && !ctx.units(p).some(u => u.types.includes('Empire') && u.leader)) return 'condition';
@@ -66,7 +68,7 @@ export function targetCount(c: CardDef): 0 | 1 | 2 {
 }
 
 function targetsOpponent(c: CardDef): boolean {
-  return (c.cardType === 'Tactique' && (c.targetRule === 'ennemi-quelconque' || c.targetRule === 'ennemi-avec-leader' || c.targetRule === 'ennemi-puis-case-vide'))
+  return (c.cardType === 'Tactique' && (c.targetRule === 'ennemi-quelconque' || c.targetRule === 'ennemi-avec-leader' || c.targetRule === 'ennemi-puis-case-vide' || c.targetRule === 'ennemi-moral-brise'))
     || (c.cardType === 'Leader' && !!c.targetsEnemy);
 }
 
@@ -76,7 +78,7 @@ export function validFirstTarget(ctx: Ctx, p: PlayerId, c: CardDef, ref: SlotRef
   const u = ctx.unitAt(ref);
   if (c.cardType === 'Regiment') {
     const min = c.sacrificeMinLevel as number | undefined;
-    if (min) return !!u && ref.zone === c.slotType && u.niveau >= min; // invocation par sacrifice
+    if (min) return !!u && (c.slotTypes ?? [c.slotType]).includes(ref.zone) && u.niveau >= min; // invocation par sacrifice
     const zones = c.slotTypes ?? [c.slotType];
     return zones.includes(ref.zone) && !u;
   }
@@ -84,9 +86,16 @@ export function validFirstTarget(ctx: Ctx, p: PlayerId, c: CardDef, ref: SlotRef
   if (c.cardType === 'Leader') {
     if (c.requiresLeader && !u.leader) return false;
     if (!c.requiresLeader && !c.targetsEnemy && u.leader) return false; // un seul Leader par régiment
+    const any = c.typesRequiredAny as string[] | undefined; // Leaders bicolores : porteur de l'une ou l'autre race
+    if (any && !any.some(t => u.types.includes(t))) return false;
     return (c.typesRequired ?? []).every(t => u.types.includes(t));
   }
+  // Prise de contrôle : régiment avant/arrière, niveau maximum, et une case libre de ton côté.
+  if (c.needsFreeSlot && (ref.zone === 'isole' || !ctx.freeSlotNear(p, ref.zone, ref.idx))) return false;
+  const maxLvl = c.maxTargetLevel as number | undefined;
+  if (maxLvl !== undefined && u.niveau > maxLvl) return false;
   switch (c.targetRule) {
+    case 'ennemi-moral-brise': return u.brokenMorale;
     case 'ennemi-puis-case-vide': return ref.zone !== 'isole';
     case 'elfe-allie-puis-case': return ref.zone !== 'isole' && u.types.includes('Elfe');
     case 'allie-quelconque': case 'ennemi-quelconque': return true;
@@ -129,22 +138,53 @@ export function playCard(ctx: Ctx, p: PlayerId, handUid: number, target?: SlotRe
   else if (c.cardType === 'Leader') attachLeader(ctx, p, c, ctx.unitAt(target!)!);
   else {
     if (!h.generated) ctx.discard(p, c.id, true);
+    pl.tacticsThisTurn = (pl.tacticsThisTurn ?? 0) + 1;
     resolveTactic(ctx, p, c, target, target2);
+    if (!ctx.over) onTacticPlayed(ctx, p);
   }
   return null;
+}
+
+/** Déclencheurs « chaque fois que tu joues une Tactique » (Elfes de la première vague). */
+function onTacticPlayed(ctx: Ctx, p: PlayerId): void {
+  const q = opponentOf(p);
+  for (const u of ctx.units(p)) {
+    if (ctx.over) return;
+    const d = card(u.cardId);
+    const bonus = d.atkPerTacticThisTurn as number | undefined; // Danseuses des lames
+    if (bonus) u.tempAtk += bonus;
+    const every = d.drawEveryTactics as number | undefined; // Chœur des saisons
+    if (every) {
+      u.counter = (u.counter ?? 0) + 1;
+      if (u.counter % every === 0) ctx.draw(p, u.cardId);
+    }
+    const ping = d.tacticPing as number | undefined; // Lyra
+    if (ping) {
+      let t: Unit | null = null;
+      for (const e of ctx.units(q)) { const r = ctx.slotOf(e.uid); if (r && r.zone !== 'isole' && (!t || e.currentEnd < t.currentEnd)) t = e; }
+      if (!t) continue;
+      t.currentEnd = Math.max(0, t.currentEnd - ping);
+      ctx.emit({ type: 'effect', key: 'lyraPing', player: p, cardId: u.cardId, data: { uid: t.uid, target: t.cardId, damage: ping } });
+      if (t.currentEnd <= 0) ctx.destroy(t, 'end');
+    }
+  }
 }
 
 function deployRegiment(ctx: Ctx, p: PlayerId, c: CardDef, ref: SlotRef): void {
   const pl = ctx.player(p);
   const u = ctx.makeUnit(c.id, p);
+  if (c.readyIfTacticThisTurn && (pl.tacticsThisTurn ?? 0) > 0) u.arrivesReady = true; // Chevaucheurs du mirage
   const min = c.sacrificeMinLevel as number | undefined;
+  let sacLevel = 0, sacCard: string | null = null;
   if (min) {
     // Invocation par sacrifice : le régiment sacrifié est détruit (avec ses conséquences habituelles).
     const sac = ctx.unitAt(ref)!;
     if (c.sacrificeGainsStats) {
       u.baseAtk += sac.baseAtk; u.maxEnd += sac.maxEnd; u.currentEnd += sac.maxEnd; u.baseArm += sac.baseArm; u.ini += sac.ini;
     }
+    if (c.sacrificeGainsMor) { u.maxMor += sac.maxMor; u.currentMor += sac.maxMor; }
     if (c.sacrificeGainsKeywords) for (const k of sac.keywords) addKeyword(u, k);
+    sacLevel = sac.niveau; sacCard = sac.cardId;
     const grant = card(sac.cardId).onSacrificeGrant as { keywords?: string[]; arrivesReady?: boolean } | undefined;
     if (grant) {
       for (const k of grant.keywords ?? []) addKeyword(u, k);
@@ -161,11 +201,35 @@ function deployRegiment(ctx: Ctx, p: PlayerId, c: CardDef, ref: SlotRef): void {
       if (m) ctx.heal(x, 0, m, x.cardId);
       const h = x.leader ? card(x.leader).healOnOwnSacrifice as number | undefined : undefined;
       if (h) ctx.heal(x, h, 1, x.leader!);
+      const dr = card(x.cardId).drawOnOwnSacrifice as number | undefined; // Hiérophante Morvak
+      if (dr) for (let i = 0; i < dr && !ctx.over; i++) ctx.draw(p, x.cardId);
     }
+    if (ctx.over) return;
   }
   if (u.types.includes('Basilic') && ctx.units(p).some(x => card(x.cardId).grantsBasilicsArriveReady)) u.arrivesReady = true;
   ctx.setAt(ref, u);
   ctx.emit({ type: 'deployed', player: p, uid: u.uid, cardId: c.id, slot: ref });
+  arrivalEffects(ctx, p, u, c.id, sacLevel);
+  // Légion de Morvak : rejoue aussi l'effet d'arrivée du régiment sacrifié.
+  if (c.sacrificeReplaysArrival && sacCard && !ctx.over && ctx.isAlive(u)) arrivalEffects(ctx, p, u, sacCard, 0);
+}
+
+/** Effets d'arrivée en jeu de la carte `asCard`, appliqués au régiment `u` (rejoués par Légat Varro, Légion de Morvak). */
+export function arrivalEffects(ctx: Ctx, p: PlayerId, u: Unit, asCard: string, sacLevel = 0): void {
+  const c = card(asCard);
+  const q = opponentOf(p);
+  // Ralliement X : les alliés voisins regagnent X Moral.
+  const rally = keywordValue({ keywords: c.keywords ?? [] } as unknown as Unit, 'Ralliement'); // mot-clé imprimé sur la carte (pas ceux gagnés)
+  if (rally) { const ref = ctx.slotOf(u.uid); if (ref) for (const n of ctx.neighbors(ref)) ctx.heal(n, 0, rally, asCard); }
+  const ad = c.onArrivalDraw as number | undefined; // Ravitailleur
+  if (ad) for (let i = 0; i < ad && !ctx.over; i++) ctx.draw(p, asCard);
+  if (asCard === 'chuchoteur_abysses' && sacLevel > 0) ctx.queueChoice('chuchoteur', p, asCard, { left: sacLevel });
+  if (asCard === 'marchand_ames') ctx.queueChoice('marchandAmes', p, asCard);
+  if (asCard === 'morvak') {
+    let t: Unit | null = null;
+    for (const e of ctx.units(q)) { const r = ctx.slotOf(e.uid); if (r && r.zone !== 'isole' && (!t || e.currentMor < t.currentMor)) t = e; }
+    if (t) ctx.takeControl(t, p, true, asCard);
+  }
   if (c.createsLieutenantOnArrival) ctx.generate(p, 'lieutenant', c.id);
   if (c.healAllMoralOnArrival) {
     for (const x of ctx.units(p)) {
@@ -174,8 +238,8 @@ function deployRegiment(ctx: Ctx, p: PlayerId, c: CardDef, ref: SlotRef): void {
       x.brokenMorale = false;
     }
   }
-  if (u.types.includes('Nomade')) nomadArrival(ctx, p, u);
-  if (u.types.includes('Basilic')) {
+  if ((c.types ?? []).includes('Nomade')) nomadArrival(ctx, p, u, asCard);
+  if (asCard === u.cardId && u.types.includes('Basilic')) {
     for (const e of ctx.units(p)) {
       const d = card(e.cardId);
       const bonus = d.basilicEndBonus as number | undefined;
@@ -212,14 +276,17 @@ function attachLeader(ctx: Ctx, p: PlayerId, c: CardDef, u: Unit): void {
   if (c.grantsReadyOnAttach) u.arrivesReady = true;
   if (c.visionOnAttach) ctx.queueChoice('vision', p, c.id);
   if (c.replaysArrivalEffectOnAttach && u.types.includes('Nomade')) nomadArrival(ctx, u.controller, u);
+  if (c.replaysAnyArrivalOnAttach) arrivalEffects(ctx, u.controller, u, u.cardId); // Légat Varro
+  const res = c.resourceOnAttach as number | undefined; // Capitaine mercenaire
+  if (res) { ctx.player(p).resource += res; ctx.emit({ type: 'resource', player: p, amount: res, source: c.id }); }
 }
 
 // ---------- Effets d'arrivée des Nomades (rejoués par Mirage, Embuscade, Maître de Caravane) ----------
-function nomadArrival(ctx: Ctx, p: PlayerId, u: Unit): void {
+function nomadArrival(ctx: Ctx, p: PlayerId, u: Unit, asCard: string = u.cardId): void {
   const q = opponentOf(p);
   const opp = ctx.player(q);
-  const note = (key: string, data?: Record<string, unknown>) => ctx.emit({ type: 'effect', key, player: p, cardId: u.cardId, data });
-  switch (u.cardId) {
+  const note = (key: string, data?: Record<string, unknown>) => ctx.emit({ type: 'effect', key, player: p, cardId: asCard, data });
+  switch (asCard) {
     case 'jeune_nomade': {
       if (!opp.hand.length) { note('noTarget'); break; }
       ctx.discardFromHand(q, opp.hand[ctx.randomInt(opp.hand.length)]!.uid, u.cardId);
@@ -492,7 +559,74 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
     case 'ranconDesert': ctx.queueChoice('ransomDesert', p, c.id); break;
     case 'frappezRavitaillement': ctx.queueChoice('handDiscard', q, c.id, { n: 2, sum: 0, thief: null, gainBase: 0 }); break;
     case 'volezRavitaillement': ctx.queueChoice('handDiscard', q, c.id, { n: 3, sum: 0, thief: p, gainBase: 7 }); break;
+    // --- Première vague ---
+    case 'appelAuxArmes': {
+      pl.board.avant.forEach((x, i) => {
+        if (x) return;
+        const r = ctx.makeUnit('recrue_imp', p, true);
+        r.arrivesReady = true;
+        pl.board.avant[i] = r;
+        ctx.emit({ type: 'deployed', player: p, uid: r.uid, cardId: r.cardId, slot: { player: p, zone: 'avant', idx: i } });
+      });
+      for (const x of ctx.units(p)) ctx.heal(x, 0, 3, c.id);
+      break;
+    }
+    case 'chantSeve':
+      ctx.heal(target!, 10, 0, c.id);
+      if ((pl.tacticsThisTurn ?? 0) >= 2) { target!.tempAtk += 10; note('chantSeve', { uid: target!.uid }); }
+      break;
+    case 'augure': {
+      const looked = pl.deck.splice(0, 3);
+      if (!looked.length) { note('noTarget'); break; }
+      ctx.gainLassitude(p, 1, c.id);
+      ctx.queueChoice('augure', p, c.id, { rest: looked.join(','), top: '', bottom: '' });
+      break;
+    }
+    case 'pacteMineur': case 'murmure': case 'rempartChair':
+      ctx.queueChoice('offrande', p, c.id, { x: (c.offrande as number) ?? 0, uid: target?.uid ?? null });
+      break;
+    case 'appat': ctx.takeControl(target!, p, true, c.id); break;
+    case 'fuiteDunes': {
+      const lvl = target!.niveau;
+      ctx.discardLeader(target!);
+      ctx.setAt(t1!, null);
+      ctx.addToHand(p, target!.cardId);
+      ctx.emit({ type: 'returnedToHand', player: p, cardId: target!.cardId });
+      ctx.mill(q, lvl, c.id);
+      break;
+    }
+    case 'terreBrulee': {
+      const regs = pl.discard.filter(id => card(id).cardType === 'Regiment');
+      ctx.mill(q, regs.length, c.id);
+      pl.discard = pl.discard.filter(id => card(id).cardType !== 'Regiment');
+      note('terreBrulee', { count: regs.length });
+      break;
+    }
+    case 'mirageOasis': addKeyword(target!, 'Mirage 1'); note('mirageOasis', { uid: target!.uid }); break;
+    case 'corRalliement': for (const x of ctx.units(p)) if (x.brokenMorale) ctx.heal(x, 0, 2, c.id); break;
     default:
       throw new Error(`Effet de tactique non implémenté : ${c.effect} (${c.id})`);
+  }
+}
+
+/** Effet d'une carte à Offrande, une fois la décision prise (payer `x` lassitude ou non). */
+export function applyOffrande(ctx: Ctx, p: PlayerId, cardId: string, paid: boolean, x: number, uid: number | null): void {
+  if (paid) ctx.gainLassitude(p, x, cardId);
+  if (ctx.over) return;
+  const target = uid !== null ? ctx.findUnit(uid) : null;
+  switch (card(cardId).effect) {
+    case 'pacteMineur': for (let i = 0; i < (paid ? 3 : 1) && !ctx.over; i++) ctx.draw(p, cardId); break;
+    case 'murmure': {
+      if (!target || target.controller === p) { ctx.emit({ type: 'effect', key: 'noTarget', player: p, cardId }); break; }
+      if (!ctx.takeControl(target, p, !paid, cardId)) break;
+      if (paid) { target.currentMor = target.maxMor; target.brokenMorale = false; }
+      break;
+    }
+    case 'rempartChair': {
+      const list = paid ? ctx.units(p).filter(u => u.types.includes('Démon')) : target ? [target] : [];
+      for (const u of list) { u.squareArm = Math.max(u.squareArm, 15); u.squareOwner = p; }
+      ctx.emit({ type: 'effect', key: 'rempartChair', player: p, cardId, data: { count: list.length } });
+      break;
+    }
   }
 }

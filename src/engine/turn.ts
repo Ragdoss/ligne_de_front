@@ -16,6 +16,8 @@ export function endTurn(ctx: Ctx): void {
   pl.hand = pl.hand.filter(h => !h.freeCopy);
   resolveCombat(ctx, ending);
   if (ctx.over) return;
+  // Prise de contrôle temporaire : les régiments empruntés retournent à leur propriétaire.
+  ctx.returnBorrowed();
 
   const extra = ctx.s.config.endTurnLassitude[ending];
   if (extra) ctx.gainLassitude(ending, extra, 'scenario');
@@ -41,6 +43,10 @@ export function endTurn(ctx: Ctx): void {
 
 export function startTurn(ctx: Ctx, p: PlayerId): void {
   const pl = ctx.player(p);
+  const q = opponentOf(p);
+  pl.tacticsThisTurn = 0;
+  pl.discardedThisTurn = 0;
+  ctx.player(q).discardedThisTurn = 0;
   // Formation en Carré : prend fin au début du tour de son lanceur.
   for (const q of ['A', 'B'] as PlayerId[]) {
     for (const u of ctx.units(q)) {
@@ -71,6 +77,38 @@ export function startTurn(ctx: Ctx, p: PlayerId): void {
     ctx.emit({ type: 'effect', key: 'hatch', player: p, cardId: u.cardId, data: { into } });
     ctx.emit({ type: 'deployed', player: p, uid: baby.uid, cardId: into, slot: ref });
   }
+
+  // Croissance : les régiments (et porteurs d'Ancien de la canopée) grandissent au début du tour de leur contrôleur.
+  for (const u of ctx.units(p)) {
+    const g = card(u.cardId).growth as { atk?: number; end?: number; arm?: number; max: number } | undefined;
+    if (g && (u.growthCount ?? 0) < g.max) {
+      u.growthCount = (u.growthCount ?? 0) + 1;
+      u.baseAtk += g.atk ?? 0; u.baseArm += g.arm ?? 0;
+      if (g.end) { u.maxEnd += g.end; u.currentEnd += g.end; }
+      ctx.emit({ type: 'effect', key: 'growth', player: p, cardId: u.cardId, data: { uid: u.uid } });
+    }
+    const le = u.leader ? card(u.leader).leaderGrowthEnd as number | undefined : undefined;
+    if (le) { u.maxEnd += le; u.currentEnd += le; }
+  }
+
+  // Usure au début du tour : Puits empoisonné adverse, Cheikha Zahra, Seigneur des caravanes perdues.
+  const poison = ctx.player(q).board.isole;
+  const pz = poison ? card(poison.cardId).poisonsOpponentTurn as { mill: number; handDiscard: number } | undefined : undefined;
+  if (pz) {
+    ctx.mill(p, pz.mill, poison!.cardId);
+    if (pz.handDiscard) ctx.queueChoice('handDiscard', p, poison!.cardId, { n: pz.handDiscard, sum: 0, thief: null, gainBase: 0 });
+  }
+  for (const u of ctx.units(p)) {
+    if (ctx.over) return;
+    if (card(u.cardId).zahraMill) { const o = ctx.player(q); ctx.mill(q, o.discard.length > o.deck.length ? 2 : 1, u.cardId); }
+  }
+  for (const side of [p, q]) {
+    for (const u of ctx.units(side)) {
+      const m = u.leader ? card(u.leader).millWhileMoreLassitude as number | undefined : undefined;
+      if (m && ctx.player(side).points > ctx.player(opponentOf(side)).points) ctx.mill(opponentOf(side), m, u.leader!);
+    }
+  }
+  if (ctx.over) return;
 
   // Cérémonie du Déclin : +1 lassitude au début du tour (qui rapporte aussi des ressources).
   for (const u of ctx.units(p)) {
@@ -129,6 +167,7 @@ export function startTurn(ctx: Ctx, p: PlayerId): void {
   if (count > 0 && pl.hand.length >= ctx.s.config.handLimit) {
     ctx.emit({ type: 'turnStart', player: p, turn: ctx.s.turn, resource: pl.resource, leftover, drawn: [], blocked: count });
     ctx.queueChoice('handDiscard', p, 'handLimit', { n: count, sum: 0, thief: null, gainBase: 0, drawAfter: count });
+    queueMarket(ctx, p);
     return;
   }
   const drawn: string[] = [];
@@ -138,4 +177,10 @@ export function startTurn(ctx: Ctx, p: PlayerId): void {
     drawn.push(cardId!);
   }
   ctx.emit({ type: 'turnStart', player: p, turn: ctx.s.turn, resource: pl.resource, leftover, drawn, blocked: 0 });
+  queueMarket(ctx, p);
+}
+
+/** Marché : après la pioche, chaque régiment Marché propose de défausser une carte pour en piocher une. */
+export function queueMarket(ctx: Ctx, p: PlayerId): void {
+  for (const u of ctx.units(p)) if (u.keywords.includes('Marché') && !u.brokenMorale) ctx.queueChoice('marche', p, u.cardId);
 }
