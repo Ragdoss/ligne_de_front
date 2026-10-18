@@ -37,6 +37,8 @@ export interface Options {
   allUnlocked: boolean;
   /** Niveaux des cartes en chiffres romains (sinon arabes). */
   romanLevels?: boolean;
+  /** Mode vérification : cartes, images de profil et emotes affichées même non possédées (pour contrôler les illustrations). */
+  showAll?: boolean;
 }
 
 export interface Profile {

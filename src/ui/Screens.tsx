@@ -242,35 +242,41 @@ function CosmeticsBlock({ profile, update }: { profile: Profile; update: (fn: (p
     if (on) { if (p.emoteLoadout.length > 1) p.emoteLoadout = p.emoteLoadout.filter(x => x !== id); }
     else if (p.emoteLoadout.length < MAX_LOADOUT) p.emoteLoadout = [...p.emoteLoadout, id];
   });
+  const showAll = !!profile.options.showAll;
   const ownedAvatars = AVATAR_IDS.filter(id => profile.avatars.includes(id));
   const ownedEmotes = EMOTE_IDS.filter(id => profile.emotes.includes(id));
+  const shownAvatars = showAll ? AVATAR_IDS : ownedAvatars, shownEmotes = showAll ? EMOTE_IDS : ownedEmotes;
   const pct = (x: number, y: number) => `${Math.floor((100 * x) / Math.max(1, y))} %`;
   return (
     <section className="menu-block">
       {/* Seules les images et emotes possédées sont affichées ; la complétion dit combien il en reste à découvrir. */}
       <h2>Image de profil <small className="muted">({ownedAvatars.length} / {AVATAR_IDS.length} · {pct(ownedAvatars.length, AVATAR_IDS.length)})</small></h2>
       <div className="avatar-grid">
-        {ownedAvatars.map(id => (
-          <button key={id} type="button" className={`avatar-pick${profile.avatar === id ? ' on' : ''}`} title={AVATARS[id]} onClick={() => update(p => { p.avatar = id; })}>
-            <Avatar id={id} size={64} />
-            <span>{AVATARS[id]}</span>
-          </button>
-        ))}
+        {shownAvatars.map(id => {
+          const have = profile.avatars.includes(id);
+          return (
+            <button key={id} type="button" disabled={!have} className={`avatar-pick${profile.avatar === id ? ' on' : ''}${have ? '' : ' locked'}`} title={have ? AVATARS[id] : `${AVATARS[id]} (pas encore possédée)`} onClick={() => update(p => { p.avatar = id; })}>
+              <Avatar id={id} size={64} />
+              <span>{AVATARS[id]}{have ? '' : ' 🔒'}</span>
+            </button>
+          );
+        })}
       </div>
-      {ownedAvatars.length < AVATAR_IDS.length && <p className="muted small">{AVATAR_IDS.length - ownedAvatars.length} image(s) de profil encore à découvrir.</p>}
+      {!showAll && ownedAvatars.length < AVATAR_IDS.length && <p className="muted small">{AVATAR_IDS.length - ownedAvatars.length} image(s) de profil encore à découvrir.</p>}
       <h2>Emotes en ligne <small className="muted">({profile.emoteLoadout.length} / {MAX_LOADOUT} choisies · {ownedEmotes.length} / {EMOTE_IDS.length} possédées · {pct(ownedEmotes.length, EMOTE_IDS.length)})</small></h2>
       <div className="emote-grid">
-        {ownedEmotes.map(id => {
+        {shownEmotes.map(id => {
           const on = profile.emoteLoadout.includes(id);
+          const have = profile.emotes.includes(id);
           return (
-            <label key={id} className="emote-pick">
-              <input type="checkbox" disabled={!on && profile.emoteLoadout.length >= MAX_LOADOUT} checked={on} onChange={() => toggle(id)} />
+            <label key={id} className={`emote-pick${have ? '' : ' locked'}`}>
+              <input type="checkbox" disabled={!have || (!on && profile.emoteLoadout.length >= MAX_LOADOUT)} checked={on} onChange={() => toggle(id)} />
               {`« ${EMOTES[id]} »`}
             </label>
           );
         })}
       </div>
-      {ownedEmotes.length < EMOTE_IDS.length && <p className="muted small">{EMOTE_IDS.length - ownedEmotes.length} emote(s) encore à découvrir.</p>}
+      {!showAll && ownedEmotes.length < EMOTE_IDS.length && <p className="muted small">{EMOTE_IDS.length - ownedEmotes.length} emote(s) encore à découvrir.</p>}
       <p className="muted small">Les emotes et les images de profil se débloquent dans les paquets (Ma collection → Mes cartes).</p>
     </section>
   );
@@ -300,6 +306,7 @@ export function OptionsScreen({ profile, update, onBack, onSwitchProfile }: { pr
         {range('bannerSpeed', 'Durée des bandeaux (tactiques, Leaders adverses)', 0.5, 4, 0.5, v => (v === 1 ? 'normale' : `×${v}`))}
         <label className="check"><input type="checkbox" checked={o.revealAiHand} onChange={e => set('revealAiHand', e.target.checked)} /> Main de l’ordinateur visible dès le début</label>
         <label className="check"><input type="checkbox" checked={o.romanLevels !== false} onChange={e => set('romanLevels', e.target.checked)} /> Niveaux des cartes en chiffres romains (II, III…)</label>
+        <label className="check"><input type="checkbox" checked={!!o.showAll} onChange={e => set('showAll', e.target.checked)} /> Afficher toutes les cartes, images de profil et emotes, même non possédées (vérification des illustrations)</label>
         <label className="check"><input type="checkbox" checked={o.allUnlocked} onChange={e => set('allUnlocked', e.target.checked)} /> Toutes les cartes débloquées (parties locales et créateur de deck)</label>
         <button type="button" onClick={() => update(p => { p.options = { ...DEFAULT_OPTIONS }; })}>Rétablir les réglages par défaut</button>
       </section>

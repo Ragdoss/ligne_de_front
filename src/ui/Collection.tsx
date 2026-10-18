@@ -118,8 +118,8 @@ export function MyCards({ profile, update }: { profile: Profile; update: (fn: (p
       <FilterBar f={f} set={setF} />
       {ids.length === 0 && <p className="muted">{f.owned === 'owned' ? 'Aucune carte possédée avec ces filtres. Choisis « Toutes » pour voir les cartes à découvrir.' : 'Aucune carte avec ces filtres.'}</p>}
       <div className="camp-grid">
-        {ids.map(id => (have(id)
-          ? <CardTile key={id} id={id} badge={<span className="count">{have(id)} / {MAX_COPIES}</span>} />
+        {ids.map(id => (have(id) || profile.options.showAll
+          ? <CardTile key={id} id={id} dim={!have(id)} badge={<span className={`count${have(id) ? '' : ' zero'}`}>{have(id)} / {MAX_COPIES}</span>} />
           : <MaskedTile key={id} id={id} />))}
       </div>
       {pack && <PackReveal result={pack} onClose={() => setPack(null)} />}
