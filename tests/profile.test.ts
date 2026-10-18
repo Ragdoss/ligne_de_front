@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { AVATAR_IDS, avatarWeight } from '../src/profile/cosmetics';
 import { autoComplete, checkDeck, COLLECTIBLE, mergeCampaignPool, newProfile, openPack, PACK_PRICE } from '../src/profile/profile';
 
 describe('Profil joueur', () => {
@@ -27,10 +28,13 @@ describe('Profil joueur', () => {
       const a = r.cards.find(c => c.kind === 'avatar');
       if (a) { if (Number(a.id.split('.')[1]) >= 5) rare++; else common++; }
     }
-    // 16 images rares (poids 1) contre 16 communes (poids 4) : une image tirée sur 5 est une rare, soit 4 fois moins par image.
+    // Part attendue d'après la liste réelle des images : chaque rare pèse 1, chaque commune 4 (donc 4 fois moins par image).
+    const nRare = AVATAR_IDS.filter(id => avatarWeight(id) === 1).length;
+    const nCommon = AVATAR_IDS.length - nRare;
+    const expected = nRare / (nRare + nCommon * 4);
     const share = rare / (rare + common);
-    expect(share).toBeGreaterThan(0.18);
-    expect(share).toBeLessThan(0.22);
+    expect(share).toBeGreaterThan(expected - 0.02);
+    expect(share).toBeLessThan(expected + 0.02);
   });
   it('un nouveau joueur ne possède aucune carte ; avec « toutes les cartes débloquées », il construit un deck valide', () => {
     const p = newProfile();
