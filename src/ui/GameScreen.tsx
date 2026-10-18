@@ -4,7 +4,7 @@ import { chooseAction, type ActionFilter } from '../ai/heuristic';
 import { card, Ctx } from '../engine/ctx';
 import { actingPlayer, applyAction, createGame, DEFAULT_LEVEL_THRESHOLDS, playsForHandCard, whyUnplayable, type GameSetup } from '../engine/game';
 import { drawCountFor } from '../engine/turn';
-import type { Action, DialogLine, GameEvent, GameState, PlayerId, SlotRef } from '../engine/types';
+import type { Action, DialogLine, GameEvent, GameState, PendingChoice, PlayerId, SlotRef } from '../engine/types';
 import { formatEvent } from '../i18n/log.fr';
 import { Board, type Highlight } from './Board';
 import { artKeyFor, CardFace, clearGameArts, setGameArts } from './CardFace';
@@ -110,6 +110,51 @@ function PlayerBar({ game, p, label, active, avatar }: { game: GameState; p: Pla
 }
 
 interface Banner { id: number; who: string; cardId: string; on?: string }
+
+/** Libellé court d'une option sous l'illustration de sa carte (le nom de la carte est déjà sur la carte). */
+function shortLabel(full: string, id: string): string {
+  const t = full.replace(cardName(id), '').replace(/\s{2,}/g, ' ').replace(/^\s*[→—:-]\s*/, '').trim();
+  if (!t || /^niv\./.test(t)) return 'Choisir';
+  return t.charAt(0).toUpperCase() + t.slice(1);
+}
+
+/** Choix en attente : les options liées à une carte sont montrées avec l'illustration de la carte, les autres en boutons. */
+export function ChoicePanel({ choice, onPick, onHover }: { choice: PendingChoice; onPick: (i: number) => void; onHover: (id: string | null, x?: number) => void }) {
+  const opts = choice.options ?? [];
+  // Options consécutives sur la même carte : une seule carte, plusieurs boutons (ex. Augure : dessus / dessous).
+  const groups: { id: string; items: { i: number; label: string }[] }[] = [];
+  const rest: number[] = [];
+  opts.forEach((o, i) => {
+    if (!o.cardId) { rest.push(i); return; }
+    const label = shortLabel(optionLabel(choice, o), o.cardId);
+    const last = groups[groups.length - 1];
+    if (last && last.id === o.cardId && !last.items.some(x => x.label === label) && opts[i - 1]?.cardId === o.cardId) last.items.push({ i, label });
+    else groups.push({ id: o.cardId, items: [{ i, label }] });
+  });
+  return (
+    <>
+      {groups.length > 0 && (
+        <div className="choice-cards">
+          {groups.map((g, k) => (
+            <div key={k} className="choice-card" onMouseEnter={e => onHover(g.id, e.clientX)} onMouseLeave={() => onHover(null)}>
+              {g.items.length === 1
+                ? <button type="button" className="cc-pick" aria-label={optionLabel(choice, opts[g.items[0]!.i]!)} onClick={() => onPick(g.items[0]!.i)}><CardFace id={g.id} variant={artKeyFor(g.id, choice.player)} /></button>
+                : <CardFace id={g.id} variant={artKeyFor(g.id, choice.player)} />}
+              <div className="cc-acts">
+                {g.items.map(x => <button key={x.i} type="button" title={optionLabel(choice, opts[x.i]!)} onClick={() => onPick(x.i)}>{x.label}</button>)}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      {rest.length > 0 && (
+        <div className="choices">
+          {rest.map(i => <button type="button" key={i} onClick={() => onPick(i)}>{optionLabel(choice, opts[i]!)}</button>)}
+        </div>
+      )}
+    </>
+  );
+}
 
 export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, intro, renderEnd, onQuit, animMul = 1, aiMul = 1, bannerMul = 1, initialReveal = false, onOver, remote, bottomSide, onGame, overlay, avatars, arts }: GameScreenProps) {
   const artsRef = useRef<Partial<Record<PlayerId, Record<string, string>>>>({});
@@ -330,14 +375,10 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
 
       {!dialogs.length && choice && choice.options && human[choice.player] && !shown && (
         <div className="overlay" role="dialog" aria-modal="true" aria-label={choiceTitle(choice)}>
-          <div className="box">
+          <div className={`box${choice.options.some(o => o.cardId) ? ' wide' : ''}`}>
             <p className="b-who">{names[choice.player]}</p>
             <h2>{choiceTitle(choice)}</h2>
-            <div className="choices">
-              {choice.options.map((o, i) => (
-                <button type="button" key={i} title={o.cardId ? cardDesc(o.cardId) : ''} onClick={() => void apply({ type: 'choose', option: i })}>{optionLabel(choice, o)}</button>
-              ))}
-            </div>
+            <ChoicePanel choice={choice} onPick={i => { setZoom(null); void apply({ type: 'choose', option: i }); }} onHover={(id, x) => setZoom(id, x, choice.player)} />
           </div>
         </div>
       )}
