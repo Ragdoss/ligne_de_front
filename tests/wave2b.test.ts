@@ -224,3 +224,14 @@ describe('Vague 2 suite : parties aléatoires', () => {
     }
   }, 180000);
 });
+
+describe('Moral brisé et tactiques', () => {
+  it('À couvert donne son armure même à un régiment au Moral brisé', () => {
+    let s = quiet();
+    const u = place(s, 'A', 'avant', 0, 'recrue_imp', { brokenMorale: true });
+    s.players.A.resource = 9;
+    const before = new Ctx(s).effectiveArm(u);
+    s = act(s, { type: 'play', handUid: give(s, 'A', 'a_couvert'), target: slot('A', 'avant', 0) }).state;
+    expect(new Ctx(s).effectiveArm(s.players.A.board.avant[0]!)).toBe(before + 20);
+  });
+});

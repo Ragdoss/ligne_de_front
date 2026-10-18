@@ -273,8 +273,9 @@ export class Ctx {
       const step = l.lassitudeStep as number | undefined, per = l.atkPerLassitudeStep as number | undefined;
       if (step && per) atk += Math.floor(this.player(u.controller).points / step) * per;
     }
+    // Bonus des tactiques (ce tour-ci) : ils s'appliquent même au Moral brisé.
+    atk += u.tempAtk;
     if (!u.brokenMorale) {
-      atk += u.tempAtk;
       // Prêtresse des saisons : Communion.
       const cb = u.leader ? card(u.leader).communionBonus as { atk?: number } | undefined : undefined;
       if (cb?.atk && this.communion(u.controller)) atk += cb.atk;
@@ -295,8 +296,9 @@ export class Ctx {
       arm += card(u.leader).bonusArm ?? 0;
       arm += card(u.cardId).armBonusWithLeader ?? 0;
     }
+    // Bonus des tactiques (À couvert, Formation en carré, Dernier carré…) : ils s'appliquent même au Moral brisé.
+    arm += u.squareArm + u.tempArm;
     if (!u.brokenMorale) {
-      arm += u.squareArm + u.tempArm;
       const d = card(u.cardId);
       const ref = (d.formationArmPerEmpireNeighbor || u.types.includes('Empire')) ? this.slotOf(u.uid) : null;
       if (ref) {

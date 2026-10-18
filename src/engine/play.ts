@@ -154,7 +154,7 @@ function onTacticPlayed(ctx: Ctx, p: PlayerId): void {
     if (ctx.over) return;
     const d = card(u.cardId);
     const bonus = d.atkPerTacticThisTurn as number | undefined; // Danseuses des lames
-    if (bonus) u.tempAtk += bonus;
+    if (bonus && !u.brokenMorale) u.tempAtk += bonus; // capacité du régiment : perdue au Moral brisé
     const every = d.drawEveryTactics as number | undefined; // Chœur des saisons
     if (every) {
       u.counter = (u.counter ?? 0) + 1;
