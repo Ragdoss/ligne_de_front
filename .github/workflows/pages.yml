@@ -1,4 +1,4 @@
-# Publie le jeu sur GitHub Pages à chaque push sur main (le jeu tient dans un seul fichier index.html).
+# Publie le jeu sur GitHub Pages à chaque push sur main (une page index.html et les images dans img/).
 name: Publier le jeu
 on:
   push:
@@ -22,10 +22,10 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
-      - run: npx vite build
+      - run: npx vite build --mode web
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: dist-web
   deploy:
     needs: build
     runs-on: ubuntu-latest

@@ -13,6 +13,7 @@
     "integrate": "tsx tools/integrate-patch.ts",
     "dev": "vite",
     "build": "vite build",
+    "build:web": "vite build --mode web",
     "build:artifact": "vite build && node tools/to-artifact.mjs",
     "difficulty": "tsx tools/campaign-difficulty.ts"
   },
