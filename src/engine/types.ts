@@ -335,6 +335,8 @@ export interface GameState {
   config: GameConfig;
   players: Record<PlayerId, PlayerState>;
   active: PlayerId;
+  /** Joueur qui a commencé la partie (A par défaut) : le tour avance quand l'autre finit le sien. */
+  first?: PlayerId;
   turn: number;
   nextUid: number;
   rng: number;

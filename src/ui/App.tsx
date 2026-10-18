@@ -30,7 +30,7 @@ type Screen =
   | { kind: 'online' }
   | { kind: 'draft' }
   | { kind: 'onlineGame'; start: OnlineStart; key: number }
-  | { kind: 'localGame'; setup: LocalSetup; key: number; series?: Record<PlayerId, number> }
+  | { kind: 'localGame'; setup: LocalSetup; key: number; series?: Record<PlayerId, number>; first?: PlayerId }
   | { kind: 'campaignMenu' }
   | { kind: 'campHub'; campaign: CampaignSave }
   | { kind: 'campDeck'; campaign: CampaignSave }
@@ -97,7 +97,7 @@ export function App() {
   if (screen.kind === 'home') {
     content = <Home profile={profile} go={t => setScreen(t === 'tutorial' ? { kind: 'tutorial', key: Date.now() } : t === 'local' ? { kind: 'local' } : t === 'online' ? { kind: 'online' } : t === 'draft' ? { kind: 'draft' } : t === 'campaign' ? { kind: 'campaignMenu' } : t === 'collection' ? { kind: 'collection', tab: 'decks' } : t === 'options' ? { kind: 'options' } : { kind: 'home' })} />;
   } else if (screen.kind === 'local') {
-    content = <LocalPlay profile={profile} onBack={home} goDecks={() => setScreen({ kind: 'collection', tab: 'decks' })} onStart={setup => setScreen({ kind: 'localGame', setup, key: Date.now() })} />;
+    content = <LocalPlay profile={profile} onBack={home} goDecks={() => setScreen({ kind: 'collection', tab: 'decks' })} onStart={setup => setScreen({ kind: 'localGame', setup, key: Date.now(), first: setup.first === 'B' ? 'B' : setup.first === 'A' ? 'A' : Math.random() < 0.5 ? 'A' : 'B' })} />;
   } else if (screen.kind === 'localGame') {
     const { setup } = screen;
     const A = resolveDeck(profile, setup.A), B = resolveDeck(profile, setup.B);
@@ -108,7 +108,7 @@ export function App() {
       <GameScreen
         key={screen.key}
         {...gameOpts}
-        setup={{ seed: screen.key, A: { faction: A.faction, deck: A.cards }, B: { faction: B.faction, deck: B.cards } }}
+        setup={{ seed: screen.key, first: screen.first ?? 'A', A: { faction: A.faction, deck: A.cards }, B: { faction: B.faction, deck: B.cards } }}
         names={names}
         human={{ A: setup.mode !== 'watch', B: setup.mode === 'hotseat' }}
         flip={setup.mode === 'hotseat'}
@@ -128,7 +128,7 @@ export function App() {
               <p className="series">Série : {names.A} {screen.series?.A ?? 0} – {screen.series?.B ?? 0} {names.B}</p></>}
           >
             <button type="button" onClick={close}>Voir le plateau</button>
-            <button type="button" onClick={() => setScreen({ kind: 'localGame', setup, key: Date.now(), series: screen.series })}>Revanche</button>
+            <button type="button" onClick={() => setScreen({ kind: 'localGame', setup, key: Date.now(), series: screen.series, first: (screen.first ?? 'A') === 'A' ? 'B' : 'A' })}>Revanche (l’autre joueur commence)</button>
             <button type="button" className="primary" onClick={home}>Accueil</button>
           </EndBox>
         )}

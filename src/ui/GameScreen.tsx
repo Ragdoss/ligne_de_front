@@ -118,7 +118,7 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
   const [shown, setShown] = useState<GameState | null>(null); // état affiché pendant une animation de combat
   const [highlight, setHighlight] = useState<Highlight | null>(null);
   const [faded, setFaded] = useState<Set<number>>(new Set());
-  const [log, setLog] = useState<{ text: string; cls: string }[]>([{ text: `Tour 1 : ${names.A} commence.`, cls: 'turn' }]);
+  const [log, setLog] = useState<{ text: string; cls: string }[]>([{ text: `Tour 1 : ${names[setup.first ?? 'A']} commence.`, cls: 'turn' }]);
   const [sel, setSel] = useState<{ uid: number; first?: SlotRef } | null>(null);
   const [hint, setHint] = useState('');
   const [banners, setBanners] = useState<Banner[]>([]);

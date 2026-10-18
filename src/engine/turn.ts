@@ -31,7 +31,7 @@ export function endTurn(ctx: Ctx): void {
 
   const next = opponentOf(ending);
   ctx.s.active = next;
-  if (ending === 'B') {
+  if (ending !== (ctx.s.first ?? 'A')) { // le second joueur finit : nouveau tour
     ctx.s.turn++;
     // « Tenir jusqu'au tour X » : victoire dès que ce tour commence.
     const w = ctx.s.config.winAtTurn;

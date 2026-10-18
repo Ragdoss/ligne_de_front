@@ -56,7 +56,9 @@ export function TopBar({ title, onBack, right }: { title: string; onBack: () => 
 // ---------- Jouer en local ----------
 export type Mode = 'ai' | 'hotseat' | 'watch';
 /** Deck choisi : un deck du joueur (« my:<id> »), un deck de démonstration (« demo:<faction> ») ou un champion de l'échelle (« champ:<faction> »). */
-export interface LocalSetup { mode: Mode; A: string; B: string }
+/** Qui commence : le joueur A, le joueur B ou au hasard. */
+export type FirstChoice = 'A' | 'B' | 'random';
+export interface LocalSetup { mode: Mode; A: string; B: string; first?: FirstChoice }
 
 export function resolveDeck(profile: Profile, key: string): { cards: string[]; faction: Faction; label: string } {
   if (key.startsWith('my:')) {
@@ -96,6 +98,7 @@ export function LocalPlay({ profile, onStart, onBack, goDecks }: { profile: Prof
   const [mode, setMode] = useState<Mode>('ai');
   const [A, setA] = useState<string>(firstMine ? `my:${firstMine.id}` : 'demo:empire');
   const [B, setB] = useState<string>('demo:elfe');
+  const [first, setFirst] = useState<FirstChoice>('random');
   const humanA = mode !== 'watch', humanB = mode === 'hotseat';
   const valid = (k: string, human: boolean) => (k.startsWith('my:') ? profile.decks.some(d => `my:${d.id}` === k && checkDeck(d.cards, profile).ok) : !human || profile.options.allUnlocked);
   const ready = valid(A, humanA) && valid(B, humanB);
@@ -110,8 +113,17 @@ export function LocalPlay({ profile, onStart, onBack, goDecks }: { profile: Prof
           </label>
         ))}
       </fieldset>
-      <DeckSelect profile={profile} value={A} onChange={setA} human={humanA} label={humanA ? 'Ton deck (joueur A, commence)' : 'Joueur A (ordinateur, commence)'} />
+      <DeckSelect profile={profile} value={A} onChange={setA} human={humanA} label={humanA ? 'Ton deck (joueur A)' : 'Joueur A (ordinateur)'} />
       <DeckSelect profile={profile} value={B} onChange={setB} human={humanB} label={humanB ? 'Joueur B' : 'Joueur B (ordinateur)'} />
+      <fieldset className="pick">
+        <legend>Qui commence</legend>
+        {([['random', 'Au hasard'], ['A', mode === 'ai' ? 'Toi' : 'Joueur A'], ['B', mode === 'hotseat' ? 'Joueur B' : 'L’ordinateur (joueur B)']] as const).map(([v, l]) => (
+          <label key={v} className={`fchip${first === v ? ' on' : ''}`}>
+            <input type="radio" name="first" checked={first === v} onChange={() => setFirst(v)} />{l}
+          </label>
+        ))}
+      </fieldset>
+      <p className="muted small">À chaque revanche, c’est l’autre joueur qui commence.</p>
       {!ready && (
         <p className="warn">
           Il te faut un deck valide construit avec tes cartes (la campagne et les paquets t’en font gagner). <button type="button" className="link" onClick={goDecks}>Créer un deck</button>
@@ -119,7 +131,7 @@ export function LocalPlay({ profile, onStart, onBack, goDecks }: { profile: Prof
         </p>
       )}
       <p className="muted small">Une victoire contre l’ordinateur rapporte 5 pièces.</p>
-      <button type="button" className="primary" disabled={!ready} onClick={() => onStart({ mode, A, B })}>Commencer la partie</button>
+      <button type="button" className="primary" disabled={!ready} onClick={() => onStart({ mode, A, B, first })}>Commencer la partie</button>
     </div>
   );
 }

@@ -33,6 +33,8 @@ export interface GameSetup {
   B: PlayerSetup;
   config?: Partial<GameConfig>;
   scenario?: ScenarioSetup;
+  /** Joueur qui commence (A par défaut). */
+  first?: PlayerId;
 }
 
 function newPlayer(ctx: Ctx, id: PlayerId, setup: PlayerSetup): PlayerState {
@@ -58,7 +60,7 @@ function newPlayer(ctx: Ctx, id: PlayerId, setup: PlayerSetup): PlayerState {
 export function createGame(setup: GameSetup): GameState {
   const config = defaultConfig(setup.config);
   const s: GameState = {
-    config, active: 'A', turn: 1, nextUid: 1, rng: seedFrom(setup.seed), pending: [], over: null, scenario: null,
+    config, active: setup.first ?? 'A', first: setup.first ?? 'A', turn: 1, nextUid: 1, rng: seedFrom(setup.seed), pending: [], over: null, scenario: null,
     players: {} as GameState['players'],
   };
   const ctx = new Ctx(s);

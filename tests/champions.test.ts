@@ -19,3 +19,18 @@ describe('Pools de champions', () => {
     expect(pickChampion('empire', () => 0.99)!.id).toBe(CHAMPION_POOLS.empire![2]!.id);
   });
 });
+
+describe('Joueur qui commence', () => {
+  it('B peut commencer : le tour avance quand A finit le sien', async () => {
+    const { createGame, applyAction } = await import('../src/engine/game');
+    const deck = Array(30).fill('recrue_imp');
+    let s = createGame({ seed: 'first', first: 'B', A: { faction: 'empire', deck }, B: { faction: 'empire', deck }, config: { noRegimentDefeatFromTurn: { A: 999, B: 999 } } });
+    expect(s.active).toBe('B');
+    s = (applyAction(s, { type: 'endTurn' }) as { state: typeof s }).state;
+    expect(s.active).toBe('A');
+    expect(s.turn).toBe(1);
+    s = (applyAction(s, { type: 'endTurn' }) as { state: typeof s }).state;
+    expect(s.active).toBe('B');
+    expect(s.turn).toBe(2);
+  });
+});
