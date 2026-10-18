@@ -28,6 +28,7 @@ export const AVATARS: Record<string, string> = {
   'mercenaires.1': 'Éclaireuse mercenaire',
   'sergents.1': 'Sergent instructeur',
   'clerc.1': 'Clerc de la forêt',
+  'sorciere.1': 'Sorcière du pacte',
 };
 export const AVATAR_IDS = Object.keys(AVATARS);
 export const BASE_AVATAR = 'empire.2';

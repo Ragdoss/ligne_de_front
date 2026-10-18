@@ -34,6 +34,7 @@ import n8 from './assets/portraits/nomades/8.webp';
 import m1 from './assets/portraits/mercenaires/1.webp';
 import s1 from './assets/portraits/sergents/1.webp';
 import c1 from './assets/portraits/clerc/1.webp';
+import sp1 from './assets/portraits/sorciere/1.webp';
 
 const IMG: Record<string, string> = {
   'empire.1': e1, 'empire.2': e2, 'empire.3': e3, 'empire.4': e4,
@@ -47,6 +48,7 @@ const IMG: Record<string, string> = {
   'mercenaires.1': m1,
   'sergents.1': s1,
   'clerc.1': c1,
+  'sorciere.1': sp1,
 };
 export const avatarImg = (id: string | undefined) => (id ? IMG[id] : undefined) ?? e2;
 
