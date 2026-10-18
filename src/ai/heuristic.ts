@@ -12,9 +12,14 @@ export interface AiWeights {
   moral: number;      // par point de Moral total d'avance
   hand: number;       // par carte en main
   resource: number;   // par ressource non dépensée
+  /** Danger de la pioche qui s'amenuise (usure) : coût qui grandit quand il reste peu de cartes à piocher. */
+  deck?: number;
 }
 
-export const DEFAULT_WEIGHTS: AiWeights = { lassitude: 9, board: 1, moral: 1.5, hand: 2, resource: 0.8 };
+export const DEFAULT_WEIGHTS: AiWeights = { lassitude: 9, board: 1, moral: 1.5, hand: 2, resource: 0.8, deck: 12 };
+
+/** Seuil de pioche (pioche + réserve) en dessous duquel l'IA s'inquiète de l'usure. */
+const DECK_SAFE = 12;
 
 function unitValue(ctx: Ctx, u: Unit): number {
   const leader = u.leader ? 6 : 0;
@@ -35,9 +40,18 @@ export function evaluate(s: GameState, p: PlayerId, w: AiWeights = DEFAULT_WEIGH
     // La lassitude coûte de plus en plus cher à l'approche de la défaite.
     const limit = s.config.defeatLassitude[x];
     const danger = Number.isFinite(limit) ? 1 + Math.max(0, pl.points - limit * 0.6) / 5 : 1;
-    return board * w.board + moral * w.moral + pl.hand.length * w.hand + pl.resource * w.resource - pl.points * w.lassitude * danger;
+    // Usure : chaque carte perdue coûte de plus en plus cher à mesure que la pioche se vide (0 au-dessus de DECK_SAFE).
+    const left = pl.deck.length + pl.reserve.length;
+    const thin = Math.max(0, DECK_SAFE - left);
+    const decay = (w.deck ?? 0) * (thin * thin) / DECK_SAFE;
+    return board * w.board + moral * w.moral + pl.hand.length * w.hand + pl.resource * w.resource - pl.points * w.lassitude * danger - decay;
   };
-  return side(p) - side(q);
+  // Course contre l'usure : quand notre pioche fond, la lassitude infligée à l'adversaire compte davantage
+  // (il faut finir la partie avant d'être vidé). Urgence de 0 (pioche ≥ 2 × DECK_SAFE) à 1 (pioche vide).
+  const mine = s.players[p];
+  const urgency = Math.max(0, 2 * DECK_SAFE - (mine.deck.length + mine.reserve.length)) / (2 * DECK_SAFE);
+  const race = ((w.deck ?? 0) / 4) * urgency * w.lassitude * s.players[q].points;
+  return side(p) - side(q) + race;
 }
 
 function key(a: Action): string { return JSON.stringify(a); }
