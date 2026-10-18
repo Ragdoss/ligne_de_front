@@ -31,6 +31,7 @@ import n5 from './assets/portraits/nomades/5.webp';
 import n6 from './assets/portraits/nomades/6.webp';
 import n7 from './assets/portraits/nomades/7.webp';
 import n8 from './assets/portraits/nomades/8.webp';
+import m1 from './assets/portraits/mercenaires/1.webp';
 
 const IMG: Record<string, string> = {
   'empire.1': e1, 'empire.2': e2, 'empire.3': e3, 'empire.4': e4,
@@ -41,6 +42,7 @@ const IMG: Record<string, string> = {
   'elfe.5': l5, 'elfe.6': l6, 'elfe.7': l7, 'elfe.8': l8,
   'demons.5': d5, 'demons.6': d6, 'demons.7': d7, 'demons.8': d8,
   'nomades.5': n5, 'nomades.6': n6, 'nomades.7': n7, 'nomades.8': n8,
+  'mercenaires.1': m1,
 };
 export const avatarImg = (id: string | undefined) => (id ? IMG[id] : undefined) ?? e2;
 
