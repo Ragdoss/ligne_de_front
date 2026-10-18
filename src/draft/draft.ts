@@ -230,4 +230,16 @@ export function standings(st: DraftState): Standing[] {
   return t.sort((p, q) => q.wins - p.wins || p.seat - q.seat);
 }
 
+/**
+ * Joueur qui commence la prochaine partie du joueur humain : tiré au hasard pour la première partie du match
+ * (de façon stable, à partir de la graine du draft et de la ronde), puis en alternance en Bo3 / Bo5.
+ */
+export function humanGameFirst(st: DraftState): 'A' | 'B' {
+  const played = st.current ? st.current[0] + st.current[1] : 0;
+  let h = (st.seed | 0) ^ Math.imul(currentRound(st) + 1, 0x9e3779b1);
+  h = Math.imul(h ^ (h >>> 15), 0x85ebca6b); h ^= h >>> 13;
+  const humanFirst = ((h >>> 0) % 2 === 0) !== (played % 2 === 1);
+  return humanFirst ? 'A' : 'B';
+}
+
 export const nextOpponent = (st: DraftState): number | null => SCHEDULE[currentRound(st)]?.[0]?.[1] ?? null;

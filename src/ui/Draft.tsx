@@ -2,7 +2,7 @@
 import { useMemo, useState } from 'react';
 import { CARDS } from '../data/cards';
 import {
-  AI_AVATARS, AI_NAMES, FACTION_AVATAR, BASICS, buildAiDeck, checkDraftDeck, deckFaction, DECK_MIN, newDraft, nextOpponent, PACK_SIZE, PACKS, pickCard,
+  AI_AVATARS, AI_NAMES, FACTION_AVATAR, BASICS, buildAiDeck, checkDraftDeck, deckFaction, DECK_MIN, humanGameFirst, newDraft, nextOpponent, PACK_SIZE, PACKS, pickCard,
   recordHumanGame, SCHEDULE, standings, winsNeeded, type BestOf, type DraftState,
 } from '../draft/draft';
 import { formatEvent } from '../i18n/log.fr';
@@ -92,7 +92,7 @@ export function DraftScreen({ profile, onExit, gameOpts, reward }: {
   reward: (r: { win?: boolean; first?: boolean }) => void;
 }) {
   const [st, setSt] = useState<DraftState | null>(() => loadDraft());
-  /** Partie en cours ; le joueur qui commence est tiré au hasard à chaque partie. */
+  /** Partie en cours ; premier joueur tiré au hasard en début de match, puis en alternance (Bo3, Bo5). */
   const [game, setGame] = useState<{ opp: number; key: number; first: 'A' | 'B' } | null>(null);
   const [bestOf, setBestOf] = useState<BestOf>(1);
   /** Issue de la dernière partie jouée : match terminé ou non, score du match. */
@@ -136,7 +136,7 @@ export function DraftScreen({ profile, onExit, gameOpts, reward }: {
               <div className="choices row">
                 <button type="button" onClick={close}>Voir le plateau</button>
                 {after && !after.done
-                  ? <button type="button" className="primary" onClick={() => setGame({ opp, key: Date.now(), first: Math.random() < 0.5 ? 'A' : 'B' })}>Partie suivante</button>
+                  ? <button type="button" className="primary" onClick={() => setGame({ opp, key: Date.now(), first: humanGameFirst(st) })}>Partie suivante</button>
                   : <button type="button" className="primary" onClick={() => setGame(null)}>Retour au tournoi</button>}
               </div>
             </div>
@@ -231,7 +231,7 @@ export function DraftScreen({ profile, onExit, gameOpts, reward }: {
       )}
       {opp !== null && st.phase === 'tournament' && (
         <div className="choices row left">
-          <button type="button" className="primary" onClick={() => setGame({ opp, key: Date.now(), first: Math.random() < 0.5 ? 'A' : 'B' })}>
+          <button type="button" className="primary" onClick={() => setGame({ opp, key: Date.now(), first: humanGameFirst(st) })}>
             {st.current ? `Partie ${st.current[0] + st.current[1] + 1} contre ${names[opp]} (match : ${st.current[0]} – ${st.current[1]})` : `Jouer la ronde ${round + 1} contre ${names[opp]} (${FACTION_LABEL[deckFaction(st.decks[opp]!)]}${(st.bestOf ?? 1) > 1 ? `, Bo${st.bestOf}` : ''})`}
           </button>
         </div>
