@@ -26,6 +26,7 @@ export const AVATARS: Record<string, string> = {
   'demons.5': 'Voyant enluminé', 'demons.6': 'Acolyte enluminé', 'demons.7': 'Hiérophante enluminé', 'demons.8': 'Faucheur enluminé',
   'nomades.5': 'Guide enluminé', 'nomades.6': 'Cheikha enluminée', 'nomades.7': 'Pillard enluminé', 'nomades.8': 'Archer enluminé',
   'mercenaires.1': 'Éclaireuse mercenaire',
+  'sergents.1': 'Sergent instructeur',
 };
 export const AVATAR_IDS = Object.keys(AVATARS);
 export const BASE_AVATAR = 'empire.2';
