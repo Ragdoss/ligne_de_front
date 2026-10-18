@@ -30,3 +30,9 @@ Gabarit validé par Nathan le 17/10/2026 (première illustration : le Lieutenant
 - `src/ui/CardFace.tsx` : carte complète, fond (illustration ou couleur de faction), niveau en chiffres romains ou arabes (Options).
 - `src/ui/Board.tsx` (régiments en jeu) et `src/ui/Hand.tsx` (main).
 - `src/ui/styles.css`, bloc « Gabarit des cartes ».
+
+## Publication
+
+- Depuis le 18/10/2026, le jeu publié (GitHub Pages et artifact) est construit par `npm run build:web` : `dist-web/index.html` (code et styles intégrés) et les images dans `dist-web/img/`. Les illustrations ne sont chargées qu'à l'affichage, et la page reste petite quel que soit le nombre d'images (la version en un seul fichier dépassait les 16 Mo d'un artifact).
+- `npm run build` produit toujours la version en un seul fichier (`dist/index.html`), pour jouer hors ligne.
+- Artifact : publier `dist-web/index.html` avec tous les fichiers de `dist-web/img/` (racine `dist-web`).
