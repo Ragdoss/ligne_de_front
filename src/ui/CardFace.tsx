@@ -22,8 +22,10 @@ export const altArtNumber = (key: string): number => Number(key.split('.alt')[1]
 // Art choisi par le joueur pour chaque carte (réglé par App à partir du profil).
 let choice: Record<string, string> = {};
 export function setArtChoices(c: Record<string, string>): void { choice = c; }
+/** Cartes qui empruntent l'art d'une autre carte, art alternatif choisi compris (le régiment Palissade suit la tactique du même nom). */
+const ART_SOURCE: Record<string, string> = { palissade_regiment: 'palissade_tactique' };
 /** Illustration d'une carte, art alternatif choisi compris (undefined si elle n'en a pas encore). */
-export const artOf = (id: string): string | undefined => (choice[id] && ART[choice[id]!]) || ART[id];
+export const artOf = (id: string): string | undefined => { const src = ART_SOURCE[id] ?? id; return (choice[src] && ART[choice[src]!]) || ART[src]; };
 // En partie : arts choisis par chaque joueur (null hors partie : on montre les choix du profil).
 type Side = 'A' | 'B';
 let gameArts: Partial<Record<Side, Record<string, string>>> | null = null;
@@ -31,8 +33,10 @@ export function setGameArts(a: Partial<Record<Side, Record<string, string>>> | n
 /** Fin de partie : on revient aux choix du profil, sauf si une autre partie a déjà réglé ses arts. */
 export function clearGameArts(a: Partial<Record<Side, Record<string, string>>>): void { if (gameArts === a) gameArts = null; }
 /** Art à montrer pour une carte d'un joueur en partie (undefined hors partie). */
-export const artKeyFor = (id: string, owner?: Side): string | undefined =>
-  gameArts && owner ? gameArts[owner]?.[id] ?? id : undefined;
+export const artKeyFor = (id: string, owner?: Side): string | undefined => {
+  const src = ART_SOURCE[id] ?? id;
+  return gameArts && owner ? gameArts[owner]?.[src] ?? src : undefined;
+};
 /** Arts choisis valides parmi une liste reçue (en ligne) : seulement des arts existants des cartes données. */
 export function cleanArts(raw: unknown, cards: string[]): Record<string, string> {
   const out: Record<string, string> = {};
@@ -43,7 +47,7 @@ export function cleanArts(raw: unknown, cards: string[]): Record<string, string>
 }
 
 /** Illustration d'une variante précise (identifiant de carte ou clé « carte.altN »). */
-export const artFile = (key: string): string | undefined => ART[key];
+export const artFile = (key: string): string | undefined => ART[key] ?? (ART_SOURCE[key] ? ART[ART_SOURCE[key]!] : undefined);
 
 // ---------- Niveau : chiffres romains (par défaut) ou arabes (Options) ----------
 let roman = true;
