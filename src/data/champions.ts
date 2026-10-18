@@ -1,5 +1,6 @@
 // Pools de champions : les meilleurs decks de chaque faction à l'échelle de decks (reports/echelle-finale.md),
-// après la vague 2 complète (18/10/2026). Quand on affronte « Champion <faction> », un deck du pool est tiré au hasard.
+// après la vague 2 complète (18/10/2026), plus les meilleurs decks de la finale précédente (après l'Équilibrage 6 : empire-93,
+// elfe-32, demons-171 et nomades-59, le deck d'usure qui gagnait 85 %). Quand on affronte « Champion <faction> », un deck du pool est tiré au hasard.
 // Pour agrandir un pool, ajouter des decks à la liste de la faction.
 import type { Faction } from '../engine/types';
 
@@ -106,6 +107,56 @@ export const CHAMPION_POOLS: Partial<Record<Faction, ChampionDeck[]>> = {
     "vivres_campagne",
     "vivres_campagne"
    ]
+  },
+  {
+   "id": "empire-93",
+   "cards": [
+    "appel_aux_armes",
+    "archer_imp",
+    "archer_imp",
+    "aumonier_guerre",
+    "banniere_dechiree",
+    "cadets_academie",
+    "cadets_academie",
+    "capitaine_mercenaire",
+    "capitaine_mercenaire",
+    "capitaine_mercenaire",
+    "cavaliers_dragons_elite",
+    "charge_imp",
+    "commandant_kragz",
+    "commandant_kragz",
+    "cuirassiers_kragz",
+    "espion_imperial",
+    "etat_major",
+    "forteresse",
+    "forteresse",
+    "garde_frontiere_sylvestre",
+    "gardes_drapeau",
+    "gardes_drapeau",
+    "gardes_drapeau",
+    "general_empire",
+    "grand_maitre_armes",
+    "grand_maitre_armes",
+    "grand_maitre_armes",
+    "inquisiteur_dechu",
+    "lancier_emp",
+    "legat_varro",
+    "marechal_empire",
+    "mercenaires",
+    "ordre_haut_commandement",
+    "palissade_tactique",
+    "paysans",
+    "porte_etendard",
+    "porte_etendard",
+    "porte_etendard",
+    "promotion",
+    "ralliement",
+    "ravitailleur",
+    "recrue_imp",
+    "sergents_instructeurs",
+    "tambour_bataillon",
+    "tambour_bataillon"
+   ]
   }
  ],
  "elfe": [
@@ -207,6 +258,56 @@ export const CHAMPION_POOLS: Partial<Record<Faction, ChampionDeck[]>> = {
     "veilleuse_sources",
     "veterans_louer",
     "vivres_campagne"
+   ]
+  },
+  {
+   "id": "elfe-32",
+   "cards": [
+    "archer_bois",
+    "brume_trompeuse",
+    "brume_trompeuse",
+    "brume_trompeuse",
+    "capitaine_mercenaire",
+    "capitaine_mercenaire",
+    "chant_seve",
+    "chant_traque",
+    "chant_traque",
+    "chant_vent",
+    "chevaucheurs_mirage",
+    "chevaucheurs_mirage",
+    "chevaucheurs_mirage",
+    "choc_et_effroi",
+    "choc_et_effroi",
+    "choc_et_effroi",
+    "cor_ralliement",
+    "druide_ancien",
+    "druide_ancien",
+    "eclaireur_elfe",
+    "eclaireuse_fourres",
+    "elem_terre",
+    "elem_terre",
+    "gardienne_seuil",
+    "gardienne_seuil",
+    "lettree_conclave",
+    "maitre_embuscades",
+    "maitre_embuscades",
+    "maitre_embuscades",
+    "pousse_sylve",
+    "pousse_sylve",
+    "racines_immobilisantes",
+    "racines_immobilisantes",
+    "racines_protectrices",
+    "retraite_sylvestre",
+    "seigneure_chasse",
+    "seigneure_chasse",
+    "sentinelle_chene",
+    "sentinelle_chene",
+    "sylvain",
+    "sylvain",
+    "traqueuse_sylvestre",
+    "traqueuse_sylvestre",
+    "treant_millenaire",
+    "veilleuse_sources"
    ]
   }
  ],
@@ -310,6 +411,56 @@ export const CHAMPION_POOLS: Partial<Record<Faction, ChampionDeck[]>> = {
     "vivres_campagne",
     "voile_ombre"
    ]
+  },
+  {
+   "id": "demons-171",
+   "cards": [
+    "a_couvert",
+    "abime_grandissant",
+    "banniere_dechiree",
+    "banquet_infernal",
+    "capitaine_mercenaire",
+    "chien_infernal",
+    "chien_infernal",
+    "chien_infernal",
+    "choc_et_effroi",
+    "cor_ralliement",
+    "cultiste",
+    "cultiste",
+    "diablotins",
+    "dragon_infernal",
+    "dragon_infernal",
+    "fanatiques",
+    "fanatiques",
+    "fanatiques",
+    "gargouille_sentinelle",
+    "gargouille_sentinelle",
+    "inquisiteur_dechu",
+    "inquisiteur_dechu",
+    "inquisiteur_dechu",
+    "legion_morvak",
+    "legion_morvak",
+    "maitre_chenil_infernal",
+    "maitre_chenil_infernal",
+    "marchand_ames",
+    "mercenaires",
+    "mercenaires",
+    "morvak",
+    "morvak",
+    "pacte_mineur",
+    "pacte_sang",
+    "pacte_survie",
+    "pretre_sacrificiel",
+    "rancon_ames",
+    "ravitaillement",
+    "ravitailleur",
+    "ravitailleur",
+    "seigneur_abysses",
+    "seigneur_abysses",
+    "veilleur_os",
+    "veilleur_os",
+    "veilleur_os"
+   ]
   }
  ],
  "nomades": [
@@ -412,6 +563,56 @@ export const CHAMPION_POOLS: Partial<Record<Faction, ChampionDeck[]>> = {
     "zahra",
     "zahra"
    ]
+  },
+  {
+   "id": "nomades-59",
+   "cards": [
+    "archeotacticiens",
+    "banniere_dechiree",
+    "banniere_dechiree",
+    "basilics_desert",
+    "basilics_desert",
+    "basilics_desert",
+    "basilics_oasis",
+    "caravane_marchande",
+    "caravane_marchande",
+    "choc_et_effroi",
+    "colporteur",
+    "colporteur",
+    "danseurs_sable",
+    "embuscade",
+    "embuscade",
+    "frappez_ravitaillement",
+    "fuite_dunes",
+    "guide_desert",
+    "jeune_nomade",
+    "jeune_nomade",
+    "legat_varro",
+    "legat_varro",
+    "marchand_ames",
+    "marche_noir",
+    "mercenaires",
+    "mirage_oasis",
+    "puits_empoisonne",
+    "puits_empoisonne",
+    "rancon_desert",
+    "ravitaillement",
+    "reine_basilics",
+    "reine_basilics",
+    "reine_basilics",
+    "seigneur_caravanes",
+    "seigneur_caravanes",
+    "seigneur_caravanes",
+    "tempete_sable",
+    "terre_brulee",
+    "voleurs_provisions",
+    "voleurs_provisions",
+    "voleurs_provisions",
+    "volez_ravitaillement",
+    "volez_ravitaillement",
+    "zahra",
+    "zahra"
+   ]
   }
  ]
 };
@@ -421,3 +622,8 @@ export function pickChampion(f: Faction, rand: () => number = Math.random): Cham
   const pool = CHAMPION_POOLS[f];
   return pool?.length ? pool[Math.floor(rand() * pool.length)] : undefined;
 }
+
+/** Decks de test, choisis à part (ni dans les pools, ni dans les decks de démonstration). */
+export const TEST_DECKS: Record<string, { label: string; faction: Faction; cards: string[] }> = {
+  usure: { label: 'Deck usure test', faction: 'nomades', cards: ["archeotacticiens", "banniere_dechiree", "banniere_dechiree", "basilics_desert", "basilics_desert", "basilics_desert", "basilics_oasis", "caravane_marchande", "caravane_marchande", "choc_et_effroi", "colporteur", "colporteur", "danseurs_sable", "embuscade", "embuscade", "frappez_ravitaillement", "fuite_dunes", "guide_desert", "jeune_nomade", "jeune_nomade", "legat_varro", "legat_varro", "marchand_ames", "marche_noir", "mercenaires", "mirage_oasis", "puits_empoisonne", "puits_empoisonne", "rancon_desert", "ravitaillement", "reine_basilics", "reine_basilics", "reine_basilics", "seigneur_caravanes", "seigneur_caravanes", "seigneur_caravanes", "tempete_sable", "terre_brulee", "voleurs_provisions", "voleurs_provisions", "voleurs_provisions", "volez_ravitaillement", "volez_ravitaillement", "zahra", "zahra"] },
+};

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { exportCode, importCode, loadCampaign, newCampaign, type CampaignSave } from '../campaign/campaign';
 import { CAMPAIGNS } from '../campaign/campaigns';
 import type { CampaignDef } from '../campaign/types';
-import { CHAMPION_POOLS, pickChampion } from '../data/champions';
+import { CHAMPION_POOLS, pickChampion, TEST_DECKS } from '../data/champions';
 import { DEMO_DECKS } from '../data/decks';
 import type { Faction } from '../engine/types';
 import { checkDeck, DEFAULT_OPTIONS, newProfile, profileCode, profileFromCode, resetEverything, saveProfile, sortedDecks, type Options, type Profile } from '../profile/profile';
@@ -63,6 +63,10 @@ export function resolveDeck(profile: Profile, key: string): { cards: string[]; f
     const d = profile.decks.find(x => `my:${x.id}` === key)!;
     return { cards: d.cards, faction: mainFaction(d.cards) as Faction, label: d.name };
   }
+  if (key.startsWith('test:')) {
+    const t = TEST_DECKS[key.slice(5)]!;
+    return { cards: t.cards, faction: t.faction, label: t.label };
+  }
   if (key.startsWith('champ:')) {
     const f = key.slice(6) as Faction;
     return { cards: pickChampion(f)!.cards, faction: f, label: `Champion ${FACTION_LABEL[f]}` }; // un deck du pool, au hasard
@@ -81,6 +85,7 @@ export function DeckSelect({ profile, value, onChange, label, human }: { profile
         {mine.length > 0 && <optgroup label="Mes decks">{mine.map(d => <option key={d.id} value={`my:${d.id}`}>{d.fav ? '★ ' : ''}{d.name} ({d.cards.length} cartes)</option>)}</optgroup>}
         {demoAllowed && <optgroup label="Decks de démonstration">{PLAYABLE_FACTIONS.map(f => <option key={f} value={`demo:${f}`}>{FACTION_LABEL[f]}</option>)}</optgroup>}
         {demoAllowed && <optgroup label="Meilleurs decks du tournoi (champions)">{PLAYABLE_FACTIONS.filter(f => CHAMPION_POOLS[f]?.length).map(f => <option key={f} value={`champ:${f}`}>Champion {FACTION_LABEL[f]} ({CHAMPION_POOLS[f]!.length} decks, un au hasard)</option>)}</optgroup>}
+        {demoAllowed && <optgroup label="Decks de test">{Object.entries(TEST_DECKS).map(([k, t]) => <option key={k} value={`test:${k}`}>{t.label} ({t.cards.length} cartes)</option>)}</optgroup>}
       </select>
     </label>
   );
