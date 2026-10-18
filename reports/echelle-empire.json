@@ -5,552 +5,552 @@
  "perPair2": 5,
  "top": [
   {
-   "id": "empire-30",
+   "id": "empire-16",
    "faction": "empire",
    "deck": [
-    "charge_imp",
-    "banniere_dechiree",
+    "ecuyers_garde",
     "gardes_drapeau",
-    "inquisiteur_dechu",
-    "hallebardiers_ligne",
-    "ralliement",
-    "sergents_instructeurs",
-    "cadets_academie",
-    "sergents_instructeurs",
-    "palissade_tactique",
-    "cor_ralliement",
-    "cadets_academie",
-    "paysans",
-    "archer_imp",
-    "capitaine_mercenaire",
-    "cadets_academie",
-    "paysans",
-    "ravitailleur",
-    "porte_etendard",
-    "chevalier_prov",
-    "cavaliers_garde",
-    "general_empire",
-    "cavaliers_garde",
-    "paysans",
-    "charge_imp",
-    "formation_carre",
-    "banniere_dechiree",
-    "aumonier_guerre",
-    "tambour_bataillon",
     "a_couvert",
-    "dragon_imp",
-    "commandant_kragz",
+    "aumonier_guerre",
+    "capitaine_garde",
+    "capitaine_mercenaire",
+    "charge_imp",
+    "ravitaillement",
+    "promotion",
+    "paysans",
+    "recrue_imp",
+    "general_empire",
+    "cor_ralliement",
+    "chevalier_prov",
+    "ingenieurs_siege",
+    "capitaine_mercenaire",
+    "mercenaires",
+    "serment_traite",
+    "banniere_dechiree",
+    "inquisiteur_dechu",
+    "cavaliers_garde",
+    "paysans",
+    "arbaletriers_rang",
+    "sergents_instructeurs",
+    "sergents_instructeurs",
+    "paysans",
+    "general_empire",
+    "capitaine_garde",
+    "banniere_dechiree",
+    "capitaine_mercenaire",
+    "forteresse",
     "grand_maitre_armes",
-    "commandant_kragz",
-    "espion_imperial",
-    "choc_et_effroi",
     "assassinat",
+    "ordre_haut_commandement",
     "grand_maitre_armes",
-    "forteresse",
-    "forteresse",
+    "legat_varro",
+    "ordre_haut_commandement",
+    "ordre_haut_commandement",
     "cuirassiers_kragz",
-    "cuirassiers_kragz",
+    "colonel_ligne",
+    "choc_et_effroi",
+    "cavaliers_dragons_elite",
+    "charge_decisive",
+    "forteresse",
+    "cuirassiers_lourds"
+   ],
+   "w1": 46,
+   "g1": 60,
+   "w2": 104,
+   "g2": 145
+  },
+  {
+   "id": "empire-111",
+   "faction": "empire",
+   "deck": [
+    "ingenieurs_siege",
+    "ralliement",
+    "charge_imp",
+    "charge_imp",
+    "recrue_imp",
+    "vivres_campagne",
+    "lancier_emp",
+    "tambour_bataillon",
+    "aumonier_guerre",
+    "promotion",
+    "execution_exemplaire",
+    "tambour_bataillon",
+    "garde_frontiere_sylvestre",
+    "execution_exemplaire",
+    "general_empire",
+    "capitaine_garde",
+    "tambour_bataillon",
+    "milice_village",
+    "lancier_emp",
+    "gardes_drapeau",
+    "contrat_convoi",
+    "chevalier_prov",
+    "gardes_drapeau",
+    "paysans",
+    "gardes_drapeau",
+    "paysans",
+    "sergents_instructeurs",
+    "general_empire",
+    "chevaliers_ordre",
+    "banniere_dechiree",
+    "chevalier_templier",
+    "marechal_empire",
+    "cuirassiers_lourds",
     "dragon_imp",
-    "etat_major",
-    "etat_major"
+    "commandant_kragz",
+    "grand_maitre_armes",
+    "imperatrice_octavia",
+    "ordre_haut_commandement",
+    "imperatrice_octavia",
+    "legat_varro",
+    "dernier_carre",
+    "grand_maitre_armes",
+    "commandant_kragz",
+    "heraut_imperial",
+    "dernier_carre"
    ],
    "w1": 43,
-   "g1": 60,
-   "w2": 103,
-   "g2": 145
-  },
-  {
-   "id": "empire-88",
-   "faction": "empire",
-   "deck": [
-    "mercenaires",
-    "banniere_dechiree",
-    "archer_imp",
-    "garde_frontiere_sylvestre",
-    "ravitailleur",
-    "soldat_kragz",
-    "porte_etendard",
-    "cor_ralliement",
-    "charge_imp",
-    "banniere_dechiree",
-    "tambour_bataillon",
-    "inquisiteur_dechu",
-    "charge_imp",
-    "paysans",
-    "mercenaires",
-    "cor_ralliement",
-    "paysans",
-    "aumonier_guerre",
-    "cadets_academie",
-    "promotion",
-    "veterans_louer",
-    "charge_imp",
-    "inquisiteur_dechu",
-    "ralliement",
-    "garde_frontiere_sylvestre",
-    "garde_frontiere_sylvestre",
-    "recrue_imp",
-    "ralliement",
-    "general_empire",
-    "inquisiteur_dechu",
-    "dragon_imp",
-    "cuirassiers_kragz",
-    "choc_et_effroi",
-    "colonel_ligne",
-    "cavaliers_dragons_elite",
-    "etat_major",
-    "grand_maitre_armes",
-    "commandant_kragz",
-    "marechal_empire",
-    "forteresse",
-    "commandant_kragz",
-    "legat_varro",
-    "assassinat",
-    "choc_et_effroi",
-    "espion_imperial"
-   ],
-   "w1": 42,
-   "g1": 60,
-   "w2": 96,
-   "g2": 145
-  },
-  {
-   "id": "empire-183",
-   "faction": "empire",
-   "deck": [
-    "promotion",
-    "banniere_dechiree",
-    "banniere_dechiree",
-    "hallebardiers_ligne",
-    "arbaletrier_imp",
-    "ralliement",
-    "ravitailleur",
-    "gardes_drapeau",
-    "cavaliers_garde",
-    "archer_imp",
-    "general_empire",
-    "charge_imp",
-    "paysans",
-    "general_empire",
-    "paysans",
-    "cavaliers_garde",
-    "aumonier_guerre",
-    "capitaine_mercenaire",
-    "archer_imp",
-    "archer_imp",
-    "gardes_drapeau",
-    "ravitailleur",
-    "ralliement",
-    "garde_frontiere_sylvestre",
-    "charge_imp",
-    "promotion",
-    "recrue_imp",
-    "general_empire",
-    "lieutenant",
-    "arbaletrier_imp",
-    "espion_imperial",
-    "legat_varro",
-    "forteresse",
-    "appel_aux_armes",
-    "dragon_imp",
-    "grand_maitre_armes",
-    "espion_imperial",
-    "cavaliers_dragons_elite",
-    "colonel_ligne",
-    "grand_maitre_armes",
-    "chevalier_templier",
-    "colonel_ligne",
-    "legat_varro",
-    "espion_imperial",
-    "cavaliers_dragons_elite"
-   ],
-   "w1": 45,
    "g1": 59,
-   "w2": 94,
+   "w2": 86,
    "g2": 145
   },
   {
-   "id": "empire-198",
+   "id": "empire-69",
    "faction": "empire",
    "deck": [
-    "a_couvert",
-    "ravitailleur",
+    "execution_exemplaire",
+    "archer_imp",
+    "milice_village",
     "banniere_dechiree",
-    "inquisiteur_dechu",
-    "ravitailleur",
-    "ralliement",
-    "chevalier_prov",
-    "soldat_kragz",
-    "sergents_instructeurs",
-    "cadets_academie",
+    "palissade_tactique",
+    "capitaine_mercenaire",
+    "vivres_campagne",
     "gardes_drapeau",
-    "capitaine_garde",
     "tambour_bataillon",
+    "quartier_maitre",
+    "ravitailleur",
+    "execution_exemplaire",
     "tambour_bataillon",
-    "porte_etendard",
-    "veterans_louer",
-    "tambour_bataillon",
+    "chevaliers_ordre",
+    "cadets_academie",
+    "sergents_instructeurs",
+    "general_empire",
+    "ravitailleur",
     "paysans",
-    "lieutenant",
-    "capitaine_garde",
+    "general_empire",
+    "paysans",
+    "gardes_drapeau",
+    "ravitailleur",
+    "paysans",
+    "execution_exemplaire",
     "aumonier_guerre",
-    "paysans",
-    "lieutenant",
-    "lieutenant",
-    "archer_imp",
-    "paysans",
-    "charge_imp",
-    "a_couvert",
-    "veterans_louer",
-    "hallebardiers_ligne",
-    "cavaliers_dragons_elite",
-    "dragon_imp",
-    "legat_varro",
+    "gardes_drapeau",
+    "promotion",
+    "chevaliers_ordre",
+    "arbaletriers_rang",
+    "assassinat",
+    "forteresse",
+    "marechal_empire",
     "cuirassiers_kragz",
-    "dragon_imp",
-    "ordre_haut_commandement",
-    "appel_aux_armes",
+    "forteresse",
     "cavaliers_dragons_elite",
-    "etat_major",
+    "grand_maitre_armes",
+    "assassinat",
     "ordre_haut_commandement",
-    "appel_aux_armes",
-    "dragon_imp",
-    "commandant_kragz",
-    "espion_imperial",
-    "assassinat"
+    "imperatrice_octavia",
+    "colonel_ligne",
+    "imperatrice_octavia",
+    "cavaliers_dragons_elite",
+    "marechal_empire",
+    "choc_et_effroi"
    ],
-   "w1": 42,
-   "g1": 59,
-   "w2": 88,
+   "w1": 47,
+   "g1": 60,
+   "w2": 83,
    "g2": 145
   },
   {
-   "id": "empire-83",
+   "id": "empire-58",
    "faction": "empire",
    "deck": [
-    "sergents_instructeurs",
-    "formation_carre",
-    "recrue_imp",
+    "ralliement",
+    "ingenieurs_siege",
+    "palissade_tactique",
+    "promotion",
+    "ravitaillement",
+    "garde_frontiere_sylvestre",
+    "ravitailleur",
+    "porte_etendard",
+    "cadets_academie",
+    "capitaine_garde",
+    "general_empire",
+    "aumonier_guerre",
+    "general_empire",
+    "cor_ralliement",
+    "archer_imp",
+    "chevalier_prov",
+    "ecuyers_garde",
+    "porte_etendard",
+    "lieutenant",
+    "aumonier_guerre",
+    "contrat_convoi",
+    "hallebardiers_ligne",
+    "hallebardiers_ligne",
+    "lieutenant",
+    "paysans",
+    "paysans",
     "gardes_drapeau",
     "paysans",
-    "recrue_imp",
-    "general_empire",
-    "cor_ralliement",
+    "ralliement",
     "hallebardiers_ligne",
-    "sergents_instructeurs",
-    "general_empire",
-    "general_empire",
-    "charge_imp",
-    "cadets_academie",
-    "inquisiteur_dechu",
-    "formation_carre",
-    "paysans",
-    "mercenaires",
-    "cor_ralliement",
-    "charge_imp",
-    "veterans_louer",
-    "capitaine_mercenaire",
-    "archer_imp",
-    "porte_etendard",
-    "paysans",
-    "cavaliers_garde",
-    "banniere_dechiree",
-    "ravitaillement",
-    "cadets_academie",
-    "ravitaillement",
     "etat_major",
-    "forteresse",
-    "choc_et_effroi",
-    "forteresse",
-    "cavaliers_dragons_elite",
-    "dragon_imp",
-    "marechal_empire",
-    "marechal_empire",
-    "cuirassiers_kragz",
-    "etat_major",
-    "assassinat",
-    "assassinat",
-    "cavaliers_dragons_elite",
-    "commandant_kragz",
-    "cavaliers_dragons_elite"
-   ],
-   "w1": 40,
-   "g1": 60,
-   "w2": 87,
-   "g2": 145
-  },
-  {
-   "id": "empire-68",
-   "faction": "empire",
-   "deck": [
-    "porte_etendard",
-    "ravitailleur",
-    "banniere_dechiree",
-    "paysans",
-    "garde_frontiere_sylvestre",
-    "inquisiteur_dechu",
-    "chevalier_prov",
-    "cadets_academie",
-    "cavaliers_garde",
-    "ravitaillement",
-    "recrue_imp",
-    "lieutenant",
-    "cor_ralliement",
-    "ravitaillement",
-    "capitaine_garde",
-    "paysans",
-    "lieutenant",
-    "inquisiteur_dechu",
-    "soldat_kragz",
-    "porte_etendard",
-    "paysans",
-    "porte_etendard",
-    "soldat_kragz",
-    "formation_carre",
-    "a_couvert",
-    "a_couvert",
-    "banniere_dechiree",
-    "cavaliers_garde",
-    "recrue_imp",
-    "capitaine_mercenaire",
-    "grand_maitre_armes",
-    "cavaliers_dragons_elite",
-    "legat_varro",
-    "assassinat",
-    "choc_et_effroi",
-    "espion_imperial",
-    "cavaliers_dragons_elite",
-    "appel_aux_armes",
+    "connetable",
+    "connetable",
     "colonel_ligne",
     "forteresse",
-    "cavaliers_dragons_elite",
-    "chevalier_templier",
-    "legat_varro",
+    "colonel_ligne",
+    "appel_aux_armes",
+    "appel_aux_armes",
+    "marechal_empire",
+    "dernier_carre",
     "etat_major",
-    "appel_aux_armes"
+    "legat_varro",
+    "imperatrice_octavia",
+    "grand_maitre_armes",
+    "dernier_carre"
    ],
-   "w1": 41,
+   "w1": 44,
    "g1": 60,
    "w2": 82,
    "g2": 145
   },
   {
-   "id": "empire-134",
+   "id": "empire-78",
    "faction": "empire",
    "deck": [
-    "ralliement",
-    "lieutenant",
-    "lancier_emp",
-    "veterans_louer",
+    "contrat_convoi",
     "paysans",
-    "capitaine_garde",
-    "arbaletrier_imp",
-    "capitaine_mercenaire",
-    "ravitailleur",
-    "porte_etendard",
-    "charge_imp",
-    "tambour_bataillon",
-    "gardes_drapeau",
-    "inquisiteur_dechu",
-    "general_empire",
-    "a_couvert",
-    "garde_frontiere_sylvestre",
-    "ralliement",
-    "capitaine_mercenaire",
-    "banniere_dechiree",
-    "a_couvert",
-    "cavaliers_garde",
-    "ravitailleur",
-    "cadets_academie",
     "promotion",
-    "paysans",
+    "aumonier_guerre",
     "soldat_kragz",
-    "ravitailleur",
-    "cor_ralliement",
+    "archer_imp",
+    "soldat_kragz",
     "promotion",
+    "chevaliers_ordre",
+    "inquisiteur_dechu",
+    "serment_traite",
+    "porte_etendard",
+    "garde_frontiere_sylvestre",
+    "ravitailleur",
+    "garde_frontiere_sylvestre",
+    "cadets_academie",
+    "garde_frontiere_sylvestre",
+    "execution_exemplaire",
+    "milice_village",
+    "inquisiteur_dechu",
+    "chevaliers_ordre",
+    "inquisiteur_dechu",
+    "banniere_dechiree",
+    "chevalier_prov",
+    "tambour_bataillon",
+    "ecuyers_garde",
+    "ecuyers_garde",
+    "sergents_instructeurs",
+    "general_empire",
+    "arbaletriers_rang",
+    "dragon_imp",
+    "dragon_imp",
+    "heraut_imperial",
+    "chevalier_templier",
+    "dernier_carre",
+    "grand_maitre_armes",
+    "ordre_haut_commandement",
     "cavaliers_dragons_elite",
-    "cuirassiers_kragz",
-    "cuirassiers_kragz",
-    "forteresse",
+    "choc_et_effroi",
+    "cavaliers_dragons_elite",
+    "ordre_haut_commandement",
+    "cuirassiers_lourds",
+    "espion_imperial",
     "colonel_ligne",
-    "cuirassiers_kragz",
-    "cavaliers_dragons_elite",
+    "marechal_empire"
+   ],
+   "w1": 43,
+   "g1": 60,
+   "w2": 82,
+   "g2": 145
+  },
+  {
+   "id": "empire-28",
+   "faction": "empire",
+   "deck": [
+    "recrue_imp",
+    "lanciers_rempart",
+    "capitaine_garde",
+    "formation_carre",
+    "quartier_maitre",
+    "capitaine_mercenaire",
+    "gardes_drapeau",
+    "lancier_emp",
+    "chevalier_prov",
+    "cadets_academie",
+    "ecuyers_garde",
+    "cor_ralliement",
+    "paysans",
+    "ingenieurs_siege",
+    "quartier_maitre",
+    "quartier_maitre",
+    "hallebardiers_ligne",
+    "capitaine_mercenaire",
+    "promotion",
+    "serment_traite",
+    "contrat_convoi",
+    "ecuyers_garde",
+    "ingenieurs_siege",
+    "chevalier_prov",
+    "contrat_convoi",
+    "capitaine_mercenaire",
+    "chevaliers_ordre",
+    "paysans",
+    "archer_imp",
+    "chevalier_prov",
+    "charge_decisive",
+    "commandant_kragz",
+    "charge_decisive",
+    "chevalier_templier",
+    "ordre_haut_commandement",
+    "appel_aux_armes",
+    "imperatrice_octavia",
+    "ordre_haut_commandement",
+    "commandant_kragz",
+    "etat_major",
+    "dernier_carre",
     "grand_maitre_armes",
     "forteresse",
-    "etat_major",
-    "ordre_haut_commandement",
-    "legat_varro",
-    "etat_major",
-    "choc_et_effroi",
-    "cavaliers_dragons_elite"
+    "grand_maitre_armes",
+    "assassinat"
    ],
-   "w1": 40,
-   "g1": 59,
+   "w1": 45,
+   "g1": 60,
    "w2": 81,
    "g2": 145
   },
   {
-   "id": "empire-118",
+   "id": "empire-160",
    "faction": "empire",
    "deck": [
-    "ravitaillement",
-    "cadets_academie",
-    "capitaine_garde",
-    "tambour_bataillon",
-    "inquisiteur_dechu",
-    "promotion",
+    "capitaine_mercenaire",
     "gardes_drapeau",
-    "paysans",
-    "soldat_kragz",
-    "porte_etendard",
-    "veterans_louer",
-    "banniere_dechiree",
-    "veterans_louer",
-    "cavaliers_garde",
-    "archer_imp",
-    "mercenaires",
     "inquisiteur_dechu",
-    "cavaliers_garde",
-    "paysans",
+    "ingenieurs_siege",
     "cor_ralliement",
-    "ralliement",
-    "promotion",
-    "soldat_kragz",
-    "ralliement",
-    "sergents_instructeurs",
+    "arbaletriers_rang",
+    "ravitailleur",
+    "serment_traite",
+    "aumonier_guerre",
+    "capitaine_garde",
+    "aumonier_guerre",
+    "garde_frontiere_sylvestre",
     "recrue_imp",
-    "cor_ralliement",
     "tambour_bataillon",
-    "paysans",
-    "sergents_instructeurs",
-    "commandant_kragz",
+    "arbaletrier_imp",
+    "ravitailleur",
+    "chevaliers_ordre",
+    "ingenieurs_siege",
+    "hallebardiers_ligne",
+    "charge_imp",
+    "aumonier_guerre",
+    "cavaliers_garde",
+    "palissade_tactique",
+    "recrue_imp",
+    "quartier_maitre",
+    "ecuyers_garde",
+    "chevaliers_ordre",
+    "lancier_emp",
+    "capitaine_mercenaire",
+    "garde_frontiere_sylvestre",
     "colonel_ligne",
+    "connetable",
+    "cuirassiers_lourds",
+    "legat_varro",
+    "charge_decisive",
     "assassinat",
-    "dragon_imp",
-    "cuirassiers_kragz",
+    "espion_imperial",
+    "forteresse",
+    "charge_decisive",
+    "dernier_carre",
+    "heraut_imperial",
     "ordre_haut_commandement",
+    "chevalier_templier",
     "cuirassiers_kragz",
-    "grand_maitre_armes",
-    "assassinat",
-    "dragon_imp",
-    "choc_et_effroi",
-    "cuirassiers_kragz",
-    "grand_maitre_armes",
-    "appel_aux_armes",
-    "marechal_empire"
+    "ordre_haut_commandement"
    ],
-   "w1": 40,
+   "w1": 46,
    "g1": 60,
-   "w2": 80,
+   "w2": 79,
    "g2": 145
   },
   {
    "id": "empire-93",
    "faction": "empire",
    "deck": [
-    "capitaine_mercenaire",
-    "ravitailleur",
-    "porte_etendard",
-    "archer_imp",
-    "general_empire",
-    "porte_etendard",
-    "mercenaires",
-    "porte_etendard",
-    "promotion",
-    "palissade_tactique",
-    "capitaine_mercenaire",
-    "banniere_dechiree",
-    "garde_frontiere_sylvestre",
-    "gardes_drapeau",
-    "lancier_emp",
+    "ingenieurs_siege",
     "paysans",
-    "inquisiteur_dechu",
-    "archer_imp",
-    "capitaine_mercenaire",
-    "cadets_academie",
-    "ralliement",
-    "cadets_academie",
+    "chevalier_prov",
+    "quartier_maitre",
+    "serment_traite",
     "tambour_bataillon",
-    "aumonier_guerre",
-    "charge_imp",
-    "tambour_bataillon",
-    "recrue_imp",
-    "gardes_drapeau",
     "sergents_instructeurs",
-    "gardes_drapeau",
-    "espion_imperial",
-    "etat_major",
+    "mercenaires",
+    "paysans",
+    "arbaletrier_imp",
+    "arbaletrier_imp",
+    "vivres_campagne",
+    "ingenieurs_siege",
+    "garde_frontiere_sylvestre",
+    "vivres_campagne",
+    "ravitaillement",
+    "cavaliers_garde",
+    "serment_traite",
+    "ingenieurs_siege",
+    "mercenaires",
+    "cavaliers_garde",
+    "aumonier_guerre",
+    "general_empire",
+    "formation_carre",
+    "contrat_convoi",
+    "paysans",
+    "recrue_imp",
+    "arbaletriers_rang",
+    "archer_imp",
+    "arbaletrier_imp",
+    "grand_maitre_armes",
+    "appel_aux_armes",
+    "connetable",
+    "grand_maitre_armes",
     "cuirassiers_kragz",
     "legat_varro",
-    "ordre_haut_commandement",
-    "commandant_kragz",
-    "marechal_empire",
+    "espion_imperial",
     "grand_maitre_armes",
-    "forteresse",
-    "appel_aux_armes",
-    "forteresse",
-    "grand_maitre_armes",
+    "assassinat",
+    "cuirassiers_kragz",
+    "charge_decisive",
     "cavaliers_dragons_elite",
-    "commandant_kragz",
-    "grand_maitre_armes"
+    "etat_major",
+    "cuirassiers_lourds",
+    "etat_major"
    ],
-   "w1": 49,
-   "g1": 61,
-   "w2": 79,
+   "w1": 38,
+   "g1": 60,
+   "w2": 78,
    "g2": 145
   },
   {
-   "id": "empire-29",
+   "id": "empire-66",
    "faction": "empire",
    "deck": [
-    "cadets_academie",
-    "archer_imp",
-    "tambour_bataillon",
-    "hallebardiers_ligne",
-    "lieutenant",
-    "ravitaillement",
+    "promotion",
+    "arbaletriers_rang",
+    "veterans_louer",
+    "vivres_campagne",
     "ravitailleur",
-    "recrue_imp",
-    "hallebardiers_ligne",
-    "charge_imp",
-    "charge_imp",
-    "charge_imp",
-    "inquisiteur_dechu",
-    "hallebardiers_ligne",
-    "ralliement",
-    "paysans",
-    "lieutenant",
-    "ravitaillement",
-    "capitaine_mercenaire",
-    "a_couvert",
+    "vivres_campagne",
     "gardes_drapeau",
-    "inquisiteur_dechu",
-    "cavaliers_garde",
+    "lanciers_rempart",
+    "garde_frontiere_sylvestre",
+    "lancier_emp",
+    "quartier_maitre",
+    "ecuyers_garde",
+    "a_couvert",
+    "chevaliers_ordre",
     "porte_etendard",
-    "soldat_kragz",
-    "paysans",
-    "recrue_imp",
-    "sergents_instructeurs",
-    "formation_carre",
+    "quartier_maitre",
+    "ecuyers_garde",
     "tambour_bataillon",
-    "legat_varro",
-    "cuirassiers_kragz",
-    "dragon_imp",
-    "appel_aux_armes",
-    "legat_varro",
+    "cavaliers_garde",
+    "chevaliers_ordre",
+    "vivres_campagne",
+    "capitaine_mercenaire",
+    "gardes_drapeau",
+    "aumonier_guerre",
+    "ralliement",
+    "quartier_maitre",
+    "veterans_louer",
+    "inquisiteur_dechu",
+    "recrue_imp",
+    "cadets_academie",
+    "heraut_imperial",
+    "espion_imperial",
+    "imperatrice_octavia",
+    "espion_imperial",
+    "heraut_imperial",
+    "charge_decisive",
+    "heraut_imperial",
     "grand_maitre_armes",
-    "ordre_haut_commandement",
-    "assassinat",
-    "choc_et_effroi",
-    "etat_major",
+    "espion_imperial",
+    "cuirassiers_kragz",
     "cavaliers_dragons_elite",
-    "espion_imperial",
-    "espion_imperial",
-    "marechal_empire",
-    "ordre_haut_commandement"
+    "cuirassiers_kragz",
+    "commandant_kragz",
+    "cuirassiers_kragz",
+    "choc_et_effroi"
    ],
-   "w1": 37,
+   "w1": 42,
    "g1": 60,
+   "w2": 77,
+   "g2": 145
+  },
+  {
+   "id": "empire-195",
+   "faction": "empire",
+   "deck": [
+    "chevaliers_ordre",
+    "gardes_drapeau",
+    "paysans",
+    "ravitaillement",
+    "general_empire",
+    "inquisiteur_dechu",
+    "general_empire",
+    "soldat_kragz",
+    "ingenieurs_siege",
+    "ecuyers_garde",
+    "recrue_imp",
+    "serment_traite",
+    "ingenieurs_siege",
+    "charge_imp",
+    "cadets_academie",
+    "ravitailleur",
+    "capitaine_mercenaire",
+    "archer_imp",
+    "cadets_academie",
+    "chevaliers_ordre",
+    "tambour_bataillon",
+    "sergents_instructeurs",
+    "arbaletrier_imp",
+    "lancier_emp",
+    "milice_village",
+    "gardes_drapeau",
+    "cadets_academie",
+    "ravitailleur",
+    "lancier_emp",
+    "formation_carre",
+    "espion_imperial",
+    "dragon_imp",
+    "etat_major",
+    "ordre_haut_commandement",
+    "grand_maitre_armes",
+    "colonel_ligne",
+    "dernier_carre",
+    "espion_imperial",
+    "forteresse",
+    "cuirassiers_lourds",
+    "forteresse",
+    "connetable",
+    "imperatrice_octavia",
+    "imperatrice_octavia",
+    "heraut_imperial"
+   ],
+   "w1": 38,
+   "g1": 59,
    "w2": 77,
    "g2": 145
   }
@@ -558,792 +558,792 @@
  "all": [
   {
    "id": "empire-1",
-   "w1": 21,
+   "w1": 24,
    "g1": 60
   },
   {
    "id": "empire-2",
-   "w1": 34,
-   "g1": 61
-  },
-  {
-   "id": "empire-3",
-   "w1": 32,
+   "w1": 31,
    "g1": 60
   },
   {
+   "id": "empire-3",
+   "w1": 34,
+   "g1": 62
+  },
+  {
    "id": "empire-4",
-   "w1": 36,
-   "g1": 63
+   "w1": 17,
+   "g1": 60
   },
   {
    "id": "empire-5",
-   "w1": 31,
+   "w1": 37,
    "g1": 60
   },
   {
    "id": "empire-6",
-   "w1": 21,
-   "g1": 60
+   "w1": 38,
+   "g1": 61
   },
   {
    "id": "empire-7",
-   "w1": 31,
-   "g1": 60
+   "w1": 29,
+   "g1": 63
   },
   {
    "id": "empire-8",
-   "w1": 32,
-   "g1": 60
+   "w1": 24,
+   "g1": 62
   },
   {
    "id": "empire-9",
-   "w1": 25,
+   "w1": 35,
    "g1": 60
   },
   {
    "id": "empire-10",
-   "w1": 19,
-   "g1": 61
-  },
-  {
-   "id": "empire-11",
-   "w1": 38,
-   "g1": 60
-  },
-  {
-   "id": "empire-12",
    "w1": 30,
    "g1": 61
   },
   {
-   "id": "empire-13",
+   "id": "empire-11",
+   "w1": 19,
+   "g1": 60
+  },
+  {
+   "id": "empire-12",
    "w1": 25,
    "g1": 60
   },
   {
+   "id": "empire-13",
+   "w1": 30,
+   "g1": 60
+  },
+  {
    "id": "empire-14",
-   "w1": 22,
+   "w1": 17,
    "g1": 60
   },
   {
    "id": "empire-15",
    "w1": 29,
-   "g1": 60
+   "g1": 61
   },
   {
    "id": "empire-16",
-   "w1": 28,
-   "g1": 61
+   "w1": 46,
+   "g1": 60
   },
   {
    "id": "empire-17",
    "w1": 36,
-   "g1": 61
+   "g1": 60
   },
   {
    "id": "empire-18",
-   "w1": 37,
+   "w1": 35,
    "g1": 60
   },
   {
    "id": "empire-19",
-   "w1": 38,
+   "w1": 26,
    "g1": 60
   },
   {
    "id": "empire-20",
-   "w1": 32,
+   "w1": 27,
    "g1": 60
   },
   {
    "id": "empire-21",
-   "w1": 22,
+   "w1": 36,
    "g1": 60
   },
   {
    "id": "empire-22",
-   "w1": 22,
+   "w1": 32,
    "g1": 60
   },
   {
    "id": "empire-23",
-   "w1": 36,
+   "w1": 33,
    "g1": 61
   },
   {
    "id": "empire-24",
-   "w1": 36,
-   "g1": 60
+   "w1": 41,
+   "g1": 61
   },
   {
    "id": "empire-25",
-   "w1": 26,
+   "w1": 38,
    "g1": 60
   },
   {
    "id": "empire-26",
-   "w1": 18,
+   "w1": 28,
    "g1": 60
   },
   {
    "id": "empire-27",
-   "w1": 28,
-   "g1": 62
+   "w1": 29,
+   "g1": 60
   },
   {
    "id": "empire-28",
-   "w1": 26,
+   "w1": 45,
    "g1": 60
   },
   {
    "id": "empire-29",
-   "w1": 37,
+   "w1": 36,
    "g1": 60
   },
   {
    "id": "empire-30",
-   "w1": 43,
-   "g1": 60
+   "w1": 39,
+   "g1": 63
   },
   {
    "id": "empire-31",
-   "w1": 30,
-   "g1": 61
+   "w1": 20,
+   "g1": 60
   },
   {
    "id": "empire-32",
-   "w1": 39,
+   "w1": 29,
    "g1": 60
   },
   {
    "id": "empire-33",
-   "w1": 41,
+   "w1": 20,
    "g1": 60
   },
   {
    "id": "empire-34",
-   "w1": 24,
+   "w1": 35,
    "g1": 60
   },
   {
    "id": "empire-35",
-   "w1": 35,
+   "w1": 24,
    "g1": 60
   },
   {
    "id": "empire-36",
-   "w1": 33,
-   "g1": 63
+   "w1": 27,
+   "g1": 60
   },
   {
    "id": "empire-37",
-   "w1": 26,
-   "g1": 62
+   "w1": 42,
+   "g1": 60
   },
   {
    "id": "empire-38",
-   "w1": 18,
-   "g1": 62
+   "w1": 45,
+   "g1": 60
   },
   {
    "id": "empire-39",
-   "w1": 31,
-   "g1": 61
+   "w1": 38,
+   "g1": 60
   },
   {
    "id": "empire-40",
-   "w1": 31,
+   "w1": 34,
    "g1": 60
   },
   {
    "id": "empire-41",
-   "w1": 22,
+   "w1": 37,
    "g1": 60
   },
   {
    "id": "empire-42",
-   "w1": 29,
+   "w1": 40,
    "g1": 60
   },
   {
    "id": "empire-43",
-   "w1": 32,
-   "g1": 60
+   "w1": 35,
+   "g1": 62
   },
   {
    "id": "empire-44",
-   "w1": 17,
-   "g1": 60
+   "w1": 30,
+   "g1": 61
   },
   {
    "id": "empire-45",
-   "w1": 32,
-   "g1": 60
+   "w1": 29,
+   "g1": 61
   },
   {
    "id": "empire-46",
-   "w1": 25,
+   "w1": 21,
    "g1": 61
   },
   {
    "id": "empire-47",
-   "w1": 41,
+   "w1": 34,
    "g1": 60
   },
   {
    "id": "empire-48",
-   "w1": 17,
-   "g1": 60
+   "w1": 36,
+   "g1": 61
   },
   {
    "id": "empire-49",
-   "w1": 32,
+   "w1": 30,
    "g1": 60
   },
   {
    "id": "empire-50",
-   "w1": 26,
+   "w1": 38,
    "g1": 60
   },
   {
    "id": "empire-51",
-   "w1": 34,
-   "g1": 60
-  },
-  {
-   "id": "empire-52",
-   "w1": 30,
-   "g1": 61
-  },
-  {
-   "id": "empire-53",
-   "w1": 40,
-   "g1": 62
-  },
-  {
-   "id": "empire-54",
-   "w1": 30,
-   "g1": 61
-  },
-  {
-   "id": "empire-55",
-   "w1": 34,
-   "g1": 60
-  },
-  {
-   "id": "empire-56",
-   "w1": 19,
-   "g1": 60
-  },
-  {
-   "id": "empire-57",
-   "w1": 37,
-   "g1": 61
-  },
-  {
-   "id": "empire-58",
-   "w1": 28,
-   "g1": 60
-  },
-  {
-   "id": "empire-59",
-   "w1": 32,
-   "g1": 60
-  },
-  {
-   "id": "empire-60",
-   "w1": 35,
-   "g1": 60
-  },
-  {
-   "id": "empire-61",
-   "w1": 28,
-   "g1": 60
-  },
-  {
-   "id": "empire-62",
-   "w1": 31,
-   "g1": 60
-  },
-  {
-   "id": "empire-63",
-   "w1": 35,
-   "g1": 60
-  },
-  {
-   "id": "empire-64",
-   "w1": 36,
-   "g1": 60
-  },
-  {
-   "id": "empire-65",
-   "w1": 27,
-   "g1": 61
-  },
-  {
-   "id": "empire-66",
-   "w1": 34,
-   "g1": 60
-  },
-  {
-   "id": "empire-67",
-   "w1": 28,
-   "g1": 60
-  },
-  {
-   "id": "empire-68",
-   "w1": 41,
-   "g1": 60
-  },
-  {
-   "id": "empire-69",
-   "w1": 34,
-   "g1": 60
-  },
-  {
-   "id": "empire-70",
-   "w1": 22,
-   "g1": 60
-  },
-  {
-   "id": "empire-71",
-   "w1": 30,
-   "g1": 60
-  },
-  {
-   "id": "empire-72",
-   "w1": 31,
-   "g1": 61
-  },
-  {
-   "id": "empire-73",
-   "w1": 24,
-   "g1": 60
-  },
-  {
-   "id": "empire-74",
-   "w1": 37,
-   "g1": 60
-  },
-  {
-   "id": "empire-75",
-   "w1": 36,
-   "g1": 61
-  },
-  {
-   "id": "empire-76",
-   "w1": 32,
-   "g1": 60
-  },
-  {
-   "id": "empire-77",
-   "w1": 34,
-   "g1": 61
-  },
-  {
-   "id": "empire-78",
-   "w1": 33,
-   "g1": 60
-  },
-  {
-   "id": "empire-79",
-   "w1": 27,
-   "g1": 60
-  },
-  {
-   "id": "empire-80",
-   "w1": 27,
-   "g1": 60
-  },
-  {
-   "id": "empire-81",
-   "w1": 30,
-   "g1": 61
-  },
-  {
-   "id": "empire-82",
-   "w1": 32,
-   "g1": 60
-  },
-  {
-   "id": "empire-83",
-   "w1": 40,
-   "g1": 60
-  },
-  {
-   "id": "empire-84",
-   "w1": 25,
-   "g1": 60
-  },
-  {
-   "id": "empire-85",
-   "w1": 19,
-   "g1": 60
-  },
-  {
-   "id": "empire-86",
-   "w1": 18,
-   "g1": 61
-  },
-  {
-   "id": "empire-87",
-   "w1": 20,
-   "g1": 61
-  },
-  {
-   "id": "empire-88",
-   "w1": 42,
-   "g1": 60
-  },
-  {
-   "id": "empire-89",
-   "w1": 27,
-   "g1": 60
-  },
-  {
-   "id": "empire-90",
-   "w1": 23,
-   "g1": 60
-  },
-  {
-   "id": "empire-91",
-   "w1": 31,
-   "g1": 60
-  },
-  {
-   "id": "empire-92",
-   "w1": 36,
-   "g1": 60
-  },
-  {
-   "id": "empire-93",
-   "w1": 49,
-   "g1": 61
-  },
-  {
-   "id": "empire-94",
-   "w1": 23,
-   "g1": 62
-  },
-  {
-   "id": "empire-95",
-   "w1": 27,
-   "g1": 60
-  },
-  {
-   "id": "empire-96",
-   "w1": 34,
-   "g1": 59
-  },
-  {
-   "id": "empire-97",
-   "w1": 28,
-   "g1": 59
-  },
-  {
-   "id": "empire-98",
-   "w1": 27,
-   "g1": 59
-  },
-  {
-   "id": "empire-99",
-   "w1": 38,
-   "g1": 61
-  },
-  {
-   "id": "empire-100",
-   "w1": 15,
-   "g1": 60
-  },
-  {
-   "id": "empire-101",
-   "w1": 31,
-   "g1": 61
-  },
-  {
-   "id": "empire-102",
-   "w1": 35,
-   "g1": 60
-  },
-  {
-   "id": "empire-103",
-   "w1": 28,
-   "g1": 61
-  },
-  {
-   "id": "empire-104",
-   "w1": 33,
-   "g1": 59
-  },
-  {
-   "id": "empire-105",
-   "w1": 34,
-   "g1": 60
-  },
-  {
-   "id": "empire-106",
-   "w1": 30,
-   "g1": 59
-  },
-  {
-   "id": "empire-107",
-   "w1": 27,
-   "g1": 59
-  },
-  {
-   "id": "empire-108",
-   "w1": 33,
-   "g1": 59
-  },
-  {
-   "id": "empire-109",
-   "w1": 32,
-   "g1": 60
-  },
-  {
-   "id": "empire-110",
-   "w1": 20,
-   "g1": 59
-  },
-  {
-   "id": "empire-111",
-   "w1": 33,
-   "g1": 59
-  },
-  {
-   "id": "empire-112",
-   "w1": 43,
-   "g1": 60
-  },
-  {
-   "id": "empire-113",
-   "w1": 38,
-   "g1": 59
-  },
-  {
-   "id": "empire-114",
-   "w1": 30,
-   "g1": 59
-  },
-  {
-   "id": "empire-115",
-   "w1": 15,
-   "g1": 60
-  },
-  {
-   "id": "empire-116",
-   "w1": 33,
-   "g1": 61
-  },
-  {
-   "id": "empire-117",
-   "w1": 10,
-   "g1": 59
-  },
-  {
-   "id": "empire-118",
-   "w1": 40,
-   "g1": 60
-  },
-  {
-   "id": "empire-119",
-   "w1": 24,
-   "g1": 59
-  },
-  {
-   "id": "empire-120",
-   "w1": 29,
-   "g1": 59
-  },
-  {
-   "id": "empire-121",
-   "w1": 29,
-   "g1": 59
-  },
-  {
-   "id": "empire-122",
-   "w1": 16,
-   "g1": 59
-  },
-  {
-   "id": "empire-123",
-   "w1": 19,
-   "g1": 61
-  },
-  {
-   "id": "empire-124",
-   "w1": 22,
-   "g1": 60
-  },
-  {
-   "id": "empire-125",
-   "w1": 40,
-   "g1": 60
-  },
-  {
-   "id": "empire-126",
-   "w1": 17,
-   "g1": 59
-  },
-  {
-   "id": "empire-127",
    "w1": 39,
    "g1": 60
   },
   {
-   "id": "empire-128",
-   "w1": 35,
-   "g1": 59
+   "id": "empire-52",
+   "w1": 9,
+   "g1": 60
   },
   {
-   "id": "empire-129",
-   "w1": 25,
-   "g1": 59
+   "id": "empire-53",
+   "w1": 31,
+   "g1": 60
   },
   {
-   "id": "empire-130",
-   "w1": 22,
-   "g1": 59
+   "id": "empire-54",
+   "w1": 39,
+   "g1": 61
   },
   {
-   "id": "empire-131",
+   "id": "empire-55",
+   "w1": 41,
+   "g1": 64
+  },
+  {
+   "id": "empire-56",
+   "w1": 29,
+   "g1": 60
+  },
+  {
+   "id": "empire-57",
    "w1": 28,
    "g1": 60
   },
   {
-   "id": "empire-132",
-   "w1": 25,
-   "g1": 59
-  },
-  {
-   "id": "empire-133",
-   "w1": 25,
+   "id": "empire-58",
+   "w1": 44,
    "g1": 60
   },
   {
-   "id": "empire-134",
-   "w1": 40,
-   "g1": 59
-  },
-  {
-   "id": "empire-135",
+   "id": "empire-59",
    "w1": 27,
-   "g1": 59
-  },
-  {
-   "id": "empire-136",
-   "w1": 37,
-   "g1": 59
-  },
-  {
-   "id": "empire-137",
-   "w1": 25,
    "g1": 61
   },
   {
-   "id": "empire-138",
-   "w1": 29,
-   "g1": 59
-  },
-  {
-   "id": "empire-139",
-   "w1": 32,
+   "id": "empire-60",
+   "w1": 31,
    "g1": 60
   },
   {
-   "id": "empire-140",
-   "w1": 37,
-   "g1": 59
+   "id": "empire-61",
+   "w1": 30,
+   "g1": 60
   },
   {
-   "id": "empire-141",
-   "w1": 27,
-   "g1": 59
+   "id": "empire-62",
+   "w1": 19,
+   "g1": 60
   },
   {
-   "id": "empire-142",
-   "w1": 33,
-   "g1": 59
+   "id": "empire-63",
+   "w1": 22,
+   "g1": 60
   },
   {
-   "id": "empire-143",
+   "id": "empire-64",
    "w1": 34,
-   "g1": 59
+   "g1": 61
   },
   {
-   "id": "empire-144",
-   "w1": 23,
+   "id": "empire-65",
+   "w1": 17,
    "g1": 60
   },
   {
-   "id": "empire-145",
+   "id": "empire-66",
    "w1": 42,
    "g1": 60
   },
   {
-   "id": "empire-146",
+   "id": "empire-67",
+   "w1": 33,
+   "g1": 60
+  },
+  {
+   "id": "empire-68",
+   "w1": 19,
+   "g1": 60
+  },
+  {
+   "id": "empire-69",
+   "w1": 47,
+   "g1": 60
+  },
+  {
+   "id": "empire-70",
+   "w1": 33,
+   "g1": 61
+  },
+  {
+   "id": "empire-71",
+   "w1": 17,
+   "g1": 60
+  },
+  {
+   "id": "empire-72",
+   "w1": 25,
+   "g1": 60
+  },
+  {
+   "id": "empire-73",
+   "w1": 36,
+   "g1": 60
+  },
+  {
+   "id": "empire-74",
+   "w1": 25,
+   "g1": 60
+  },
+  {
+   "id": "empire-75",
+   "w1": 25,
+   "g1": 60
+  },
+  {
+   "id": "empire-76",
+   "w1": 21,
+   "g1": 60
+  },
+  {
+   "id": "empire-77",
+   "w1": 37,
+   "g1": 60
+  },
+  {
+   "id": "empire-78",
+   "w1": 43,
+   "g1": 60
+  },
+  {
+   "id": "empire-79",
+   "w1": 14,
+   "g1": 60
+  },
+  {
+   "id": "empire-80",
+   "w1": 26,
+   "g1": 60
+  },
+  {
+   "id": "empire-81",
+   "w1": 36,
+   "g1": 60
+  },
+  {
+   "id": "empire-82",
+   "w1": 27,
+   "g1": 61
+  },
+  {
+   "id": "empire-83",
+   "w1": 30,
+   "g1": 60
+  },
+  {
+   "id": "empire-84",
+   "w1": 32,
+   "g1": 60
+  },
+  {
+   "id": "empire-85",
+   "w1": 39,
+   "g1": 62
+  },
+  {
+   "id": "empire-86",
+   "w1": 32,
+   "g1": 60
+  },
+  {
+   "id": "empire-87",
+   "w1": 30,
+   "g1": 60
+  },
+  {
+   "id": "empire-88",
+   "w1": 31,
+   "g1": 60
+  },
+  {
+   "id": "empire-89",
+   "w1": 26,
+   "g1": 60
+  },
+  {
+   "id": "empire-90",
+   "w1": 32,
+   "g1": 60
+  },
+  {
+   "id": "empire-91",
+   "w1": 38,
+   "g1": 61
+  },
+  {
+   "id": "empire-92",
+   "w1": 31,
+   "g1": 60
+  },
+  {
+   "id": "empire-93",
+   "w1": 38,
+   "g1": 60
+  },
+  {
+   "id": "empire-94",
+   "w1": 34,
+   "g1": 61
+  },
+  {
+   "id": "empire-95",
+   "w1": 15,
+   "g1": 60
+  },
+  {
+   "id": "empire-96",
+   "w1": 39,
+   "g1": 60
+  },
+  {
+   "id": "empire-97",
+   "w1": 37,
+   "g1": 60
+  },
+  {
+   "id": "empire-98",
+   "w1": 23,
+   "g1": 60
+  },
+  {
+   "id": "empire-99",
+   "w1": 29,
+   "g1": 60
+  },
+  {
+   "id": "empire-100",
+   "w1": 24,
+   "g1": 60
+  },
+  {
+   "id": "empire-101",
+   "w1": 32,
+   "g1": 59
+  },
+  {
+   "id": "empire-102",
+   "w1": 28,
+   "g1": 59
+  },
+  {
+   "id": "empire-103",
+   "w1": 28,
+   "g1": 60
+  },
+  {
+   "id": "empire-104",
    "w1": 31,
    "g1": 59
   },
   {
-   "id": "empire-147",
-   "w1": 24,
-   "g1": 63
-  },
-  {
-   "id": "empire-148",
-   "w1": 32,
+   "id": "empire-105",
+   "w1": 30,
    "g1": 60
   },
   {
-   "id": "empire-149",
-   "w1": 29,
-   "g1": 59
-  },
-  {
-   "id": "empire-150",
-   "w1": 29,
-   "g1": 59
-  },
-  {
-   "id": "empire-151",
-   "w1": 22,
-   "g1": 59
-  },
-  {
-   "id": "empire-152",
-   "w1": 22,
-   "g1": 59
-  },
-  {
-   "id": "empire-153",
-   "w1": 29,
-   "g1": 60
-  },
-  {
-   "id": "empire-154",
+   "id": "empire-106",
    "w1": 34,
    "g1": 60
   },
   {
-   "id": "empire-155",
-   "w1": 25,
-   "g1": 62
+   "id": "empire-107",
+   "w1": 26,
+   "g1": 60
   },
   {
-   "id": "empire-156",
-   "w1": 32,
+   "id": "empire-108",
+   "w1": 28,
    "g1": 59
   },
   {
-   "id": "empire-157",
+   "id": "empire-109",
+   "w1": 22,
+   "g1": 59
+  },
+  {
+   "id": "empire-110",
+   "w1": 30,
+   "g1": 60
+  },
+  {
+   "id": "empire-111",
+   "w1": 43,
+   "g1": 59
+  },
+  {
+   "id": "empire-112",
    "w1": 27,
    "g1": 59
   },
   {
+   "id": "empire-113",
+   "w1": 21,
+   "g1": 60
+  },
+  {
+   "id": "empire-114",
+   "w1": 26,
+   "g1": 60
+  },
+  {
+   "id": "empire-115",
+   "w1": 29,
+   "g1": 60
+  },
+  {
+   "id": "empire-116",
+   "w1": 13,
+   "g1": 61
+  },
+  {
+   "id": "empire-117",
+   "w1": 30,
+   "g1": 60
+  },
+  {
+   "id": "empire-118",
+   "w1": 28,
+   "g1": 59
+  },
+  {
+   "id": "empire-119",
+   "w1": 24,
+   "g1": 60
+  },
+  {
+   "id": "empire-120",
+   "w1": 41,
+   "g1": 59
+  },
+  {
+   "id": "empire-121",
+   "w1": 26,
+   "g1": 59
+  },
+  {
+   "id": "empire-122",
+   "w1": 47,
+   "g1": 60
+  },
+  {
+   "id": "empire-123",
+   "w1": 20,
+   "g1": 60
+  },
+  {
+   "id": "empire-124",
+   "w1": 24,
+   "g1": 60
+  },
+  {
+   "id": "empire-125",
+   "w1": 22,
+   "g1": 59
+  },
+  {
+   "id": "empire-126",
+   "w1": 31,
+   "g1": 61
+  },
+  {
+   "id": "empire-127",
+   "w1": 22,
+   "g1": 59
+  },
+  {
+   "id": "empire-128",
+   "w1": 26,
+   "g1": 60
+  },
+  {
+   "id": "empire-129",
+   "w1": 28,
+   "g1": 60
+  },
+  {
+   "id": "empire-130",
+   "w1": 34,
+   "g1": 59
+  },
+  {
+   "id": "empire-131",
+   "w1": 21,
+   "g1": 59
+  },
+  {
+   "id": "empire-132",
+   "w1": 36,
+   "g1": 62
+  },
+  {
+   "id": "empire-133",
+   "w1": 30,
+   "g1": 59
+  },
+  {
+   "id": "empire-134",
+   "w1": 20,
+   "g1": 59
+  },
+  {
+   "id": "empire-135",
+   "w1": 38,
+   "g1": 60
+  },
+  {
+   "id": "empire-136",
+   "w1": 35,
+   "g1": 60
+  },
+  {
+   "id": "empire-137",
+   "w1": 35,
+   "g1": 60
+  },
+  {
+   "id": "empire-138",
+   "w1": 16,
+   "g1": 60
+  },
+  {
+   "id": "empire-139",
+   "w1": 32,
+   "g1": 59
+  },
+  {
+   "id": "empire-140",
+   "w1": 36,
+   "g1": 59
+  },
+  {
+   "id": "empire-141",
+   "w1": 34,
+   "g1": 59
+  },
+  {
+   "id": "empire-142",
+   "w1": 25,
+   "g1": 60
+  },
+  {
+   "id": "empire-143",
+   "w1": 30,
+   "g1": 60
+  },
+  {
+   "id": "empire-144",
+   "w1": 31,
+   "g1": 59
+  },
+  {
+   "id": "empire-145",
+   "w1": 34,
+   "g1": 60
+  },
+  {
+   "id": "empire-146",
+   "w1": 12,
+   "g1": 59
+  },
+  {
+   "id": "empire-147",
+   "w1": 8,
+   "g1": 60
+  },
+  {
+   "id": "empire-148",
+   "w1": 27,
+   "g1": 59
+  },
+  {
+   "id": "empire-149",
+   "w1": 27,
+   "g1": 61
+  },
+  {
+   "id": "empire-150",
+   "w1": 21,
+   "g1": 61
+  },
+  {
+   "id": "empire-151",
+   "w1": 26,
+   "g1": 59
+  },
+  {
+   "id": "empire-152",
+   "w1": 28,
+   "g1": 60
+  },
+  {
+   "id": "empire-153",
+   "w1": 27,
+   "g1": 60
+  },
+  {
+   "id": "empire-154",
+   "w1": 28,
+   "g1": 59
+  },
+  {
+   "id": "empire-155",
+   "w1": 24,
+   "g1": 59
+  },
+  {
+   "id": "empire-156",
+   "w1": 23,
+   "g1": 59
+  },
+  {
+   "id": "empire-157",
+   "w1": 29,
+   "g1": 59
+  },
+  {
    "id": "empire-158",
-   "w1": 33,
+   "w1": 35,
    "g1": 59
   },
   {
@@ -1353,208 +1353,208 @@
   },
   {
    "id": "empire-160",
-   "w1": 22,
-   "g1": 63
+   "w1": 46,
+   "g1": 60
   },
   {
    "id": "empire-161",
-   "w1": 30,
+   "w1": 21,
    "g1": 59
   },
   {
    "id": "empire-162",
-   "w1": 32,
+   "w1": 33,
    "g1": 60
   },
   {
    "id": "empire-163",
-   "w1": 36,
+   "w1": 34,
    "g1": 59
   },
   {
    "id": "empire-164",
-   "w1": 33,
+   "w1": 31,
    "g1": 59
   },
   {
    "id": "empire-165",
-   "w1": 23,
-   "g1": 59
+   "w1": 33,
+   "g1": 60
   },
   {
    "id": "empire-166",
-   "w1": 37,
-   "g1": 59
+   "w1": 33,
+   "g1": 61
   },
   {
    "id": "empire-167",
-   "w1": 34,
+   "w1": 37,
    "g1": 60
   },
   {
    "id": "empire-168",
-   "w1": 21,
-   "g1": 59
-  },
-  {
-   "id": "empire-169",
-   "w1": 28,
-   "g1": 59
-  },
-  {
-   "id": "empire-170",
-   "w1": 26,
-   "g1": 61
-  },
-  {
-   "id": "empire-171",
-   "w1": 35,
-   "g1": 61
-  },
-  {
-   "id": "empire-172",
-   "w1": 34,
-   "g1": 60
-  },
-  {
-   "id": "empire-173",
-   "w1": 33,
-   "g1": 59
-  },
-  {
-   "id": "empire-174",
-   "w1": 26,
-   "g1": 59
-  },
-  {
-   "id": "empire-175",
-   "w1": 30,
-   "g1": 59
-  },
-  {
-   "id": "empire-176",
-   "w1": 32,
-   "g1": 63
-  },
-  {
-   "id": "empire-177",
-   "w1": 38,
-   "g1": 59
-  },
-  {
-   "id": "empire-178",
-   "w1": 34,
-   "g1": 61
-  },
-  {
-   "id": "empire-179",
-   "w1": 26,
-   "g1": 59
-  },
-  {
-   "id": "empire-180",
-   "w1": 34,
-   "g1": 59
-  },
-  {
-   "id": "empire-181",
-   "w1": 31,
-   "g1": 60
-  },
-  {
-   "id": "empire-182",
-   "w1": 28,
-   "g1": 59
-  },
-  {
-   "id": "empire-183",
-   "w1": 45,
-   "g1": 59
-  },
-  {
-   "id": "empire-184",
    "w1": 29,
    "g1": 59
   },
   {
-   "id": "empire-185",
-   "w1": 36,
+   "id": "empire-169",
+   "w1": 31,
    "g1": 60
   },
   {
-   "id": "empire-186",
-   "w1": 26,
-   "g1": 59
-  },
-  {
-   "id": "empire-187",
-   "w1": 40,
-   "g1": 59
-  },
-  {
-   "id": "empire-188",
-   "w1": 18,
-   "g1": 60
-  },
-  {
-   "id": "empire-189",
-   "w1": 35,
-   "g1": 61
-  },
-  {
-   "id": "empire-190",
-   "w1": 37,
+   "id": "empire-170",
+   "w1": 42,
    "g1": 62
   },
   {
-   "id": "empire-191",
+   "id": "empire-171",
+   "w1": 32,
+   "g1": 59
+  },
+  {
+   "id": "empire-172",
    "w1": 38,
    "g1": 60
   },
   {
-   "id": "empire-192",
-   "w1": 33,
+   "id": "empire-173",
+   "w1": 28,
+   "g1": 59
+  },
+  {
+   "id": "empire-174",
+   "w1": 29,
+   "g1": 62
+  },
+  {
+   "id": "empire-175",
+   "w1": 26,
+   "g1": 59
+  },
+  {
+   "id": "empire-176",
+   "w1": 21,
+   "g1": 59
+  },
+  {
+   "id": "empire-177",
+   "w1": 26,
+   "g1": 62
+  },
+  {
+   "id": "empire-178",
+   "w1": 23,
+   "g1": 59
+  },
+  {
+   "id": "empire-179",
+   "w1": 31,
+   "g1": 59
+  },
+  {
+   "id": "empire-180",
+   "w1": 17,
    "g1": 60
   },
   {
-   "id": "empire-193",
+   "id": "empire-181",
+   "w1": 35,
+   "g1": 60
+  },
+  {
+   "id": "empire-182",
+   "w1": 32,
+   "g1": 60
+  },
+  {
+   "id": "empire-183",
+   "w1": 35,
+   "g1": 59
+  },
+  {
+   "id": "empire-184",
+   "w1": 31,
+   "g1": 60
+  },
+  {
+   "id": "empire-185",
+   "w1": 27,
+   "g1": 59
+  },
+  {
+   "id": "empire-186",
+   "w1": 36,
+   "g1": 60
+  },
+  {
+   "id": "empire-187",
+   "w1": 25,
+   "g1": 60
+  },
+  {
+   "id": "empire-188",
    "w1": 27,
    "g1": 60
   },
   {
-   "id": "empire-194",
+   "id": "empire-189",
    "w1": 28,
-   "g1": 62
+   "g1": 60
+  },
+  {
+   "id": "empire-190",
+   "w1": 27,
+   "g1": 60
+  },
+  {
+   "id": "empire-191",
+   "w1": 20,
+   "g1": 59
+  },
+  {
+   "id": "empire-192",
+   "w1": 29,
+   "g1": 59
+  },
+  {
+   "id": "empire-193",
+   "w1": 39,
+   "g1": 59
+  },
+  {
+   "id": "empire-194",
+   "w1": 27,
+   "g1": 59
   },
   {
    "id": "empire-195",
-   "w1": 37,
+   "w1": 38,
    "g1": 59
   },
   {
    "id": "empire-196",
-   "w1": 26,
-   "g1": 60
+   "w1": 31,
+   "g1": 59
   },
   {
    "id": "empire-197",
-   "w1": 26,
-   "g1": 59
+   "w1": 31,
+   "g1": 60
   },
   {
    "id": "empire-198",
-   "w1": 42,
-   "g1": 59
+   "w1": 33,
+   "g1": 60
   },
   {
    "id": "empire-199",
-   "w1": 27,
-   "g1": 59
+   "w1": 33,
+   "g1": 60
   },
   {
    "id": "empire-200",
-   "w1": 21,
-   "g1": 59
+   "w1": 31,
+   "g1": 60
   }
  ]
 }
