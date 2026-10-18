@@ -1,0 +1,363 @@
+{
+ "_description": "Test : tous les régiments ont 2 Moral de plus.",
+ "recrue_imp": {
+  "mor": 7
+ },
+ "lancier_emp": {
+  "mor": 9
+ },
+ "archer_imp": {
+  "mor": 7
+ },
+ "arbaletrier_imp": {
+  "mor": 7
+ },
+ "chevalier_prov": {
+  "mor": 10
+ },
+ "dragon_imp": {
+  "mor": 12
+ },
+ "soldat_kragz": {
+  "mor": 10
+ },
+ "porte_etendard": {
+  "mor": 9
+ },
+ "chevalier_templier": {
+  "mor": 8
+ },
+ "cadets_academie": {
+  "mor": 8
+ },
+ "forteresse": {
+  "mor": 14
+ },
+ "convoi": {
+  "mor": 32
+ },
+ "garnison": {
+  "mor": 8
+ },
+ "paysans": {
+  "mor": 5
+ },
+ "etat_major": {
+  "mor": 7
+ },
+ "cavaliers_dragons_elite": {
+  "mor": 12
+ },
+ "eclaireur_elfe": {
+  "mor": 7
+ },
+ "archer_bois": {
+  "mor": 7
+ },
+ "cavalier_elfe": {
+  "mor": 9
+ },
+ "elem_feu": {
+  "mor": 7
+ },
+ "clerc_foret": {
+  "mor": 9
+ },
+ "elem_terre": {
+  "mor": 8
+ },
+ "elem_eau": {
+  "mor": 7
+ },
+ "elem_eveil_regiment": {
+  "mor": 6
+ },
+ "sylvain": {
+  "mor": 10
+ },
+ "rangers": {
+  "mor": 6
+ },
+ "palissade_regiment": {
+  "mor": 5
+ },
+ "cultiste": {
+  "mor": 5
+ },
+ "chien_infernal": {
+  "mor": 8
+ },
+ "esclave_guerrier": {
+  "mor": 6
+ },
+ "mercenaire_stagiaire": {
+  "mor": 7
+ },
+ "demon_akantha": {
+  "mor": 12
+ },
+ "dryades_guerisseuses": {
+  "mor": 7
+ },
+ "ceremonie_declin": {
+  "mor": 7
+ },
+ "veilleur_os": {
+  "mor": 8
+ },
+ "fanatiques": {
+  "mor": 7
+ },
+ "maitre_chenil_infernal": {
+  "mor": 7
+ },
+ "jeune_nomade": {
+  "mor": 6
+ },
+ "frondeur_nomade": {
+  "mor": 7
+ },
+ "saboteur_nomade": {
+  "mor": 12
+ },
+ "charmeur_basilics": {
+  "mor": 7
+ },
+ "basilics_oasis": {
+  "mor": 10
+ },
+ "archeotacticiens": {
+  "mor": 8
+ },
+ "chasseur_reliques": {
+  "mor": 7
+ },
+ "marchand_ombres": {
+  "mor": 8
+ },
+ "caravane_marchande": {
+  "mor": 8
+ },
+ "eleveur_basilics": {
+  "mor": 8
+ },
+ "basilics_desert": {
+  "mor": 3
+ },
+ "diablotins": {
+  "mor": 6
+ },
+ "gargouille_cendres": {
+  "mor": 8
+ },
+ "oeuf_dragon": {
+  "mor": 10
+ },
+ "dragonnet_infernal": {
+  "mor": 10
+ },
+ "dragon_infernal": {
+  "mor": 12
+ },
+ "cavaliers_dunes": {
+  "mor": 8
+ },
+ "reine_basilics": {
+  "mor": 11
+ },
+ "treant_millenaire": {
+  "mor": 12
+ },
+ "gardienne_lumiere": {
+  "mor": 9
+ },
+ "mercenaires": {
+  "mor": 7
+ },
+ "puits_sel_amar": {
+  "mor": 32
+ },
+ "source_corrompue": {
+  "mor": 14
+ },
+ "portail_infernal": {
+  "mor": 22
+ },
+ "gardienne_nid": {
+  "mor": 12
+ },
+ "chariot_oeufs": {
+  "mor": 32
+ },
+ "oeuf_rituel": {
+  "mor": 32
+ },
+ "legionnaire_desert": {
+  "mor": 9
+ },
+ "garde_capitale": {
+  "mor": 9
+ },
+ "tambour_bataillon": {
+  "mor": 7
+ },
+ "sergents_instructeurs": {
+  "mor": 9
+ },
+ "hallebardiers_ligne": {
+  "mor": 9
+ },
+ "gardes_drapeau": {
+  "mor": 10
+ },
+ "cavaliers_garde": {
+  "mor": 9
+ },
+ "cuirassiers_kragz": {
+  "mor": 9
+ },
+ "commandant_kragz": {
+  "mor": 14
+ },
+ "pousse_sylve": {
+  "mor": 7
+ },
+ "gardien_ecorce": {
+  "mor": 9
+ },
+ "danseuses_lames": {
+  "mor": 7
+ },
+ "lettree_conclave": {
+  "mor": 8
+ },
+ "choeur_saisons": {
+  "mor": 8
+ },
+ "sentinelle_chene": {
+  "mor": 11
+ },
+ "lyra": {
+  "mor": 11
+ },
+ "chuchoteur_abysses": {
+  "mor": 7
+ },
+ "gargouille_sentinelle": {
+  "mor": 8
+ },
+ "legion_morvak": {
+  "mor": 4
+ },
+ "morvak": {
+  "mor": 12
+ },
+ "voleurs_provisions": {
+  "mor": 6
+ },
+ "colporteur": {
+  "mor": 6
+ },
+ "danseurs_sable": {
+  "mor": 7
+ },
+ "razzieurs_dunes": {
+  "mor": 8
+ },
+ "puits_empoisonne": {
+  "mor": 6
+ },
+ "zahra": {
+  "mor": 11
+ },
+ "garde_frontiere_sylvestre": {
+  "mor": 9
+ },
+ "dryade_corrompue": {
+  "mor": 8
+ },
+ "chevaucheurs_mirage": {
+  "mor": 8
+ },
+ "marchand_ames": {
+  "mor": 8
+ },
+ "ravitailleur": {
+  "mor": 7
+ },
+ "veterans_louer": {
+  "mor": 9
+ },
+ "sentinelle_cimes": {
+  "mor": 7
+ },
+ "traqueuse_sylvestre": {
+  "mor": 8
+ },
+ "seigneure_chasse": {
+  "mor": 11
+ },
+ "gardienne_seuil": {
+  "mor": 9
+ },
+ "eclaireuse_fourres": {
+  "mor": 7
+ },
+ "ecuyers_garde": {
+  "mor": 7
+ },
+ "arbaletriers_rang": {
+  "mor": 8
+ },
+ "lanciers_rempart": {
+  "mor": 8
+ },
+ "chevaliers_ordre": {
+  "mor": 10
+ },
+ "cuirassiers_lourds": {
+  "mor": 11
+ },
+ "imperatrice_octavia": {
+  "mor": 10
+ },
+ "garde_asura": {
+  "mor": 6
+ },
+ "sorciere_pacte": {
+  "mor": 8
+ },
+ "gardien_chaines": {
+  "mor": 9
+ },
+ "bourreau_abime": {
+  "mor": 10
+ },
+ "archidemon_origines": {
+  "mor": 12
+ },
+ "chamelier": {
+  "mor": 6
+ },
+ "eclaireuse_sables": {
+  "mor": 6
+ },
+ "sentinelles_oasis": {
+  "mor": 8
+ },
+ "caravanier_arme": {
+  "mor": 9
+ },
+ "al_mansur": {
+  "mor": 11
+ },
+ "basilic_demoniaque": {
+  "mor": 8
+ },
+ "milice_village": {
+  "mor": 7
+ },
+ "ingenieurs_siege": {
+  "mor": 8
+ }
+}

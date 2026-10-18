@@ -13,10 +13,16 @@ import { nextRandom, seedFrom } from '../src/engine/rng';
 import type { Faction } from '../src/engine/types';
 import { cardName } from '../src/i18n/log.fr';
 import { COLLECTIBLE } from '../src/profile/profile';
+import { patchFromArgs } from '../src/data/patch';
 
 const F: Faction[] = ['empire', 'elfe', 'demons', 'nomades'];
 const LABEL: Record<string, string> = { empire: 'Empire', elfe: 'Elfes', demons: 'Démons', nomades: 'Nomades' };
-const [mode, arg1, arg2, arg3, arg4] = process.argv.slice(2);
+// Option « --patch balance/x.json » : modifications testées en mémoire ; « --out nom » : rapport de finale sous un autre nom.
+const { args: ARGV0 } = patchFromArgs(process.argv.slice(2));
+const oi = ARGV0.indexOf('--out');
+const OUT = oi >= 0 ? ARGV0[oi + 1]! : 'echelle-finale';
+const ARGV = oi >= 0 ? [...ARGV0.slice(0, oi), ...ARGV0.slice(oi + 2)] : ARGV0;
+const [mode, arg1, arg2, arg3, arg4] = ARGV;
 
 interface Entry { id: string; faction: Faction; deck: string[]; w1: number; g1: number; w2: number; g2: number }
 
@@ -129,6 +135,6 @@ if (mode === 'qualif') {
     '## Meilleur deck de chaque faction', '',
     ...F.flatMap(f => { const e = ranked.find(x => x.faction === f)!; return [`**${LABEL[f]} — ${e.id}** (${pct(stats.get(e.id)!.w, stats.get(e.id)!.g)} en finale) : ${composition(e)}.`, '']; }),
   ];
-  writeFileSync('reports/echelle-finale.md', lines.join('\n') + '\n');
+  writeFileSync(`reports/${OUT}.md`, lines.join('\n') + '\n');
   console.log(lines.slice(0, 22).join('\n'));
 }
