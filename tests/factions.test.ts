@@ -103,7 +103,7 @@ describe('Nomades', () => {
     const r = act(s, { type: 'endTurn' });
     expect(r.state.players.B.hand).toHaveLength(0);
     expect(r.state.players.B.discard).toContain('chevalier_prov');
-    expect(r.state.players.A.board.isole!.currentMor).toBe(10 - 5);
+    expect(r.state.players.A.board.isole!.currentMor).toBe(10 + 1 - 5); // +1 Moral (Équilibrage 8)
   });
   it('Archéotacticiens : une Tactique défaussée de force chez l’adversaire donne une copie gratuite', () => {
     let s = blankGame();

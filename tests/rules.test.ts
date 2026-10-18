@@ -99,7 +99,7 @@ describe('Combat de fin de tour', () => {
     const after = s.players.B.board.avant[0]!;
     expect(after.uid).toBe(t.uid);
     expect(after.currentEnd).toBe(50 - (10 - 5));
-    expect(after.currentMor).toBe(6 - 1);
+    expect(after.currentMor).toBe(6 + 1 - 1); // +1 Moral (Équilibrage 8)
   });
   it("destruction : lassitude = niveau, alliés -1 Moral, l'attaquant +1 Moral", () => {
     let s = blankGame();
