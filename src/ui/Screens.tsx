@@ -242,34 +242,35 @@ function CosmeticsBlock({ profile, update }: { profile: Profile; update: (fn: (p
     if (on) { if (p.emoteLoadout.length > 1) p.emoteLoadout = p.emoteLoadout.filter(x => x !== id); }
     else if (p.emoteLoadout.length < MAX_LOADOUT) p.emoteLoadout = [...p.emoteLoadout, id];
   });
+  const ownedAvatars = AVATAR_IDS.filter(id => profile.avatars.includes(id));
+  const ownedEmotes = EMOTE_IDS.filter(id => profile.emotes.includes(id));
+  const pct = (x: number, y: number) => `${Math.floor((100 * x) / Math.max(1, y))} %`;
   return (
     <section className="menu-block">
-      <h2>Image de profil</h2>
+      {/* Seules les images et emotes possédées sont affichées ; la complétion dit combien il en reste à découvrir. */}
+      <h2>Image de profil <small className="muted">({ownedAvatars.length} / {AVATAR_IDS.length} · {pct(ownedAvatars.length, AVATAR_IDS.length)})</small></h2>
       <div className="avatar-grid">
-        {AVATAR_IDS.map(id => {
-          const have = profile.avatars.includes(id);
-          return (
-            <button key={id} type="button" disabled={!have} className={`avatar-pick${profile.avatar === id ? ' on' : ''}${have ? '' : ' locked'}`}
-              title={have ? AVATARS[id] : `${AVATARS[id]} — à débloquer dans les paquets`} onClick={() => update(p => { p.avatar = id; })}>
-              <Avatar id={id} size={64} />
-              <span>{have ? AVATARS[id] : '🔒'}</span>
-            </button>
-          );
-        })}
+        {ownedAvatars.map(id => (
+          <button key={id} type="button" className={`avatar-pick${profile.avatar === id ? ' on' : ''}`} title={AVATARS[id]} onClick={() => update(p => { p.avatar = id; })}>
+            <Avatar id={id} size={64} />
+            <span>{AVATARS[id]}</span>
+          </button>
+        ))}
       </div>
-      <h2>Emotes en ligne <small className="muted">({profile.emoteLoadout.length} / {MAX_LOADOUT} choisies)</small></h2>
+      {ownedAvatars.length < AVATAR_IDS.length && <p className="muted small">{AVATAR_IDS.length - ownedAvatars.length} image(s) de profil encore à découvrir.</p>}
+      <h2>Emotes en ligne <small className="muted">({profile.emoteLoadout.length} / {MAX_LOADOUT} choisies · {ownedEmotes.length} / {EMOTE_IDS.length} possédées · {pct(ownedEmotes.length, EMOTE_IDS.length)})</small></h2>
       <div className="emote-grid">
-        {EMOTE_IDS.map(id => {
-          const have = profile.emotes.includes(id);
+        {ownedEmotes.map(id => {
           const on = profile.emoteLoadout.includes(id);
           return (
-            <label key={id} className={`emote-pick${have ? '' : ' locked'}`} title={have ? '' : 'À débloquer dans les paquets'}>
-              <input type="checkbox" disabled={!have || (!on && profile.emoteLoadout.length >= MAX_LOADOUT)} checked={on} onChange={() => toggle(id)} />
-              {have ? `« ${EMOTES[id]} »` : '🔒 Emote à débloquer'}
+            <label key={id} className="emote-pick">
+              <input type="checkbox" disabled={!on && profile.emoteLoadout.length >= MAX_LOADOUT} checked={on} onChange={() => toggle(id)} />
+              {`« ${EMOTES[id]} »`}
             </label>
           );
         })}
       </div>
+      {ownedEmotes.length < EMOTE_IDS.length && <p className="muted small">{EMOTE_IDS.length - ownedEmotes.length} emote(s) encore à découvrir.</p>}
       <p className="muted small">Les emotes et les images de profil se débloquent dans les paquets (Ma collection → Mes cartes).</p>
     </section>
   );
