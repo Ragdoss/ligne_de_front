@@ -1,6 +1,7 @@
 // Tuile de carte réutilisable (collection, créateur de deck, campagne).
 import { CARDS } from '../data/cards';
 import { CardFace } from './CardFace';
+import { zoomProps } from './HoverZoom';
 import { cardDesc, cardName, visibleKeywords } from './labels';
 
 export function statsLine(id: string): string {
@@ -22,7 +23,7 @@ export function statsLine(id: string): string {
 export function CardTile({ id, dim, badge, children }: { id: string; dim?: boolean; badge?: React.ReactNode; children?: React.ReactNode }) {
   const c = CARDS[id]!;
   return (
-    <div className={`ccard ${c.faction}${dim ? '' : ' in'}`} title={`${cardName(id)} — ${statsLine(id)}${cardDesc(id) ? `\n${cardDesc(id)}` : ''}`}>
+    <div className={`ccard ${c.faction}${dim ? '' : ' in'}`} {...zoomProps(id)} title={`${cardName(id)} — ${statsLine(id)}${cardDesc(id) ? `\n${cardDesc(id)}` : ''}`}>
       <CardFace id={id} />
       {(badge || children) && <div className="cc-ctl">{badge}{children}</div>}
     </div>

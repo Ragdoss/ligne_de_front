@@ -4,10 +4,10 @@ import { CARDS } from '../src/data/cards';
 import { CHAMPION_POOLS, pickChampion, TEST_DECKS } from '../src/data/champions';
 
 describe('Pools de champions', () => {
-  it('3 decks de 45 cartes existantes par faction', () => {
+  it('4 decks de 45 cartes existantes par faction', () => {
     for (const f of ['empire', 'elfe', 'demons', 'nomades'] as const) {
       const pool = CHAMPION_POOLS[f]!;
-      expect(pool).toHaveLength(3);
+      expect(pool).toHaveLength(4);
       for (const d of pool) { expect(d.cards).toHaveLength(45); for (const id of d.cards) expect(CARDS[id], id).toBeTruthy(); }
     }
   });
@@ -16,7 +16,7 @@ describe('Pools de champions', () => {
   });
   it('le tirage choisit dans le pool', () => {
     expect(pickChampion('empire', () => 0)!.id).toBe(CHAMPION_POOLS.empire![0]!.id);
-    expect(pickChampion('empire', () => 0.99)!.id).toBe(CHAMPION_POOLS.empire![2]!.id);
+    expect(pickChampion('empire', () => 0.99)!.id).toBe(CHAMPION_POOLS.empire![3]!.id);
   });
 });
 

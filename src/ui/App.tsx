@@ -8,6 +8,7 @@ import { CampHub } from './Camp';
 import { CampaignDeck } from './CampaignDeck';
 import { setRomanLevels } from './CardFace';
 import { CardTile } from './CardTile';
+import { HoverZoom, showZoom } from './HoverZoom';
 import { MyCards } from './Collection';
 import { DeckList } from './Decks';
 import { Dialog, GameScreen } from './GameScreen';
@@ -59,6 +60,7 @@ const CoinGain = () => <p className="coin-gain">+{COINS_PER_WIN} pièces</p>;
 
 export function App() {
   const [screen, setScreen] = useState<Screen>({ kind: 'home' });
+  useEffect(() => { showZoom(null); }, [screen.kind]); // l'agrandissement ne survit pas à un changement d'écran
   const [profile, setProfile] = useState<Profile>(() => loadProfile());
   /** Partie de campagne en cours, suivie par la bulle des règles du scénario. */
   const live = useRef(liveGameStore()).current;
@@ -283,7 +285,7 @@ export function App() {
     content = <OptionsScreen profile={profile} update={update} onSwitchProfile={switchProfile} onBack={home} />;
   }
 
-  return <div className="app-zoom" style={{ zoom: o.scale }}>{content}</div>;
+  return <div className="app-zoom" style={{ zoom: o.scale }}>{content}<HoverZoom /></div>;
 }
 
 /** Partie en ligne : notre camp est en bas, le camp adverse est joué à distance. Revanche, série et emotes. */

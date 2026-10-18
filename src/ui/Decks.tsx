@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { CARDS } from '../data/cards';
 import { autoComplete, checkDeck, MAX_COPIES, owned, sortedDecks, type Profile, type SavedDeck } from '../profile/profile';
 import { CardTile } from './CardTile';
+import { showZoom, zoomProps } from './HoverZoom';
 import { filterCards, FilterBar, NO_FILTER, type Filters } from './Collection';
 import { cardName, FACTION_LABEL, PLAYABLE_FACTIONS } from './labels';
 
@@ -104,7 +105,7 @@ function DeckBuilder({ profile, initial, onSave, onCancel, onDelete }: {
         <div className="deck-cards">
           {listed.length === 0 && <p className="muted small">Ajoute des cartes avec les boutons + de la grille.</p>}
           {listed.map(([id, n]) => (
-            <button key={id} type="button" className={`deck-line ${CARDS[id]!.faction}`} onClick={() => remove(id)} title="Retirer un exemplaire">
+            <button key={id} type="button" className={`deck-line ${CARDS[id]!.faction}`} {...zoomProps(id)} onClick={() => { remove(id); showZoom(null); }} title="Retirer un exemplaire">
               <span>{n}×</span> {cardName(id)} <small>niv. {CARDS[id]!.niveau}</small>
             </button>
           ))}

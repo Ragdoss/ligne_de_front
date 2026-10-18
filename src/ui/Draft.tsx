@@ -10,6 +10,7 @@ import { COINS_PER_WIN, type Profile } from '../profile/profile';
 import { keyFor } from '../profile/store';
 import { Avatar } from './avatars';
 import { CardTile } from './CardTile';
+import { showZoom, zoomProps } from './HoverZoom';
 import { GameScreen } from './GameScreen';
 import { cardName, FACTION_LABEL } from './labels';
 import { TopBar } from './Screens';
@@ -40,7 +41,7 @@ function PicksSummary({ picks }: { picks: string[] }) {
       <p className="small muted">{FACTION_ORDER.filter(f => fac[f]).map(f => `${FACTION_LABEL[f as keyof typeof FACTION_LABEL]} ${fac[f]}`).join(' · ')}{picks.length ? ` · niveau 4-5 : ${high}` : ''}</p>
       <div className="draft-list">
         {Object.keys(n).sort(byFactionLevel).map(id => (
-          <div key={id} className={`deck-line ${CARDS[id]!.faction}`}><span>{n[id]}</span>{cardName(id)}<small>niv. {CARDS[id]!.niveau}</small></div>
+          <div key={id} className={`deck-line ${CARDS[id]!.faction}`} {...zoomProps(id)}><span>{n[id]}</span>{cardName(id)}<small>niv. {CARDS[id]!.niveau}</small></div>
         ))}
       </div>
     </aside>
@@ -179,7 +180,7 @@ export function DraftScreen({ profile, onExit, gameOpts, reward }: {
         <div className="draft-layout">
           <div className="camp-grid">
             {st.packs[0]!.map((id, i) => (
-              <button type="button" key={`${id}-${i}`} className="vn-pick" aria-label={`Garder ${cardName(id)}`} onClick={() => set(pickCard(st, i))}><CardTile id={id} /></button>
+              <button type="button" key={`${id}-${i}`} className="vn-pick" aria-label={`Garder ${cardName(id)}`} onClick={() => { set(pickCard(st, i)); showZoom(null); }}><CardTile id={id} /></button>
             ))}
           </div>
           <PicksSummary picks={st.picks[0]!} />
@@ -236,7 +237,7 @@ export function DraftScreen({ profile, onExit, gameOpts, reward }: {
       )}
       <details className="small"><summary>Mon deck ({st.decks[0]!.length} cartes)</summary>
         <div className="draft-list">{Object.entries(countOf(st.decks[0]!)).sort(([a], [b]) => byFactionLevel(a, b)).map(([id, k]) => (
-          <div key={id} className={`deck-line ${CARDS[id]!.faction}`}><span>{k}</span>{cardName(id)}<small>niv. {CARDS[id]!.niveau}</small></div>
+          <div key={id} className={`deck-line ${CARDS[id]!.faction}`} {...zoomProps(id)}><span>{k}</span>{cardName(id)}<small>niv. {CARDS[id]!.niveau}</small></div>
         ))}</div>
       </details>
     </div>
