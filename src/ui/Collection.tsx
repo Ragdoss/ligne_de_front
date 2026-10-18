@@ -74,8 +74,21 @@ function PackReveal({ result, onClose }: { result: PackResult; onClose: () => vo
   );
 }
 
+/** Carte non possédée : dos de carte, sans illustration ni texte (on garde la surprise et la grille reste légère). */
+function MaskedTile({ id }: { id: string }) {
+  const c = CARDS[id]!;
+  return (
+    <div className={`ccard masked ${c.faction}`} title="Carte pas encore possédée">
+      <div className="mask-back"><span>?</span><small>{FACTION_LABEL[c.faction]} · niv. {c.niveau}</small></div>
+      <div className="cc-ctl"><span className="count zero">0 / {MAX_COPIES}</span></div>
+    </div>
+  );
+}
+
+const pct = (x: number, y: number) => `${Math.floor((100 * x) / Math.max(1, y))} %`;
+
 export function MyCards({ profile, update }: { profile: Profile; update: (fn: (p: Profile) => void) => void }) {
-  const [f, setF] = useState<Filters>(NO_FILTER);
+  const [f, setF] = useState<Filters>({ ...NO_FILTER, owned: 'owned' }); // par défaut : seulement les cartes possédées
   const [pack, setPack] = useState<PackResult | null>(null);
   const have = (id: string) => profile.collection[id] ?? 0;
   const ids = filterCards(f, have);
@@ -86,6 +99,7 @@ export function MyCards({ profile, update }: { profile: Profile; update: (fn: (p
       <div className="camp-bar">
         <span className="pill">Cartes différentes : <b>{ownedDistinct}</b> / {COLLECTIBLE.length}</span>
         <span className="pill">Exemplaires : <b>{total}</b> / {COLLECTIBLE.length * MAX_COPIES}</span>
+        <span className="pill ok">Complétion : <b>{pct(total, COLLECTIBLE.length * MAX_COPIES)}</b></span>
         <span className="pill coins">Pièces : <b>{profile.coins}</b></span>
         <button type="button" className="primary" disabled={profile.coins < PACK_PRICE} onClick={() => {
           let res: PackResult | null = null;
@@ -94,9 +108,19 @@ export function MyCards({ profile, update }: { profile: Profile; update: (fn: (p
         }}>Ouvrir un paquet ({PACK_SIZE} cartes, {PACK_PRICE} pièces)</button>
       </div>
       <p className="muted small">Chaque victoire contre l’ordinateur ou en campagne rapporte 5 pièces. Un exemplaire tiré au-delà de 3 rend 1 pièce. Un paquet peut aussi contenir une emote (1 chance sur 5) ou une image de profil (1 sur 10). La fin d’une campagne ajoute ses cartes à ta collection.</p>
+      <p className="completion">
+        {FACTIONS.map(fa => {
+          const list = COLLECTIBLE.filter(id => CARDS[id]!.faction === fa);
+          const got = list.reduce((n, id) => n + Math.min(MAX_COPIES, have(id)), 0);
+          return <span key={fa} className={`fchip ${fa}`}>{FACTION_LABEL[fa]} <b>{pct(got, list.length * MAX_COPIES)}</b></span>;
+        })}
+      </p>
       <FilterBar f={f} set={setF} />
+      {ids.length === 0 && <p className="muted">{f.owned === 'owned' ? 'Aucune carte possédée avec ces filtres. Choisis « Toutes » pour voir les cartes à découvrir.' : 'Aucune carte avec ces filtres.'}</p>}
       <div className="camp-grid">
-        {ids.map(id => <CardTile key={id} id={id} dim={!have(id)} badge={<span className={`count${have(id) ? '' : ' zero'}`}>{have(id)} / {MAX_COPIES}</span>} />)}
+        {ids.map(id => (have(id)
+          ? <CardTile key={id} id={id} badge={<span className="count">{have(id)} / {MAX_COPIES}</span>} />
+          : <MaskedTile key={id} id={id} />))}
       </div>
       {pack && <PackReveal result={pack} onClose={() => setPack(null)} />}
     </div>
