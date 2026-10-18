@@ -88,6 +88,10 @@ export function newProfile(): Profile {
   };
 }
 
+/** Arts choisis et débloqués pour une liste de cartes (envoyés à l'adversaire en ligne). */
+export const artsForDeck = (p: Profile, cards: string[]): Record<string, string> =>
+  Object.fromEntries(Object.entries(p.artChoice).filter(([id, k]) => cards.includes(id) && p.altArts.includes(k)));
+
 export const owned = (p: Profile, id: string) => (p.options.allUnlocked ? MAX_COPIES : Math.min(MAX_COPIES, p.collection[id] ?? 0));
 
 // ---------- Règles de construction ----------
@@ -114,7 +118,7 @@ export function checkDeck(cards: string[], p?: Profile): DeckCheck {
 // ---------- Paquets ----------
 export interface PackItem { id: string; isNew: boolean; extra: boolean; kind?: 'card' | 'emote' | 'avatar' | 'alt' }
 
-/** Paquets : 1 chance sur 8 qu'une carte soit remplacée par un art alternatif (s'il en existe). */
+/** Paquets : 1 chance sur 8 qu'une carte soit remplacée par un art alternatif d'une carte possédée (s'il en existe). */
 export const ALT_ART_CHANCE = 0.125;
 /** Carte d'un art alternatif (« lieutenant.alt1 » → « lieutenant »). */
 export const altCardOf = (key: string) => key.replace(/\.alt\d+$/, '');
@@ -127,7 +131,9 @@ export function openPack(p: Profile, rand: () => number = Math.random, altPool: 
   p.coins -= PACK_PRICE;
   const out: PackResult = { cards: [], refund: 0 };
   const withEmote = rand() < EMOTE_CHANCE, withAvatar = rand() < AVATAR_CHANCE;
-  const withAlt = altPool.length > 0 && rand() < ALT_ART_CHANCE;
+  // Seuls les arts des cartes déjà possédées (au moins un exemplaire) peuvent sortir.
+  const altOwned = altPool.filter(k => (p.collection[altCardOf(k)] ?? 0) > 0);
+  const withAlt = altOwned.length > 0 && rand() < ALT_ART_CHANCE;
   /** Tirage dans `list`, pondéré par `weight` (1 appel à `rand`). */
   const pick = (list: string[], weight: (id: string) => number) => {
     let r = rand() * list.reduce((t, x) => t + weight(x), 0);
@@ -143,8 +149,7 @@ export function openPack(p: Profile, rand: () => number = Math.random, altPool: 
   };
   if (withEmote) cosmetic(EMOTE_IDS, p.emotes, 'emote');
   if (withAvatar) cosmetic(AVATAR_IDS, p.avatars, 'avatar', avatarWeight);
-  // Art alternatif : 3 fois plus de chances pour une carte déjà possédée.
-  if (withAlt) cosmetic(altPool, p.altArts, 'alt', k => ((p.collection[altCardOf(k)] ?? 0) > 0 ? 3 : 1));
+  if (withAlt) cosmetic(altOwned, p.altArts, 'alt');
   while (out.cards.length < PACK_SIZE) {
     const id = COLLECTIBLE[Math.floor(rand() * COLLECTIBLE.length)]!;
     const have = p.collection[id] ?? 0;

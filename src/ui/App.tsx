@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { addToPool, bonusFor, bonusUnlocked, campaignDef, defeatsOn, currentScenario, defaultDeckSelection, saveCampaign, scenarioAiFilter, scenarioGameSetup, selectionToDeck, type CampaignSave } from '../campaign/campaign';
 import type { Action, DialogLine, GameState, PlayerId } from '../engine/types';
 import { formatEvent } from '../i18n/log.fr';
-import { COINS_PER_WIN, loadProfile, mergeCampaignPool, saveProfile, type Profile } from '../profile/profile';
+import { artsForDeck, COINS_PER_WIN, loadProfile, mergeCampaignPool, saveProfile, type Profile } from '../profile/profile';
 import { CampHub } from './Camp';
 import { CampaignDeck } from './CampaignDeck';
 import { setArtChoices, setRomanLevels } from './CardFace';
@@ -117,6 +117,7 @@ export function App() {
         flip={setup.mode === 'hotseat'}
         fast={setup.mode === 'watch'}
         avatars={setup.mode !== 'watch' ? { A: profile.avatar } : undefined}
+        arts={setup.mode === 'watch' ? {} : { A: artsForDeck(profile, A.cards), B: setup.mode === 'hotseat' ? artsForDeck(profile, B.cards) : {} }}
         onQuit={() => setScreen({ kind: 'local' })}
         onOver={g => {
           const winA = g.over!.winner === 'A';
@@ -381,6 +382,7 @@ function OnlineGame({ start: first, gameOpts, onExit, onResult, loadout }: {
         remote={{ side: other, send: a => link.send({ t: 'act', n: sent.current++, a }), inbox }}
         title={`Partie en ligne — ${seriesText}`}
         avatars={start.avatars}
+        arts={start.arts}
         onQuit={quit}
         overlay={emoteUi}
         onOver={g => {

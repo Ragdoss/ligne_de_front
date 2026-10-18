@@ -1,7 +1,7 @@
 // Plateau : rangs avant / arrière, emplacement isolé, régiments avec leurs statistiques effectives.
 import { card, Ctx } from '../engine/ctx';
 import type { GameState, PlayerId, SlotRef, Unit, Zone } from '../engine/types';
-import { ArtBackdrop, levelLabel } from './CardFace';
+import { ArtBackdrop, artKeyFor, levelLabel } from './CardFace';
 import { cardDesc, cardName, KEPT_WHEN_BROKEN, visibleKeywords } from './labels';
 
 export interface Highlight {
@@ -24,11 +24,14 @@ export interface BoardProps {
   /** Simulation du combat : pertes et destructions prévues par régiment. */
   preview?: Map<number, { end: number; mor: number; dead: boolean }>;
   /** Survol d'un régiment ou de son Leader : carte à afficher en grand (null en sortie). */
-  onHover?: (cardId: string | null, x?: number) => void;
+  onHover?: (cardId: string | null, x?: number, owner?: PlayerId) => void;
 }
 
 type Pv = { end: number; mor: number; dead: boolean };
-function UnitCard({ u, ctx, highlight, faded, pv, onHover }: { u: Unit; ctx: Ctx; highlight: Highlight | null; faded: boolean; pv?: Pv; onHover?: (id: string | null, x?: number) => void }) {
+function UnitCard({ u, ctx, highlight, faded, pv, onHover, side }: { u: Unit; ctx: Ctx; highlight: Highlight | null; faded: boolean; pv?: Pv; onHover?: (id: string | null, x?: number, owner?: PlayerId) => void; side: PlayerId }) {
+  // Propriétaire de la carte (pour son art) : celui qui l'a jouée, même si elle est empruntée.
+  const owner: PlayerId = u.borrowed?.owner ?? side;
+  const leaderOwner: PlayerId = u.leader && card(u.leader).targetsEnemy ? (owner === 'A' ? 'B' : 'A') : owner;
   const d = card(u.cardId);
   const atk = ctx.effectiveAtk(u), arm = ctx.effectiveArm(u), ini = ctx.effectiveIni(u);
   const cls = ['unit', d.faction];
@@ -45,8 +48,8 @@ function UnitCard({ u, ctx, highlight, faded, pv, onHover }: { u: Unit; ctx: Ctx
   const tip = `${cardName(u.cardId)}${u.leader ? ` + ${cardName(u.leader)}` : ''}\n${cardDesc(u.cardId)}${u.leader ? `\n${cardName(u.leader)} : ${cardDesc(u.leader)}` : ''}`;
   const base = (k: 'atk' | 'arm' | 'ini', v: number) => (v > ((k === 'atk' ? u.baseAtk : k === 'arm' ? u.baseArm : u.ini)) ? ' up' : v < (k === 'atk' ? u.baseAtk : k === 'arm' ? u.baseArm : u.ini) ? ' down' : '');
   return (
-    <div className={cls.join(' ')} title={tip} onMouseEnter={e => onHover?.(u.cardId, e.clientX)} onMouseLeave={() => onHover?.(null)}>
-      <ArtBackdrop id={u.cardId} />
+    <div className={cls.join(' ')} title={tip} onMouseEnter={e => onHover?.(u.cardId, e.clientX, owner)} onMouseLeave={() => onHover?.(null)}>
+      <ArtBackdrop id={u.cardId} variant={artKeyFor(u.cardId, owner)} />
       <div className="u-top">
         <span className={`u-atk${base('atk', atk)}`} title="Attaque"><b>{atk}</b><i>ATK</i></span>
         <span className="u-lvl" title={`Niveau ${u.niveau}`}>{levelLabel(u.niveau)}</span>
@@ -55,7 +58,7 @@ function UnitCard({ u, ctx, highlight, faded, pv, onHover }: { u: Unit; ctx: Ctx
       <div className="u-mid">
         {u.leader ? (
           <span className="u-leader" title={`${cardName(u.leader)} : ${cardDesc(u.leader)}`}
-            onMouseEnter={e => { e.stopPropagation(); onHover?.(u.leader!, e.clientX); }} onMouseLeave={e => onHover?.(u.cardId, e.clientX)}>{cardName(u.leader)}</span>
+            onMouseEnter={e => { e.stopPropagation(); onHover?.(u.leader!, e.clientX, leaderOwner); }} onMouseLeave={e => onHover?.(u.cardId, e.clientX, owner)}>{cardName(u.leader)}</span>
         ) : <span />}
         <span className={`u-ini${base('ini', ini)}`} title="Initiative">INI {ini}</span>
       </div>
@@ -108,7 +111,7 @@ export function Board({ game, player, bottom, isTarget, isFirstPicked, onSlot, h
         onKeyDown={target ? e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSlot(ref); } } : undefined}
         aria-label={`${zone === 'isole' ? 'Isolé' : zone === 'avant' ? `Avant ${idx + 1}` : `Arrière ${idx + 1}`}${u ? ` : ${cardName(u.cardId)}` : ' (vide)'}`}
       >
-        {u ? <UnitCard u={u} ctx={ctx} highlight={highlight} faded={faded.has(u.uid)} pv={preview?.get(u.uid)} onHover={onHover} /> : <span className="slot-label">{zone === 'isole' ? 'Isolé' : zone === 'avant' ? 'Avant' : 'Arrière'}</span>}
+        {u ? <UnitCard u={u} ctx={ctx} highlight={highlight} faded={faded.has(u.uid)} pv={preview?.get(u.uid)} onHover={onHover} side={player} /> : <span className="slot-label">{zone === 'isole' ? 'Isolé' : zone === 'avant' ? 'Avant' : 'Arrière'}</span>}
       </div>
     );
   };

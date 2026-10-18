@@ -7,7 +7,7 @@ import { drawCountFor } from '../engine/turn';
 import type { Action, DialogLine, GameEvent, GameState, PlayerId, SlotRef } from '../engine/types';
 import { formatEvent } from '../i18n/log.fr';
 import { Board, type Highlight } from './Board';
-import { CardFace } from './CardFace';
+import { artKeyFor, CardFace, clearGameArts, setGameArts } from './CardFace';
 import { Hand } from './Hand';
 import { cardDesc, cardName, choiceTitle, optionLabel, UNPLAYABLE } from './labels';
 
@@ -78,6 +78,8 @@ export interface GameScreenProps {
   onGame?: (game: GameState) => void;
   /** Images de profil affichées dans les barres des joueurs. */
   avatars?: Partial<Record<PlayerId, string | undefined>>;
+  /** Arts alternatifs choisis par chaque joueur (carte → clé d'art). */
+  arts?: Partial<Record<PlayerId, Record<string, string>>>;
   /** Contenu affiché par-dessus le plateau (bulle du tutoriel). */
   overlay?: React.ReactNode;
 }
@@ -109,12 +111,17 @@ function PlayerBar({ game, p, label, active, avatar }: { game: GameState; p: Pla
 
 interface Banner { id: number; who: string; cardId: string; on?: string }
 
-export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, intro, renderEnd, onQuit, animMul = 1, aiMul = 1, bannerMul = 1, initialReveal = false, onOver, remote, bottomSide, onGame, overlay, avatars }: GameScreenProps) {
+export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, intro, renderEnd, onQuit, animMul = 1, aiMul = 1, bannerMul = 1, initialReveal = false, onOver, remote, bottomSide, onGame, overlay, avatars, arts }: GameScreenProps) {
+  const artsRef = useRef<Partial<Record<PlayerId, Record<string, string>>>>({});
+  artsRef.current = arts ?? {};
+  setGameArts(artsRef.current); // chaque camp avec ses propres arts (base pour l'ordinateur)
+  // En quittant la partie seulement (pas si une nouvelle partie, ex. revanche, a déjà pris la main).
+  useEffect(() => () => clearGameArts(artsRef.current), []);
   const [game, setGame] = useState<GameState>(() => createGame(setup));
   useEffect(() => { setZoomState(null); }, [game]); // une carte jouée ou détruite ne reste pas affichée
   // Carte survolée, affichée en grand du côté opposé à la souris (fermée dès que le jeu change).
-  const [zoom, setZoomState] = useState<{ id: string; left: boolean } | null>(null);
-  const setZoom = useCallback((id: string | null, x?: number) => setZoomState(id ? { id, left: x !== undefined && x > window.innerWidth / 2 } : null), []);
+  const [zoom, setZoomState] = useState<{ id: string; left: boolean; owner?: PlayerId } | null>(null);
+  const setZoom = useCallback((id: string | null, x?: number, owner?: PlayerId) => setZoomState(id ? { id, owner, left: x !== undefined && x > window.innerWidth / 2 } : null), []);
   const [shown, setShown] = useState<GameState | null>(null); // état affiché pendant une animation de combat
   const [highlight, setHighlight] = useState<Highlight | null>(null);
   const [faded, setFaded] = useState<Set<number>>(new Set());
@@ -335,7 +342,7 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
         </div>
       )}
 
-      {zoom && <div className={`zoom${zoom.left ? ' left' : ''}`} aria-hidden="true"><CardFace id={zoom.id} /></div>}
+      {zoom && <div className={`zoom${zoom.left ? ' left' : ''}`} aria-hidden="true"><CardFace id={zoom.id} variant={artKeyFor(zoom.id, zoom.owner)} /></div>}
 
       {!dialogs.length && overlay}
       {game.over && !shown && !dialogs.length && !overClosed && renderEnd(game, () => setOverClosed(true))}

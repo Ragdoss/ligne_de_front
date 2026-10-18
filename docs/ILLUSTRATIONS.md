@@ -20,7 +20,8 @@ Gabarit validé par Nathan le 17/10/2026 (première illustration : le Lieutenant
 ## Arts alternatifs
 
 - Même format que l'art de base, nommé **`<id de carte>.altN.webp`** dans le même dossier : `lieutenant.alt1.webp`, `lieutenant.alt2.webp`…
-- Ils sont repris automatiquement : chaque paquet a 1 chance sur 8 de contenir un art alternatif (3 fois plus de chances pour une carte déjà possédée), et le joueur choisit sous la carte, dans Ma collection → Mes cartes, l'art affiché partout (« Base », « Alt 1 »…).
+- Ils sont repris automatiquement : chaque paquet a 1 chance sur 8 de contenir un art alternatif, **seulement d'une carte déjà possédée** (au moins un exemplaire). Le joueur choisit l'art sous la carte, dans Ma collection → Mes cartes (« Base », « Alt 1 »…).
+- En partie, chaque joueur voit ses cartes avec ses arts et celles de l'adversaire avec les arts de l'adversaire (envoyés en ligne au début de la partie ; l'ordinateur joue avec les arts de base).
 - L'option « Afficher toutes les cartes… » rend tous les arts alternatifs sélectionnables, pour les vérifier sans les débloquer.
 - Un art alternatif peut exister sans art de base.
 

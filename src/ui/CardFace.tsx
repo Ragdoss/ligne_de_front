@@ -24,6 +24,24 @@ let choice: Record<string, string> = {};
 export function setArtChoices(c: Record<string, string>): void { choice = c; }
 /** Illustration d'une carte, art alternatif choisi compris (undefined si elle n'en a pas encore). */
 export const artOf = (id: string): string | undefined => (choice[id] && ART[choice[id]!]) || ART[id];
+// En partie : arts choisis par chaque joueur (null hors partie : on montre les choix du profil).
+type Side = 'A' | 'B';
+let gameArts: Partial<Record<Side, Record<string, string>>> | null = null;
+export function setGameArts(a: Partial<Record<Side, Record<string, string>>> | null): void { gameArts = a; }
+/** Fin de partie : on revient aux choix du profil, sauf si une autre partie a déjà réglé ses arts. */
+export function clearGameArts(a: Partial<Record<Side, Record<string, string>>>): void { if (gameArts === a) gameArts = null; }
+/** Art à montrer pour une carte d'un joueur en partie (undefined hors partie). */
+export const artKeyFor = (id: string, owner?: Side): string | undefined =>
+  gameArts && owner ? gameArts[owner]?.[id] ?? id : undefined;
+/** Arts choisis valides parmi une liste reçue (en ligne) : seulement des arts existants des cartes données. */
+export function cleanArts(raw: unknown, cards: string[]): Record<string, string> {
+  const out: Record<string, string> = {};
+  if (!raw || typeof raw !== 'object') return out;
+  for (const [id, k] of Object.entries(raw as Record<string, unknown>))
+    if (typeof k === 'string' && cards.includes(id) && altArtCard(k) === id && ART[k]) out[id] = k;
+  return out;
+}
+
 /** Illustration d'une variante précise (identifiant de carte ou clé « carte.altN »). */
 export const artFile = (key: string): string | undefined => ART[key];
 
@@ -58,7 +76,7 @@ export function typeLine(c: CardDef): string {
 
 /** Fond d'une carte : son illustration, sinon la couleur de sa faction et son initiale. */
 export function ArtBackdrop({ id, variant }: { id: string; variant?: string }) {
-  const art = variant ? artFile(variant) ?? artOf(id) : artOf(id);
+  const art = variant ? artFile(variant) ?? artFile(id) : artOf(id);
   return art
     ? <img className="art" src={art} alt="" draggable={false} />
     : <span className="art none" aria-hidden="true">{cardName(id).replace(/^(?:(?:Le|La|Les)\s+|L[’'])/, '').charAt(0)}</span>;
@@ -72,7 +90,7 @@ export function CardFace({ id, cost, className = '', variant }: { id: string; co
   const size = desc.length > 210 ? ' xlong' : desc.length > 130 ? ' long' : '';
   const shownCost = c.dynamicCost ? 'X' : cost ?? c.cout;
   return (
-    <div className={`cface ${c.faction} ${c.cardType.toLowerCase()}${(variant ? artFile(variant) : undefined) ?? artOf(id) ? '' : ' noart'}${variant?.includes('.alt') ? ' alt' : ''} ${className}`}>
+    <div className={`cface ${c.faction} ${c.cardType.toLowerCase()}${(variant ? artFile(variant) ?? artFile(id) : artOf(id)) ? '' : ' noart'}${variant?.includes('.alt') ? ' alt' : ''} ${className}`}>
       <ArtBackdrop id={id} variant={variant} />
       <span className={`f-cost${cost !== undefined && cost < c.cout ? ' cheaper' : ''}`} title="Coût">{shownCost}</span>
       <span className="f-lvl" title={`Niveau ${c.niveau}`}>Niv. {levelLabel(c.niveau)}</span>

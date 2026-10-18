@@ -3,7 +3,7 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import { card } from '../engine/ctx';
 import { costOf, whyUnplayable } from '../engine/game';
 import type { CardDef, GameState, HandCard, PlayerId } from '../engine/types';
-import { ArtBackdrop, bearerLabel, leaderBonuses, levelLabel, slotLabel, STAT_KEYS, STAT_LABEL } from './CardFace';
+import { ArtBackdrop, artKeyFor, bearerLabel, leaderBonuses, levelLabel, slotLabel, STAT_KEYS, STAT_LABEL } from './CardFace';
 import { cardDesc, cardName, TYPE_LABEL, UNPLAYABLE, visibleKeywords } from './labels';
 
 /** Résumé d'une carte en main : stats colorées, bonus de Leader ou début de l'effet. */
@@ -59,7 +59,7 @@ export interface HandProps {
   /** Début du glisser d'une carte (pour la poser directement sur le plateau). */
   onDragCard?: (uid: number) => void;
   /** Survol d'une carte : carte à afficher en grand (null en sortie). */
-  onHover?: (cardId: string | null, x?: number) => void;
+  onHover?: (cardId: string | null, x?: number, owner?: PlayerId) => void;
 }
 
 export function Hand({ game, player, order, setOrder, canAct, hidden, selected, onSelect, onDragCard, onHover }: HandProps) {
@@ -121,11 +121,11 @@ export function Hand({ game, player, order, setOrder, canAct, hidden, selected, 
               aria-disabled={!playable}
               title={`${cardName(c.id)}\n${cardDesc(c.id)}${why && why !== 'turn' ? `\nInjouable : ${UNPLAYABLE[why] ?? why}` : ''}`}
               onClick={() => onSelect(h.uid)}
-              onMouseEnter={e => onHover?.(c.id, e.clientX)}
+              onMouseEnter={e => onHover?.(c.id, e.clientX, player)}
               onMouseLeave={() => onHover?.(null)}
               onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(h.uid); } }}
             >
-              <ArtBackdrop id={c.id} />
+              <ArtBackdrop id={c.id} variant={artKeyFor(c.id, player)} />
               <span className={`h-cost${cost < c.cout ? ' cheaper' : cost > c.cout ? ' dearer' : ''}`} title={`Coût ${cost}${c.dynamicCost ? ' (variable)' : ''}`}>{cost}</span>
               <span className="h-lvl" title={`Niveau ${c.niveau}`}>{levelLabel(c.niveau)}</span>
               <div className="h-low">

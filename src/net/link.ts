@@ -9,10 +9,10 @@ import type { Action, Faction, PlayerId } from '../engine/types';
 export const PROTOCOL = 1;
 
 /** Un joueur en ligne : nom, deck, image de profil. */
-export interface Seat { name: string; faction: Faction; deck: string[]; avatar?: string }
+export interface Seat { name: string; faction: Faction; deck: string[]; avatar?: string; /** Arts alternatifs choisis (carte → clé d'art). */ arts?: Record<string, string> }
 
 export type NetMsg =
-  | { t: 'hello'; v: number; name: string; faction: Faction; deck: string[]; avatar?: string }
+  | { t: 'hello'; v: number; name: string; faction: Faction; deck: string[]; avatar?: string; arts?: Record<string, string> }
   | { t: 'start'; seed: string; hostSide: PlayerId; A: Seat; B: Seat }
   | { t: 'act'; n: number; a: Action }
   | { t: 'emote'; id: string }
