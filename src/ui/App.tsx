@@ -6,7 +6,7 @@ import { formatEvent } from '../i18n/log.fr';
 import { COINS_PER_WIN, loadProfile, mergeCampaignPool, saveProfile, type Profile } from '../profile/profile';
 import { CampHub } from './Camp';
 import { CampaignDeck } from './CampaignDeck';
-import { setRomanLevels } from './CardFace';
+import { setArtChoices, setRomanLevels } from './CardFace';
 import { CardTile } from './CardTile';
 import { HoverZoom, showZoom } from './HoverZoom';
 import { MyCards } from './Collection';
@@ -78,6 +78,7 @@ export function App() {
   const switchProfile = () => { const p = loadProfile(); profileRef.current = p; setProfile(p); };
   const o = profile.options;
   setRomanLevels(o.romanLevels !== false);
+  setArtChoices(o.showAll ? profile.artChoice : Object.fromEntries(Object.entries(profile.artChoice).filter(([, k]) => profile.altArts.includes(k))));
   const gameOpts = { animMul: o.animSpeed, aiMul: o.aiSpeed, bannerMul: o.bannerSpeed, initialReveal: o.revealAiHand };
 
   /** Passe au scénario suivant ou termine la campagne (fusion du pool dans la collection). */

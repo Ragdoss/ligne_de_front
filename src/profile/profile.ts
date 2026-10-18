@@ -57,6 +57,10 @@ export interface Profile {
   emoteLoadout: string[];
   avatars: string[];
   avatar: string;
+  /** Arts alternatifs débloqués (clés « carte.altN »). */
+  altArts: string[];
+  /** Art affiché pour une carte : clé d'un art alternatif possédé (absent = art de base). */
+  artChoice: Record<string, string>;
 }
 
 /** Decks triés : favoris d'abord, puis les plus récemment modifiés. */
@@ -79,6 +83,8 @@ export function newProfile(): Profile {
     emoteLoadout: BASE_EMOTES.slice(),
     avatars: [BASE_AVATAR],
     avatar: BASE_AVATAR,
+    altArts: [],
+    artChoice: {},
   };
 }
 
@@ -106,23 +112,29 @@ export function checkDeck(cards: string[], p?: Profile): DeckCheck {
 }
 
 // ---------- Paquets ----------
-export interface PackItem { id: string; isNew: boolean; extra: boolean; kind?: 'card' | 'emote' | 'avatar' }
+export interface PackItem { id: string; isNew: boolean; extra: boolean; kind?: 'card' | 'emote' | 'avatar' | 'alt' }
+
+/** Paquets : 1 chance sur 8 qu'une carte soit remplacée par un art alternatif (s'il en existe). */
+export const ALT_ART_CHANCE = 0.125;
+/** Carte d'un art alternatif (« lieutenant.alt1 » → « lieutenant »). */
+export const altCardOf = (key: string) => key.replace(/\.alt\d+$/, '');
 export interface PackResult { cards: PackItem[]; refund: number }
 
 /** Ouvre un paquet de 5 cartes tirées dans toute la collection possible. `rand` renvoie un nombre dans [0, 1).
  * Une carte peut être remplacée par une emote (1 chance sur 5) et une autre par une image de profil (1 sur 10). */
-export function openPack(p: Profile, rand: () => number = Math.random): PackResult | null {
+export function openPack(p: Profile, rand: () => number = Math.random, altPool: string[] = []): PackResult | null {
   if (p.coins < PACK_PRICE) return null;
   p.coins -= PACK_PRICE;
   const out: PackResult = { cards: [], refund: 0 };
   const withEmote = rand() < EMOTE_CHANCE, withAvatar = rand() < AVATAR_CHANCE;
+  const withAlt = altPool.length > 0 && rand() < ALT_ART_CHANCE;
   /** Tirage dans `list`, pondéré par `weight` (1 appel à `rand`). */
   const pick = (list: string[], weight: (id: string) => number) => {
     let r = rand() * list.reduce((t, x) => t + weight(x), 0);
     for (const x of list) { r -= weight(x); if (r < 0) return x; }
     return list[list.length - 1]!;
   };
-  const cosmetic = (pool: string[], owned: string[], kind: 'emote' | 'avatar', weight: (id: string) => number = () => 1) => {
+  const cosmetic = (pool: string[], owned: string[], kind: 'emote' | 'avatar' | 'alt', weight: (id: string) => number = () => 1) => {
     const fresh = pool.filter(x => !owned.includes(x));
     if (!fresh.length) { out.refund += COINS_PER_EXTRA; out.cards.push({ id: pick(pool, weight), isNew: false, extra: true, kind }); return; }
     const id = pick(fresh, weight);
@@ -131,6 +143,8 @@ export function openPack(p: Profile, rand: () => number = Math.random): PackResu
   };
   if (withEmote) cosmetic(EMOTE_IDS, p.emotes, 'emote');
   if (withAvatar) cosmetic(AVATAR_IDS, p.avatars, 'avatar', avatarWeight);
+  // Art alternatif : 3 fois plus de chances pour une carte déjà possédée.
+  if (withAlt) cosmetic(altPool, p.altArts, 'alt', k => ((p.collection[altCardOf(k)] ?? 0) > 0 ? 3 : 1));
   while (out.cards.length < PACK_SIZE) {
     const id = COLLECTIBLE[Math.floor(rand() * COLLECTIBLE.length)]!;
     const have = p.collection[id] ?? 0;
@@ -181,6 +195,13 @@ export function sanitizeProfile(raw: unknown): Profile {
       const avatars = [...new Set([BASE_AVATAR, ...(Array.isArray(r.avatars) ? r.avatars : []).filter(x => AVATAR_IDS.includes(x))])];
       const loadout = (Array.isArray(r.emoteLoadout) ? r.emoteLoadout : emotes).filter(x => emotes.includes(x)).slice(0, MAX_LOADOUT);
       return { emotes, avatars, emoteLoadout: loadout.length ? loadout : emotes.slice(0, MAX_LOADOUT), avatar: typeof r.avatar === 'string' && avatars.includes(r.avatar) ? r.avatar : BASE_AVATAR };
+    })(),
+    ...(() => {
+      // Les arts alternatifs ne sont pas vérifiés contre les fichiers ici (le profil ne connaît pas les images) : seulement leur forme.
+      const altArts = [...new Set((Array.isArray(r.altArts) ? r.altArts : []).filter(k => typeof k === 'string' && /\.alt\d+$/.test(k) && CARDS[altCardOf(k)]))];
+      const artChoice: Record<string, string> = {};
+      for (const [id, k] of Object.entries(r.artChoice ?? {})) if (typeof k === 'string' && altArts.includes(k) && altCardOf(k) === id) artChoice[id] = k;
+      return { altArts, artChoice };
     })(),
   };
 }

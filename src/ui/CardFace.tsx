@@ -1,6 +1,7 @@
 // Gabarit des cartes (validé le 17/10/2026) : illustration pleine carte au format 9:16, bas laissé libre pour
 // le cartouche (nom, rôle), l'effet et les stats. Les illustrations sont dans src/ui/assets/cards/<id de carte>.webp
 // (ou .png / .jpg) : il suffit d'y déposer un fichier pour qu'il apparaisse partout dans le jeu.
+// Arts alternatifs : <id de carte>.alt1.webp, .alt2.webp… ; ils se débloquent dans les paquets et se choisissent dans la collection.
 import { CARDS } from '../data/cards';
 import type { CardDef } from '../engine/types';
 import { FLAVOR_FR } from '../i18n/wave2b.fr';
@@ -8,8 +9,23 @@ import { cardDesc, cardName, visibleKeywords } from './labels';
 
 const FILES = import.meta.glob('./assets/cards/*.{webp,png,jpg,jpeg}', { eager: true, import: 'default' }) as Record<string, string>;
 const ART: Record<string, string> = Object.fromEntries(Object.entries(FILES).map(([path, url]) => [path.replace(/^.*\/|\.[a-z]+$/g, ''), url]));
-/** Illustration d'une carte (undefined si elle n'en a pas encore). */
-export const artOf = (id: string): string | undefined => ART[id];
+const ALT_RE = /^(.+)\.alt\d+$/;
+/** Arts alternatifs disponibles (clés « carte.altN »), triés. */
+export const ALT_ART_KEYS: string[] = Object.keys(ART).filter(k => ALT_RE.test(k)).sort((a, b) => a.localeCompare(b, 'fr', { numeric: true }));
+/** Carte d'un art alternatif. */
+export const altArtCard = (key: string): string => key.match(ALT_RE)?.[1] ?? key;
+/** Arts alternatifs d'une carte. */
+export const altArtsOf = (id: string): string[] => ALT_ART_KEYS.filter(k => altArtCard(k) === id);
+/** Numéro d'un art alternatif (« carte.alt2 » → 2). */
+export const altArtNumber = (key: string): number => Number(key.split('.alt')[1]);
+
+// Art choisi par le joueur pour chaque carte (réglé par App à partir du profil).
+let choice: Record<string, string> = {};
+export function setArtChoices(c: Record<string, string>): void { choice = c; }
+/** Illustration d'une carte, art alternatif choisi compris (undefined si elle n'en a pas encore). */
+export const artOf = (id: string): string | undefined => (choice[id] && ART[choice[id]!]) || ART[id];
+/** Illustration d'une variante précise (identifiant de carte ou clé « carte.altN »). */
+export const artFile = (key: string): string | undefined => ART[key];
 
 // ---------- Niveau : chiffres romains (par défaut) ou arabes (Options) ----------
 let roman = true;
@@ -41,23 +57,23 @@ export function typeLine(c: CardDef): string {
 }
 
 /** Fond d'une carte : son illustration, sinon la couleur de sa faction et son initiale. */
-export function ArtBackdrop({ id }: { id: string }) {
-  const art = artOf(id);
+export function ArtBackdrop({ id, variant }: { id: string; variant?: string }) {
+  const art = variant ? artFile(variant) ?? artOf(id) : artOf(id);
   return art
     ? <img className="art" src={art} alt="" draggable={false} />
     : <span className="art none" aria-hidden="true">{cardName(id).replace(/^(?:(?:Le|La|Les)\s+|L[’'])/, '').charAt(0)}</span>;
 }
 
 /** Carte complète (collection, draft, récompenses, agrandissement en partie). */
-export function CardFace({ id, cost, className = '' }: { id: string; cost?: number; className?: string }) {
+export function CardFace({ id, cost, className = '', variant }: { id: string; cost?: number; className?: string; /** Art précis à afficher (sinon l'art choisi). */ variant?: string }) {
   const c = CARDS[id]!;
   const desc = cardDesc(id);
   const kws = c.cardType === 'Regiment' ? visibleKeywords(c.keywords ?? []) : [];
   const size = desc.length > 210 ? ' xlong' : desc.length > 130 ? ' long' : '';
   const shownCost = c.dynamicCost ? 'X' : cost ?? c.cout;
   return (
-    <div className={`cface ${c.faction} ${c.cardType.toLowerCase()}${artOf(id) ? '' : ' noart'} ${className}`}>
-      <ArtBackdrop id={id} />
+    <div className={`cface ${c.faction} ${c.cardType.toLowerCase()}${(variant ? artFile(variant) : undefined) ?? artOf(id) ? '' : ' noart'}${variant?.includes('.alt') ? ' alt' : ''} ${className}`}>
+      <ArtBackdrop id={id} variant={variant} />
       <span className={`f-cost${cost !== undefined && cost < c.cout ? ' cheaper' : ''}`} title="Coût">{shownCost}</span>
       <span className="f-lvl" title={`Niveau ${c.niveau}`}>Niv. {levelLabel(c.niveau)}</span>
       {c.unique && <span className="f-uniq">Unique</span>}

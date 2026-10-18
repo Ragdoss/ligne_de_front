@@ -17,6 +17,13 @@ Gabarit validé par Nathan le 17/10/2026 (première illustration : le Lieutenant
 - Format : `.webp` de préférence (`.png` et `.jpg` acceptés), environ **600 px de large** et moins de 100 Ko : le jeu est livré en un seul fichier HTML.
 - Il suffit de déposer le fichier : il est repris automatiquement partout (collection, draft, récompenses, plateau, main, agrandissement au survol). Les cartes sans illustration gardent la couleur de leur faction et leur initiale.
 
+## Arts alternatifs
+
+- Même format que l'art de base, nommé **`<id de carte>.altN.webp`** dans le même dossier : `lieutenant.alt1.webp`, `lieutenant.alt2.webp`…
+- Ils sont repris automatiquement : chaque paquet a 1 chance sur 8 de contenir un art alternatif (3 fois plus de chances pour une carte déjà possédée), et le joueur choisit sous la carte, dans Ma collection → Mes cartes, l'art affiché partout (« Base », « Alt 1 »…).
+- L'option « Afficher toutes les cartes… » rend tous les arts alternatifs sélectionnables, pour les vérifier sans les débloquer.
+- Un art alternatif peut exister sans art de base.
+
 ## Où le gabarit est codé
 
 - `src/ui/CardFace.tsx` : carte complète, fond (illustration ou couleur de faction), niveau en chiffres romains ou arabes (Options).

@@ -4,6 +4,7 @@ import { CARDS } from '../data/cards';
 import { COLLECTIBLE, MAX_COPIES, openPack, PACK_PRICE, PACK_SIZE, type PackResult, type Profile } from '../profile/profile';
 import { AVATARS, EMOTES } from '../profile/cosmetics';
 import { Avatar } from './avatars';
+import { ALT_ART_KEYS, altArtCard, altArtNumber, altArtsOf, CardFace } from './CardFace';
 import { CardTile } from './CardTile';
 import { cardName, FACTION_LABEL, TYPE_LABEL } from './labels';
 
@@ -50,13 +51,15 @@ function PackReveal({ result, onClose }: { result: PackResult; onClose: () => vo
         <h2>Nouveau paquet</h2>
         <div className="pack">
           {result.cards.map((c, i) => (
-            <button key={i} type="button" className={`pack-slot${i < shown ? ' open' : ''}`} onClick={() => setShown(Math.max(shown, i + 1))} aria-label={i < shown ? (c.kind === 'emote' ? `Emote : ${EMOTES[c.id]}` : c.kind === 'avatar' ? `Image de profil : ${AVATARS[c.id]}` : cardName(c.id)) : 'Retourner la carte'}>
+            <button key={i} type="button" className={`pack-slot${i < shown ? ' open' : ''}`} onClick={() => setShown(Math.max(shown, i + 1))} aria-label={i < shown ? (c.kind === 'emote' ? `Emote : ${EMOTES[c.id]}` : c.kind === 'avatar' ? `Image de profil : ${AVATARS[c.id]}` : c.kind === 'alt' ? `Art alternatif : ${cardName(altArtCard(c.id))}` : cardName(c.id)) : 'Retourner la carte'}>
               {i < shown ? (
                 <>
                   {c.kind === 'emote' ? (
                     <div className="cosmo emote"><span className="cosmo-type">Emote</span><p>« {EMOTES[c.id]} »</p></div>
                   ) : c.kind === 'avatar' ? (
                     <div className="cosmo avatar-card"><span className="cosmo-type">Image de profil</span><Avatar id={c.id} size={110} /><p>{AVATARS[c.id]}</p></div>
+                  ) : c.kind === 'alt' ? (
+                    <div className="ccard in alt-reveal"><CardFace id={altArtCard(c.id)} variant={c.id} /><span className="alt-ribbon">Art alternatif</span></div>
                   ) : <CardTile id={c.id} />}
                   <span className={`tag${c.isNew ? ' new' : c.extra ? ' extra' : ''}`}>{c.isNew ? (c.kind && c.kind !== 'card' ? 'Débloquée !' : 'Nouvelle !') : c.extra ? (c.kind && c.kind !== 'card' ? 'Déjà possédée : +1 pièce' : `Déjà ${MAX_COPIES} : +1 pièce`) : '+1 exemplaire'}</span>
                 </>
@@ -85,6 +88,29 @@ function MaskedTile({ id }: { id: string }) {
   );
 }
 
+/** Choix de l'art d'une carte : base ou un art alternatif débloqué (tous en mode vérification). */
+function ArtPicker({ id, profile, update }: { id: string; profile: Profile; update: (fn: (p: Profile) => void) => void }) {
+  const alts = altArtsOf(id);
+  if (!alts.length) return null;
+  const cur = profile.artChoice[id];
+  const can = (k: string) => profile.altArts.includes(k) || !!profile.options.showAll;
+  const pick = (k?: string) => update(p => {
+    if (!k) delete p.artChoice[id];
+    else p.artChoice[id] = k; // en mode vérification, un art non débloqué n'est qu'un aperçu (retiré au prochain chargement)
+  });
+  return (
+    <span className="art-pick" role="group" aria-label="Art de la carte">
+      <button type="button" className={!cur ? 'on' : ''} onClick={() => pick()} title="Art de base">Base</button>
+      {alts.map(k => (
+        <button key={k} type="button" className={cur === k ? 'on' : ''} disabled={!can(k)} onClick={() => pick(k)}
+          title={can(k) ? `Art alternatif ${altArtNumber(k)}` : 'Art alternatif à débloquer dans les paquets'}>
+          {can(k) ? `Alt ${altArtNumber(k)}` : '🔒'}
+        </button>
+      ))}
+    </span>
+  );
+}
+
 const pct = (x: number, y: number) => `${Math.floor((100 * x) / Math.max(1, y))} %`;
 
 export function MyCards({ profile, update }: { profile: Profile; update: (fn: (p: Profile) => void) => void }) {
@@ -100,14 +126,15 @@ export function MyCards({ profile, update }: { profile: Profile; update: (fn: (p
         <span className="pill">Cartes différentes : <b>{ownedDistinct}</b> / {COLLECTIBLE.length}</span>
         <span className="pill">Exemplaires : <b>{total}</b> / {COLLECTIBLE.length * MAX_COPIES}</span>
         <span className="pill ok">Complétion : <b>{pct(total, COLLECTIBLE.length * MAX_COPIES)}</b></span>
+        {ALT_ART_KEYS.length > 0 && <span className="pill">Arts alternatifs : <b>{profile.altArts.filter(k => ALT_ART_KEYS.includes(k)).length}</b> / {ALT_ART_KEYS.length}</span>}
         <span className="pill coins">Pièces : <b>{profile.coins}</b></span>
         <button type="button" className="primary" disabled={profile.coins < PACK_PRICE} onClick={() => {
           let res: PackResult | null = null;
-          update(p => { res = openPack(p); });
+          update(p => { res = openPack(p, Math.random, ALT_ART_KEYS); });
           if (res) setPack(res);
         }}>Ouvrir un paquet ({PACK_SIZE} cartes, {PACK_PRICE} pièces)</button>
       </div>
-      <p className="muted small">Chaque victoire contre l’ordinateur ou en campagne rapporte 5 pièces. Un exemplaire tiré au-delà de 3 rend 1 pièce. Un paquet peut aussi contenir une emote (1 chance sur 5) ou une image de profil (1 sur 10). La fin d’une campagne ajoute ses cartes à ta collection.</p>
+      <p className="muted small">Chaque victoire contre l’ordinateur ou en campagne rapporte 5 pièces. Un exemplaire tiré au-delà de 3 rend 1 pièce. Un paquet peut aussi contenir une emote (1 chance sur 5), une image de profil (1 sur 10) ou un art alternatif de carte (1 sur 8), à choisir ensuite sous la carte. La fin d’une campagne ajoute ses cartes à ta collection.</p>
       <p className="completion">
         {FACTIONS.map(fa => {
           const list = COLLECTIBLE.filter(id => CARDS[id]!.faction === fa);
@@ -119,7 +146,9 @@ export function MyCards({ profile, update }: { profile: Profile; update: (fn: (p
       {ids.length === 0 && <p className="muted">{f.owned === 'owned' ? 'Aucune carte possédée avec ces filtres. Choisis « Toutes » pour voir les cartes à découvrir.' : 'Aucune carte avec ces filtres.'}</p>}
       <div className="camp-grid">
         {ids.map(id => (have(id) || profile.options.showAll
-          ? <CardTile key={id} id={id} dim={!have(id)} badge={<span className={`count${have(id) ? '' : ' zero'}`}>{have(id)} / {MAX_COPIES}</span>} />
+          ? <CardTile key={id} id={id} dim={!have(id)} badge={<span className={`count${have(id) ? '' : ' zero'}`}>{have(id)} / {MAX_COPIES}</span>}>
+              <ArtPicker id={id} profile={profile} update={update} />
+            </CardTile>
           : <MaskedTile key={id} id={id} />))}
       </div>
       {pack && <PackReveal result={pack} onClose={() => setPack(null)} />}
