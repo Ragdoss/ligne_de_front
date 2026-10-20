@@ -53,17 +53,27 @@ describe('Profil joueur', () => {
     expect(c.ok).toBe(false);
     expect(c.problems).toHaveLength(3);
   });
-  it('un paquet : 5 cartes, coûte 5, les exemplaires au-delà de 3 rendent 1 pièce', () => {
+  it('un paquet : 5 cartes, coûte 5 ; les cartes déjà à 3 exemplaires ne sortent plus', () => {
     const p = newProfile();
     p.coins = PACK_PRICE;
     const first = COLLECTIBLE[Math.floor(0.5 * COLLECTIBLE.length)]!;
     p.collection[first] = 2;
-    const r = openPack(p, () => 0.5)!; // pas de cosmétique (0,5 ≥ 1/5) ; tire toujours la même carte : 1 nouvel exemplaire, puis 4 en trop
+    const r = openPack(p, () => 0.5)!; // pas de cosmétique (0,5 ≥ 1/5) ; la carte du milieu, puis celle du milieu des cartes restantes…
     expect(r.cards).toHaveLength(5);
     expect(p.collection[first]).toBe(3);
-    expect(r.refund).toBe(4);
-    expect(p.coins).toBe(4);
-    expect(openPack(p)).toBeNull(); // 4 pièces < prix d'un paquet
+    expect(r.refund).toBe(0);
+    expect(r.cards.filter(c => c.extra)).toHaveLength(0);
+    for (const c of r.cards) expect(p.collection[c.id]).toBeLessThanOrEqual(3);
+    expect(p.coins).toBe(0);
+    expect(openPack(p)).toBeNull();
+  });
+  it('collection complète : les exemplaires en trop rendent 1 pièce', () => {
+    const p = newProfile();
+    p.coins = PACK_PRICE;
+    for (const id of COLLECTIBLE) p.collection[id] = 3;
+    const r = openPack(p, () => 0.5)!;
+    expect(r.refund).toBe(5);
+    expect(p.coins).toBe(5);
   });
   it('fin de campagne : la collection monte au nombre d’exemplaires du pool (3 max), une seule fois', () => {
     const p = newProfile();

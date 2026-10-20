@@ -41,7 +41,14 @@ export function newCampaign(campaign = 'empire'): CampaignSave {
 export const currentScenario = (c: CampaignSave): CampaignScenario => SCENARIOS[campaignDef(c).order[c.idx]!]!;
 
 /** Construit la partie du moteur correspondant à un scénario, avec le deck choisi par le joueur. */
-export function scenarioGameSetup(sc: CampaignScenario, playerDeck: string[], seed: string | number, bonus = 0): GameSetup {
+/**
+ * Aide de campagne (20/10/2026) : la campagne sert de grand tutoriel, elle doit rester agréable.
+ * Appliquée à tous les scénarios sans toucher à leur contenu : ressource et marge de lassitude en plus pour le joueur,
+ * régiments adverses moins offensifs, régiments vitaux du joueur plus solides.
+ */
+export const CAMPAIGN_EASE = { startResource: 1, lassitudeMul: 1.5, enemyAtk: 0.8, vitalEnd: 2, vitalMor: 3, vitalArm: 10 };
+
+export function scenarioGameSetup(sc: CampaignScenario, playerDeck: string[], seed: string | number, bonus = 0, ease = CAMPAIGN_EASE): GameSetup {
   const per = <T>(m: Partial<Record<PlayerId, T>> | undefined, def: T): Record<PlayerId, T> => ({ A: m?.A ?? def, B: m?.B ?? def });
   return {
     seed,
@@ -50,7 +57,7 @@ export function scenarioGameSetup(sc: CampaignScenario, playerDeck: string[], se
     config: {
       layout: sc.layout ?? { avant: 4, arriere: 3 },
       levelThresholds: per(sc.levelThresholds, DEFAULT_LEVEL_THRESHOLDS),
-      defeatLassitude: per(sc.defeatLassitude, 50),
+      defeatLassitude: (({ A, B }) => ({ A: Math.round(A * ease.lassitudeMul), B }))(per(sc.defeatLassitude, 50)),
       moralCheckLassitude: sc.moralCheckLassitude ?? null,
       endTurnLassitude: per(sc.endTurnLassitude, 0),
       noRegimentDefeatFromTurn: per(sc.noRegimentDefeatFromTurn, 1),
@@ -69,7 +76,8 @@ export function scenarioGameSetup(sc: CampaignScenario, playerDeck: string[], se
       startOverrides: sc.startOverrides,
       weather: sc.weather,
       alarm: sc.alarm,
-      startResource: bonus ? { A: bonus } : undefined,
+      startResource: bonus + ease.startResource ? { A: bonus + ease.startResource } : undefined,
+      ease: { weak: 'B', atk: ease.enemyAtk, helped: 'A', vitalEnd: ease.vitalEnd, vitalMor: ease.vitalMor, vitalArm: ease.vitalArm },
     },
   };
 }

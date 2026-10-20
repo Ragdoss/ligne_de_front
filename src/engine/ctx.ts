@@ -231,8 +231,18 @@ export class Ctx {
   /** Valeur d'Effrayant (cumulée : Effrayant X + Effrayant Y = Effrayant X+Y). */
   fear(u: Unit): number { return keywordValue(u, 'Effrayant'); }
 
+  /** Aide de campagne : régiment vital du joueur aidé. */
+  isEasedVital(u: Unit): boolean {
+    const e = this.s.scenario?.ease;
+    return !!e && e.helped === u.controller && this.s.config.mustSurvive[u.controller] === u.cardId;
+  }
   makeUnit(cardId: string, controller: PlayerId, isToken = false): Unit {
     const c = card(cardId);
+    const ease = this.s.scenario?.ease;
+    const atkMul = ease && ease.weak === controller ? ease.atk : 1;
+    const vital = !!ease && ease.helped === controller && this.s.config.mustSurvive[controller] === cardId;
+    const endMul = vital ? ease!.vitalEnd : 1;
+    const end = Math.round((c.end ?? 1) * endMul);
     return {
       uid: this.uid(),
       cardId,
@@ -240,13 +250,13 @@ export class Ctx {
       types: (c.types ?? []).slice(),
       keywords: (c.keywords ?? []).slice(),
       niveau: c.niveau,
-      baseAtk: c.atk ?? 0,
-      baseArm: c.arm ?? 0,
+      baseAtk: Math.round((c.atk ?? 0) * atkMul),
+      baseArm: (c.arm ?? 0) + (vital ? ease!.vitalArm : 0),
       ini: c.ini ?? 0,
-      maxEnd: c.end ?? 1,
-      currentEnd: c.end ?? 1,
-      maxMor: c.mor ?? 1,
-      currentMor: c.startMor ?? c.mor ?? 1,
+      maxEnd: end,
+      currentEnd: end,
+      maxMor: (c.mor ?? 1) + (vital ? ease!.vitalMor : 0),
+      currentMor: (c.startMor ?? c.mor ?? 1) + (vital ? ease!.vitalMor : 0),
       leader: null,
       leaderOwner: null,
       justDeployed: true,
@@ -681,7 +691,8 @@ export class Ctx {
 
     const allies = this.units(p);
     for (const a of allies) {
-      const steady = (!!a.leader && !a.brokenMorale && !!card(a.leader).leaderNoAllyDeathMoralLoss) || !!a.steadyOwner; // Acolyte Damné, Dernier carré
+      // Acolyte Damné, Dernier carré ; aide de campagne : le régiment vital du joueur ne perd pas de Moral à la mort d'un allié.
+      const steady = (!!a.leader && !a.brokenMorale && !!card(a.leader).leaderNoAllyDeathMoralLoss) || !!a.steadyOwner || this.isEasedVital(a);
       if (!minion && !steady) {
         const lost = this.loseMoral(a, 1);
         if (lost) this.emit({ type: 'moralLoss', uid: a.uid, cardId: a.cardId, amount: lost, source: 'allyDeath' });

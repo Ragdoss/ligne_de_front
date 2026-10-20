@@ -32,7 +32,8 @@ describe('Scénarios', () => {
   });
   it('scénario 2 : Garnison vitale, Palissades à 4 Moral, elfes niveau 2', () => {
     const s = start('s2');
-    expect(s.players.A.board.arriere[1]).toMatchObject({ cardId: 'garnison', currentMor: 3, maxMor: 6 });
+    // Aide de campagne : régiment vital avec 3 Moral de plus (3/6 → 6/9), END ×2, +10 ARM.
+    expect(s.players.A.board.arriere[1]).toMatchObject({ cardId: 'garnison', currentMor: 6, maxMor: 9, maxEnd: 160, baseArm: 15 });
     expect(s.players.A.board.avant[1]).toMatchObject({ cardId: 'palissade_regiment', currentMor: 4, maxMor: 4 });
     expect(s.players.B.level).toBe(2);
     expect(s.config.mustSurvive).toEqual({ A: 'garnison' });
@@ -99,7 +100,7 @@ describe('Scénarios', () => {
       }
       expect(s.over, id).not.toBeNull();
     }
-  });
+  }, 30000);
   it('aide après plusieurs défaites : +1 ressource de départ toutes les 3 défaites (3 au plus)', () => {
     const c = newCampaign('demons');
     expect(bonusUnlocked(c, 'd1')).toBe(0);

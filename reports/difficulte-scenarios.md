@@ -1,27 +1,27 @@
 # Difficulté des scénarios de campagne
 
-30 parties par scénario. Le camp du joueur est joué par l'ordinateur avec tout son pool de campagne ; l'ordinateur joue moins bien qu'un humain : ces taux sont une borne basse.
+40 parties par scénario. Le camp du joueur est joué par l'ordinateur avec tout son pool de campagne ; l'ordinateur joue moins bien qu'un humain : ces taux sont une borne basse.
 
 | Scénario | Pool (cartes) | Réussite | Tours (moy.) | Défaites les plus fréquentes |
 |---|---|---|---|---|
-| Les Œufs — 1. Le nid des sables | 21 | **37 %** | 8.0 | lassitude (37 %), plus de régiment (27 %) |
-| Les Œufs — 2. La traversée du désert | 26 | **43 %** | 9.8 | lassitude (30 %), régiment vital détruit (27 %) |
-| Les Œufs — 3. La frontière impériale | 28 | **30 %** | 7.3 | lassitude (63 %), plus de régiment (3 %) |
-| Les Œufs — 4. Les égouts de la capitale | 31 | **47 %** | 9.0 | lassitude (43 %), plus de régiment (10 %) |
-| Les Œufs — 5. L’offrande | 34 | **37 %** | 5.9 | régiment vital détruit (63 %) |
-| La Purification — 1. La source souillée | 20 | **83 %** | 8.5 | lassitude (17 %) |
-| La Purification — 2. Les captifs | 24 | **77 %** | 9.6 | lassitude (23 %) |
-| La Purification — 3. La nuit sans fin | 25 | **53 %** | 6.4 | plus de régiment (47 %) |
-| La Purification — 4. Le portail des Abysses | 28 | **43 %** | 5.2 | plus de régiment (57 %) |
-| Les Sables — 1. Les éclaireurs de la Légion | 21 | **90 %** | 8.2 | pioche vide (10 %) |
-| Les Sables — 2. Le puits de Sel-Amar | 24 | **87 %** | 7.9 | régiment vital détruit (10 %), lassitude (3 %) |
-| Les Sables — 3. Razzia sur le ravitaillement | 26 | **60 %** | 7.4 | lassitude (40 %) |
-| Les Sables — 4. La tempête de sable | 29 | **37 %** | 17.2 | lassitude (43 %), plus de régiment (17 %) |
-| Les Sables — 5. La Forteresse dans les dunes | 32 | **87 %** | 6.2 | lassitude (13 %) |
-| Scénario 1 — Attaque à la frontière | 20 | **57 %** | 7.1 | lassitude (43 %) |
-| Scénario 2 — Le siège de Kragz | 23 | **7 %** | 3.9 | régiment vital détruit (90 %), lassitude (3 %) |
-| Scénario 3 — Le convoi du col des Brumes | 28 | **7 %** | 6.2 | régiment vital détruit (93 %) |
-| Scénario 4 — Sylvain, le Gardien Élémentaire | 31 | **33 %** | 8.3 | lassitude (63 %), plus de régiment (3 %) |
+| Les Œufs — 1. Le nid des sables | 21 | **80 %** | 5.9 | plus de régiment (20 %) |
+| Les Œufs — 2. La traversée du désert | 26 | **80 %** | 11.6 | lassitude (20 %) |
+| Les Œufs — 3. La frontière impériale | 28 | **78 %** | 7.7 | lassitude (10 %), plus de régiment (8 %) |
+| Les Œufs — 4. Les égouts de la capitale | 31 | **98 %** | 8.8 | lassitude (3 %) |
+| Les Œufs — 5. L’offrande | 34 | **100 %** | 7.9 | — |
+| La Purification — 1. La source souillée | 20 | **90 %** | 8.7 | plus de régiment (10 %) |
+| La Purification — 2. Les captifs | 24 | **98 %** | 11.3 | lassitude (3 %) |
+| La Purification — 3. La nuit sans fin | 25 | **78 %** | 9.2 | plus de régiment (23 %) |
+| La Purification — 4. Le portail des Abysses | 28 | **78 %** | 9.6 | plus de régiment (23 %) |
+| Les Sables — 1. Les éclaireurs de la Légion | 21 | **98 %** | 9.0 | pioche vide (3 %) |
+| Les Sables — 2. Le puits de Sel-Amar | 24 | **100 %** | 9.2 | — |
+| Les Sables — 3. Razzia sur le ravitaillement | 26 | **80 %** | 7.2 | plus de régiment (10 %), convoi passé (8 %) |
+| Les Sables — 4. La tempête de sable | 29 | **48 %** | 19.3 | lassitude (28 %), plus de régiment (25 %) |
+| Les Sables — 5. La Forteresse dans les dunes | 32 | **100 %** | 6.0 | — |
+| Scénario 1 — Attaque à la frontière | 20 | **90 %** | 8.3 | lassitude (10 %) |
+| Scénario 2 — Le siège de Kragz | 23 | **28 %** | 8.8 | lassitude (73 %) |
+| Scénario 3 — Le convoi du col des Brumes | 28 | **73 %** | 14.4 | régiment vital détruit (28 %) |
+| Scénario 4 — Sylvain, le Gardien Élémentaire | 31 | **50 %** | 10.5 | pioche vide (35 %), lassitude (13 %) |
 
 ## Pools utilisés
 

@@ -232,7 +232,8 @@ export function attack(ctx: Ctx, a: Unit, target: Unit, mult = 1): void {
   target.currentEnd = Math.max(0, target.currentEnd - damage);
   if (damage > 0 && card(a.cardId).woundInflictsFrondeurMill) target.woundedByFrondeur = true;
   const fearVal = a.brokenMorale ? 0 : ctx.fear(a);
-  const moralLoss = ctx.loseMoral(target, 1 + fearVal);
+  // Aide de campagne : le régiment vital du joueur ne perd du Moral aux attaques que par Effrayant.
+  const moralLoss = ctx.loseMoral(target, (ctx.isEasedVital(target) ? 0 : 1) + fearVal);
   ctx.checkBroken(target);
   ctx.emit({
     type: 'attack', attacker: a.uid, attackerCard: a.cardId, target: target.uid, targetCard: target.cardId,

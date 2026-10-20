@@ -151,7 +151,10 @@ export function openPack(p: Profile, rand: () => number = Math.random, altPool: 
   if (withAvatar) cosmetic(AVATAR_IDS, p.avatars, 'avatar', avatarWeight);
   if (withAlt) cosmetic(altOwned, p.altArts, 'alt');
   while (out.cards.length < PACK_SIZE) {
-    const id = COLLECTIBLE[Math.floor(rand() * COLLECTIBLE.length)]!;
+    // Les cartes déjà possédées en 3 exemplaires ne sortent plus (sauf si toute la collection est complète).
+    const open = COLLECTIBLE.filter(x => (p.collection[x] ?? 0) < MAX_COPIES);
+    const pool = open.length ? open : COLLECTIBLE;
+    const id = pool[Math.floor(rand() * pool.length)]!;
     const have = p.collection[id] ?? 0;
     if (have >= MAX_COPIES) { out.refund += COINS_PER_EXTRA; out.cards.push({ id, isNew: false, extra: true, kind: 'card' }); continue; }
     p.collection[id] = have + 1;

@@ -312,6 +312,8 @@ export interface ScenarioRules {
   moralCheckLostResource?: Partial<Record<PlayerId, { base: number; level3: number }>>;
   weather?: Weather;
   alarm?: Alarm;
+  /** Aide de campagne : ATK des régiments du camp `weak` multipliée par `atk` ; END des régiments vitaux de `helped` multipliée par `vitalEnd`, et `vitalMor` Moral en plus (maximum et départ). */
+  ease?: { weak: PlayerId; atk: number; helped: PlayerId; vitalEnd: number; vitalMor: number; vitalArm: number };
 }
 export interface ScenarioSetup extends ScenarioRules {
   start?: Partial<Record<PlayerId, { avant?: Record<string, string>; arriere?: Record<string, string>; isole?: string }>>;
