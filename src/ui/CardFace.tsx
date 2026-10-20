@@ -23,7 +23,7 @@ export const altArtNumber = (key: string): number => Number(key.split('.alt')[1]
 let choice: Record<string, string> = {};
 export function setArtChoices(c: Record<string, string>): void { choice = c; }
 /** Cartes qui empruntent l'art d'une autre carte, art alternatif choisi compris (le régiment Palissade suit la tactique du même nom). */
-const ART_SOURCE: Record<string, string> = { palissade_regiment: 'palissade_tactique' };
+const ART_SOURCE: Record<string, string> = { palissade_regiment: 'palissade_tactique', eveil_elementaire: 'elem_eveil_regiment' };
 /** Illustration d'une carte, art alternatif choisi compris (undefined si elle n'en a pas encore). */
 export const artOf = (id: string): string | undefined => { const src = ART_SOURCE[id] ?? id; return (choice[src] && ART[choice[src]!]) || ART[src]; };
 // En partie : arts choisis par chaque joueur (null hors partie : on montre les choix du profil).
