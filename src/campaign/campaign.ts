@@ -25,8 +25,8 @@ export interface CampaignSave {
   bonus: number;
 }
 
-/** Une aide de +1 ressource de départ se débloque toutes les 3 défaites sur un même scénario (3 au plus). */
-export const FAILS_PER_BONUS = 3;
+/** Une aide de +1 ressource de départ se débloque toutes les 2 défaites sur un même scénario (3 au plus). */
+export const FAILS_PER_BONUS = 2;
 export const MAX_BONUS = 3;
 export const defeatsOn = (c: CampaignSave, id: string) => c.attempts[id] ?? 0;
 export const bonusUnlocked = (c: CampaignSave, id: string) => Math.min(MAX_BONUS, Math.floor(defeatsOn(c, id) / FAILS_PER_BONUS));
@@ -44,9 +44,9 @@ export const currentScenario = (c: CampaignSave): CampaignScenario => SCENARIOS[
 /**
  * Aide de campagne (20/10/2026) : la campagne sert de grand tutoriel, elle doit rester agréable.
  * Appliquée à tous les scénarios sans toucher à leur contenu : ressource et marge de lassitude en plus pour le joueur,
- * régiments adverses moins offensifs, régiments vitaux du joueur plus solides.
+ * régiment vital du joueur plus solide (END ×1,5, +2 Moral). Pertes de Moral normales, ATK adverse inchangée.
  */
-export const CAMPAIGN_EASE = { startResource: 1, lassitudeMul: 1.5, enemyAtk: 0.8, vitalEnd: 2, vitalMor: 3, vitalArm: 10 };
+export const CAMPAIGN_EASE = { startResource: 1, lassitudeMul: 1.5, enemyAtk: 1, vitalEnd: 1.5, vitalMor: 2, vitalArm: 0 };
 
 export function scenarioGameSetup(sc: CampaignScenario, playerDeck: string[], seed: string | number, bonus = 0, ease = CAMPAIGN_EASE): GameSetup {
   const per = <T>(m: Partial<Record<PlayerId, T>> | undefined, def: T): Record<PlayerId, T> => ({ A: m?.A ?? def, B: m?.B ?? def });

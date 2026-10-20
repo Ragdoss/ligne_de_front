@@ -691,8 +691,7 @@ export class Ctx {
 
     const allies = this.units(p);
     for (const a of allies) {
-      // Acolyte Damné, Dernier carré ; aide de campagne : le régiment vital du joueur ne perd pas de Moral à la mort d'un allié.
-      const steady = (!!a.leader && !a.brokenMorale && !!card(a.leader).leaderNoAllyDeathMoralLoss) || !!a.steadyOwner || this.isEasedVital(a);
+      const steady = (!!a.leader && !a.brokenMorale && !!card(a.leader).leaderNoAllyDeathMoralLoss) || !!a.steadyOwner; // Acolyte Damné, Dernier carré
       if (!minion && !steady) {
         const lost = this.loseMoral(a, 1);
         if (lost) this.emit({ type: 'moralLoss', uid: a.uid, cardId: a.cardId, amount: lost, source: 'allyDeath' });

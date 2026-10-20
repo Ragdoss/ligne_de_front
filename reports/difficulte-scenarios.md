@@ -1,5 +1,7 @@
 # Difficulté des scénarios de campagne
 
+> Mesuré le 20/10/2026 avec une aide plus forte (ATK adverse ×0,8, régiment vital END ×2, +10 ARM, +3 Moral, sans pertes de Moral), réduite ensuite par Nathan : ces taux surestiment l’aide actuelle.
+
 40 parties par scénario. Le camp du joueur est joué par l'ordinateur avec tout son pool de campagne ; l'ordinateur joue moins bien qu'un humain : ces taux sont une borne basse.
 
 | Scénario | Pool (cartes) | Réussite | Tours (moy.) | Défaites les plus fréquentes |
