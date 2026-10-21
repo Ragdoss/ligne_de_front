@@ -28,4 +28,101 @@ export const MODE_EASE: Record<Difficulty, ScenarioEase> = {
   heros: { startResource: 0, lassitudeMul: 1, vitalEnd: 1, vitalMor: 0 },
 };
 /** Réglage par scénario et par mode. */
-export const SCENARIO_EASE: Record<string, Partial<Record<Difficulty, ScenarioEase>>> = {};
+/**
+ * Réglage par scénario et par mode (21/10/2026, tools/tune-campaign.ts, 60 à 120 parties par essai ; commentaires : taux de
+ * victoire de l'ordinateur jouant le joueur). Kragz, le Convoi, Sylvain, le Portail et la Tempête plafonnent vers 25-55 %
+ * quelle que soit l'aide : l'ordinateur y joue mal (il ne protège pas le régiment vital, finit sa pioche) ; ils reçoivent
+ * une aide progressive raisonnable plutôt que l'aide maximale.
+ */
+export const SCENARIO_EASE: Record<string, Partial<Record<Difficulty, ScenarioEase>>> = {
+  d1: {
+    heros: { startResource: 0, lassitudeMul: 0.5 }, /* IA 28 % */
+    guerrier: { startResource: 0, lassitudeMul: 0.8 }, /* IA 57 % */
+    histoire: { startResource: 2, lassitudeMul: 1.5 }, /* IA 62 % */
+  },
+  d2: {
+    heros: { startResource: 0, lassitudeMul: 0.8, vitalEnd: 1, vitalMor: 1 }, /* IA 23 % */
+    guerrier: { startResource: 2, lassitudeMul: 1.5, vitalEnd: 1.75, vitalMor: 2 }, /* IA 48 % */
+    histoire: { startResource: 6, lassitudeMul: 4, vitalEnd: 4, vitalMor: 6 }, /* IA 58 % */
+  },
+  d3: {
+    heros: { startResource: 0, lassitudeMul: 0.8 }, /* IA 13 % */
+    guerrier: { startResource: 0, lassitudeMul: 1 }, /* IA 58 % */
+    histoire: { startResource: 0, lassitudeMul: 1.25 }, /* IA 75 % */
+  },
+  d4: {
+    heros: { startResource: 0, lassitudeMul: 0.5 }, /* IA 30 % */
+    guerrier: { startResource: 0, lassitudeMul: 0.6 }, /* IA 55 % */
+    histoire: { startResource: 0, lassitudeMul: 1 }, /* IA 73 % */
+  },
+  d5: {
+    heros: { startResource: 0, lassitudeMul: 0.6, vitalEnd: 1, vitalMor: 0 }, /* IA 18 % */
+    guerrier: { startResource: 0, lassitudeMul: 0.8, vitalEnd: 1, vitalMor: 1 }, /* IA 50 % */
+    histoire: { startResource: 0, lassitudeMul: 1.25, vitalEnd: 1.5, vitalMor: 2 }, /* IA 73 % */
+  },
+  e1: {
+    heros: { startResource: 0, lassitudeMul: 0.6 }, /* IA 29 % */
+    guerrier: { startResource: 0, lassitudeMul: 0.8 }, /* IA 57 % */
+    histoire: { startResource: 0, lassitudeMul: 1 }, /* IA 90 % */
+  },
+  e2: {
+    heros: { startResource: 0, lassitudeMul: 0.6 }, /* IA 30 % */
+    guerrier: { startResource: 0, lassitudeMul: 0.8 }, /* IA 42 % */
+    histoire: { startResource: 0, lassitudeMul: 1 }, /* IA 75 % */
+  },
+  e3: {
+    heros: { startResource: 0, lassitudeMul: 0.6 }, /* IA 8 % */
+    guerrier: { startResource: 0, lassitudeMul: 0.8 }, /* IA 50 % */
+    histoire: { startResource: 2, lassitudeMul: 1.5 }, /* IA 73 % */
+  },
+  e4: {
+    heros: { startResource: 0, lassitudeMul: 0.8 }, /* IA 10 % */
+    guerrier: { startResource: 0, lassitudeMul: 1.25 }, /* IA 53 % */
+    histoire: { startResource: 3, lassitudeMul: 2 }, /* IA 55 % */
+  },
+  s1: {
+    heros: { startResource: 0, lassitudeMul: 0.8 }, /* IA 28 % */
+    guerrier: { startResource: 0, lassitudeMul: 1.25 }, /* IA 57 % */
+    histoire: { startResource: 1, lassitudeMul: 1.25 }, /* IA 93 % */
+  },
+  s2: {
+    heros: { startResource: 1, lassitudeMul: 1.5, vitalEnd: 1.5, vitalMor: 2 }, /* limité par l’IA */
+    guerrier: { startResource: 3, lassitudeMul: 2, vitalEnd: 2, vitalMor: 3 }, /* limité par l’IA */
+    histoire: { startResource: 5, lassitudeMul: 3, vitalEnd: 3, vitalMor: 5 }, /* limité par l’IA */
+  },
+  s3: {
+    heros: { startResource: 1, lassitudeMul: 1.5, vitalEnd: 1.5, vitalMor: 2 }, /* limité par l’IA */
+    guerrier: { startResource: 3, lassitudeMul: 2, vitalEnd: 2, vitalMor: 3 }, /* limité par l’IA */
+    histoire: { startResource: 5, lassitudeMul: 3, vitalEnd: 3, vitalMor: 5 }, /* limité par l’IA */
+  },
+  s4: {
+    heros: { startResource: 1, lassitudeMul: 1.5 }, /* limité par l’IA */
+    guerrier: { startResource: 3, lassitudeMul: 1.75 }, /* IA 25 % */
+    histoire: { startResource: 4, lassitudeMul: 2 }, /* IA 32 % */
+  },
+  n1: {
+    heros: { startResource: 0, lassitudeMul: 0.6 }, /* IA 25 % */
+    guerrier: { startResource: 0, lassitudeMul: 0.8 }, /* IA 63 % */
+    histoire: { startResource: 0, lassitudeMul: 1 }, /* IA 90 % */
+  },
+  n2: {
+    heros: { startResource: 0, lassitudeMul: 0.8, vitalEnd: 1, vitalMor: 1 }, /* IA 33 % */
+    guerrier: { startResource: 0, lassitudeMul: 1, vitalEnd: 1.25, vitalMor: 1 }, /* IA 68 % */
+    histoire: { startResource: 0, lassitudeMul: 1.25, vitalEnd: 1.5, vitalMor: 2 }, /* IA 80 % */
+  },
+  n3: {
+    heros: { startResource: 0, lassitudeMul: 0.6 }, /* IA 21 % */
+    guerrier: { startResource: 0, lassitudeMul: 1.25 }, /* IA 57 % */
+    histoire: { startResource: 2, lassitudeMul: 1.5 }, /* IA 73 % */
+  },
+  n4: {
+    heros: { startResource: 0, lassitudeMul: 0.6 }, /* IA 18 % */
+    guerrier: { startResource: 0, lassitudeMul: 0.8 }, /* IA 46 % */
+    histoire: { startResource: 1, lassitudeMul: 1.5 }, /* IA 45 % */
+  },
+  n5: {
+    heros: { startResource: 0, lassitudeMul: 0.6 }, /* IA 18 % */
+    guerrier: { startResource: 0, lassitudeMul: 0.7 }, /* IA 52 % */
+    histoire: { startResource: 0, lassitudeMul: 0.8 }, /* IA 83 % */
+  },
+};
