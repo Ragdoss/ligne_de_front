@@ -4,6 +4,7 @@ import { keyFor } from '../profile/store';
 import { DEFAULT_LEVEL_THRESHOLDS, type GameSetup } from '../engine/game';
 import type { Action, GameState, PlayerId } from '../engine/types';
 import { CAMPAIGN_BY_ID, SCENARIOS } from './campaigns';
+import { SCENARIO_EASE } from './ease';
 import type { CampaignDef, CampaignScenario } from './types';
 
 export interface CampaignSave {
@@ -46,9 +47,14 @@ export const currentScenario = (c: CampaignSave): CampaignScenario => SCENARIOS[
  * Appliquée à tous les scénarios sans toucher à leur contenu : ressource et marge de lassitude en plus pour le joueur,
  * régiment vital du joueur plus solide (END ×1,5, +2 Moral). Pertes de Moral normales, ATK adverse inchangée.
  */
+// Réglages propres à chaque scénario : voir ease.ts.
 export const CAMPAIGN_EASE = { startResource: 1, lassitudeMul: 1.5, enemyAtk: 1, vitalEnd: 1.5, vitalMor: 2, vitalArm: 0 };
 
-export function scenarioGameSetup(sc: CampaignScenario, playerDeck: string[], seed: string | number, bonus = 0, ease = CAMPAIGN_EASE): GameSetup {
+export type CampaignEase = typeof CAMPAIGN_EASE;
+/** Aide d'un scénario : réglage commun, avec ressources et lassitude propres au scénario (src/campaign/ease.ts). */
+export const easeFor = (id: string): CampaignEase => ({ ...CAMPAIGN_EASE, ...SCENARIO_EASE[id] });
+
+export function scenarioGameSetup(sc: CampaignScenario, playerDeck: string[], seed: string | number, bonus = 0, ease: CampaignEase = easeFor(sc.id)): GameSetup {
   const per = <T>(m: Partial<Record<PlayerId, T>> | undefined, def: T): Record<PlayerId, T> => ({ A: m?.A ?? def, B: m?.B ?? def });
   return {
     seed,
@@ -57,7 +63,7 @@ export function scenarioGameSetup(sc: CampaignScenario, playerDeck: string[], se
     config: {
       layout: sc.layout ?? { avant: 4, arriere: 3 },
       levelThresholds: per(sc.levelThresholds, DEFAULT_LEVEL_THRESHOLDS),
-      defeatLassitude: (({ A, B }) => ({ A: Math.round(A * ease.lassitudeMul), B }))(per(sc.defeatLassitude, 50)),
+      defeatLassitude: (({ A, B }) => ({ A: Math.max(1, Math.round(A * ease.lassitudeMul)), B }))(per(sc.defeatLassitude, 50)),
       moralCheckLassitude: sc.moralCheckLassitude ?? null,
       endTurnLassitude: per(sc.endTurnLassitude, 0),
       noRegimentDefeatFromTurn: per(sc.noRegimentDefeatFromTurn, 1),
@@ -76,7 +82,7 @@ export function scenarioGameSetup(sc: CampaignScenario, playerDeck: string[], se
       startOverrides: sc.startOverrides,
       weather: sc.weather,
       alarm: sc.alarm,
-      startResource: bonus + ease.startResource ? { A: bonus + ease.startResource } : undefined,
+      startResource: bonus + ease.startResource ? { A: Math.max(0, bonus + ease.startResource) } : undefined,
       ease: { weak: 'B', atk: ease.enemyAtk, helped: 'A', vitalEnd: ease.vitalEnd, vitalMor: ease.vitalMor, vitalArm: ease.vitalArm },
     },
   };
