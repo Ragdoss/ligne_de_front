@@ -6,7 +6,7 @@ import {
   recordHumanGame, SCHEDULE, standings, winsNeeded, type BestOf, type DraftState,
 } from '../draft/draft';
 import { formatEvent } from '../i18n/log.fr';
-import { COINS_PER_WIN, type Profile } from '../profile/profile';
+import { COINS_PER_WIN, defeatCoins, type Profile } from '../profile/profile';
 import { keyFor } from '../profile/store';
 import { Avatar } from './avatars';
 import { CardTile } from './CardTile';
@@ -89,7 +89,7 @@ export function DraftScreen({ profile, onExit, gameOpts, reward }: {
   onExit: () => void;
   gameOpts: { animMul: number; aiMul: number; bannerMul: number; initialReveal: boolean };
   /** Victoire d'un match (pièces + statistiques) ; `first` = première place finale. */
-  reward: (r: { win?: boolean; first?: boolean }) => void;
+  reward: (r: { win?: boolean; first?: boolean; consolation?: number }) => void;
 }) {
   const [st, setSt] = useState<DraftState | null>(() => loadDraft());
   /** Partie en cours ; premier joueur tiré au hasard en début de match, puis en alternance (Bo3, Bo5). */
@@ -116,6 +116,7 @@ export function DraftScreen({ profile, onExit, gameOpts, reward }: {
         onQuit={() => setGame(null)}
         onOver={g => {
           const win = g.over!.winner === 'A';
+          if (!win) reward({ consolation: defeatCoins(g.players.B.points) }); // défaite : lassitude infligée − 2
           const nextSt = recordHumanGame(st, win, g.turn);
           const done = !nextSt.current;
           const score: [number, number] = done ? nextSt.results.filter(r => r.a === 0).at(-1)!.score ?? [win ? 1 : 0, win ? 0 : 1] : nextSt.current!;
@@ -133,6 +134,7 @@ export function DraftScreen({ profile, onExit, gameOpts, reward }: {
               <p>{formatEvent({ type: 'gameOver', winner: g.over!.winner, reason: g.over!.reason }, nm)} (tour {g.turn})</p>
               {(st.bestOf ?? 1) > 1 && after && <p className="series">Match : {names[0]} {after.score[0]} – {after.score[1]} {nm.B}{after.done ? (after.score[0] > after.score[1] ? ' — match gagné !' : ' — match perdu') : ''}</p>}
               {after?.done && after.score[0] > after.score[1] && <p className="coin-gain">+{COINS_PER_WIN} pièces</p>}
+              {g.over!.winner !== 'A' && <p className="coin-gain">{defeatCoins(g.players.B.points) ? `+${defeatCoins(g.players.B.points)} pièce(s)` : 'Aucune pièce'} <span className="muted small">(lassitude infligée − 2)</span></p>}
               <div className="choices row">
                 <button type="button" onClick={close}>Voir le plateau</button>
                 {after && !after.done

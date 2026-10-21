@@ -85,3 +85,12 @@ describe('Profil joueur', () => {
     expect(mergeCampaignPool(p, ['lancier_emp', 'lancier_emp'], 'camp-1')).toEqual({});
   });
 });
+
+describe('Pièces de défaite', () => {
+  it('lassitude infligée − 2, jamais négatif', async () => {
+    const { defeatCoins } = await import('../src/profile/profile');
+    expect(defeatCoins(0)).toBe(0);
+    expect(defeatCoins(2)).toBe(0);
+    expect(defeatCoins(7)).toBe(5);
+  });
+});

@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { addToPool, bonusFor, difficultyOf, easeFor, bonusUnlocked, campaignDef, defeatsOn, currentScenario, defaultDeckSelection, saveCampaign, scenarioAiFilter, scenarioGameSetup, selectionToDeck, type CampaignSave } from '../campaign/campaign';
 import type { Action, DialogLine, GameState, PlayerId } from '../engine/types';
 import { formatEvent } from '../i18n/log.fr';
-import { artsForDeck, COINS_PER_WIN, loadProfile, mergeCampaignPool, saveProfile, type Profile } from '../profile/profile';
+import { artsForDeck, COINS_PER_WIN, defeatCoins, loadProfile, mergeCampaignPool, saveProfile, type Profile } from '../profile/profile';
 import { CampHub } from './Camp';
 import { CampaignDeck } from './CampaignDeck';
 import { setArtChoices, setRomanLevels } from './CardFace';
@@ -57,6 +57,9 @@ function EndBox({ title, text, children, extra }: { title: string; text: string;
 }
 
 const CoinGain = () => <p className="coin-gain">+{COINS_PER_WIN} pièces</p>;
+/** Défaite : pièces gagnées selon la lassitude infligée à l'adversaire (le vainqueur). */
+const lossCoins = (g: GameState) => defeatCoins(g.players[g.over!.winner].points);
+const LossCoins = ({ n }: { n: number }) => <p className="coin-gain">{n > 0 ? `+${n} pièce${n > 1 ? 's' : ''}` : 'Aucune pièce'} <span className="muted small">(lassitude infligée − 2)</span></p>;
 
 export function App() {
   const [screen, setScreen] = useState<Screen>({ kind: 'home' });
@@ -121,14 +124,14 @@ export function App() {
         onQuit={() => setScreen({ kind: 'local' })}
         onOver={g => {
           const winA = g.over!.winner === 'A';
-          if (setup.mode !== 'watch') update(p => { if (paid && winA) p.coins += COINS_PER_WIN; p.stats[paid ? 'ai' : 'hotseat'][winA ? 'w' : 'l']++; });
+          if (setup.mode !== 'watch') update(p => { if (paid) p.coins += winA ? COINS_PER_WIN : lossCoins(g); p.stats[paid ? 'ai' : 'hotseat'][winA ? 'w' : 'l']++; });
           setScreen(cur => (cur.kind === 'localGame' ? { ...cur, series: { A: (cur.series?.A ?? 0) + (winA ? 1 : 0), B: (cur.series?.B ?? 0) + (winA ? 0 : 1) } } : cur));
         }}
         renderEnd={(g, close) => (
           <EndBox
             title={`Victoire : ${names[g.over!.winner]}`}
             text={`${formatEvent({ type: 'gameOver', winner: g.over!.winner, reason: g.over!.reason }, names)} (tour ${g.turn})`}
-            extra={<>{paid && g.over!.winner === 'A' ? <CoinGain /> : null}
+            extra={<>{paid ? (g.over!.winner === 'A' ? <CoinGain /> : <LossCoins n={lossCoins(g)} />) : null}
               <p className="series">Série : {names.A} {screen.series?.A ?? 0} – {screen.series?.B ?? 0} {names.B}</p></>}
           >
             <button type="button" onClick={close}>Voir le plateau</button>
@@ -140,14 +143,14 @@ export function App() {
     );
   } else if (screen.kind === 'draft') {
     content = <DraftScreen profile={profile} onExit={home} gameOpts={gameOpts}
-      reward={r => update(p => { if (r.win !== undefined) { if (r.win) p.coins += COINS_PER_WIN; p.stats.ai[r.win ? 'w' : 'l']++; } if (r.first) p.coins += DRAFT_FIRST_BONUS; })} />;
+      reward={r => update(p => { if (r.win !== undefined) { if (r.win) p.coins += COINS_PER_WIN; p.stats.ai[r.win ? 'w' : 'l']++; } if (r.first) p.coins += DRAFT_FIRST_BONUS; if (r.consolation) p.coins += r.consolation; })} />;
   } else if (screen.kind === 'tutorial') {
     content = <Tutorial key={screen.key} gameOpts={{ animMul: o.animSpeed, aiMul: o.aiSpeed, bannerMul: o.bannerSpeed }} onExit={home} onCampaign={() => setScreen({ kind: 'campaignMenu' })} />;
   } else if (screen.kind === 'online') {
     content = <OnlineLobby profile={profile} onBack={home} goDecks={() => setScreen({ kind: 'collection', tab: 'decks' })} onStart={start => setScreen({ kind: 'onlineGame', start, key: Date.now() })} />;
   } else if (screen.kind === 'onlineGame') {
     content = <OnlineGame key={screen.key} start={screen.start} gameOpts={gameOpts} loadout={profile.emoteLoadout} onExit={() => setScreen({ kind: 'online' })}
-      onResult={win => update(p => { if (win) p.coins += COINS_PER_WIN; p.stats.online[win ? 'w' : 'l']++; })} />;
+      onResult={(win, g) => update(p => { p.coins += win ? COINS_PER_WIN : lossCoins(g); p.stats.online[win ? 'w' : 'l']++; })} />;
   } else if (screen.kind === 'campaignMenu') {
     content = <CampaignMenu onBack={home} onPlay={c => { saveCampaign(c); setScreen({ kind: 'campHub', campaign: c }); }} />;
   } else if (screen.kind === 'campHub') {
@@ -209,6 +212,7 @@ export function App() {
         onOver={g => {
           update(p => { p.stats.campaign[g.over!.winner === 'A' ? 'w' : 'l']++; });
           if (g.over!.winner === 'A') { update(p => { p.coins += COINS_PER_WIN; }); return; }
+          update(p => { p.coins += lossCoins(g); });
           // Défaite : comptée pour ce scénario (débloque l'aide au départ après plusieurs échecs).
           const next = { ...c, attempts: { ...c.attempts, [sc.id]: (c.attempts[sc.id] ?? 0) + 1 } };
           saveCampaign(next);
@@ -229,7 +233,7 @@ export function App() {
           </EndBox>
         ) : (
           <EndBox title="Scénario échoué" text={formatEvent({ type: 'gameOver', winner: g.over!.winner, reason: g.over!.reason }, names) ?? ''}
-            extra={<p className="muted small">Défaites sur ce combat : {defeatsOn(c, sc.id)}.{bonusUnlocked(c, sc.id) > bonusFor(c, sc.id) ? ' Une aide est disponible au camp : des ressources en plus au départ.' : ''}</p>}>
+            extra={<><LossCoins n={lossCoins(g)} /><p className="muted small">Défaites sur ce combat : {defeatsOn(c, sc.id)}.{bonusUnlocked(c, sc.id) > bonusFor(c, sc.id) ? ' Une aide est disponible au camp : des ressources en plus au départ.' : ''}</p></>}>
             <button type="button" onClick={close}>Voir le plateau</button>
             <button type="button" onClick={() => setScreen({ kind: 'campHub', campaign: c })}>Retour au camp</button>
             <button type="button" className="primary" onClick={() => setScreen({ kind: 'campGame', campaign: c, deck: screen.deck, key: Date.now() })}>Réessayer le scénario</button>
@@ -294,7 +298,7 @@ export function App() {
 /** Partie en ligne : notre camp est en bas, le camp adverse est joué à distance. Revanche, série et emotes. */
 function OnlineGame({ start: first, gameOpts, onExit, onResult, loadout }: {
   loadout: string[];
-  start: OnlineStart; gameOpts: { animMul: number; aiMul: number; bannerMul: number; initialReveal: boolean }; onExit: () => void; onResult: (win: boolean) => void;
+  start: OnlineStart; gameOpts: { animMul: number; aiMul: number; bannerMul: number; initialReveal: boolean }; onExit: () => void; onResult: (win: boolean, g: GameState) => void;
 }) {
   const link = first.link;
   const [start, setStart] = useState(first);
@@ -390,13 +394,13 @@ function OnlineGame({ start: first, gameOpts, onExit, onResult, loadout }: {
           setEnded(true);
           const win = g.over!.winner === start.side;
           setSeries(x => (win ? { ...x, me: x.me + 1 } : { ...x, them: x.them + 1 }));
-          onResult(win);
+          onResult(win, g);
         }}
         renderEnd={(g, close) => (
           <EndBox
             title={g.over!.winner === start.side ? 'Victoire !' : 'Défaite'}
             text={`${formatEvent({ type: 'gameOver', winner: g.over!.winner, reason: g.over!.reason }, start.names)} (tour ${g.turn})`}
-            extra={<>{g.over!.winner === start.side ? <CoinGain /> : null}<p className="series">{seriesText}</p>
+            extra={<>{g.over!.winner === start.side ? <CoinGain /> : <LossCoins n={lossCoins(g)} />}<p className="series">{seriesText}</p>
               {rematch.them && !rematch.me && <p className="muted small">{start.names[other]} propose une revanche !</p>}
               {rematch.me && !rematch.them && <p className="muted small">En attente de la réponse de {start.names[other]}…</p>}</>}
           >

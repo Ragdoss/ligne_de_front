@@ -5,6 +5,9 @@ import { clearActiveProfileData, keyFor } from './store';
 
 export const MAX_COPIES = 3;
 export const COINS_PER_WIN = 5;
+/** Défaite : pièces de consolation = lassitude infligée à l'adversaire − 2 (0 au minimum). */
+export const DEFEAT_COIN_MALUS = 2;
+export const defeatCoins = (opponentLassitude: number) => Math.max(0, Math.floor(opponentLassitude) - DEFEAT_COIN_MALUS);
 export const PACK_PRICE = 5;
 export const PACK_SIZE = 5;
 /** Monnaie rendue pour un exemplaire tiré au-delà de 3. */
