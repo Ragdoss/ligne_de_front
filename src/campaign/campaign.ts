@@ -4,7 +4,7 @@ import { keyFor } from '../profile/store';
 import { DEFAULT_LEVEL_THRESHOLDS, type GameSetup } from '../engine/game';
 import type { Action, GameState, PlayerId } from '../engine/types';
 import { CAMPAIGN_BY_ID, SCENARIOS } from './campaigns';
-import { SCENARIO_EASE } from './ease';
+import { DEFAULT_DIFFICULTY, DIFFICULTIES, MODE_EASE, SCENARIO_EASE, type Difficulty } from './ease';
 import type { CampaignDef, CampaignScenario } from './types';
 
 export interface CampaignSave {
@@ -24,6 +24,8 @@ export interface CampaignSave {
   attempts: Record<string, number>;
   /** Aide choisie pour le prochain combat : ressources en plus au départ. */
   bonus: number;
+  /** Mode de difficulté (modifiable au camp entre deux combats). */
+  difficulty?: Difficulty;
 }
 
 /** Une aide de +1 ressource de départ se débloque toutes les 2 défaites sur un même scénario (3 au plus). */
@@ -51,8 +53,10 @@ export const currentScenario = (c: CampaignSave): CampaignScenario => SCENARIOS[
 export const CAMPAIGN_EASE = { startResource: 1, lassitudeMul: 1.5, enemyAtk: 1, vitalEnd: 1.5, vitalMor: 2, vitalArm: 0 };
 
 export type CampaignEase = typeof CAMPAIGN_EASE;
-/** Aide d'un scénario : réglage commun, avec ressources et lassitude propres au scénario (src/campaign/ease.ts). */
-export const easeFor = (id: string): CampaignEase => ({ ...CAMPAIGN_EASE, ...SCENARIO_EASE[id] });
+/** Aide d'un scénario dans un mode : réglage commun, avec ressources et lassitude propres au scénario (src/campaign/ease.ts). */
+export const easeFor = (id: string, mode: Difficulty = DEFAULT_DIFFICULTY): CampaignEase =>
+  ({ ...CAMPAIGN_EASE, ...MODE_EASE[mode], ...SCENARIO_EASE[id]?.[mode] });
+export const difficultyOf = (c: CampaignSave): Difficulty => c.difficulty ?? DEFAULT_DIFFICULTY;
 
 export function scenarioGameSetup(sc: CampaignScenario, playerDeck: string[], seed: string | number, bonus = 0, ease: CampaignEase = easeFor(sc.id)): GameSetup {
   const per = <T>(m: Partial<Record<PlayerId, T>> | undefined, def: T): Record<PlayerId, T> => ({ A: m?.A ?? def, B: m?.B ?? def });
@@ -166,6 +170,7 @@ export function sanitize(raw: unknown): CampaignSave | null {
     finished: !!c.finished,
     attempts: c.attempts && typeof c.attempts === 'object' ? Object.fromEntries(Object.entries(c.attempts).filter(([, v]) => typeof v === 'number')) : {},
     bonus: Math.max(0, Math.min(MAX_BONUS, Number(c.bonus) | 0)),
+    difficulty: DIFFICULTIES.includes(c.difficulty as Difficulty) ? c.difficulty : DEFAULT_DIFFICULTY,
   };
 }
 export function saveCampaign(c: CampaignSave): void {

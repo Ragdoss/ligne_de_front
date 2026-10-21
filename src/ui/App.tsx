@@ -1,6 +1,6 @@
 // Application : accueil, parties locales, campagne, collection (decks, cartes, paquets), options.
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { addToPool, bonusFor, bonusUnlocked, campaignDef, defeatsOn, currentScenario, defaultDeckSelection, saveCampaign, scenarioAiFilter, scenarioGameSetup, selectionToDeck, type CampaignSave } from '../campaign/campaign';
+import { addToPool, bonusFor, difficultyOf, easeFor, bonusUnlocked, campaignDef, defeatsOn, currentScenario, defaultDeckSelection, saveCampaign, scenarioAiFilter, scenarioGameSetup, selectionToDeck, type CampaignSave } from '../campaign/campaign';
 import type { Action, DialogLine, GameState, PlayerId } from '../engine/types';
 import { formatEvent } from '../i18n/log.fr';
 import { artsForDeck, COINS_PER_WIN, loadProfile, mergeCampaignPool, saveProfile, type Profile } from '../profile/profile';
@@ -161,6 +161,7 @@ export function App() {
         onOptions={() => setScreen({ kind: 'campOptions', campaign: c })}
         onMenu={home}
         onBonus={b => { const next = { ...c, bonus: b }; saveCampaign(next); setScreen({ kind: 'campHub', campaign: next }); }}
+        onDifficulty={d => { const next = { ...c, difficulty: d }; saveCampaign(next); setScreen({ kind: 'campHub', campaign: next }); }}
         onFight={() => {
           const sel = defaultDeckSelection(c);
           const size = Object.values(sel).reduce((a, b) => a + b, 0);
@@ -195,7 +196,7 @@ export function App() {
       <GameScreen
         key={screen.key}
         {...gameOpts}
-        setup={scenarioGameSetup(sc, screen.deck, screen.key, bonusFor(c, sc.id))}
+        setup={scenarioGameSetup(sc, screen.deck, screen.key, bonusFor(c, sc.id), easeFor(sc.id, difficultyOf(c)))}
         names={names}
         human={{ A: !AUTOPILOT, B: false }}
         fast={AUTOPILOT}

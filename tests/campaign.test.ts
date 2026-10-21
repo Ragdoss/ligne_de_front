@@ -112,3 +112,20 @@ describe('Scénarios', () => {
     expect(s.players.A.resource).toBe(base.players.A.resource + 2);
   });
 });
+
+describe('Modes de difficulté', () => {
+  it('Histoire est plus clément que Guerrier, lui-même plus que Héros ; Guerrier par défaut', async () => {
+    const { easeFor, difficultyOf, sanitize } = await import('../src/campaign/campaign');
+    const c = newCampaign('empire');
+    expect(difficultyOf(c)).toBe('guerrier');
+    expect(sanitize({ ...c, difficulty: 'nimporte' })!.difficulty).toBe('guerrier');
+    expect(sanitize({ ...c, difficulty: 'heros' })!.difficulty).toBe('heros');
+    for (const id of ['s1', 's2', 'd1', 'e1', 'n1']) {
+      if (!SCENARIOS[id]) continue;
+      const lass = (m: 'histoire' | 'guerrier' | 'heros') => createGame(scenarioGameSetup(SCENARIOS[id]!, c.pool, 'x', 0, easeFor(id, m))).config.defeatLassitude.A;
+      const res = (m: 'histoire' | 'guerrier' | 'heros') => createGame(scenarioGameSetup(SCENARIOS[id]!, c.pool, 'x', 0, easeFor(id, m))).players.A.resource;
+      expect(lass('histoire') * 10 + res('histoire')).toBeGreaterThanOrEqual(lass('guerrier') * 10 + res('guerrier'));
+      expect(lass('guerrier') * 10 + res('guerrier')).toBeGreaterThanOrEqual(lass('heros') * 10 + res('heros'));
+    }
+  });
+});
