@@ -4,3 +4,4 @@ coverage/
 *.log
 .DS_Store
 dist-web/
+reports/reglage-campagne-*.json
