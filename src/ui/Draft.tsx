@@ -116,7 +116,7 @@ export function DraftScreen({ profile, onExit, gameOpts, reward }: {
         onQuit={() => setGame(null)}
         onOver={g => {
           const win = g.over!.winner === 'A';
-          if (!win) reward({ consolation: defeatCoins(g.players.B.points) }); // défaite : lassitude infligée − 2
+          if (!win) reward({ consolation: defeatCoins(g.players.B.level) }); // défaite : niveau adverse − 2
           const nextSt = recordHumanGame(st, win, g.turn);
           const done = !nextSt.current;
           const score: [number, number] = done ? nextSt.results.filter(r => r.a === 0).at(-1)!.score ?? [win ? 1 : 0, win ? 0 : 1] : nextSt.current!;
@@ -134,7 +134,7 @@ export function DraftScreen({ profile, onExit, gameOpts, reward }: {
               <p>{formatEvent({ type: 'gameOver', winner: g.over!.winner, reason: g.over!.reason }, nm)} (tour {g.turn})</p>
               {(st.bestOf ?? 1) > 1 && after && <p className="series">Match : {names[0]} {after.score[0]} – {after.score[1]} {nm.B}{after.done ? (after.score[0] > after.score[1] ? ' — match gagné !' : ' — match perdu') : ''}</p>}
               {after?.done && after.score[0] > after.score[1] && <p className="coin-gain">+{COINS_PER_WIN} pièces</p>}
-              {g.over!.winner !== 'A' && <p className="coin-gain">{defeatCoins(g.players.B.points) ? `+${defeatCoins(g.players.B.points)} pièce(s)` : 'Aucune pièce'} <span className="muted small">(lassitude infligée − 2)</span></p>}
+              {g.over!.winner !== 'A' && <p className="coin-gain">{defeatCoins(g.players.B.level) ? `+${defeatCoins(g.players.B.level)} pièce(s)` : 'Aucune pièce'} <span className="muted small">(niveau adverse − 2)</span></p>}
               <div className="choices row">
                 <button type="button" onClick={close}>Voir le plateau</button>
                 {after && !after.done

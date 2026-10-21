@@ -57,9 +57,9 @@ function EndBox({ title, text, children, extra }: { title: string; text: string;
 }
 
 const CoinGain = () => <p className="coin-gain">+{COINS_PER_WIN} pièces</p>;
-/** Défaite : pièces gagnées selon la lassitude infligée à l'adversaire (le vainqueur). */
-const lossCoins = (g: GameState) => defeatCoins(g.players[g.over!.winner].points);
-const LossCoins = ({ n }: { n: number }) => <p className="coin-gain">{n > 0 ? `+${n} pièce${n > 1 ? 's' : ''}` : 'Aucune pièce'} <span className="muted small">(lassitude infligée − 2)</span></p>;
+/** Défaite : pièces gagnées selon le niveau de l'adversaire (le vainqueur). */
+const lossCoins = (g: GameState) => defeatCoins(g.players[g.over!.winner].level);
+const LossCoins = ({ n }: { n: number }) => <p className="coin-gain">{n > 0 ? `+${n} pièce${n > 1 ? 's' : ''}` : 'Aucune pièce'} <span className="muted small">(niveau adverse − 2)</span></p>;
 
 export function App() {
   const [screen, setScreen] = useState<Screen>({ kind: 'home' });

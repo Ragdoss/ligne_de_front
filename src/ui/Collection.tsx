@@ -134,7 +134,7 @@ export function MyCards({ profile, update }: { profile: Profile; update: (fn: (p
           if (res) setPack(res);
         }}>Ouvrir un paquet ({PACK_SIZE} cartes, {PACK_PRICE} pièces)</button>
       </div>
-      <p className="muted small">Chaque victoire contre l’ordinateur, en ligne ou en campagne rapporte 5 pièces ; une défaite rapporte la lassitude infligée à l’adversaire moins 2. Les cartes que tu as déjà en 3 exemplaires ne sortent plus des paquets. Un paquet peut aussi contenir une emote (1 chance sur 5), une image de profil (1 sur 10) ou un art alternatif d’une carte que tu possèdes (1 sur 8), à choisir ensuite sous la carte : ton adversaire le verra aussi en partie. La fin d’une campagne ajoute ses cartes à ta collection.</p>
+      <p className="muted small">Chaque victoire contre l’ordinateur, en ligne ou en campagne rapporte 5 pièces ; une défaite rapporte le niveau atteint par l’adversaire moins 2. Les cartes que tu as déjà en 3 exemplaires ne sortent plus des paquets. Un paquet peut aussi contenir une emote (1 chance sur 5), une image de profil (1 sur 10) ou un art alternatif d’une carte que tu possèdes (1 sur 8), à choisir ensuite sous la carte : ton adversaire le verra aussi en partie. La fin d’une campagne ajoute ses cartes à ta collection.</p>
       <p className="completion">
         {FACTIONS.map(fa => {
           const list = COLLECTIBLE.filter(id => CARDS[id]!.faction === fa);
