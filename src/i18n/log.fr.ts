@@ -8,7 +8,7 @@ const zoneFr = (r: SlotRef) => (r.zone === 'isole' ? 'isolé' : `${r.zone === 'a
 
 const REASONS: Record<string, string> = {
   lassitude: 'a atteint sa limite de lassitude',
-  noRegiment: "n'a plus aucun régiment en fin de tour",
+  noRegiment: "n'a plus aucun régiment (isolé exclu) en fin de tour",
   emptyDeck: 'doit piocher mais sa pioche est vide',
   vitalDestroyed: 'a perdu son régiment vital',
   convoyArrived: 'n\'a pas pu arrêter le convoi',

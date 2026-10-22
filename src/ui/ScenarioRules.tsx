@@ -44,7 +44,7 @@ export function scenarioRules(sc: CampaignScenario): ScenarioRuleSet {
   if (sc.convoy?.pid === 'A') victory.push({ text: `Fais sortir ${cardName(sc.convoy.cardId)} par la droite du rang arrière : tu gagnes.`, tag: 'nouveau' });
   if (lass('B') < NEVER) victory.push({ text: `L’adversaire atteint ${lass('B')} de lassitude.` });
   else victory.push({ text: 'L’adversaire ne peut pas perdre par la lassitude.', tag: 'neutre' });
-  if (noReg('B') < NEVER) victory.push({ text: noReg('B') > 1 ? `L’adversaire n’a plus aucun régiment à la fin de son tour, à partir du tour ${noReg('B')}.` : 'L’adversaire n’a plus aucun régiment à la fin de son tour.', tag: noReg('B') > 1 ? 'nouveau' : undefined });
+  if (noReg('B') < NEVER) victory.push({ text: noReg('B') > 1 ? `L’adversaire n’a plus aucun régiment (isolé exclu) à la fin de son tour, à partir du tour ${noReg('B')}.` : 'L’adversaire n’a plus aucun régiment (isolé exclu) à la fin de son tour.', tag: noReg('B') > 1 ? 'nouveau' : undefined });
   else victory.push({ text: 'Vider le plateau adverse ne suffit pas à gagner.', tag: 'neutre' });
   if (emptyDeck('B')) victory.push({ text: `L’adversaire doit piocher dans une pioche vide (sa pioche : ${enemyDeck} cartes).` });
   else victory.push({ text: 'L’adversaire ne perd pas si sa pioche est vide.', tag: 'neutre' });
@@ -56,7 +56,7 @@ export function scenarioRules(sc: CampaignScenario): ScenarioRuleSet {
   if (lass('A') >= NEVER) defeat.push({ text: 'Pas de défaite par la lassitude.', tag: 'neutre' });
   else defeat.push({ text: `Tu atteins ${lass('A')} de lassitude${lass('A') !== 50 ? ' (au lieu de 50)' : ''}.`, tag: lass('A') !== 50 ? 'nouveau' : undefined });
   if (noReg('A') >= NEVER) defeat.push({ text: 'Pas de défaite si tu n’as plus de régiment.', tag: 'neutre' });
-  else defeat.push({ text: noReg('A') > 1 ? `Tu n’as plus aucun régiment à la fin de ton tour (à partir du tour ${noReg('A')}).` : 'Tu n’as plus aucun régiment à la fin de ton tour.' });
+  else defeat.push({ text: noReg('A') > 1 ? `Tu n’as plus aucun régiment (isolé exclu) à la fin de ton tour (à partir du tour ${noReg('A')}).` : 'Tu n’as plus aucun régiment (isolé exclu) à la fin de ton tour.' });
   if (!emptyDeck('A')) defeat.push({ text: 'Pas de défaite par pioche vide : tu ne pioches simplement plus.', tag: 'neutre' });
   else defeat.push({ text: 'Tu dois piocher dans une pioche vide.' });
 

@@ -120,7 +120,7 @@ const STEPS: Step[] = [
   {
     title: 'Gagner la partie',
     body: <>
-      <p>Un joueur perd s’il atteint sa <b>limite de lassitude</b>, s’il n’a <b>plus aucun régiment</b> à la fin de son tour, ou s’il doit piocher dans une <b>pioche vide</b>.</p>
+      <p>Un joueur perd s’il atteint sa <b>limite de lassitude</b>, s’il n’a <b>plus aucun régiment</b> à l’avant ou à l’arrière (l’emplacement isolé ne compte pas) à la fin de son tour, ou s’il doit piocher dans une <b>pioche vide</b>.</p>
       <p>Les Pillards sont fragiles : leur limite n’est que de 18. Continue à jouer et à finir tes tours jusqu’à la victoire !</p>
     </>,
     task: 'Remporte le combat.',

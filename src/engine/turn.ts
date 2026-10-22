@@ -24,7 +24,9 @@ export function endTurn(ctx: Ctx): void {
   if (extra) ctx.gainLassitude(ending, extra, 'scenario');
   if (ctx.over) return;
 
-  if (ctx.units(ending).length === 0 && ctx.s.turn >= ctx.s.config.noRegimentDefeatFromTurn[ending]) {
+  // Défaite : aucun régiment sur les rangs avant et arrière (l'emplacement isolé ne compte pas) à la fin de son tour.
+  const board = ctx.player(ending).board;
+  if (![...board.avant, ...board.arriere].some(Boolean) && ctx.s.turn >= ctx.s.config.noRegimentDefeatFromTurn[ending]) {
     ctx.endGame(opponentOf(ending), 'noRegiment');
     return;
   }

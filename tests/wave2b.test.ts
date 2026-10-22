@@ -256,3 +256,14 @@ describe('Alliance', () => {
     expect(ctx.effectiveArm(g)).toBe(base + 10);
   });
 });
+
+describe('Défaite sans régiment', () => {
+  it('un régiment isolé seul ne suffit pas', async () => {
+    const { applyAction } = await import('../src/engine/game');
+    const s = blankGame({ moralCheck: false });
+    place(s, 'A', 'isole', 0, 'sentinelles_oasis');
+    place(s, 'B', 'avant', 0, 'recrue_imp');
+    const r = applyAction(s, { type: 'endTurn' }) as { state: GameState };
+    expect(r.state.over).toMatchObject({ winner: 'B', reason: 'noRegiment' });
+  });
+});

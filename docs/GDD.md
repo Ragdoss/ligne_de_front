@@ -325,7 +325,7 @@ Plus un régiment est blessé, moins il se bat efficacement. L'ATK effective d'u
 ## 10. Conditions de victoire et de défaite
 
 - **Pas de points de vie joueur.**
-- **Défaite automatique** si un joueur n'a **aucun régiment sur le plateau à la fin de son propre tour**.
+- **Défaite automatique** si un joueur n'a **aucun régiment sur le plateau à la fin de son propre tour**, **l'emplacement isolé exclu** (règle du 22/10/2026 : un régiment isolé seul ne suffit pas).
 - **Défaite classique** si le deck est vide au moment de piocher (fatigue/deck-out).
 - **Défaite par dépassement de niveau** (section 7).
 - **Conditions de victoire alternatives** : portées par des **cartes spécifiques** (effet de carte qui offre une voie de victoire différente), plutôt qu'une règle systémique du jeu de base.
