@@ -235,3 +235,24 @@ describe('Moral brisé et tactiques', () => {
     expect(new Ctx(s).effectiveArm(s.players.A.board.avant[0]!)).toBe(before + 20);
   });
 });
+
+describe('Alliance', () => {
+  it('Garde-frontière sylvestre : il faut un Empire et un Elfe parmi les autres régiments', () => {
+    const s = quiet();
+    const g = place(s, 'A', 'avant', 0, 'garde_frontiere_sylvestre');
+    const ctx = new Ctx(s);
+    const base = ctx.effectiveArm(g);
+    place(s, 'A', 'avant', 1, 'recrue_imp');
+    expect(ctx.effectiveArm(g)).toBe(base); // Empire seul : pas d'Alliance
+    place(s, 'A', 'arriere', 0, 'archer_bois');
+    expect(ctx.effectiveArm(g)).toBe(base + 10); // Empire + Elfe
+  });
+  it('un même régiment Empire et Elfe suffit', () => {
+    const s = quiet();
+    const g = place(s, 'A', 'avant', 0, 'garde_frontiere_sylvestre');
+    const ctx = new Ctx(s);
+    const base = ctx.effectiveArm(g);
+    place(s, 'A', 'avant', 1, 'garde_frontiere_sylvestre');
+    expect(ctx.effectiveArm(g)).toBe(base + 10);
+  });
+});

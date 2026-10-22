@@ -1,6 +1,7 @@
 // Écrans de menu : accueil, jouer en local, campagnes, options.
 import { useState } from 'react';
 import { APP_VERSION } from '../version';
+import { OptionsPreview } from './OptionsPreview';
 import { exportCode, importCode, loadCampaign, newCampaign, type CampaignSave } from '../campaign/campaign';
 import { CAMPAIGNS } from '../campaign/campaigns';
 import type { CampaignDef } from '../campaign/types';
@@ -313,6 +314,7 @@ export function OptionsScreen({ profile, update, onBack, onSwitchProfile }: { pr
         <label className="check"><input type="checkbox" checked={o.allUnlocked} onChange={e => set('allUnlocked', e.target.checked)} /> Toutes les cartes débloquées (parties locales et créateur de deck)</label>
         <button type="button" onClick={() => update(p => { p.options = { ...DEFAULT_OPTIONS }; })}>Rétablir les réglages par défaut</button>
       </section>
+      <OptionsPreview />
       <section className="menu-block danger-zone">
         <h2>Tout réinitialiser</h2>
         <p className="muted small">Efface ta collection, tes pièces, tes decks, tes options et ta campagne en cours. Impossible à annuler (pense au code de sauvegarde ci-dessous si tu veux pouvoir revenir en arrière).</p>

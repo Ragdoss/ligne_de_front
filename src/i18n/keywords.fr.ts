@@ -22,7 +22,7 @@ const GLOSS: Record<string, string> = {
   Formation: 'Bonus selon les régiments voisins sur la même ligne (à gauche et à droite seulement).',
   'Durée de vie': 'Quitte le plateau après le nombre de tours indiqué.',
   Communion: 'Actif tant que tu contrôles un Elfe et un Élémentaux (deux régiments distincts).',
-  Alliance: 'Bonus tant qu’un autre régiment de l’une des deux races indiquées est en jeu.',
+  Alliance: 'Bonus tant que tes autres régiments réunissent les deux rôles indiqués (au moins un de chaque ; un même régiment peut porter les deux).',
   Unique: 'Un seul exemplaire en jeu à la fois, tous joueurs confondus.',
   Sonné: 'Le régiment n’attaque pas lors du prochain combat.',
   'Moral brisé': 'À un tiers de son Moral ou moins : perd ses mots-clés positifs, les bonus de son Leader et ses capacités ; les tactiques jouées sur lui s’appliquent toujours.',

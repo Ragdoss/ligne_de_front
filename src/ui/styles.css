@@ -606,3 +606,13 @@ button.danger { background: var(--danger); border: 1px solid var(--danger); colo
 .frontline { position: relative; }
 .version-mark { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); text-transform: none; font-family: system-ui, sans-serif; z-index: 1; pointer-events: none; user-select: none; font-size: .68rem; letter-spacing: .03em;
   color: var(--parchment, #eadfc8); opacity: .28; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* Options : aperçu d'une carte en main, d'un régiment en jeu et de la carte agrandie. */
+.options-preview .op-grid { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+.options-preview .op-col { display: grid; gap: 8px; min-width: 0; flex: 1 1 420px; }
+.options-preview .op-zoom { flex: 0 1 auto; }
+.options-preview h3 { margin: 4px 0 0; font-size: .9rem; color: var(--brass); }
+.options-preview .op-board { max-width: 100%; overflow-x: auto; }
+.zoom.still { display: flex; position: static; transform: none; animation: none; flex-direction: row; align-items: flex-start; }
+.zoom.still > .cface { width: min(calc(clamp(240px, 22vw, 340px) * var(--zoom-k, 1)), 52vh); flex: none; }
+.options-preview .hand-sort, .options-preview .sort-bar { display: none; }

@@ -40,7 +40,7 @@ export const WAVE1_TEXT_FR: Record<string, { name: string; desc: string }> = {
   terre_brulee: { name: 'Terre brûlée', desc: 'L’adversaire défausse autant de cartes du dessus de sa pioche que tu as de régiments dans ta défausse (2 au plus), puis ces régiments sont retirés de la partie.' },
   mirage_oasis: { name: 'Mirage de l’oasis', desc: 'Un régiment allié gagne Mirage 1.' },
   zahra: { name: 'Cheikha Zahra', desc: 'Au début de ton tour, l’adversaire défausse la carte du dessus de sa pioche, 2 si sa défausse contient plus de cartes que sa pioche.' },
-  garde_frontiere_sylvestre: { name: 'Garde-frontière sylvestre', desc: 'Empire et Elfes. Alliance (un autre régiment Empire ou Elfe en jeu) : +10 ARM.' },
+  garde_frontiere_sylvestre: { name: 'Garde-frontière sylvestre', desc: 'Empire et Elfes. Alliance (parmi tes autres régiments, au moins un Empire et au moins un Elfe) : +10 ARM.' },
   legat_varro: { name: 'Légat Varro', desc: 'Empire et Nomades : porteur Empire ou Nomade. À son attache, le porteur refait son effet d’arrivée en jeu.' },
   inquisiteur_dechu: { name: 'Inquisiteur déchu', desc: 'Empire et Démons : porteur Empire ou Démon. Le porteur gagne Effrayant 1, et son Moral ne peut pas descendre sous 2.' },
   dryade_corrompue: { name: 'Dryade corrompue', desc: 'Elfes et Démons. Quand un de tes régiments regagne de l’END ou du Moral, tu perds aussi 1 lassitude par tranche de 20 END (reliquat conservé) et 1 par point de Moral.' },

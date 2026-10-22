@@ -5,7 +5,7 @@ import { CardFace } from './CardFace';
 
 export const GLOSSARY_DELAY = 2000;
 
-export function ZoomCard({ id, left, variant }: { id: string; left: boolean; variant?: string }) {
+export function ZoomCard({ id, left, variant, still }: { id: string; left: boolean; variant?: string; /** Aperçu fixe dans la page (Options). */ still?: boolean }) {
   const [gloss, setGloss] = useState(false);
   useEffect(() => {
     setGloss(false);
@@ -14,7 +14,7 @@ export function ZoomCard({ id, left, variant }: { id: string; left: boolean; var
   }, [id]);
   const entries = gloss ? glossaryFor(id) : [];
   return (
-    <div className={`zoom${left ? ' left' : ''}`} aria-hidden="true">
+    <div className={`zoom${left ? ' left' : ''}${still ? ' still' : ''}`} aria-hidden="true">
       <CardFace id={id} variant={variant} />
       {entries.length > 0 && (
         <dl className="zoom-gloss">

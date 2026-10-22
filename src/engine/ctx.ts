@@ -136,7 +136,9 @@ export class Ctx {
   allianceActive(u: Unit): boolean {
     const al = card(u.cardId).alliance as string[] | undefined;
     if (!al) return false;
-    return this.units(u.controller).some(x => x !== u && al.some(t => x.types.includes(t)));
+    // Il faut, parmi les autres régiments du joueur, chacun des rôles de l'Alliance (un même régiment peut en porter plusieurs).
+    const others = this.units(u.controller).filter(x => x !== u);
+    return al.every(t => others.some(x => x.types.includes(t)));
   }
   /** Case libre la plus proche pour `p` (même rangée d'abord, puis l'autre). */
   freeSlotNear(p: PlayerId, zone: 'avant' | 'arriere', idx: number): SlotRef | null {
