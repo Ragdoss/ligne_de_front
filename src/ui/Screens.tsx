@@ -1,5 +1,6 @@
 // Écrans de menu : accueil, jouer en local, campagnes, options.
 import { useState } from 'react';
+import { APP_VERSION } from '../version';
 import { exportCode, importCode, loadCampaign, newCampaign, type CampaignSave } from '../campaign/campaign';
 import { CAMPAIGNS } from '../campaign/campaigns';
 import type { CampaignDef } from '../campaign/types';
@@ -37,6 +38,7 @@ export function Home({ profile, go }: { profile: Profile; go: (t: HomeTarget) =>
         ))}
       </nav>
       <p className="home-who"><Avatar id={profile.avatar} size={88} /> <b>{profile.name}</b> <span className="pill coins">Pièces : <b>{profile.coins}</b></span></p>
+      <p className="home-version">Version {APP_VERSION}</p>
     </div>
   );
 }

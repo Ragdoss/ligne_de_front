@@ -8,6 +8,7 @@ import type { Action, DialogLine, GameEvent, GameState, PendingChoice, PlayerId,
 import { formatEvent } from '../i18n/log.fr';
 import { Board, type Highlight } from './Board';
 import { artKeyFor, CardFace, clearGameArts, setGameArts } from './CardFace';
+import { APP_VERSION } from '../version';
 import { Hand } from './Hand';
 import { ZoomCard } from './ZoomCard';
 import { cardDesc, cardName, choiceTitle, optionLabel, UNPLAYABLE } from './labels';
@@ -339,7 +340,7 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
         <PlayerBar game={view} p={top} label={names[top]} active={game.active === top} avatar={avatars?.[top]} />
         <Board game={view} player={top} bottom={false} isTarget={isTarget} isFirstPicked={r => sameSlot(sel?.first, r)} onSlot={onSlot} highlight={highlight} faded={faded} preview={preview?.units} onHover={setZoom} />
       </section>
-      <div className="frontline">ligne de front</div>
+      <div className="frontline">ligne de front<span className="version-mark" aria-hidden="true">v {APP_VERSION}</span></div>
       <section className="side">
         <Board game={view} player={bottom} bottom isTarget={isTarget} isFirstPicked={r => sameSlot(sel?.first, r)} onSlot={onSlot} highlight={highlight} faded={faded} preview={preview?.units} onHover={setZoom} />
         <PlayerBar game={view} p={bottom} label={names[bottom]} active={game.active === bottom} avatar={avatars?.[bottom]} />

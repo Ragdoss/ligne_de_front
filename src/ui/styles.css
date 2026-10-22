@@ -600,3 +600,9 @@ button.danger { background: var(--danger); border: 1px solid var(--danger); colo
 .choice-card .cc-acts button { padding: 6px; font-size: .78rem; line-height: 1.2; color: var(--parchment); background: var(--bg); border: 1px solid var(--line); border-radius: 4px; cursor: pointer; }
 .choice-card .cc-acts button:hover, .choice-card .cc-acts button:focus-visible { border-color: var(--brass-bright); }
 .choice-cards + .choices { margin-top: 12px; }
+
+/* Numéro de version : à l'accueil, et en filigrane discret pendant les parties (visible sur les captures d'écran). */
+.home-version { margin-top: 18px; font-size: .75rem; opacity: .55; font-variant-numeric: tabular-nums; }
+.frontline { position: relative; }
+.version-mark { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); text-transform: none; font-family: system-ui, sans-serif; z-index: 1; pointer-events: none; user-select: none; font-size: .68rem; letter-spacing: .03em;
+  color: var(--parchment, #eadfc8); opacity: .28; font-variant-numeric: tabular-nums; white-space: nowrap; }
