@@ -9,6 +9,7 @@ import { formatEvent } from '../i18n/log.fr';
 import { Board, type Highlight } from './Board';
 import { artKeyFor, CardFace, clearGameArts, setGameArts } from './CardFace';
 import { Hand } from './Hand';
+import { ZoomCard } from './ZoomCard';
 import { cardDesc, cardName, choiceTitle, optionLabel, UNPLAYABLE } from './labels';
 
 const sameSlot = (a?: SlotRef, b?: SlotRef) => !!a && !!b && a.player === b.player && a.zone === b.zone && a.idx === b.idx;
@@ -383,7 +384,7 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
         </div>
       )}
 
-      {zoom && <div className={`zoom${zoom.left ? ' left' : ''}`} aria-hidden="true"><CardFace id={zoom.id} variant={artKeyFor(zoom.id, zoom.owner)} /></div>}
+      {zoom && <ZoomCard id={zoom.id} left={zoom.left} variant={artKeyFor(zoom.id, zoom.owner)} />}
 
       {!dialogs.length && overlay}
       {game.over && !shown && !dialogs.length && !overClosed && renderEnd(game, () => setOverClosed(true))}

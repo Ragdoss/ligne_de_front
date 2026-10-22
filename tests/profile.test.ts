@@ -94,3 +94,14 @@ describe('Pièces de défaite', () => {
     expect(defeatCoins(5)).toBe(3);
   });
 });
+
+describe('Glossaire des cartes', () => {
+  it('reprend les mots-clés de la carte et les termes de son texte', async () => {
+    const { glossaryFor } = await import('../src/i18n/keywords.fr');
+    const terms = (id: string) => glossaryFor(id).map(e => e.term);
+    expect(terms('archidemon_origines')).toEqual(expect.arrayContaining(['Effrayant', 'Sacrifice', 'Unique']));
+    expect(terms('garde_asura')).toContain('Distance');
+    expect(terms('voile_ombre')).toContain('Offrande');
+    expect(terms('lieutenant')).toContain('Leader');
+  });
+});

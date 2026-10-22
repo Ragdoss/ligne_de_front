@@ -288,10 +288,10 @@ export function OptionsScreen({ profile, update, onBack, onSwitchProfile }: { pr
   const [code, setCode] = useState('');
   const [msg, setMsg] = useState('');
   const [resetArmed, setResetArmed] = useState(false);
-  const range = (k: 'scale' | 'animSpeed' | 'aiSpeed' | 'bannerSpeed', label: string, min: number, max: number, step: number, fmt: (v: number) => string) => (
+  const range = (k: 'scale' | 'animSpeed' | 'aiSpeed' | 'bannerSpeed' | 'zoomScale', label: string, min: number, max: number, step: number, fmt: (v: number) => string) => (
     <label className="field">
-      <span>{label} : <b>{fmt(o[k])}</b></span>
-      <input type="range" min={min} max={max} step={step} value={o[k]} onChange={e => set(k, Number(e.target.value))} />
+      <span>{label} : <b>{fmt(o[k] ?? 1)}</b></span>
+      <input type="range" min={min} max={max} step={step} value={o[k] ?? 1} onChange={e => set(k, Number(e.target.value))} />
     </label>
   );
   return (
@@ -301,6 +301,7 @@ export function OptionsScreen({ profile, update, onBack, onSwitchProfile }: { pr
       <CosmeticsBlock profile={profile} update={update} />
       <section className="menu-block">
         {range('scale', 'Taille de l’interface', 0.8, 1.4, 0.05, v => `${Math.round(v * 100)} %`)}
+        {range('zoomScale', 'Taille de la carte agrandie au survol', 0.8, 2, 0.1, v => `${Math.round(v * 100)} %`)}
         {range('animSpeed', 'Durée des animations de combat', 0.25, 2, 0.25, v => (v === 1 ? 'normale' : `×${v}`))}
         {range('aiSpeed', 'Temps de réflexion affiché de l’ordinateur', 0.25, 3, 0.25, v => (v === 1 ? 'normal' : `×${v}`))}
         {range('bannerSpeed', 'Durée des bandeaux (tactiques, Leaders adverses)', 0.5, 4, 0.5, v => (v === 1 ? 'normale' : `×${v}`))}
