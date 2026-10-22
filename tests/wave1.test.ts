@@ -242,7 +242,8 @@ describe('Vague 1 : Nomades', () => {
     expect(r.state.players.B.deck.length).toBeLessThanOrEqual(n - 2);
   });
   it('Usure : Voleurs, Terre brûlée, Fuite dans les dunes, Zahra, Puits', () => {
-    let s = blankGame({ moralCheck: false, noRegimentDefeatFromTurn: { A: 999, B: 999 } }); // A n'a que le Puits (isolé) à la fin du tour s.players.A.level = 3; s.players.A.resource = 12;
+    // A n'a que le Puits (isolé) à la fin du tour : pas de défaite sans régiment dans ce test.
+    let s = blankGame({ moralCheck: false, noRegimentDefeatFromTurn: { A: 999, B: 999 } }); s.players.A.level = 3; s.players.A.resource = 12;
     s.players.A.discard = ['recrue_imp', 'recrue_imp', 'ravitaillement'];
     const deckB = s.players.B.deck.length;
     s = act(s, { type: 'play', handUid: give(s, 'A', 'terre_brulee') }).state;
