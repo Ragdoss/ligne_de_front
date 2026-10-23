@@ -640,3 +640,14 @@ button.danger { background: var(--danger); border: 1px solid var(--danger); colo
 .menu-block > fieldset.pick > legend { padding: 0; margin-bottom: 6px; }
 .menu-block > .draft-format { border: 0; padding: 0; }
 .menu-block > .draft-format > legend { padding: 0; margin-bottom: 4px; }
+
+/* Camp : décor en plein écran (l'image couvre tout, l'en-tête et la barre d'actions la recouvrent). */
+.camp-hub { position: relative; isolation: isolate; height: 100vh; min-height: 0; overflow: hidden; background: #14110d; }
+.camp-hub .hub-scene { position: absolute; inset: 0; z-index: -1; padding: 0; display: block; overflow: hidden; }
+.camp-hub .hub-frame { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: max(100vw, calc(100vh * var(--hub-ratio, 1.7178))); max-width: none; }
+.camp-hub .hub-head { grid-row: 1; z-index: 1; padding: 14px 16px 36px; background: linear-gradient(rgba(10,8,6,.72), transparent); }
+.camp-hub .hub-head h1 { color: var(--brass-bright); text-shadow: 0 1px 6px rgba(0,0,0,.8); }
+.camp-hub .hub-step, .camp-hub .hub-deck { color: #e8dfc3; text-shadow: 0 1px 4px rgba(0,0,0,.8); }
+.camp-hub .hub-bar { grid-row: 3; z-index: 1; align-self: end; background: rgba(200,208,218,.88); backdrop-filter: blur(4px); }
+.camp-hub .hub-help { bottom: 90px; z-index: 1; }
+@media (max-width: 560px) { .camp-hub .hub-help { position: absolute; bottom: 150px; left: 16px; right: 16px; max-width: none; } }
