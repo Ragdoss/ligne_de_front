@@ -825,7 +825,10 @@ const BASE_CARDS: Record<string, CardDef> = {
     ],
     "niveau": 1,
     "cout": 1,
-    "slotType": "avant",
+    "slotTypes": [
+      "avant",
+      "arriere"
+    ],
     "atk": 0,
     "end": 40,
     "arm": 0,
