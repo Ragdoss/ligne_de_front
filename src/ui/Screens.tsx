@@ -1,4 +1,5 @@
 // Écrans de menu : accueil, jouer en local, campagnes, options.
+import titleBg from './assets/title_bg.webp';
 import { useState } from 'react';
 import { APP_VERSION } from '../version';
 import { OptionsPreview } from './OptionsPreview';
@@ -28,7 +29,7 @@ export function Home({ profile, go }: { profile: Profile; go: (t: HomeTarget) =>
     ['options', 'Options', 'Taille de l’interface, vitesse du jeu…'],
   ];
   return (
-    <div className="home">
+    <div className="home" style={{ ["--title-bg" as string]: `url(${titleBg})` }}>
       <h1>Ligne de Front</h1>
       <p className="muted">Jeu de cartes de régiments</p>
       <nav className="home-menu" aria-label="Menu principal">
