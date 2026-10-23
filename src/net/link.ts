@@ -4,6 +4,7 @@
 // - PeerJS : un service gratuit met les deux navigateurs en relation grâce à un code court ;
 // - copier-coller : aucun service externe, chaque joueur transmet un long code à l'autre.
 import Peer, { type DataConnection } from 'peerjs';
+import type { MultiDraft } from '../draft/multi';
 import type { Action, Faction, PlayerId } from '../engine/types';
 
 export const PROTOCOL = 1;
@@ -17,7 +18,16 @@ export type NetMsg =
   | { t: 'act'; n: number; a: Action }
   | { t: 'emote'; id: string }
   | { t: 'rematch' }
-  | { t: 'bye' };
+  | { t: 'bye' }
+  // Draft à plusieurs : l'hôte tient l'état ; les actions des parties entre humains passent par lui.
+  | { t: 'dhello'; v: number; name: string; avatar?: string }
+  | { t: 'dlobby'; players: { name: string; avatar?: string }[]; you: number }
+  | { t: 'dfull' }
+  | { t: 'dstate'; st: MultiDraft }
+  | { t: 'dpick'; index: number }
+  | { t: 'ddeck'; deck: string[] }
+  | { t: 'dresult'; a: number; b: number; winner: number; turns: number }
+  | { t: 'dact'; game: string; n: number; a: Action; to: number };
 
 export interface Link {
   send(m: NetMsg): void;
@@ -34,12 +44,12 @@ const PREFIX = 'ligne-de-front-';
 const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 export const newRoomCode = () => Array.from({ length: 6 }, () => ALPHABET[Math.floor(Math.random() * ALPHABET.length)]).join('');
 
-function wrapConn(conn: DataConnection, peer: Peer): Link {
+function wrapConn(conn: DataConnection, peer: Peer, ownsPeer = true): Link {
   const link: Link = {
     send: m => conn.send(m),
     onMessage: null,
     onClose: null,
-    close: () => { try { conn.close(); peer.destroy(); } catch { /* déjà fermée */ } },
+    close: () => { try { conn.close(); if (ownsPeer) peer.destroy(); } catch { /* déjà fermée */ } },
   };
   conn.on('data', d => link.onMessage?.(d as NetMsg));
   conn.on('close', () => link.onClose?.());
@@ -62,6 +72,15 @@ export function hostRoom(code: string, onReady: () => void, onLink: (l: Link) =>
   const peer = new Peer(PREFIX + code, { config: { iceServers: ICE } });
   peer.on('open', onReady);
   peer.on('connection', conn => conn.on('open', () => onLink(wrapConn(conn, peer))));
+  peer.on('error', e => onError(peerError(e)));
+  return () => { try { peer.destroy(); } catch { /* rien */ } };
+}
+
+/** Hôte de plusieurs invités (draft à plusieurs) : fermer une liaison ne ferme pas la salle. */
+export function hostRoomMulti(code: string, onReady: () => void, onLink: (l: Link) => void, onError: (msg: string) => void): () => void {
+  const peer = new Peer(PREFIX + code, { config: { iceServers: ICE } });
+  peer.on('open', onReady);
+  peer.on('connection', conn => conn.on('open', () => onLink(wrapConn(conn, peer, false))));
   peer.on('error', e => onError(peerError(e)));
   return () => { try { peer.destroy(); } catch { /* rien */ } };
 }

@@ -59,7 +59,7 @@ function next(st: { rng: number }): number {
 const POOL_BY_LEVEL: Record<number, string[]> = {};
 for (const id of COLLECTIBLE) (POOL_BY_LEVEL[CARDS[id]!.niveau] ??= []).push(id);
 
-function newPack(st: { rng: number }): string[] {
+export function newPack(st: { rng: number }): string[] {
   const pack: string[] = [];
   for (const [lvl, n] of Object.entries(PACK_LEVELS)) {
     const pool = POOL_BY_LEVEL[Number(lvl)] ?? [];
@@ -101,7 +101,7 @@ function aiScore(id: string, picks: string[], st: { rng: number }): number {
   return s;
 }
 
-function aiPick(st: DraftState, seat: number): void {
+export function aiPick(st: DraftState, seat: number): void {
   const pack = st.packs[seat]!;
   let best = 0, bestScore = -Infinity;
   pack.forEach((id, i) => { const s = aiScore(id, st.picks[seat]!, st); if (s > bestScore) { bestScore = s; best = i; } });

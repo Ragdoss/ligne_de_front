@@ -628,3 +628,9 @@ button.danger { background: var(--danger); border: 1px solid var(--danger); colo
 /* Œuf : tours avant l'éclosion. */
 .u-hatch { position: absolute; left: 50%; top: 30%; transform: translateX(-50%); z-index: 3; white-space: nowrap; font-size: .66rem; font-weight: 700;
   background: #1a1509d9; color: var(--brass-bright); border: 1px solid var(--brass); border-radius: 10px; padding: 1px 8px; }
+
+/* Draft à plusieurs */
+.draft-lobby { display: grid; gap: 6px; padding-left: 20px; }
+.draft-lobby li { display: flex; align-items: center; gap: 8px; }
+.camp-grid.waiting { opacity: .55; }
+.vn-pick.on { outline: 3px solid var(--brass-bright); outline-offset: 2px; border-radius: 6px; }

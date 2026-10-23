@@ -12,6 +12,7 @@ import { HoverZoom, showZoom } from './HoverZoom';
 import { MyCards } from './Collection';
 import { DeckList } from './Decks';
 import { Dialog, GameScreen, setAttackMotion } from './GameScreen';
+import { MultiDraftScreen } from './DraftMulti';
 import { DraftScreen, DRAFT_FIRST_BONUS } from './Draft';
 import { EMOTES } from '../profile/cosmetics';
 import { Avatar } from './avatars';
@@ -30,6 +31,7 @@ type Screen =
   | { kind: 'tutorial'; key: number }
   | { kind: 'online' }
   | { kind: 'draft' }
+  | { kind: 'draftMulti' }
   | { kind: 'onlineGame'; start: OnlineStart; key: number }
   | { kind: 'localGame'; setup: LocalSetup; key: number; series?: Record<PlayerId, number>; first?: PlayerId }
   | { kind: 'campaignMenu' }
@@ -143,8 +145,11 @@ export function App() {
       />
     );
   } else if (screen.kind === 'draft') {
-    content = <DraftScreen profile={profile} onExit={home} gameOpts={gameOpts}
+    content = <DraftScreen profile={profile} onExit={home} gameOpts={gameOpts} onMulti={() => setScreen({ kind: 'draftMulti' })}
       reward={r => update(p => { if (r.win !== undefined) { if (r.win) p.coins += COINS_PER_WIN; p.stats.ai[r.win ? 'w' : 'l']++; } if (r.first) p.coins += DRAFT_FIRST_BONUS; if (r.consolation) p.coins += r.consolation; })} />;
+  } else if (screen.kind === 'draftMulti') {
+    content = <MultiDraftScreen profile={profile} onExit={() => setScreen({ kind: 'draft' })} gameOpts={gameOpts}
+      reward={r => update(p => { if (r.win !== undefined) { if (r.win) p.coins += COINS_PER_WIN; p.stats.online[r.win ? 'w' : 'l']++; } if (r.first) p.coins += DRAFT_FIRST_BONUS; if (r.consolation) p.coins += r.consolation; })} />;
   } else if (screen.kind === 'tutorial') {
     content = <Tutorial key={screen.key} gameOpts={{ animMul: o.animSpeed, aiMul: o.aiSpeed, bannerMul: o.bannerSpeed }} onExit={home} onCampaign={() => setScreen({ kind: 'campaignMenu' })} />;
   } else if (screen.kind === 'online') {

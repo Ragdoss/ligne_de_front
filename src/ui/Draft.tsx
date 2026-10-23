@@ -27,11 +27,11 @@ function saveDraft(st: DraftState | null): void {
 }
 
 const FACTION_ORDER = ['empire', 'elfe', 'demons', 'nomades', 'neutre'];
-const byFactionLevel = (a: string, b: string) =>
+export const byFactionLevel = (a: string, b: string) =>
   FACTION_ORDER.indexOf(CARDS[a]!.faction) - FACTION_ORDER.indexOf(CARDS[b]!.faction) || CARDS[a]!.niveau - CARDS[b]!.niveau || cardName(a).localeCompare(cardName(b));
-const countOf = (ids: string[]) => { const n: Record<string, number> = {}; for (const id of ids) n[id] = (n[id] ?? 0) + 1; return n; };
+export const countOf = (ids: string[]) => { const n: Record<string, number> = {}; for (const id of ids) n[id] = (n[id] ?? 0) + 1; return n; };
 
-function PicksSummary({ picks }: { picks: string[] }) {
+export function PicksSummary({ picks }: { picks: string[] }) {
   const n = countOf(picks);
   const fac = countOf(picks.map(id => CARDS[id]!.faction));
   const high = picks.filter(id => CARDS[id]!.niveau >= 4).length;
@@ -48,8 +48,7 @@ function PicksSummary({ picks }: { picks: string[] }) {
   );
 }
 
-function Builder({ st, onDone }: { st: DraftState; onDone: (deck: string[]) => void }) {
-  const picks = st.picks[0]!;
+export function Builder({ picks, onDone, doneLabel = 'Valider le deck et lancer le tournoi' }: { picks: string[]; onDone: (deck: string[]) => void; doneLabel?: string }) {
   const have = countOf(picks);
   const [deck, setDeck] = useState<string[]>(() => buildAiDeck(picks));
   const inDeck = countOf(deck);
@@ -73,7 +72,7 @@ function Builder({ st, onDone }: { st: DraftState; onDone: (deck: string[]) => v
         <div className="choices row left">
           <button type="button" onClick={() => setDeck(buildAiDeck(picks))}>Deck proposé</button>
           <button type="button" onClick={() => setDeck([])}>Vider</button>
-          <button type="button" className="primary" disabled={!chk.ok} onClick={() => onDone(deck)}>Valider le deck et lancer le tournoi</button>
+          <button type="button" className="primary" disabled={!chk.ok} onClick={() => onDone(deck)}>{doneLabel}</button>
         </div>
       </div>
       <h2 className="sub">Tes cartes draftées</h2>
@@ -84,9 +83,11 @@ function Builder({ st, onDone }: { st: DraftState; onDone: (deck: string[]) => v
   );
 }
 
-export function DraftScreen({ profile, onExit, gameOpts, reward }: {
+export function DraftScreen({ profile, onExit, gameOpts, reward, onMulti }: {
   profile: Profile;
   onExit: () => void;
+  /** Draft à plusieurs, en ligne. */
+  onMulti?: () => void;
   gameOpts: { animMul: number; aiMul: number; bannerMul: number; initialReveal: boolean };
   /** Victoire d'un match (pièces + statistiques) ; `first` = première place finale. */
   reward: (r: { win?: boolean; first?: boolean; consolation?: number }) => void;
@@ -164,7 +165,7 @@ export function DraftScreen({ profile, onExit, gameOpts, reward }: {
             ))}
           </fieldset>
           <p className="small muted">Toutes les cartes du jeu peuvent sortir, même celles que tu ne possèdes pas. Les cartes draftées ne rejoignent pas ta collection.</p>
-          <div className="choices row left"><button type="button" className="primary" onClick={() => set(newDraft(Date.now(), bestOf))}>Commencer un draft</button></div>
+          <div className="choices row left"><button type="button" className="primary" onClick={() => set(newDraft(Date.now(), bestOf))}>Commencer un draft</button>{onMulti && <button type="button" onClick={onMulti}>Draft à plusieurs (en ligne, jusqu’à 4 joueurs)</button>}</div>
         </div>
       </div>
     );
@@ -196,7 +197,7 @@ export function DraftScreen({ profile, onExit, gameOpts, reward }: {
     return (
       <div className="camp">
         <TopBar title="Draft — construis ton deck" onBack={onExit} right={abandon} />
-        <Builder st={st} onDone={deck => { const s = structuredClone(st); s.decks[0] = deck; s.phase = 'tournament'; set(s); }} />
+        <Builder picks={st.picks[0]!} onDone={deck => { const s = structuredClone(st); s.decks[0] = deck; s.phase = 'tournament'; set(s); }} />
       </div>
     );
   }
