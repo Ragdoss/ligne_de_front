@@ -412,7 +412,7 @@ button.danger { background: var(--danger); border: 1px solid var(--danger); colo
 .count.owned.full { opacity: .6; }
 
 /* Draft à 4 */
-.draft-intro { max-width: 72ch; display: grid; gap: 8px; }
+.draft-intro { display: grid; gap: 8px; }
 .draft-layout { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 16px; align-items: start; }
 @media (max-width: 760px) { .draft-layout { grid-template-columns: minmax(0, 1fr); } }
 .draft-picks { position: sticky; top: 8px; background: var(--bg-panel); border: 1px solid var(--line); border-radius: 6px; padding: 10px; display: grid; gap: 6px; }
@@ -638,3 +638,5 @@ button.danger { background: var(--danger); border: 1px solid var(--danger); colo
 .vn-pick.on { outline: 3px solid var(--brass-bright); outline-offset: 2px; border-radius: 6px; }
 .menu-block > fieldset.pick { border: 0; padding: 0; margin: 0; }
 .menu-block > fieldset.pick > legend { padding: 0; margin-bottom: 6px; }
+.menu-block > .draft-format { border: 0; padding: 0; }
+.menu-block > .draft-format > legend { padding: 0; margin-bottom: 4px; }

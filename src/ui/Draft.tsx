@@ -14,6 +14,7 @@ import { showZoom, zoomProps } from './HoverZoom';
 import { GameScreen } from './GameScreen';
 import { cardName, FACTION_LABEL } from './labels';
 import { TopBar } from './Screens';
+import draftBg from './assets/draft_bg.webp';
 
 const KEY = 'ligneDeFront.jeu.draft.v1';
 /** Bonus de pièces pour la première place du tournoi. */
@@ -153,11 +154,12 @@ export function DraftScreen({ profile, onExit, gameOpts, reward, onMulti }: {
 
   if (!st) {
     return (
-      <div className="camp">
+      <div className="setup options-screen" style={{ ["--screen-bg" as string]: `url(${draftBg})` }}>
         {quit}
-        <div className="draft-intro">
-          <p>Toi et trois adversaires dirigés par l’ordinateur ouvrez chacun un paquet de {PACK_SIZE} cartes. Tu en gardes une, puis tu passes le reste à ton voisin, et ainsi de suite jusqu’à ce que le paquet soit vide. On recommence avec {PACKS} paquets au total : tu repars avec {PACKS * PACK_SIZE} cartes.</p>
-          <p>Tu construis ensuite un deck d’au moins {DECK_MIN} cartes avec tes cartes draftées, plus autant de Mercenaires stagiaires que tu veux. Puis tournoi : un match contre chaque adversaire. Chaque match gagné rapporte {COINS_PER_WIN} pièces, la première place {DRAFT_FIRST_BONUS} de plus.</p>
+        <div className="draft-intro" style={{ display: 'grid', gap: 14 }}>
+          <section className="menu-block"><p>Toi et trois adversaires dirigés par l’ordinateur ouvrez chacun un paquet de {PACK_SIZE} cartes. Tu en gardes une, puis tu passes le reste à ton voisin, et ainsi de suite jusqu’à ce que le paquet soit vide. On recommence avec {PACKS} paquets au total : tu repars avec {PACKS * PACK_SIZE} cartes.</p>
+          <p>Tu construis ensuite un deck d’au moins {DECK_MIN} cartes avec tes cartes draftées, plus autant de Mercenaires stagiaires que tu veux. Puis tournoi : un match contre chaque adversaire. Chaque match gagné rapporte {COINS_PER_WIN} pièces, la première place {DRAFT_FIRST_BONUS} de plus.</p></section>
+          <section className="menu-block">
           <fieldset className="draft-format">
             <legend>Format des matchs</legend>
             {([1, 3, 5] as BestOf[]).map(bo => (
@@ -165,6 +167,7 @@ export function DraftScreen({ profile, onExit, gameOpts, reward, onMulti }: {
             ))}
           </fieldset>
           <p className="small muted">Toutes les cartes du jeu peuvent sortir, même celles que tu ne possèdes pas. Les cartes draftées ne rejoignent pas ta collection.</p>
+          </section>
           <div className="choices row left"><button type="button" className="primary" onClick={() => set(newDraft(Date.now(), bestOf))}>Commencer un draft</button>{onMulti && <button type="button" onClick={onMulti}>Draft à plusieurs (en ligne, jusqu’à 4 joueurs)</button>}</div>
         </div>
       </div>
