@@ -5,6 +5,7 @@ import type { Action, PlayerId } from '../engine/types';
 import { hostRoom, joinRoom, manualHost, manualJoin, newRoomCode, PROTOCOL, webrtcAvailable, type Link, type NetMsg } from '../net/link';
 import { artsForDeck, checkDeck, sortedDecks, type Profile } from '../profile/profile';
 import { cleanArts } from './CardFace';
+import onlineBg from './assets/online_bg.webp';
 import { DeckSelect, resolveDeck, TopBar } from './Screens';
 
 export interface OnlineStart { link: Link; setup: GameSetup; side: PlayerId; names: Record<PlayerId, string>; avatars: Record<PlayerId, string | undefined>; arts: Record<PlayerId, Record<string, string>>; isHost: boolean; msg: Extract<NetMsg, { t: 'start' }> }
@@ -88,7 +89,7 @@ export function OnlineLobby({ profile, onStart, onBack, goDecks }: { profile: Pr
 
   if (!webrtcAvailable()) {
     return (
-      <div className="setup">
+      <div className="setup options-screen" style={{ ["--screen-bg" as string]: `url(${onlineBg})` }}>
         <TopBar title="Jouer en ligne" onBack={onBack} />
         <p className="warn">Cette page ne permet pas les connexions entre navigateurs. Ouvre le jeu depuis son site (GitHub Pages) ou depuis le fichier HTML pour jouer en ligne.</p>
       </div>
@@ -96,15 +97,19 @@ export function OnlineLobby({ profile, onStart, onBack, goDecks }: { profile: Pr
   }
 
   return (
-    <div className="setup">
+    <div className="setup options-screen" style={{ ["--screen-bg" as string]: `url(${onlineBg})` }}>
       <TopBar title="Jouer en ligne" onBack={() => { cleanup.current?.(); onBack(); }} />
-      <p className="muted small">Premier jet : une partie entre deux navigateurs, sans compte. La partie est calculée des deux côtés ; seules les actions voyagent. Une victoire rapporte 5 pièces.</p>
+      <section className="menu-block">
+        <p className="muted small">Premier jet : une partie entre deux navigateurs, sans compte. La partie est calculée des deux côtés ; seules les actions voyagent. Une victoire rapporte 5 pièces.</p>
+      </section>
 
       {step.k === 'menu' && (
         <>
-          <p className="muted small">Tu joues sous le nom de ton profil : <b>{name}</b> (modifiable dans Options → Profils).</p>
-          <DeckSelect profile={profile} value={deckKey} onChange={setDeckKey} human label="Ton deck" />
-          {!validDeck && <p className="warn">Il te faut un deck valide. <button type="button" className="link" onClick={goDecks}>Créer un deck</button> — ou active « Toutes les cartes débloquées » dans les options.</p>}
+          <section className="menu-block">
+            <p className="muted small">Tu joues sous le nom de ton profil : <b>{name}</b> (modifiable dans Options → Profils).</p>
+            <DeckSelect profile={profile} value={deckKey} onChange={setDeckKey} human label="Ton deck" />
+          </section>
+          {!validDeck && <p className="warn menu-block" style={{ display: 'block' }}>Il te faut un deck valide. <button type="button" className="link" onClick={goDecks}>Créer un deck</button> — ou active « Toutes les cartes débloquées » dans les options.</p>}
           <section className="menu-block">
             <h2>Avec un code court</h2>
             <p className="muted small">Un service gratuit de mise en relation (PeerJS) relie les deux navigateurs, puis la partie passe directement de l’un à l’autre.</p>
