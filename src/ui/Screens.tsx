@@ -1,6 +1,7 @@
 // Écrans de menu : accueil, jouer en local, campagnes, options.
 import titleBg from './assets/title_bg.webp';
 import optionsBg from './assets/options_bg.webp';
+import localBg from './assets/local_bg.webp';
 import { useState } from 'react';
 import { APP_VERSION } from '../version';
 import { OptionsPreview } from './OptionsPreview';
@@ -108,7 +109,7 @@ export function LocalPlay({ profile, onStart, onBack, goDecks }: { profile: Prof
   const valid = (k: string, human: boolean) => (k.startsWith('my:') ? profile.decks.some(d => `my:${d.id}` === k && checkDeck(d.cards, profile).ok) : !human || profile.options.allUnlocked);
   const ready = valid(A, humanA) && valid(B, humanB);
   return (
-    <div className="setup">
+    <div className="setup options-screen local-screen" style={{ ["--screen-bg" as string]: `url(${localBg})` }}>
       <TopBar title="Jouer en local" onBack={onBack} />
       <fieldset className="pick">
         <legend>Mode</legend>
