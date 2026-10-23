@@ -42,8 +42,9 @@ export const SCENARIO_EASE: Record<string, Partial<Record<Difficulty, ScenarioEa
   },
   d2: {
     heros: { startResource: 0, lassitudeMul: 0.8, vitalEnd: 1, vitalMor: 1 }, /* IA 23 % */
-    guerrier: { startResource: 2, lassitudeMul: 1.5, vitalEnd: 1.75, vitalMor: 2 }, /* IA 48 % */
-    histoire: { startResource: 6, lassitudeMul: 4, vitalEnd: 4, vitalMor: 6 }, /* IA 58 % */
+    // Réglage de Nathan (23/10/2026) : Guerrier lassitude max 45 (60 − 15) et Chariot 40 END (70 − 30) ; Histoire Chariot 60 END, lassitude max 50.
+    guerrier: { startResource: 2, lassitudeMul: 1.125, vitalEnd: 1, vitalMor: 2 },
+    histoire: { startResource: 6, lassitudeMul: 1.25, vitalEnd: 1.5, vitalMor: 6 },
   },
   d3: {
     heros: { startResource: 0, lassitudeMul: 0.8 }, /* IA 13 % */

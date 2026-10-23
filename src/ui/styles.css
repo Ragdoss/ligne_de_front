@@ -616,3 +616,13 @@ button.danger { background: var(--danger); border: 1px solid var(--danger); colo
 .zoom.still { display: flex; position: static; transform: none; animation: none; flex-direction: row; align-items: flex-start; }
 .zoom.still > .cface { width: min(calc(clamp(240px, 22vw, 340px) * var(--zoom-k, 1)), 52vh); flex: none; }
 .options-preview .hand-sort, .options-preview .sort-bar { display: none; }
+
+/* Bulles de variation de statistiques (attaques, tactiques, effets, Moral perdu…). */
+.unit .floaters { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); z-index: 5; display: grid; gap: 2px; justify-items: center; pointer-events: none; }
+.unit .floaters .floater { position: static; transform: none; left: auto; top: auto; animation: rise-in .45s ease-out; }
+.floater.down { background: var(--danger); }
+.floater.up { background: #2f7d43; }
+@keyframes rise-in { from { opacity: 0; transform: translateY(8px); } }
+/* Œuf : tours avant l'éclosion. */
+.u-hatch { position: absolute; left: 50%; top: 30%; transform: translateX(-50%); z-index: 3; white-space: nowrap; font-size: .66rem; font-weight: 700;
+  background: #1a1509d9; color: var(--brass-bright); border: 1px solid var(--brass); border-radius: 10px; padding: 1px 8px; }

@@ -308,6 +308,7 @@ export function OptionsScreen({ profile, update, onBack, onSwitchProfile }: { pr
         {range('animSpeed', 'Durée des animations de combat', 0.25, 2, 0.25, v => (v === 1 ? 'normale' : `×${v}`))}
         {range('aiSpeed', 'Temps de réflexion affiché de l’ordinateur', 0.25, 3, 0.25, v => (v === 1 ? 'normal' : `×${v}`))}
         {range('bannerSpeed', 'Durée des bandeaux (tactiques, Leaders adverses)', 0.5, 4, 0.5, v => (v === 1 ? 'normale' : `×${v}`))}
+        <label className="check"><input type="checkbox" checked={o.attackMotion !== false} onChange={e => set('attackMotion', e.target.checked)} /> Combat : le régiment qui attaque se déplace jusqu’à sa cible</label>
         <label className="check"><input type="checkbox" checked={o.revealAiHand} onChange={e => set('revealAiHand', e.target.checked)} /> Main de l’ordinateur visible dès le début</label>
         <label className="check"><input type="checkbox" checked={o.romanLevels !== false} onChange={e => set('romanLevels', e.target.checked)} /> Niveaux des cartes en chiffres romains (II, III…)</label>
         <label className="check"><input type="checkbox" checked={!!o.showAll} onChange={e => set('showAll', e.target.checked)} /> Afficher toutes les cartes, images de profil et emotes, même non possédées (vérification des illustrations)</label>

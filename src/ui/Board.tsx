@@ -2,6 +2,7 @@
 import { card, Ctx } from '../engine/ctx';
 import type { GameState, PlayerId, SlotRef, Unit, Zone } from '../engine/types';
 import { ArtBackdrop, artKeyFor, levelLabel } from './CardFace';
+import type { Bubble, Bubbles } from './bubbles';
 import { cardDesc, cardName, KEPT_WHEN_BROKEN, visibleKeywords } from './labels';
 
 export interface Highlight {
@@ -25,10 +26,12 @@ export interface BoardProps {
   preview?: Map<number, { end: number; mor: number; dead: boolean }>;
   /** Survol d'un régiment ou de son Leader : carte à afficher en grand (null en sortie). */
   onHover?: (cardId: string | null, x?: number, owner?: PlayerId) => void;
+  /** Bulles de variation de statistiques à afficher sur les régiments. */
+  bubbles?: Bubbles | null;
 }
 
 type Pv = { end: number; mor: number; dead: boolean };
-function UnitCard({ u, ctx, highlight, faded, pv, onHover, side }: { u: Unit; ctx: Ctx; highlight: Highlight | null; faded: boolean; pv?: Pv; onHover?: (id: string | null, x?: number, owner?: PlayerId) => void; side: PlayerId }) {
+function UnitCard({ u, ctx, highlight, faded, pv, onHover, side, bubbles }: { u: Unit; ctx: Ctx; highlight: Highlight | null; faded: boolean; pv?: Pv; onHover?: (id: string | null, x?: number, owner?: PlayerId) => void; side: PlayerId; bubbles?: Bubble[] }) {
   // Propriétaire de la carte (pour son art) : celui qui l'a jouée, même si elle est empruntée.
   const owner: PlayerId = u.borrowed?.owner ?? side;
   const leaderOwner: PlayerId = u.leader && card(u.leader).targetsEnemy ? (owner === 'A' ? 'B' : 'A') : owner;
@@ -44,11 +47,13 @@ function UnitCard({ u, ctx, highlight, faded, pv, onHover, side }: { u: Unit; ct
   // Moral brisé : les mots-clés sont perdus, sauf les négatifs (Lent) et Minions.
   const kept = u.brokenMorale ? allKws.filter(k => KEPT_WHEN_BROKEN.includes(k)) : [];
   const kws = u.brokenMorale ? allKws.filter(k => !KEPT_WHEN_BROKEN.includes(k)) : allKws;
+  // Œuf : tours restants avant l'éclosion (le compteur avance au début de chaque tour de son contrôleur).
+  const hatch = d.hatchesInto ? Math.max(1, ((d.hatchTurns as number | undefined) ?? 3) - (u.counter ?? 0)) : 0;
   const flags = [u.justDeployed && !u.arrivesReady ? 'déploiement' : '', u.stunned ? 'sonné' : '', u.pactShield ? 'pacte' : ''].filter(Boolean);
   const tip = `${cardName(u.cardId)}${u.leader ? ` + ${cardName(u.leader)}` : ''}\n${cardDesc(u.cardId)}${u.leader ? `\n${cardName(u.leader)} : ${cardDesc(u.leader)}` : ''}`;
   const base = (k: 'atk' | 'arm' | 'ini', v: number) => (v > ((k === 'atk' ? u.baseAtk : k === 'arm' ? u.baseArm : u.ini)) ? ' up' : v < (k === 'atk' ? u.baseAtk : k === 'arm' ? u.baseArm : u.ini) ? ' down' : '');
   return (
-    <div className={cls.join(' ')} title={tip} onMouseEnter={e => onHover?.(u.cardId, e.clientX, owner)} onMouseLeave={() => onHover?.(null)}>
+    <div className={cls.join(' ')} data-uid={u.uid} title={tip} onMouseEnter={e => onHover?.(u.cardId, e.clientX, owner)} onMouseLeave={() => onHover?.(null)}>
       <ArtBackdrop id={u.cardId} variant={artKeyFor(u.cardId, owner)} />
       <div className="u-top">
         <span className={`u-atk${base('atk', atk)}`} title="Attaque"><b>{atk}</b><i>ATK</i></span>
@@ -84,14 +89,15 @@ function UnitCard({ u, ctx, highlight, faded, pv, onHover, side }: { u: Unit; ct
           <em>MOR {u.currentMor}/{u.maxMor}</em>
         </div>
       </div>
-      {highlight?.target === u.uid && highlight.damage !== undefined && (
-        <div className="floater">−{highlight.damage} END{highlight.moral ? ` · −${highlight.moral} MOR` : ''}</div>
+      {hatch > 0 && <div className="u-hatch" title="Tours avant l’éclosion">Éclot dans {hatch} tour{hatch > 1 ? 's' : ''}</div>}
+      {bubbles && bubbles.length > 0 && (
+        <div className="floaters">{bubbles.map((x, i) => <span key={i} className={`floater ${x.up ? 'up' : 'down'}`}>{x.text}</span>)}</div>
       )}
     </div>
   );
 }
 
-export function Board({ game, player, bottom, isTarget, isFirstPicked, onSlot, highlight, faded, preview, onHover }: BoardProps) {
+export function Board({ game, player, bottom, isTarget, isFirstPicked, onSlot, highlight, faded, preview, onHover, bubbles }: BoardProps) {
   const ctx = new Ctx(game);
   const b = game.players[player].board;
   const slot = (zone: Zone, idx: number, u: Unit | null) => {
@@ -111,7 +117,7 @@ export function Board({ game, player, bottom, isTarget, isFirstPicked, onSlot, h
         onKeyDown={target ? e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSlot(ref); } } : undefined}
         aria-label={`${zone === 'isole' ? 'Isolé' : zone === 'avant' ? `Avant ${idx + 1}` : `Arrière ${idx + 1}`}${u ? ` : ${cardName(u.cardId)}` : ' (vide)'}`}
       >
-        {u ? <UnitCard u={u} ctx={ctx} highlight={highlight} faded={faded.has(u.uid)} pv={preview?.get(u.uid)} onHover={onHover} side={player} /> : <span className="slot-label">{zone === 'isole' ? 'Isolé' : zone === 'avant' ? 'Avant' : 'Arrière'}</span>}
+        {u ? <UnitCard u={u} ctx={ctx} highlight={highlight} faded={faded.has(u.uid)} pv={preview?.get(u.uid)} onHover={onHover} side={player} bubbles={bubbles?.get(u.uid)} /> : <span className="slot-label">{zone === 'isole' ? 'Isolé' : zone === 'avant' ? 'Avant' : 'Arrière'}</span>}
       </div>
     );
   };

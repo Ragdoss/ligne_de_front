@@ -1,7 +1,7 @@
 // Écran de partie : plateau, mains, ciblage, choix, dialogues de scénario, journal, ordinateur.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { chooseAction, type ActionFilter } from '../ai/heuristic';
-import { card, Ctx } from '../engine/ctx';
+import { card, Ctx, recordStates } from '../engine/ctx';
 import { actingPlayer, applyAction, createGame, DEFAULT_LEVEL_THRESHOLDS, playsForHandCard, whyUnplayable, type GameSetup } from '../engine/game';
 import { drawCountFor } from '../engine/turn';
 import type { Action, DialogLine, GameEvent, GameState, PendingChoice, PlayerId, SlotRef } from '../engine/types';
@@ -11,6 +11,7 @@ import { artKeyFor, CardFace, clearGameArts, setGameArts } from './CardFace';
 import { APP_VERSION } from '../version';
 import { Hand } from './Hand';
 import { ZoomCard } from './ZoomCard';
+import { statBubbles, type Bubbles } from './bubbles';
 import { cardDesc, cardName, choiceTitle, optionLabel, UNPLAYABLE } from './labels';
 
 const sameSlot = (a?: SlotRef, b?: SlotRef) => !!a && !!b && a.player === b.player && a.zone === b.zone && a.idx === b.idx;
@@ -46,6 +47,9 @@ function simulateCombat(game: GameState): CombatPreview | null {
 }
 
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
+/** Option « le régiment qui attaque se déplace jusqu'à sa cible » (réglée par App à partir du profil). */
+let attackMotionOn = true;
+export function setAttackMotion(on: boolean): void { attackMotionOn = on; }
 
 export interface GameScreenProps {
   setup: GameSetup;
@@ -80,6 +84,8 @@ export interface GameScreenProps {
   onGame?: (game: GameState) => void;
   /** Images de profil affichées dans les barres des joueurs. */
   avatars?: Partial<Record<PlayerId, string | undefined>>;
+  /** Le régiment qui attaque se déplace jusqu'à sa cible (Options). */
+  attackMotion?: boolean;
   /** Arts alternatifs choisis par chaque joueur (carte → clé d'art). */
   arts?: Partial<Record<PlayerId, Record<string, string>>>;
   /** Contenu affiché par-dessus le plateau (bulle du tutoriel). */
@@ -158,7 +164,7 @@ export function ChoicePanel({ choice, onPick, onHover }: { choice: PendingChoice
   );
 }
 
-export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, intro, renderEnd, onQuit, animMul = 1, aiMul = 1, bannerMul = 1, initialReveal = false, onOver, remote, bottomSide, onGame, overlay, avatars, arts }: GameScreenProps) {
+export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, intro, renderEnd, onQuit, animMul = 1, aiMul = 1, bannerMul = 1, initialReveal = false, onOver, remote, bottomSide, onGame, overlay, avatars, arts, attackMotion = attackMotionOn }: GameScreenProps) {
   const artsRef = useRef<Partial<Record<PlayerId, Record<string, string>>>>({});
   artsRef.current = arts ?? {};
   setGameArts(artsRef.current); // chaque camp avec ses propres arts (base pour l'ordinateur)
@@ -172,6 +178,21 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
   const [shown, setShown] = useState<GameState | null>(null); // état affiché pendant une animation de combat
   const [highlight, setHighlight] = useState<Highlight | null>(null);
   const [faded, setFaded] = useState<Set<number>>(new Set());
+  const [bubbles, setBubblesState] = useState<Bubbles | null>(null);
+  const bubbleTimers = useRef(new Map<number, ReturnType<typeof setTimeout>>());
+  /** Bulles de variation de statistiques : chaque régiment garde les siennes un moment (les nouvelles remplacent les anciennes). */
+  const setBubbles = useCallback((b: Bubbles | null) => {
+    if (!b || !b.size) return;
+    setBubblesState(cur => { const next = new Map(cur ?? []); for (const [uid, list] of b) next.set(uid, list); return next; });
+    for (const uid of b.keys()) {
+      const old = bubbleTimers.current.get(uid);
+      if (old) clearTimeout(old);
+      bubbleTimers.current.set(uid, setTimeout(() => {
+        bubbleTimers.current.delete(uid);
+        setBubblesState(cur => { if (!cur?.has(uid)) return cur; const next = new Map(cur); next.delete(uid); return next.size ? next : null; });
+      }, 1800 * Math.max(0.6, animMul)));
+    }
+  }, [animMul]);
   const [log, setLog] = useState<{ text: string; cls: string }[]>([{ text: `Tour 1 : ${names[setup.first ?? 'A']} commence.`, cls: 'turn' }]);
   const [sel, setSel] = useState<{ uid: number; first?: SlotRef } | null>(null);
   const [hint, setHint] = useState('');
@@ -199,7 +220,7 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
   const apply = useCallback(async (action: Action, fromRemote = false) => {
     if (busy.current) return;
     const actor = actingPlayer(game);
-    const r = applyAction(game, action);
+    const { result: r, states } = recordStates(() => applyAction(game, action));
     if (!r.ok) { setHint(fromRemote ? `Désynchronisation avec l’adversaire (${r.error}).` : `Action impossible : ${UNPLAYABLE[r.error] ?? r.error}`); return; }
     if (remote && !fromRemote && actor !== remote.side) remote.send(action);
     busy.current = true;
@@ -212,28 +233,56 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
       // Leaders joués par l'adversaire (ordinateur ou joueur à distance) : même bandeau, avec le régiment qui le reçoit.
       if (e.type === 'leaderAttached' && !human[e.player]) pushBanner(names[e.player], e.leaderId, true, cardName(e.cardId));
     }
-    // Animation du combat : on montre l'état d'avant, attaque par attaque, puis l'état final.
-    if (action.type === 'endTurn' && r.events.some(e => e.type === 'attack')) {
-      setShown(game);
-      const gone = new Set<number>();
-      for (const e of r.events) {
-        if (e.type === 'attack') {
-          setHighlight({ attacker: e.attacker, target: e.target, damage: e.damage, moral: e.moralLoss });
-          await sleep((fast ? 380 : 520) * animMul);
-        } else if (e.type === 'destroyed') {
-          gone.add(e.uid);
-          setFaded(new Set(gone));
+    // Animation du combat, attaque par attaque : le plateau affiché suit l'état du jeu après chaque attaque
+    // (et après les effets d'avant-combat, comme les Chiens du Maître du Chenil), avec les bulles de variation.
+    const T = (fast ? 380 : 600) * animMul;
+    const ev = r.events;
+    const at = (i: number) => (i < 0 ? game : states[i] ?? r.state);
+    const attacks = ev.map((e, i) => (e.type === 'attack' ? i : -1)).filter(i => i >= 0);
+    if (action.type === 'endTurn' && attacks.length) {
+      const startIdx = ev.findIndex(e => e.type === 'combatStart');
+      // Avant les attaques : effets d'avant-combat.
+      const pre = at(attacks[0]! - 1);
+      setShown(pre);
+      const preB = statBubbles(game, pre);
+      if (preB.size || ev.slice(startIdx, attacks[0]).some(e => e.type === 'deployed')) { setBubbles(preB); await sleep(T); }
+      for (let k = 0; k < attacks.length; k++) {
+        const i = attacks[k]!, end = (attacks[k + 1] ?? ev.findIndex((e, j) => j > i && e.type === 'turnStart')) - 1;
+        const last = end >= i ? end : ev.length - 1;
+        const e = ev[i] as Extract<GameEvent, { type: 'attack' }>;
+        setShown(at(i - 1));
+        setHighlight({ attacker: e.attacker, target: e.target });
+        await sleep(T * 0.75);
+        // Résultat de l'attaque (et de ses suites : destructions, Moral perdu par les alliés…).
+        const segment = ev.slice(i, last + 1);
+        const killed = segment.filter(x => x.type === 'destroyed').map(x => (x as { uid: number }).uid);
+        const firstKill = segment.findIndex(x => x.type === 'destroyed');
+        setBubbles(statBubbles(at(i - 1), at(last)));
+        if (killed.length) {
+          setShown(at(i + firstKill - 1));
+          setFaded(new Set(killed));
+          await sleep(T * 0.45);
+          setFaded(new Set());
         }
+        setShown(at(last));
+        await sleep(T * 0.5);
       }
       setHighlight(null);
       setFaded(new Set());
       setShown(null);
+      const tail = at(ev.length - 1);
+      const endB = statBubbles(at(attacks[attacks.length - 1]!), tail, false);
+      setBubbles(endB);
+    } else {
+      // Autres actions (tactique, Leader, effet…) : bulles des variations de statistiques.
+      const b = statBubbles(game, r.state);
+      setBubbles(b);
     }
     const dlg = r.events.filter(e => e.type === 'dialog').map(e => ({ lines: (e as { lines: DialogLine[] }).lines }));
     if (dlg.length) setDialogs(d => [...d, ...dlg]);
     setGame(r.state);
     busy.current = false;
-  }, [game, names, human, pushBanner, fast, animMul, remote]);
+  }, [game, names, human, pushBanner, fast, animMul, remote, setBubbles]);
 
   // Tour de l'ordinateur (et ses choix en attente). Il attend que les dialogues soient fermés.
   useEffect(() => {
@@ -243,6 +292,27 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
   }, [game, paused, acting, apply, human, fast, aiFilter, aiMul]);
 
   useEffect(() => { onGame?.(game); }, [game, onGame]);
+
+  // Charge : le régiment qui attaque fonce vers sa cible puis revient (désactivable dans les Options).
+  useEffect(() => {
+    if (!attackMotion || !highlight?.attacker || !highlight.target) return;
+    const el = document.querySelector<HTMLElement>(`.unit[data-uid="${highlight.attacker}"]`);
+    const to = document.querySelector<HTMLElement>(`.unit[data-uid="${highlight.target}"]`);
+    if (!el || !to || typeof el.animate !== 'function') return;
+    const a = el.getBoundingClientRect(), b = to.getBoundingClientRect();
+    const k = el.offsetWidth ? a.width / el.offsetWidth : 1; // zoom de l'interface (Options)
+    const dx = ((b.left + b.width / 2) - (a.left + a.width / 2)) / k, dy = ((b.top + b.height / 2) - (a.top + a.height / 2)) / k;
+    // On s'arrête au contact (pas au centre de la cible).
+    const len = Math.hypot(dx, dy) || 1, stop = Math.max(0, len - (b.height / k) * 0.55) / len;
+    const anim = el.animate([
+      { transform: 'translate(0, 0) scale(1.04)' },
+      { transform: `translate(${dx * stop}px, ${dy * stop}px) scale(1.08)`, offset: 0.55, easing: 'ease-in' },
+      { transform: 'translate(0, 0) scale(1.04)' },
+    ], { duration: (fast ? 380 : 600) * animMul * 0.75, easing: 'ease-out' });
+    el.style.zIndex = '30';
+    anim.onfinish = anim.oncancel = () => { el.style.zIndex = ''; };
+    return () => anim.cancel();
+  }, [highlight, attackMotion, fast, animMul]);
 
   // Jeu en ligne : on applique les actions reçues, une par une, quand l'écran est libre.
   const played = useRef(0);
@@ -338,11 +408,11 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
         <h2 className="hand-title">Main — {names[top]}</h2>
         {handFor(top)}
         <PlayerBar game={view} p={top} label={names[top]} active={game.active === top} avatar={avatars?.[top]} />
-        <Board game={view} player={top} bottom={false} isTarget={isTarget} isFirstPicked={r => sameSlot(sel?.first, r)} onSlot={onSlot} highlight={highlight} faded={faded} preview={preview?.units} onHover={setZoom} />
+        <Board game={view} player={top} bottom={false} isTarget={isTarget} isFirstPicked={r => sameSlot(sel?.first, r)} onSlot={onSlot} highlight={highlight} faded={faded} preview={preview?.units} onHover={setZoom} bubbles={bubbles} />
       </section>
       <div className="frontline">ligne de front<span className="version-mark" aria-hidden="true">v {APP_VERSION}</span></div>
       <section className="side">
-        <Board game={view} player={bottom} bottom isTarget={isTarget} isFirstPicked={r => sameSlot(sel?.first, r)} onSlot={onSlot} highlight={highlight} faded={faded} preview={preview?.units} onHover={setZoom} />
+        <Board game={view} player={bottom} bottom isTarget={isTarget} isFirstPicked={r => sameSlot(sel?.first, r)} onSlot={onSlot} highlight={highlight} faded={faded} preview={preview?.units} onHover={setZoom} bubbles={bubbles} />
         <PlayerBar game={view} p={bottom} label={names[bottom]} active={game.active === bottom} avatar={avatars?.[bottom]} />
         <div className="controls">
           <button type="button" className={`eye-coin${peek ? ' open' : ''}`} disabled={!humanTurn || !!game.pending.length} onClick={() => setPeek(v => !v)}

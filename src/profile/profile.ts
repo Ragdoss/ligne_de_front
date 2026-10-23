@@ -40,6 +40,8 @@ export interface Options {
   allUnlocked: boolean;
   /** Niveaux des cartes en chiffres romains (sinon arabes). */
   romanLevels?: boolean;
+  /** Combat : le régiment qui attaque se déplace jusqu'à sa cible (activé par défaut). */
+  attackMotion?: boolean;
   /** Taille de la carte affichée en grand au survol (1 = normale). */
   zoomScale?: number;
   /** Mode vérification : cartes, images de profil et emotes affichées même non possédées (pour contrôler les illustrations). */

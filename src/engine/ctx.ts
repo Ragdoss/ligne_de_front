@@ -33,11 +33,21 @@ export function addKeyword(u: Unit, k: string): void {
   if (!u.keywords.includes(k)) u.keywords.push(k);
 }
 
+// Enregistreur d'états pour l'affichage : après chaque événement émis, une copie de l'état (inactif par défaut,
+// donc sans coût pour l'ordinateur et les simulations). L'écran de partie s'en sert pour animer le combat attaque par attaque.
+let recorder: GameState[] | null = null;
+/** Exécute `fn` en gardant l'état du jeu après chaque événement (states[i] = état juste après events[i]). */
+export function recordStates<T>(fn: () => T): { result: T; states: GameState[] } {
+  const prev = recorder;
+  recorder = [];
+  try { const result = fn(); return { result, states: recorder }; } finally { recorder = prev; }
+}
+
 export class Ctx {
   readonly events: GameEvent[] = [];
   constructor(public readonly s: GameState) {}
 
-  emit(e: GameEvent): void { this.events.push(e); }
+  emit(e: GameEvent): void { this.events.push(e); if (recorder) recorder.push(structuredClone(this.s)); }
   get over(): boolean { return this.s.over !== null; }
   player(p: PlayerId): PlayerState { return this.s.players[p]; }
 

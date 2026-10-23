@@ -11,7 +11,7 @@ import { CardTile } from './CardTile';
 import { HoverZoom, showZoom } from './HoverZoom';
 import { MyCards } from './Collection';
 import { DeckList } from './Decks';
-import { Dialog, GameScreen } from './GameScreen';
+import { Dialog, GameScreen, setAttackMotion } from './GameScreen';
 import { DraftScreen, DRAFT_FIRST_BONUS } from './Draft';
 import { EMOTES } from '../profile/cosmetics';
 import { Avatar } from './avatars';
@@ -81,6 +81,7 @@ export function App() {
   const switchProfile = () => { const p = loadProfile(); profileRef.current = p; setProfile(p); };
   const o = profile.options;
   setRomanLevels(o.romanLevels !== false);
+  setAttackMotion(o.attackMotion !== false);
   setArtChoices(o.showAll ? profile.artChoice : Object.fromEntries(Object.entries(profile.artChoice).filter(([, k]) => profile.altArts.includes(k))));
   const gameOpts = { animMul: o.animSpeed, aiMul: o.aiSpeed, bannerMul: o.bannerSpeed, initialReveal: o.revealAiHand };
 
