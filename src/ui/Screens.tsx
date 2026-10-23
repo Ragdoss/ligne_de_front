@@ -1,5 +1,6 @@
 // Écrans de menu : accueil, jouer en local, campagnes, options.
 import titleBg from './assets/title_bg.webp';
+import optionsBg from './assets/options_bg.webp';
 import { useState } from 'react';
 import { APP_VERSION } from '../version';
 import { OptionsPreview } from './OptionsPreview';
@@ -299,7 +300,7 @@ export function OptionsScreen({ profile, update, onBack, onSwitchProfile }: { pr
     </label>
   );
   return (
-    <div className="setup">
+    <div className="setup options-screen" style={{ ["--screen-bg" as string]: `url(${optionsBg})` }}>
       <TopBar title="Options" onBack={onBack} />
       <ProfilesBlock profile={profile} update={update} onSwitchProfile={onSwitchProfile} />
       <CosmeticsBlock profile={profile} update={update} />
