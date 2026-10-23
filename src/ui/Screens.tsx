@@ -109,8 +109,9 @@ export function LocalPlay({ profile, onStart, onBack, goDecks }: { profile: Prof
   const valid = (k: string, human: boolean) => (k.startsWith('my:') ? profile.decks.some(d => `my:${d.id}` === k && checkDeck(d.cards, profile).ok) : !human || profile.options.allUnlocked);
   const ready = valid(A, humanA) && valid(B, humanB);
   return (
-    <div className="setup options-screen local-screen" style={{ ["--screen-bg" as string]: `url(${localBg})` }}>
+    <div className="setup options-screen" style={{ ["--screen-bg" as string]: `url(${localBg})` }}>
       <TopBar title="Jouer en local" onBack={onBack} />
+      <section className="menu-block">
       <fieldset className="pick">
         <legend>Mode</legend>
         {([['ai', 'Contre l’ordinateur'], ['hotseat', 'À deux sur le même écran'], ['watch', 'Ordinateur contre ordinateur']] as const).map(([m, l]) => (
@@ -119,8 +120,12 @@ export function LocalPlay({ profile, onStart, onBack, goDecks }: { profile: Prof
           </label>
         ))}
       </fieldset>
+      </section>
+      <section className="menu-block">
       <DeckSelect profile={profile} value={A} onChange={setA} human={humanA} label={humanA ? 'Ton deck (joueur A)' : 'Joueur A (ordinateur)'} />
       <DeckSelect profile={profile} value={B} onChange={setB} human={humanB} label={humanB ? 'Joueur B' : 'Joueur B (ordinateur)'} />
+      </section>
+      <section className="menu-block">
       <fieldset className="pick">
         <legend>Qui commence</legend>
         {([['random', 'Au hasard'], ['A', mode === 'ai' ? 'Toi' : 'Joueur A'], ['B', mode === 'hotseat' ? 'Joueur B' : 'L’ordinateur (joueur B)']] as const).map(([v, l]) => (
@@ -130,14 +135,17 @@ export function LocalPlay({ profile, onStart, onBack, goDecks }: { profile: Prof
         ))}
       </fieldset>
       <p className="muted small">À chaque revanche, c’est l’autre joueur qui commence.</p>
+      </section>
       {!ready && (
-        <p className="warn">
+        <p className="warn menu-block" style={{ display: 'block' }}>
           Il te faut un deck valide construit avec tes cartes (la campagne et les paquets t’en font gagner). <button type="button" className="link" onClick={goDecks}>Créer un deck</button>
           {' '}— ou active « Toutes les cartes débloquées » dans les options pour utiliser toutes les cartes et les decks de démonstration.
         </p>
       )}
-      <p className="muted small">Une victoire contre l’ordinateur rapporte 5 pièces.</p>
-      <button type="button" className="primary" disabled={!ready} onClick={() => onStart({ mode, A, B, first })}>Commencer la partie</button>
+      <section className="menu-block">
+        <p className="muted small">Une victoire contre l’ordinateur rapporte 5 pièces.</p>
+        <button type="button" className="primary" disabled={!ready} onClick={() => onStart({ mode, A, B, first })}>Commencer la partie</button>
+      </section>
     </div>
   );
 }
