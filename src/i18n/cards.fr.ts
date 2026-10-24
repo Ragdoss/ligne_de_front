@@ -230,7 +230,7 @@ const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "suppot_infernal": {
     "name": "Suppôt Infernal",
-    "desc": "Remplace le Leader déjà présent. Quand le régiment porteur est détruit : copie en main d'un régiment Démon de ta défausse, qui coûte 2 de moins à jouer."
+    "desc": "Doit remplacer un Leader déjà présent. Quand le régiment porteur est détruit : copie en main d'un régiment Démon de ta défausse, qui coûte 2 de moins à jouer."
   },
   "demon_akantha": {
     "name": "Démon d'Akantha",
