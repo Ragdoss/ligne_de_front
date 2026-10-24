@@ -394,11 +394,11 @@ const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "frappez_ravitaillement": {
     "name": "Frappez le ravitaillement",
-    "desc": "L'adversaire défausse 2 cartes de sa main (son choix)."
+    "desc": "L'adversaire défausse 2 cartes de sa main (de son choix)."
   },
   "volez_ravitaillement": {
     "name": "Volez le ravitaillement",
-    "desc": "L'adversaire défausse 3 cartes de sa main (son choix). Tu gagnes 7 ressources moins la somme des niveaux des cartes défaussées (minimum 0)."
+    "desc": "L'adversaire défausse 3 cartes de sa main (de son choix). Tu gagnes 7 ressources moins la somme des niveaux des cartes défaussées (minimum 0)."
   },
   "basilics_desert": {
     "name": "Basilics du Désert",
