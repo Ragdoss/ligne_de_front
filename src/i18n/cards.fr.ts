@@ -290,7 +290,7 @@ const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "rancon_ames": {
     "name": "Rançon d'Âmes",
-    "desc": "Cible un Démon allié : gagne X points de lassitude (X au choix, 1 à 5) ; il gagne +5 ATK par point payé pour ce combat."
+    "desc": "Cible un Démon allié : gagne X points de lassitude (X au choix, de 1 à 5) ; il gagne +5 ATK par point payé pour ce combat."
   },
   "dette_infernale": {
     "name": "Dette Infernale",
