@@ -50,7 +50,7 @@ export const currentScenario = (c: CampaignSave): CampaignScenario => SCENARIOS[
  * régiment vital du joueur plus solide (END ×1,5, +2 Moral). Pertes de Moral normales, ATK adverse inchangée.
  */
 // Réglages propres à chaque scénario : voir ease.ts.
-export const CAMPAIGN_EASE = { startResource: 1, lassitudeMul: 1.5, enemyAtk: 1, vitalEnd: 1.5, vitalMor: 2, vitalArm: 0 };
+export const CAMPAIGN_EASE = { startResource: 1, lassitudeMul: 1.5, enemyAtk: 1, vitalEnd: 1.5, vitalMor: 2, vitalArm: 0, extraCards: 0 };
 
 export type CampaignEase = typeof CAMPAIGN_EASE;
 /** Aide d'un scénario dans un mode : réglage commun, avec ressources et lassitude propres au scénario (src/campaign/ease.ts). */
@@ -87,6 +87,7 @@ export function scenarioGameSetup(sc: CampaignScenario, playerDeck: string[], se
       weather: sc.weather,
       alarm: sc.alarm,
       startResource: bonus + ease.startResource ? { A: Math.max(0, bonus + ease.startResource) } : undefined,
+      startDraw: ease.extraCards ? { A: ease.extraCards } : undefined,
       ease: { weak: 'B', atk: ease.enemyAtk, helped: 'A', vitalEnd: ease.vitalEnd, vitalMor: ease.vitalMor, vitalArm: ease.vitalArm },
     },
   };

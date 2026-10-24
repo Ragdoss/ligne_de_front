@@ -101,6 +101,22 @@ export function submitDeck(prev: MultiDraft, seat: number, deck: string[]): Mult
   return st;
 }
 
+/** Peut-on modifier son deck ? Entre deux adversaires : pas pendant un match commencé (Bo3, Bo5). */
+export function canChangeDeck(st: MultiDraft, seat: number): boolean {
+  if (st.phase !== 'tournament' || !st.seats[seat]?.human) return false;
+  const m = myMatch(st, seat);
+  return !m || m.done || (m.score[0] === 0 && m.score[1] === 0);
+}
+
+/** Un humain modifie son deck entre deux adversaires (cartes draftées seulement : vérifié par l'interface). */
+export function changeDeck(prev: MultiDraft, seat: number, deck: string[]): MultiDraft {
+  if (prev.phase === 'build') return submitDeck(prev, seat, deck);
+  if (!canChangeDeck(prev, seat)) return prev;
+  const st = clone(prev);
+  st.decks[seat] = deck.slice();
+  return st;
+}
+
 /** Match de la ronde en cours pour un siège : sièges a < b dans l'ordre du calendrier, score actuel. */
 export function myMatch(st: MultiDraft, seat: number): { a: number; b: number; opp: number; score: [number, number]; done: boolean } | null {
   if (st.phase !== 'tournament') return null;

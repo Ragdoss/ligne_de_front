@@ -267,3 +267,25 @@ describe('Défaite sans régiment', () => {
     expect(r.state.over).toMatchObject({ winner: 'B', reason: 'noRegiment' });
   });
 });
+
+describe('Résolution avant destruction', () => {
+  it('Gargouille de Cendres à 1 Moral survit au sacrifice : elle regagne son Moral avant la perte due au sacrifice', () => {
+    let s = quiet();
+    s.players.A.level = 5; s.players.A.resource = 20;
+    place(s, 'A', 'avant', 0, 'cultiste');
+    const g = place(s, 'A', 'avant', 1, 'gargouille_cendres');
+    g.currentMor = 1;
+    s = act(s, { type: 'play', handUid: give(s, 'A', 'gardien_chaines'), target: slot('A', 'avant', 0) }).state;
+    const after = s.players.A.board.avant[1];
+    expect(after?.cardId).toBe('gargouille_cendres');
+    expect(after!.currentMor).toBe(1);
+  });
+  it('Minions : pas de Moral regagné en détruisant un régiment', async () => {
+    const s = quiet();
+    const ctx = new Ctx(s);
+    const killer = place(s, 'A', 'avant', 0, 'recrue_imp', { keywords: ['Minions'], currentMor: 2 });
+    const victim = place(s, 'B', 'avant', 0, 'recrue_imp');
+    ctx.destroy(victim, 'end', killer);
+    expect(killer.currentMor).toBe(2);
+  });
+});

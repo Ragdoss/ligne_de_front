@@ -3,7 +3,7 @@ export const WAVE2B_TEXT_FR: Record<string, { name: string; desc: string }> = {
   ecuyers_garde: { name: 'Écuyers de la Garde', desc: 'Formation : +5 ATK si un régiment Monté est voisin sur sa ligne.' },
   arbaletriers_rang: { name: 'Arbalétriers en rang', desc: 'Formation : +5 ATK par régiment Empire voisin sur sa ligne.' },
   lanciers_rempart: { name: 'Lanciers du rempart', desc: '+10 ARM tant qu’il a deux voisins sur sa ligne.' },
-  chevaliers_ordre: { name: 'Chevaliers de l’Ordre', desc: 'Arrive prêt.' },
+  chevaliers_ordre: { name: 'Chevaliers de l’Ordre', desc: '' },
   cuirassiers_lourds: { name: 'Cuirassiers lourds', desc: 'Quand il détruit un régiment, il attaque une seconde fois (une fois par combat).' },
   connetable: { name: 'Connétable', desc: 'Formation : les voisins du porteur sur sa ligne gagnent +5 ATK.' },
   heraut_imperial: { name: 'Héraut impérial', desc: 'Au début de ton tour, tous tes régiments porteurs d’un Leader regagnent 1 Moral.' },

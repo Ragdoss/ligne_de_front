@@ -22,7 +22,7 @@ const DEFS: Record<string, Def> = {
   ecuyers_garde: reg('empire', 1, 1, 'avant', ['Humain', 'Empire', 'Recrue'], [8, 25, 5, 15, 5], { formationAtkIfMountedNeighbor: 5 }),
   arbaletriers_rang: reg('empire', 2, 3, 'arriere', ['Humain', 'Empire', 'Arbalétrier'], [20, 30, 0, 12, 6], { keywords: ['Distance', 'Lent'], formationAtkPerEmpireNeighbor: 5 }),
   lanciers_rempart: reg('empire', 2, 2, 'avant', ['Humain', 'Empire', 'Lancier'], [12, 40, 5, 10, 6], { armIfTwoRowNeighbors: 10 }),
-  chevaliers_ordre: reg('empire', 3, 4, 'avant', ['Humain', 'Empire', 'Monté', 'Chevalier'], [20, 45, 10, 25, 8], { keywords: ['Ralliement 1'], arrivesReady: true }),
+  chevaliers_ordre: reg('empire', 3, 4, 'avant', ['Humain', 'Empire', 'Monté', 'Chevalier'], [20, 45, 10, 25, 8], { keywords: ['Ralliement 1', 'Prêt'], arrivesReady: true }),
   cuirassiers_lourds: reg('empire', 4, 5, 'avant', ['Humain', 'Empire', 'Monté', 'Élite'], [25, 60, 15, 20, 9], { extraAttackOnKill: true }),
   connetable: lead('empire', 4, 2, { typesRequired: ['Empire'], bonusArm: 10, bonusMor: 2, leaderFormationAtk: 5 }),
   heraut_imperial: lead('empire', 5, 3, { typesRequired: ['Empire'], bonusAtk: 5, bonusMor: 3, leaderRallyCarriersEachTurn: 1 }),

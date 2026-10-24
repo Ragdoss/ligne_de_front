@@ -20,10 +20,12 @@ export interface ScenarioEase {
   /** Régiment à protéger : END multipliée, Moral en plus (maximum et départ). */
   vitalEnd?: number;
   vitalMor?: number;
+  /** Cartes en main en plus au départ. */
+  extraCards?: number;
 }
 /** Réglage par défaut d'un mode (scénario non réglé). */
 export const MODE_EASE: Record<Difficulty, ScenarioEase> = {
-  histoire: { startResource: 2, lassitudeMul: 2, vitalEnd: 2, vitalMor: 3 },
+  histoire: { startResource: 2, lassitudeMul: 2, vitalEnd: 2, vitalMor: 3, extraCards: 1 },
   guerrier: { startResource: 1, lassitudeMul: 1.5, vitalEnd: 1.5, vitalMor: 2 },
   heros: { startResource: 0, lassitudeMul: 1, vitalEnd: 1, vitalMor: 0 },
 };

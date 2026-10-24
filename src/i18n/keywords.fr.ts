@@ -11,11 +11,12 @@ const GLOSS: Record<string, string> = {
   Ralliement: 'À son arrivée, ses voisins regagnent X Moral.',
   Mirage: 'Les X premières attaques qui le visent frappent le vide (au total, pas par tour).',
   Lent: 'N’attaque qu’au combat de fin de son propre tour, pas à celui de l’adversaire. Gardé même au Moral brisé.',
-  Minions: 'À sa destruction, ses alliés ne perdent pas de Moral et son camp ne gagne pas de lassitude. Gardé même au Moral brisé.',
+  Minions: 'À sa destruction, ses alliés ne perdent pas de Moral et son camp ne gagne pas de lassitude. Il ne regagne pas de Moral en détruisant un régiment. Gardé même au Moral brisé.',
   Marché: 'Au début de ton tour, tu peux défausser une carte de ta main pour en piocher une.',
   Pénétration: 'Quand ce régiment attaque, il ignore X points d’Armure de sa cible.',
   Pillage: 'Quand il détruit un régiment, l’adversaire défausse les X cartes du dessus de sa pioche.',
   Débordement: 'Quand il attaque un régiment de la ligne avant, les deux régiments derrière sa cible subissent X dégâts.',
+  Prêt: 'Arrive prêt : pas de pénalité d’arrivée, il frappe avec toute son ATK dès le tour où il est posé (sinon, la moitié).',
   'Arrive prêt': 'Pas de pénalité d’arrivée : il frappe avec toute son ATK dès le tour où il est posé (sinon, la moitié).',
   Offrande: 'En jouant la carte, tu peux payer X lassitude pour obtenir l’effet renforcé.',
   Sacrifice: 'Pour le poser, sacrifie un de tes régiments du niveau indiqué ou plus : il prend sa place.',
@@ -51,7 +52,7 @@ export function glossaryFor(id: string): GlossEntry[] {
   const granted = c.grantsKeywordOnAttach as string | undefined;
   if (granted && GLOSS[base(granted)]) found.add(base(granted));
   if (c.unique) found.add('Unique');
-  if (c.arrivesReady) found.add('Arrive prêt');
+  if (c.arrivesReady && !found.has('Prêt')) found.add('Arrive prêt');
   if (c.offrande) found.add('Offrande');
   if (c.sacrificeMinLevel !== undefined) found.add('Sacrifice');
   if (c.vieTours) found.add('Durée de vie');

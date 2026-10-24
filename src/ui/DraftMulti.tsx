@@ -4,14 +4,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { CARDS } from '../data/cards';
 import { AI_AVATARS, AI_NAMES, deckFaction, FACTION_AVATAR, PACK_SIZE, PACKS, SCHEDULE, standings, winsNeeded, type BestOf } from '../draft/draft';
-import { choosePick, dropHuman, gameFirst, gameKey, myMatch, newMulti, recordGame, submitDeck, type MultiDraft } from '../draft/multi';
+import { canChangeDeck, changeDeck, choosePick, dropHuman, gameFirst, gameKey, myMatch, newMulti, recordGame, type MultiDraft } from '../draft/multi';
 import type { Action, GameState } from '../engine/types';
 import { formatEvent } from '../i18n/log.fr';
 import { hostRoomMulti, joinRoom, newRoomCode, PROTOCOL, webrtcAvailable, type Link, type NetMsg } from '../net/link';
 import { defeatCoins, type Profile } from '../profile/profile';
 import { Avatar } from './avatars';
 import { CardTile } from './CardTile';
-import { Builder, byFactionLevel, countOf, PicksSummary } from './Draft';
+import { Builder, byFactionLevel, countOf, DraftStats, PackGrid, PicksSummary, SortChips, type DraftSort } from './Draft';
 import { GameScreen } from './GameScreen';
 import { showZoom, zoomProps } from './HoverZoom';
 import { cardName, FACTION_LABEL } from './labels';
@@ -37,6 +37,8 @@ export function MultiDraftScreen({ profile, onExit, gameOpts, reward }: {
   const [st, setSt] = useState<MultiDraft | null>(null);
   const [inbox, setInbox] = useState<Record<string, Action[]>>({});
   const [game, setGame] = useState<{ key: string; a: number; b: number } | null>(null);
+  const [sort, setSort] = useState<DraftSort>('faction');
+  const [editDeck, setEditDeck] = useState(false);
   const stRef = useRef<MultiDraft | null>(null);
   const links = useRef(new Map<number, Link>()); // hôte : siège → liaison
   const hostLink = useRef<Link | null>(null); // invité : liaison vers l'hôte
@@ -85,7 +87,7 @@ export function MultiDraftScreen({ profile, onExit, gameOpts, reward }: {
           return;
         }
         if (m.t === 'dpick') update(s => choosePick(s, seat, m.index));
-        else if (m.t === 'ddeck') update(s => submitDeck(s, seat, m.deck));
+        else if (m.t === 'ddeck') update(s => changeDeck(s, seat, m.deck));
         else if (m.t === 'dresult') update(s => recordGame(s, m.a, m.b, m.winner, m.turns));
         else if (m.t === 'dact') {
           if (m.to === 0) pushAct(m.game, m.a);
@@ -147,7 +149,7 @@ export function MultiDraftScreen({ profile, onExit, gameOpts, reward }: {
   const act = (m: Extract<NetMsg, { t: 'dpick' | 'ddeck' | 'dresult' }>) => {
     if (role === 'host') {
       if (m.t === 'dpick') update(s => choosePick(s, me, m.index));
-      else if (m.t === 'ddeck') update(s => submitDeck(s, me, m.deck));
+      else if (m.t === 'ddeck') update(s => changeDeck(s, me, m.deck));
       else update(s => recordGame(s, m.a, m.b, m.winner, m.turns));
     } else hostLink.current?.send(m);
   };
@@ -297,12 +299,13 @@ export function MultiDraftScreen({ profile, onExit, gameOpts, reward }: {
         {status}
         <p className="small muted">{done ? `Choix enregistré. En attente de : ${waitingFor(i => st.chosen[i] === null)}.` : `Clique sur une carte pour la garder. Le reste du paquet part ${st.round % 2 === 0 ? 'à ta gauche' : 'à ta droite'}.`}</p>
         <div className="draft-layout">
-          <div className={`camp-grid${done ? ' waiting' : ''}`}>
-            {pack.map((id, i) => (
-              <button type="button" key={`${id}-${i}`} className={`vn-pick${st.chosen[me] === i ? ' on' : ''}`} disabled={done} aria-label={`Garder ${cardName(id)}`} onClick={() => { act({ t: 'dpick', index: i }); showZoom(null); }}><CardTile id={id} /></button>
-            ))}
+          <div>
+            <SortChips value={sort} set={setSort} />
+            <PackGrid pack={pack} sort={sort} disabled={done} chosen={st.chosen[me]} onPick={i => act({ t: 'dpick', index: i })} />
+            <h3 className="sub small">Ce paquet</h3>
+            <DraftStats ids={pack} />
           </div>
-          <PicksSummary picks={st.picks[me]!} />
+          <PicksSummary picks={st.picks[me]!} sort={sort} />
         </div>
       </div>
     );
@@ -322,6 +325,15 @@ export function MultiDraftScreen({ profile, onExit, gameOpts, reward }: {
   }
 
   // ---------- Tournoi ----------
+  if (editDeck && canChangeDeck(st, me)) {
+    return (
+      <div className="camp">
+        <TopBar title="Draft à plusieurs — modifier ton deck" onBack={() => setEditDeck(false)} />
+        <Builder picks={st.picks[me]!} initial={st.decks[me]!} doneLabel="Enregistrer le deck" onCancel={() => setEditDeck(false)}
+          onDone={deck => { act({ t: 'ddeck', deck }); setEditDeck(false); }} />
+      </div>
+    );
+  }
   const table = standings(st);
   const mm = myMatch(st, me);
   const bo = st.bestOf ?? 1;
@@ -357,6 +369,7 @@ export function MultiDraftScreen({ profile, onExit, gameOpts, reward }: {
         </div>
       )}
       {mm?.done && st.phase === 'tournament' && <p className="muted">Ton match est joué. En attente des autres matchs de la ronde.</p>}
+      {canChangeDeck(st, me) && <div className="choices row left"><button type="button" onClick={() => setEditDeck(true)}>Modifier mon deck avant le prochain adversaire</button></div>}
       {st.decks[me] && (
         <details className="small"><summary>Mon deck ({st.decks[me]!.length} cartes)</summary>
           <div className="draft-list">{Object.entries(countOf(st.decks[me]!)).sort(([x], [y]) => byFactionLevel(x, y)).map(([id, k]) => (

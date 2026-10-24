@@ -118,7 +118,7 @@ const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "cavaliers_dragons_elite": {
     "name": "Cavaliers Dragons Élite",
-    "desc": "Arrive prêt. À son arrivée, tous vos régiments Empire retrouvent un Moral plein."
+    "desc": "À son arrivée, tous vos régiments Empire retrouvent un Moral plein."
   },
   "eclaireur_elfe": {
     "name": "Éclaireur Elfe",
@@ -134,7 +134,7 @@ const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "elem_feu": {
     "name": "Élémentaire de Feu",
-    "desc": "Arrive prêt (pas de pénalité d'apparition)."
+    "desc": ""
   },
   "clerc_foret": {
     "name": "Clerc de la Forêt",
@@ -330,7 +330,7 @@ const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "jeune_nomade": {
     "name": "Jeune Nomade",
-    "desc": "Arrive prêt. À son arrivée, l'adversaire défausse une carte au hasard. À sa mort, l'adversaire pioche une carte."
+    "desc": "À son arrivée, l'adversaire défausse une carte au hasard. À sa mort, l'adversaire pioche une carte."
   },
   "frondeur_nomade": {
     "name": "Frondeur Nomade",
@@ -402,7 +402,7 @@ const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "basilics_desert": {
     "name": "Basilics du Désert",
-    "desc": "À son arrivée, gagne 5 END, 1 ARM, 3 INI et 1 Moral par carte dans la défausse adverse."
+    "desc": "À son arrivée, gagne 5 END, 1 ARM, 3 INI et 1 Moral par carte Régiment dans la défausse adverse."
   },
   "diablotins": {
     "name": "Diablotins",
@@ -430,7 +430,7 @@ const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "cavaliers_dunes": {
     "name": "Cavaliers des Dunes",
-    "desc": "Arrive prêt (pas de pénalité d'apparition)."
+    "desc": ""
   },
   "cheikh_dunes": {
     "name": "Cheikh des Dunes",

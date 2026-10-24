@@ -5,7 +5,7 @@ export const WAVE1_TEXT_FR: Record<string, { name: string; desc: string }> = {
   hallebardiers_ligne: { name: 'Hallebardiers en ligne', desc: 'Formation : +5 ARM par régiment Empire voisin sur sa ligne.' },
   gardes_drapeau: { name: 'Gardes du drapeau', desc: 'Formation : ses voisins Empire sur la ligne gagnent +5 ATK.' },
   cavaliers_garde: { name: 'Cavaliers de la Garde', desc: 'Quand il détruit un régiment, ses alliés adjacents regagnent 1 Moral.' },
-  cuirassiers_kragz: { name: 'Cuirassiers de Kragz', desc: 'Arrive prêt.' },
+  cuirassiers_kragz: { name: 'Cuirassiers de Kragz', desc: '' },
   colonel_ligne: { name: 'Colonel de la Ligne', desc: 'Formation : les régiments Empire voisins du porteur sur sa ligne gagnent +5 ARM.' },
   grand_maitre_armes: { name: 'Grand Maître d’armes', desc: 'Le porteur frappe deux fois par combat ; la seconde frappe se fait à moitié de son ATK.' },
   appel_aux_armes: { name: 'Appel aux armes', desc: 'Crée une Recrue Impériale prête dans chacune de tes cases avant vides ; tous tes régiments regagnent 3 Moral.' },
@@ -47,7 +47,7 @@ export const WAVE1_TEXT_FR: Record<string, { name: string; desc: string }> = {
   chevaucheurs_mirage: { name: 'Chevaucheurs du mirage', desc: 'Elfes et Nomades. Arrive prêt si tu as joué une Tactique ce tour-ci. Si 3 de tes régiments attaquent avant le premier régiment adverse d’un combat, il gagne Mirage 1.' },
   marchand_ames: { name: 'Marchand d’âmes', desc: 'Démons et Nomades. Sacrifice niveau 1+. À son arrivée, retire un régiment de la défausse adverse : tu gagnes autant de ressources que son niveau, et autant de lassitude que son niveau moins le nombre de cartes mises dans la défausse adverse ce tour-ci.' },
   ravitailleur: { name: 'Ravitailleur', desc: 'Pioche 1 carte à son arrivée, quand il est détruit, et quand il est défaussé de ta main ou de ta pioche.' },
-  veterans_louer: { name: 'Vétérans à louer', desc: 'Arrive prêt.' },
+  veterans_louer: { name: 'Vétérans à louer', desc: '' },
   capitaine_mercenaire: { name: 'Capitaine mercenaire', desc: 'À son attache, tu gagnes 1 ressource.' },
   cor_ralliement: { name: 'Cor de ralliement', desc: 'Tous tes régiments au Moral brisé regagnent 2 Moral.' },
 };

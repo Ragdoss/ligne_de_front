@@ -322,6 +322,8 @@ export interface ScenarioSetup extends ScenarioRules {
   startOverrides?: Record<string, { mor?: number }>;
   /** Ressources supplémentaires au départ (aide après plusieurs défaites en campagne). */
   startResource?: Partial<Record<PlayerId, number>>;
+  /** Cartes piochées en plus au départ (mode Histoire de la campagne). */
+  startDraw?: Partial<Record<PlayerId, number>>;
 }
 export interface ScenarioRuntime extends ScenarioRules {
   fired: string[];

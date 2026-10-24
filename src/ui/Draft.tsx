@@ -10,6 +10,7 @@ import { COINS_PER_WIN, defeatCoins, type Profile } from '../profile/profile';
 import { keyFor } from '../profile/store';
 import { Avatar } from './avatars';
 import { CardTile } from './CardTile';
+import { FilterBar, NO_FILTER, type Filters } from './Collection';
 import { showZoom, zoomProps } from './HoverZoom';
 import { GameScreen } from './GameScreen';
 import { cardName, FACTION_LABEL } from './labels';
@@ -32,16 +33,49 @@ export const byFactionLevel = (a: string, b: string) =>
   FACTION_ORDER.indexOf(CARDS[a]!.faction) - FACTION_ORDER.indexOf(CARDS[b]!.faction) || CARDS[a]!.niveau - CARDS[b]!.niveau || cardName(a).localeCompare(cardName(b));
 export const countOf = (ids: string[]) => { const n: Record<string, number> = {}; for (const id of ids) n[id] = (n[id] ?? 0) + 1; return n; };
 
-export function PicksSummary({ picks }: { picks: string[] }) {
+const TYPE_ORDER: Record<string, number> = { Regiment: 0, Leader: 1, Tactique: 2 };
+const TYPE_PLURAL: Record<string, string> = { Regiment: 'Régiments', Leader: 'Leaders', Tactique: 'Tactiques' };
+export type DraftSort = 'faction' | 'niveau' | 'type';
+const SORTS: Record<DraftSort, (a: string, b: string) => number> = {
+  faction: byFactionLevel,
+  niveau: (a, b) => CARDS[a]!.niveau - CARDS[b]!.niveau || byFactionLevel(a, b),
+  type: (a, b) => TYPE_ORDER[CARDS[a]!.cardType]! - TYPE_ORDER[CARDS[b]!.cardType]! || CARDS[a]!.niveau - CARDS[b]!.niveau || byFactionLevel(a, b),
+};
+export const draftSort = (mode: DraftSort) => SORTS[mode];
+
+/** Choix du tri (paquet et cartes draftées). */
+export function SortChips({ value, set }: { value: DraftSort; set: (v: DraftSort) => void }) {
+  return (
+    <div className="hand-sort" role="radiogroup" aria-label="Trier les cartes">
+      Trier :{(['faction', 'niveau', 'type'] as DraftSort[]).map(m => (
+        <button key={m} type="button" role="radio" aria-checked={value === m} className={value === m ? 'on' : ''} onClick={() => set(m)}>{m}</button>
+      ))}
+    </div>
+  );
+}
+
+/** Répartition d'une liste de cartes : par niveau, par type, par faction. */
+export function DraftStats({ ids }: { ids: string[] }) {
+  const lvl = countOf(ids.map(id => String(CARDS[id]!.niveau)));
+  const typ = countOf(ids.map(id => CARDS[id]!.cardType));
+  const fac = countOf(ids.map(id => CARDS[id]!.faction));
+  return (
+    <div className="draft-stats small">
+      <div><b>Niveaux</b> {[1, 2, 3, 4, 5].map(n => <span key={n} className="pill">niv. {n} : <b>{lvl[n] ?? 0}</b></span>)}</div>
+      <div><b>Types</b> {['Regiment', 'Leader', 'Tactique'].map(t => <span key={t} className="pill">{TYPE_PLURAL[t]} : <b>{typ[t] ?? 0}</b></span>)}</div>
+      <div><b>Factions</b> {FACTION_ORDER.filter(f => fac[f]).map(f => <span key={f} className={`fchip ${f}`}>{FACTION_LABEL[f as keyof typeof FACTION_LABEL]} <b>{fac[f]}</b></span>)}</div>
+    </div>
+  );
+}
+
+export function PicksSummary({ picks, sort = 'faction' }: { picks: string[]; sort?: DraftSort }) {
   const n = countOf(picks);
-  const fac = countOf(picks.map(id => CARDS[id]!.faction));
-  const high = picks.filter(id => CARDS[id]!.niveau >= 4).length;
   return (
     <aside className="draft-picks" aria-label="Tes cartes draftées">
       <h2 className="sub">Tes cartes ({picks.length})</h2>
-      <p className="small muted">{FACTION_ORDER.filter(f => fac[f]).map(f => `${FACTION_LABEL[f as keyof typeof FACTION_LABEL]} ${fac[f]}`).join(' · ')}{picks.length ? ` · niveau 4-5 : ${high}` : ''}</p>
+      {picks.length > 0 && <DraftStats ids={picks} />}
       <div className="draft-list">
-        {Object.keys(n).sort(byFactionLevel).map(id => (
+        {Object.keys(n).sort(SORTS[sort]).map(id => (
           <div key={id} className={`deck-line ${CARDS[id]!.faction}`} {...zoomProps(id)}><span>{n[id]}</span>{cardName(id)}<small>niv. {CARDS[id]!.niveau}</small></div>
         ))}
       </div>
@@ -49,14 +83,38 @@ export function PicksSummary({ picks }: { picks: string[] }) {
   );
 }
 
-export function Builder({ picks, onDone, doneLabel = 'Valider le deck et lancer le tournoi' }: { picks: string[]; onDone: (deck: string[]) => void; doneLabel?: string }) {
+/** Paquet en cours : cartes affichées dans l'ordre de tri choisi (le choix garde l'index d'origine). */
+export function PackGrid({ pack, sort, disabled, chosen, onPick }: { pack: string[]; sort: DraftSort; disabled?: boolean; chosen?: number | null; onPick: (index: number) => void }) {
+  const order = pack.map((id, i) => ({ id, i })).sort((x, y) => SORTS[sort](x.id, y.id) || x.i - y.i);
+  return (
+    <div className={`camp-grid${disabled ? ' waiting' : ''}`}>
+      {order.map(({ id, i }) => (
+        <button type="button" key={`${id}-${i}`} className={`vn-pick${chosen === i ? ' on' : ''}`} disabled={disabled} aria-label={`Garder ${cardName(id)}`} onClick={() => { onPick(i); showZoom(null); }}><CardTile id={id} /></button>
+      ))}
+    </div>
+  );
+}
+
+export function Builder({ picks, onDone, doneLabel = 'Valider le deck et lancer le tournoi', initial, onCancel }: {
+  picks: string[]; onDone: (deck: string[]) => void; doneLabel?: string;
+  /** Deck de départ (modification entre deux adversaires) ; sinon le deck proposé. */
+  initial?: string[];
+  onCancel?: () => void;
+}) {
   const have = countOf(picks);
-  const [deck, setDeck] = useState<string[]>(() => buildAiDeck(picks));
+  const [deck, setDeck] = useState<string[]>(() => initial?.slice() ?? buildAiDeck(picks));
+  const [f, setF] = useState<Filters>({ ...NO_FILTER });
   const inDeck = countOf(deck);
   const chk = checkDraftDeck(deck, picks);
   const add = (id: string) => setDeck(d => [...d, id]);
   const remove = (id: string) => setDeck(d => { const i = d.lastIndexOf(id); return i < 0 ? d : [...d.slice(0, i), ...d.slice(i + 1)]; });
-  const ids = Object.keys(have).sort(byFactionLevel);
+  const t = f.text.trim().toLowerCase();
+  const keep = (id: string) => {
+    const c = CARDS[id]!;
+    return (f.faction === 'all' || c.faction === f.faction) && (f.type === 'all' || c.cardType === f.type) && (f.level === 'all' || String(c.niveau) === f.level)
+      && (!t || cardName(id).toLowerCase().includes(t));
+  };
+  const ids = Object.keys(have).filter(keep).sort(byFactionLevel);
   const ctl = (id: string, max: number) => (
     <>
       <button type="button" aria-label={`Retirer ${cardName(id)}`} disabled={!inDeck[id]} onClick={() => remove(id)}>−</button>
@@ -70,13 +128,16 @@ export function Builder({ picks, onDone, doneLabel = 'Valider le deck et lancer 
         <b>Deck : {chk.total} cartes</b> (au moins {DECK_MIN}) · régiments de niveau 1 : {chk.lvl1} · niveau 4-5 : {chk.high}
         {chk.problems.map(p => <p key={p} className="bad small">{p}</p>)}
         {chk.warnings.map(p => <p key={p} className="small muted">{p}</p>)}
+        {deck.length > 0 && <DraftStats ids={deck} />}
         <div className="choices row left">
           <button type="button" onClick={() => setDeck(buildAiDeck(picks))}>Deck proposé</button>
           <button type="button" onClick={() => setDeck([])}>Vider</button>
+          {onCancel && <button type="button" onClick={onCancel}>Annuler</button>}
           <button type="button" className="primary" disabled={!chk.ok} onClick={() => onDone(deck)}>{doneLabel}</button>
         </div>
       </div>
-      <h2 className="sub">Tes cartes draftées</h2>
+      <FilterBar f={f} set={setF} ownedLabels={false} />
+      <h2 className="sub">Tes cartes draftées{ids.length < Object.keys(have).length ? ` (${ids.length} affichées sur ${Object.keys(have).length})` : ''}</h2>
       <div className="camp-grid">{ids.map(id => <CardTile key={id} id={id} dim={!inDeck[id]}>{ctl(id, have[id]!)}</CardTile>)}</div>
       <h2 className="sub">Régiments de base (à volonté)</h2>
       <div className="camp-grid">{BASICS.map(id => <CardTile key={id} id={id} dim={!inDeck[id]}>{ctl(id, Infinity)}</CardTile>)}</div>
@@ -97,6 +158,8 @@ export function DraftScreen({ profile, onExit, gameOpts, reward, onMulti }: {
   /** Partie en cours ; premier joueur tiré au hasard en début de match, puis en alternance (Bo3, Bo5). */
   const [game, setGame] = useState<{ opp: number; key: number; first: 'A' | 'B' } | null>(null);
   const [bestOf, setBestOf] = useState<BestOf>(1);
+  const [sort, setSort] = useState<DraftSort>('faction');
+  const [editDeck, setEditDeck] = useState(false);
   /** Issue de la dernière partie jouée : match terminé ou non, score du match. */
   const [after, setAfter] = useState<{ done: boolean; score: [number, number] } | null>(null);
   const set = (s: DraftState | null) => { saveDraft(s); setSt(s); };
@@ -185,12 +248,13 @@ export function DraftScreen({ profile, onExit, gameOpts, reward, onMulti }: {
         <TopBar title={`Draft — paquet ${st.round + 1} / ${PACKS}, choix ${pickNo} / ${PACK_SIZE}`} onBack={onExit} right={abandon} />
         <p className="small muted">Clique sur une carte pour la garder. Le reste du paquet part {st.round % 2 === 0 ? 'à ta gauche' : 'à ta droite'}.</p>
         <div className="draft-layout">
-          <div className="camp-grid">
-            {st.packs[0]!.map((id, i) => (
-              <button type="button" key={`${id}-${i}`} className="vn-pick" aria-label={`Garder ${cardName(id)}`} onClick={() => { set(pickCard(st, i)); showZoom(null); }}><CardTile id={id} /></button>
-            ))}
+          <div>
+            <SortChips value={sort} set={setSort} />
+            <PackGrid pack={st.packs[0]!} sort={sort} onPick={i => set(pickCard(st, i))} />
+            <h3 className="sub small">Ce paquet</h3>
+            <DraftStats ids={st.packs[0]!} />
           </div>
-          <PicksSummary picks={st.picks[0]!} />
+          <PicksSummary picks={st.picks[0]!} sort={sort} />
         </div>
       </div>
     );
@@ -201,6 +265,17 @@ export function DraftScreen({ profile, onExit, gameOpts, reward, onMulti }: {
       <div className="camp">
         <TopBar title="Draft — construis ton deck" onBack={onExit} right={abandon} />
         <Builder picks={st.picks[0]!} onDone={deck => { const s = structuredClone(st); s.decks[0] = deck; s.phase = 'tournament'; set(s); }} />
+      </div>
+    );
+  }
+
+  // Entre deux adversaires : modification du deck avec les cartes draftées.
+  if (editDeck && st.phase === 'tournament' && !st.current) {
+    return (
+      <div className="camp">
+        <TopBar title="Draft — modifier ton deck" onBack={() => setEditDeck(false)} />
+        <Builder picks={st.picks[0]!} initial={st.decks[0]!} doneLabel="Enregistrer le deck" onCancel={() => setEditDeck(false)}
+          onDone={deck => { const s = structuredClone(st); s.decks[0] = deck; set(s); setEditDeck(false); }} />
       </div>
     );
   }
@@ -242,6 +317,7 @@ export function DraftScreen({ profile, onExit, gameOpts, reward, onMulti }: {
           </button>
         </div>
       )}
+      {st.phase === 'tournament' && !st.current && <div className="choices row left"><button type="button" onClick={() => setEditDeck(true)}>Modifier mon deck avant le prochain adversaire</button></div>}
       <details className="small"><summary>Mon deck ({st.decks[0]!.length} cartes)</summary>
         <div className="draft-list">{Object.entries(countOf(st.decks[0]!)).sort(([a], [b]) => byFactionLevel(a, b)).map(([id, k]) => (
           <div key={id} className={`deck-line ${CARDS[id]!.faction}`} {...zoomProps(id)}><span>{k}</span>{cardName(id)}<small>niv. {CARDS[id]!.niveau}</small></div>

@@ -1699,7 +1699,9 @@ const BASE_CARDS: Record<string, CardDef> = {
     "arm": 2,
     "ini": 35,
     "mor": 6,
-    "keywords": [],
+    "keywords": [
+      "Prêt"
+    ],
     "arrivesReady": true
   },
   "cheikh_dunes": {
@@ -1995,3 +1997,5 @@ const BASE_CARDS: Record<string, CardDef> = {
 export const CARDS: Record<string, CardDef> = { ...BASE_CARDS, ...WAVE1, ...WAVE2, ...WAVE2B };
 for (const [id, over] of Object.entries({ ...BALANCE_5, ...BALANCE_6, ...BALANCE_7 })) CARDS[id] = { ...CARDS[id]!, ...over } as CardDef;
 applyBalance8(CARDS);
+// Régiments qui arrivent prêts : le mot-clé Prêt est affiché sur la carte (au lieu d'un texte « Arrive prêt »).
+for (const c of Object.values(CARDS)) if (c.arrivesReady && !(c.keywords ?? []).includes('Prêt')) c.keywords = [...(c.keywords ?? []), 'Prêt'];

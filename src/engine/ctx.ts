@@ -47,6 +47,23 @@ export class Ctx {
   readonly events: GameEvent[] = [];
   constructor(public readonly s: GameState) {}
 
+  // Destructions différées : pendant la résolution d'une carte, un régiment qui tombe à 0 Moral à cause de la mort d'un allié
+  // n'est détruit qu'une fois tous les effets de la carte résolus (il peut regagner du Moral entre-temps).
+  private deferDepth = 0;
+  private deferred: Unit[] = [];
+  deferDeaths<T>(fn: () => T): T {
+    this.deferDepth++;
+    try { return fn(); } finally {
+      this.deferDepth--;
+      if (!this.deferDepth) {
+        while (this.deferred.length && !this.over) {
+          const list = this.deferred; this.deferred = [];
+          for (const u of list) if (!this.over && this.slotOf(u.uid) && u.currentMor <= 0) this.destroy(u, 'moral');
+        }
+        this.deferred = [];
+      }
+    }
+  }
   emit(e: GameEvent): void { this.events.push(e); if (recorder) recorder.push(structuredClone(this.s)); }
   get over(): boolean { return this.s.over !== null; }
   player(p: PlayerId): PlayerState { return this.s.players[p]; }
@@ -669,7 +686,7 @@ export class Ctx {
       if (g) this.heal(e, 0, g, e.cardId);
     }
     if (killer) {
-      this.addMoralRaw(killer, 1);
+      if (!killer.keywords.includes('Minions')) this.addMoralRaw(killer, 1); // Minions : pas de Moral regagné en détruisant un régiment
       if (u.stunnedBy !== null && killer.types.includes('Elfe')) {
         this.addMoralRaw(killer, 2);
         const ranger = this.findUnit(u.stunnedBy);
@@ -715,7 +732,7 @@ export class Ctx {
     if (!minion) {
       for (const a of allies.filter(x => x.currentMor <= 0)) {
         if (this.over) return;
-        this.destroy(a, 'moral');
+        if (this.deferDepth) this.deferred.push(a); else this.destroy(a, 'moral');
       }
     }
   }

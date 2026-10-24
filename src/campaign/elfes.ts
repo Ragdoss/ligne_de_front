@@ -7,12 +7,13 @@ const LY = 'Éclaireuse Lyra';
 
 const START_POOL = cards('eclaireur_elfe*6', 'archer_bois*3', 'elem_terre*3', 'bourgeonnement*3', 'brise_matin*2', 'repositionnement*2', 'dryades_guerisseuses');
 
-const DEMONS_SOURCE = cards('cultiste*6', 'chien_infernal*4', 'esclave_guerrier*2', 'acolyte_damne*2', 'effroi_demoniaque*2', 'pacte_sang*2', 'diablotins*3');
-const DEMONS_CAPTIFS = cards('esclave_guerrier*5', 'cultiste*6', 'diablotins*3', 'chien_infernal*3', 'fanatiques*2', 'acolyte_damne*2', 'effroi_demoniaque*2',
+// 24/10/2026 : 4 cartes de plus dans chaque deck démon (trop de victoires du joueur par pioche vide adverse).
+const DEMONS_SOURCE = cards('cultiste*7', 'chien_infernal*5', 'esclave_guerrier*3', 'acolyte_damne*2', 'effroi_demoniaque*2', 'pacte_sang*2', 'diablotins*4');
+const DEMONS_CAPTIFS = cards('esclave_guerrier*6', 'cultiste*7', 'diablotins*4', 'chien_infernal*4', 'fanatiques*2', 'acolyte_damne*2', 'effroi_demoniaque*2',
   'pacte_survie', 'demon_akantha', 'banquet_infernal');
-const DEMONS_NUIT = cards('chien_infernal*4', 'demon_akantha*2', 'cultiste*4', 'fanatiques*2', 'esclave_guerrier*2', 'effroi_demoniaque*3',
+const DEMONS_NUIT = cards('chien_infernal*5', 'demon_akantha*2', 'cultiste*6', 'fanatiques*2', 'esclave_guerrier*3', 'effroi_demoniaque*3',
   'rancon_ames', 'dette_infernale', 'acolyte_damne*2', 'suppot_infernal', 'veilleur_os', 'abime_grandissant');
-const DEMONS_PORTAIL = cards('cultiste*3', 'chien_infernal*3', 'demon_akantha*2', 'fanatiques*2', 'ceremonie_declin', 'gargouille_cendres*2', 'diablotins*2',
+const DEMONS_PORTAIL = cards('cultiste*5', 'chien_infernal*4', 'demon_akantha*2', 'fanatiques*2', 'ceremonie_declin', 'gargouille_cendres*2', 'diablotins*3',
   'effroi_demoniaque*2', 'banquet_infernal', 'acolyte_damne*2', 'veilleur_os', 'maitre_chenil_infernal');
 
 /** Le Portail crache un Chien Infernal à chaque tour des Démons, sur une case avant qui tourne. */

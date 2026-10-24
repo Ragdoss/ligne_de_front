@@ -11,6 +11,7 @@ export function applyScenarioStart(ctx: Ctx, sc: ScenarioSetup): void {
     const lvl = sc.startLevel?.[p];
     if (lvl) { pl.level = Math.max(pl.level, lvl); pl.resource = pl.level; }
     pl.resource += sc.startResource?.[p] ?? 0;
+    for (let i = 0; i < (sc.startDraw?.[p] ?? 0) && !ctx.over; i++) ctx.draw(p, 'campagne');
     for (const zone of ['avant', 'arriere'] as const) {
       for (const [idx, cardId] of Object.entries(sc.start?.[p]?.[zone] ?? {})) {
         const u = ctx.makeUnit(cardId, p, cardId === 'palissade_regiment');

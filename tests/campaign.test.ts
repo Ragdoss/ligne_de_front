@@ -114,6 +114,12 @@ describe('Scénarios', () => {
 });
 
 describe('Modes de difficulté', () => {
+  it('Histoire : une carte de plus en main au départ', async () => {
+    const { easeFor } = await import('../src/campaign/campaign');
+    const c = newCampaign('empire');
+    const hand = (m: 'histoire' | 'guerrier') => createGame(scenarioGameSetup(SCENARIOS.s1!, c.pool, 'x', 0, easeFor('s1', m))).players.A.hand.length;
+    expect(hand('histoire')).toBe(hand('guerrier') + 1);
+  });
   it('Histoire est plus clément que Guerrier, lui-même plus que Héros ; Guerrier par défaut', async () => {
     const { easeFor, difficultyOf, sanitize } = await import('../src/campaign/campaign');
     const c = newCampaign('empire');

@@ -83,7 +83,9 @@ export function applyAction(state: GameState, action: Action): ActionResult {
   switch (action.type) {
     case 'choose': err = resolveChoice(ctx, action.option); break;
     case 'endTurn': endTurn(ctx); break;
-    case 'play': err = playCard(ctx, s.active, action.handUid, action.target, action.target2); break;
+    // Une carte jouée résout tous ses effets avant que les régiments tombés à 0 Moral ne soient détruits
+    // (ex. Gargouille de Cendres : elle regagne son Moral du sacrifice avant la perte de Moral due à ce sacrifice).
+    case 'play': err = ctx.deferDeaths(() => playCard(ctx, s.active, action.handUid, action.target, action.target2)); break;
   }
   if (err) return { ok: false, error: err };
   activateChoices(ctx);

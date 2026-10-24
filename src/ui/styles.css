@@ -651,3 +651,11 @@ button.danger { background: var(--danger); border: 1px solid var(--danger); colo
 .camp-hub .hub-bar { grid-row: 3; z-index: 1; align-self: end; background: rgba(200,208,218,.88); backdrop-filter: blur(4px); }
 .camp-hub .hub-help { bottom: 90px; z-index: 1; }
 @media (max-width: 560px) { .camp-hub .hub-help { position: absolute; bottom: 150px; left: 16px; right: 16px; max-width: none; } }
+
+/* Paquets : dos de carte, emotes et images de profil au format des cartes (9:16). */
+.pack-slot .pack-back, .pack-slot .cosmo { aspect-ratio: 941 / 1672; min-height: 0; width: 100%; box-sizing: border-box; }
+.pack-slot .cosmo { border-radius: 5.2% / 2.9%; border: 2px solid var(--brass); border-top-width: 6px; }
+.draft-stats { display: grid; gap: 4px; margin: 6px 0; }
+.draft-stats > div { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.draft-stats b:first-child { min-width: 64px; }
+.draft-stats .fchip, .draft-stats .pill { flex: none; width: auto; min-width: 0; padding: 2px 8px; }
