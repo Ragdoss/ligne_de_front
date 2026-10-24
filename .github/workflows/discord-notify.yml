@@ -5,9 +5,15 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
-      - name: Discord notification
+        - name: Récupérer les commits et envoyer sur Discord
         env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        uses: Ilshidur/action-discord@master
-        with:
-          args: "Nouveau push par {{ event.pusher.name }} sur {{ event.ref }}"
+          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COMPARE_URL: ${{ github.event.compare_url || 'https://api.github.com/repos/TON_USER/TON_REPO/compare/main...HEAD' }}
+        run: |
+          curl -s \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "$COMPARE_URL" \
+            | jq '{content: ("**📤 Push sur la branche '"${{ github.ref_name }}"'**\n\n" + ([.commits[] | "- `\(.sha[0:7])` **\(.commit.message | split("\n")[0])** — \(.commit.author.name)"] | join("\n")))}' \
+            | curl -X POST -H "Content-Type: application/json" -d @- "$WEBHOOK"
