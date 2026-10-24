@@ -54,64 +54,64 @@
     "legion_morvak",
     "bourreau_abime"
    ],
-   "w1": 48,
+   "w1": 51,
    "g1": 60,
-   "w2": 97,
+   "w2": 96,
    "g2": 145
   },
   {
-   "id": "demons-184",
+   "id": "demons-45",
    "faction": "demons",
    "deck": [
-    "diablotins",
-    "sorciere_pacte",
-    "gardien_chaines",
-    "ravitailleur",
-    "ravitailleur",
-    "appat_invocateur",
-    "pacte_mineur",
     "garde_asura",
-    "appat_invocateur",
-    "acolyte_damne",
-    "marchand_ames",
-    "mercenaires",
-    "gargouille_sentinelle",
-    "milice_village",
-    "dette_infernale",
-    "palissade_tactique",
-    "ceremonie_declin",
-    "effroi_demoniaque",
-    "esclave_guerrier",
-    "cultiste",
-    "gargouille_sentinelle",
-    "vivres_campagne",
-    "mercenaires",
-    "veterans_louer",
-    "mercenaires",
+    "augure_abime",
     "ravitailleur",
-    "cor_ralliement",
-    "acolyte_damne",
+    "demon_akantha",
+    "ingenieurs_siege",
+    "pacte_survie",
+    "fanatiques",
     "inquisiteur_dechu",
-    "rancon_ames",
+    "marchand_ames",
+    "banniere_dechiree",
+    "murmure_abime",
+    "cultiste",
+    "chuchoteur_abysses",
+    "gardien_chaines",
+    "sang_seve",
+    "banquet_infernal",
+    "chuchoteur_abysses",
+    "ravitailleur",
+    "execution_exemplaire",
+    "fanatiques",
+    "mercenaires",
+    "murmure_abime",
+    "chaines_abime",
+    "dette_infernale",
+    "oeuf_dragon",
+    "cultiste",
+    "suppot_infernal",
+    "ravitailleur",
+    "gargouille_sentinelle",
+    "marchand_ames",
     "maitre_chenil_infernal",
-    "choc_et_effroi",
-    "bourreau_abime",
-    "maitre_chenil_infernal",
+    "seigneur_tourments",
+    "abime_grandissant",
+    "seigneur_tourments",
+    "archidemon_origines",
     "rituel_sang_noir",
+    "legion_morvak",
+    "bourreau_abime",
     "bourreau_abime",
     "seigneur_tourments",
-    "veilleur_os",
     "morvak",
-    "legion_morvak",
-    "archidemon_origines",
-    "archidemon_origines",
-    "abime_grandissant",
-    "dragon_infernal",
-    "veilleur_os"
+    "morvak",
+    "seigneur_abysses",
+    "tuteur_demoniaque",
+    "bourreau_abime"
    ],
    "w1": 42,
-   "g1": 59,
-   "w2": 88,
+   "g1": 60,
+   "w2": 91,
    "g2": 145
   },
   {
@@ -166,227 +166,62 @@
    ],
    "w1": 39,
    "g1": 61,
-   "w2": 88,
-   "g2": 145
-  },
-  {
-   "id": "demons-113",
-   "faction": "demons",
-   "deck": [
-    "chaines_abime",
-    "ravitailleur",
-    "execution_exemplaire",
-    "marchand_ames",
-    "augure_abime",
-    "chien_infernal",
-    "chuchoteur_abysses",
-    "oeuf_dragon",
-    "murmure_abime",
-    "appat_invocateur",
-    "gargouille_sentinelle",
-    "sorciere_pacte",
-    "oeuf_dragon",
-    "murmure_abime",
-    "gardien_chaines",
-    "gargouille_cendres",
-    "banquet_infernal",
-    "quartier_maitre",
-    "ravitailleur",
-    "pacte_sang",
-    "execution_exemplaire",
-    "ravitailleur",
-    "inquisiteur_dechu",
-    "dryade_corrompue",
-    "sang_seve",
-    "cultiste",
-    "milice_village",
-    "chuchoteur_abysses",
-    "milice_village",
-    "sang_seve",
-    "bourreau_abime",
-    "archidemon_origines",
-    "legion_morvak",
-    "seigneur_abysses",
-    "morvak",
-    "archidemon_origines",
-    "bourreau_abime",
-    "veilleur_os",
-    "legion_morvak",
-    "dragon_infernal",
-    "seigneur_abysses",
-    "maitre_chenil_infernal",
-    "abime_grandissant",
-    "abime_grandissant",
-    "morvak"
-   ],
-   "w1": 43,
-   "g1": 59,
    "w2": 87,
    "g2": 145
   },
   {
-   "id": "demons-167",
+   "id": "demons-20",
    "faction": "demons",
    "deck": [
-    "quartier_maitre",
     "augure_abime",
-    "chien_infernal",
-    "effroi_demoniaque",
-    "rancon_ames",
-    "palissade_tactique",
-    "gardien_chaines",
-    "dryade_corrompue",
-    "diablotins",
-    "veterans_louer",
-    "chuchoteur_abysses",
-    "gargouille_sentinelle",
-    "gargouille_sentinelle",
     "sang_seve",
-    "murmure_abime",
+    "chuchoteur_abysses",
     "cultiste",
-    "banniere_dechiree",
+    "diablotins",
+    "cultiste",
+    "milice_village",
+    "acolyte_damne",
+    "vivres_campagne",
+    "demon_akantha",
     "pacte_sang",
-    "basilic_demoniaque",
+    "voile_ombre",
+    "palissade_tactique",
+    "veterans_louer",
+    "pretre_sacrificiel",
+    "garde_asura",
+    "gargouille_cendres",
+    "ingenieurs_siege",
+    "effroi_demoniaque",
+    "cor_ralliement",
+    "inquisiteur_dechu",
+    "palissade_tactique",
+    "palissade_tactique",
+    "gargouille_sentinelle",
+    "acolyte_damne",
+    "gargouille_cendres",
+    "chaines_abime",
     "ravitailleur",
     "esclave_guerrier",
-    "oeuf_dragon",
-    "vivres_campagne",
-    "fanatiques",
-    "marchand_ames",
-    "pretre_sacrificiel",
-    "cultiste",
-    "chien_infernal",
-    "pacte_mineur",
-    "pretre_sacrificiel",
-    "bourreau_abime",
-    "tuteur_demoniaque",
-    "seigneur_tourments",
+    "milice_village",
     "veilleur_os",
-    "seigneur_tourments",
-    "rituel_sang_noir",
-    "maitre_chenil_infernal",
-    "seigneur_abysses",
-    "veilleur_os",
-    "tuteur_demoniaque",
-    "archidemon_origines",
-    "archidemon_origines",
-    "maitre_chenil_infernal",
-    "archidemon_origines",
-    "seigneur_abysses"
-   ],
-   "w1": 39,
-   "g1": 59,
-   "w2": 86,
-   "g2": 145
-  },
-  {
-   "id": "demons-45",
-   "faction": "demons",
-   "deck": [
-    "garde_asura",
-    "augure_abime",
-    "ravitailleur",
-    "demon_akantha",
-    "ingenieurs_siege",
-    "pacte_survie",
-    "fanatiques",
-    "inquisiteur_dechu",
-    "marchand_ames",
-    "banniere_dechiree",
-    "murmure_abime",
-    "cultiste",
-    "chuchoteur_abysses",
-    "gardien_chaines",
-    "sang_seve",
-    "banquet_infernal",
-    "chuchoteur_abysses",
-    "ravitailleur",
-    "execution_exemplaire",
-    "fanatiques",
-    "mercenaires",
-    "murmure_abime",
-    "chaines_abime",
-    "dette_infernale",
-    "oeuf_dragon",
-    "cultiste",
-    "suppot_infernal",
-    "ravitailleur",
-    "gargouille_sentinelle",
-    "marchand_ames",
-    "maitre_chenil_infernal",
-    "seigneur_tourments",
-    "abime_grandissant",
-    "seigneur_tourments",
-    "archidemon_origines",
-    "rituel_sang_noir",
-    "legion_morvak",
-    "bourreau_abime",
-    "bourreau_abime",
-    "seigneur_tourments",
-    "morvak",
-    "morvak",
-    "seigneur_abysses",
-    "tuteur_demoniaque",
-    "bourreau_abime"
-   ],
-   "w1": 43,
-   "g1": 60,
-   "w2": 84,
-   "g2": 145
-  },
-  {
-   "id": "demons-36",
-   "faction": "demons",
-   "deck": [
-    "gargouille_sentinelle",
-    "ravitailleur",
-    "cultiste",
-    "quartier_maitre",
-    "chuchoteur_abysses",
-    "voile_ombre",
-    "chien_infernal",
-    "chuchoteur_abysses",
-    "dryade_corrompue",
-    "gargouille_sentinelle",
-    "inquisiteur_dechu",
-    "grimoire_interdit",
-    "diablotins",
-    "a_couvert",
-    "palissade_tactique",
-    "murmure_abime",
-    "ingenieurs_siege",
-    "voile_ombre",
-    "gardien_chaines",
-    "effroi_demoniaque",
-    "garde_asura",
-    "rancon_ames",
-    "vivres_campagne",
-    "a_couvert",
-    "palissade_tactique",
-    "pacte_survie",
-    "diablotins",
-    "capitaine_mercenaire",
-    "ravitailleur",
-    "murmure_abime",
-    "abime_grandissant",
-    "seigneur_tourments",
-    "archidemon_origines",
-    "abime_grandissant",
-    "bourreau_abime",
-    "dragon_infernal",
-    "seigneur_tourments",
-    "seigneur_abysses",
-    "dragon_infernal",
-    "abime_grandissant",
-    "seigneur_tourments",
     "choc_et_effroi",
     "seigneur_abysses",
+    "maitre_chenil_infernal",
+    "tuteur_demoniaque",
     "seigneur_abysses",
-    "bourreau_abime"
+    "seigneur_abysses",
+    "morvak",
+    "maitre_chenil_infernal",
+    "abime_grandissant",
+    "choc_et_effroi",
+    "legion_morvak",
+    "tuteur_demoniaque",
+    "bourreau_abime",
+    "legion_morvak"
    ],
-   "w1": 41,
-   "g1": 61,
-   "w2": 82,
+   "w1": 38,
+   "g1": 60,
+   "w2": 86,
    "g2": 145
   },
   {
@@ -439,118 +274,283 @@
     "maitre_chenil_infernal",
     "seigneur_tourments"
    ],
-   "w1": 39,
+   "w1": 42,
    "g1": 59,
-   "w2": 82,
+   "w2": 84,
    "g2": 145
   },
   {
-   "id": "demons-89",
+   "id": "demons-113",
    "faction": "demons",
    "deck": [
-    "milice_village",
-    "veterans_louer",
-    "gargouille_cendres",
-    "quartier_maitre",
-    "grimoire_interdit",
-    "dryade_corrompue",
-    "banquet_infernal",
-    "milice_village",
-    "mercenaires",
-    "sang_seve",
+    "chaines_abime",
+    "ravitailleur",
+    "execution_exemplaire",
+    "marchand_ames",
+    "augure_abime",
+    "chien_infernal",
+    "chuchoteur_abysses",
+    "oeuf_dragon",
+    "murmure_abime",
+    "appat_invocateur",
     "gargouille_sentinelle",
-    "cor_ralliement",
-    "palissade_tactique",
-    "cultiste",
-    "pacte_mineur",
-    "basilic_demoniaque",
-    "rancon_ames",
-    "pacte_sang",
-    "effroi_demoniaque",
-    "a_couvert",
+    "sorciere_pacte",
+    "oeuf_dragon",
+    "murmure_abime",
+    "gardien_chaines",
+    "gargouille_cendres",
+    "banquet_infernal",
     "quartier_maitre",
-    "chien_infernal",
+    "ravitailleur",
     "pacte_sang",
-    "acolyte_damne",
-    "chien_infernal",
-    "fanatiques",
-    "pacte_sang",
-    "ceremonie_declin",
-    "veterans_louer",
-    "vivres_campagne",
+    "execution_exemplaire",
+    "ravitailleur",
+    "inquisiteur_dechu",
+    "dryade_corrompue",
+    "sang_seve",
+    "cultiste",
+    "milice_village",
+    "chuchoteur_abysses",
+    "milice_village",
+    "sang_seve",
     "bourreau_abime",
-    "tuteur_demoniaque",
+    "archidemon_origines",
+    "legion_morvak",
+    "seigneur_abysses",
+    "morvak",
+    "archidemon_origines",
     "bourreau_abime",
+    "veilleur_os",
     "legion_morvak",
-    "legion_morvak",
-    "maitre_chenil_infernal",
-    "choc_et_effroi",
-    "maitre_chenil_infernal",
-    "choc_et_effroi",
-    "rituel_sang_noir",
-    "rituel_sang_noir",
     "dragon_infernal",
     "seigneur_abysses",
+    "maitre_chenil_infernal",
+    "abime_grandissant",
+    "abime_grandissant",
+    "morvak"
+   ],
+   "w1": 40,
+   "g1": 59,
+   "w2": 84,
+   "g2": 145
+  },
+  {
+   "id": "demons-51",
+   "faction": "demons",
+   "deck": [
+    "esclave_guerrier",
+    "vivres_campagne",
+    "garde_asura",
+    "cultiste",
+    "grimoire_interdit",
+    "inquisiteur_dechu",
+    "quartier_maitre",
+    "grimoire_interdit",
+    "dette_infernale",
+    "chien_infernal",
+    "gargouille_cendres",
+    "chien_infernal",
+    "pacte_mineur",
+    "augure_abime",
+    "gargouille_sentinelle",
+    "chien_infernal",
+    "mercenaires",
+    "cultiste",
+    "gargouille_sentinelle",
+    "rancon_ames",
+    "pacte_mineur",
+    "gargouille_sentinelle",
+    "capitaine_mercenaire",
+    "sorciere_pacte",
+    "ingenieurs_siege",
+    "fanatiques",
+    "cor_ralliement",
+    "rempart_chair",
+    "esclave_guerrier",
+    "diablotins",
+    "legion_morvak",
+    "seigneur_tourments",
+    "maitre_chenil_infernal",
+    "morvak",
+    "veilleur_os",
+    "choc_et_effroi",
+    "dragon_infernal",
+    "legion_morvak",
+    "choc_et_effroi",
+    "rituel_sang_noir",
+    "choc_et_effroi",
+    "maitre_chenil_infernal",
+    "veilleur_os",
+    "rituel_sang_noir",
+    "bourreau_abime"
+   ],
+   "w1": 46,
+   "g1": 60,
+   "w2": 83,
+   "g2": 145
+  },
+  {
+   "id": "demons-181",
+   "faction": "demons",
+   "deck": [
+    "oeuf_dragon",
+    "milice_village",
+    "banquet_infernal",
+    "pacte_mineur",
+    "ravitaillement",
+    "milice_village",
+    "cor_ralliement",
+    "pacte_survie",
+    "chien_infernal",
+    "pacte_sang",
+    "mercenaires",
+    "gargouille_sentinelle",
+    "gardien_chaines",
+    "veterans_louer",
+    "demon_akantha",
+    "dette_infernale",
+    "ravitailleur",
+    "milice_village",
+    "ravitailleur",
+    "garde_asura",
+    "pacte_sang",
+    "demon_akantha",
+    "capitaine_mercenaire",
+    "rempart_chair",
+    "gargouille_sentinelle",
+    "maitre_pactes",
+    "ceremonie_declin",
+    "chuchoteur_abysses",
+    "gargouille_sentinelle",
+    "veterans_louer",
+    "tuteur_demoniaque",
+    "abime_grandissant",
     "bourreau_abime",
-    "tuteur_demoniaque"
+    "bourreau_abime",
+    "bourreau_abime",
+    "legion_morvak",
+    "seigneur_abysses",
+    "rituel_sang_noir",
+    "rituel_sang_noir",
+    "maitre_chenil_infernal",
+    "tuteur_demoniaque",
+    "rituel_sang_noir",
+    "maitre_chenil_infernal",
+    "maitre_chenil_infernal",
+    "abime_grandissant"
+   ],
+   "w1": 38,
+   "g1": 59,
+   "w2": 83,
+   "g2": 145
+  },
+  {
+   "id": "demons-82",
+   "faction": "demons",
+   "deck": [
+    "dette_infernale",
+    "quartier_maitre",
+    "banquet_infernal",
+    "palissade_tactique",
+    "suppot_infernal",
+    "capitaine_mercenaire",
+    "suppot_infernal",
+    "chuchoteur_abysses",
+    "capitaine_mercenaire",
+    "quartier_maitre",
+    "ravitailleur",
+    "cultiste",
+    "ravitailleur",
+    "sorciere_pacte",
+    "garde_asura",
+    "rempart_chair",
+    "fanatiques",
+    "gargouille_sentinelle",
+    "ingenieurs_siege",
+    "cor_ralliement",
+    "acolyte_damne",
+    "ravitaillement",
+    "gargouille_cendres",
+    "demon_akantha",
+    "gargouille_cendres",
+    "banquet_infernal",
+    "ravitailleur",
+    "rancon_ames",
+    "acolyte_damne",
+    "gargouille_sentinelle",
+    "choc_et_effroi",
+    "seigneur_tourments",
+    "rituel_sang_noir",
+    "bourreau_abime",
+    "legion_morvak",
+    "seigneur_tourments",
+    "rituel_sang_noir",
+    "veilleur_os",
+    "veilleur_os",
+    "archidemon_origines",
+    "choc_et_effroi",
+    "archidemon_origines",
+    "veilleur_os",
+    "legion_morvak",
+    "seigneur_abysses"
    ],
    "w1": 41,
-   "g1": 61,
+   "g1": 60,
    "w2": 81,
    "g2": 145
   },
   {
-   "id": "demons-98",
+   "id": "demons-127",
    "faction": "demons",
    "deck": [
-    "gardien_chaines",
-    "esclave_guerrier",
-    "voile_ombre",
-    "sang_seve",
-    "pretre_sacrificiel",
-    "cor_ralliement",
-    "cultiste",
-    "execution_exemplaire",
     "veterans_louer",
-    "garde_asura",
-    "milice_village",
-    "suppot_infernal",
-    "appat_invocateur",
-    "gardien_chaines",
-    "demon_akantha",
-    "gargouille_sentinelle",
-    "chien_infernal",
-    "milice_village",
-    "cultiste",
-    "dette_infernale",
-    "a_couvert",
-    "capitaine_mercenaire",
     "sorciere_pacte",
-    "diablotins",
-    "dette_infernale",
-    "pacte_sang",
-    "dryade_corrompue",
-    "vivres_campagne",
+    "appat_invocateur",
+    "cor_ralliement",
+    "veterans_louer",
+    "esclave_guerrier",
+    "chien_infernal",
+    "cor_ralliement",
+    "effroi_demoniaque",
     "gargouille_cendres",
+    "rempart_chair",
+    "garde_asura",
+    "inquisiteur_dechu",
+    "sang_seve",
+    "banniere_dechiree",
+    "chien_infernal",
+    "cultiste",
+    "palissade_tactique",
+    "basilic_demoniaque",
+    "milice_village",
+    "sang_seve",
+    "mercenaires",
+    "sorciere_pacte",
+    "gardien_chaines",
+    "cultiste",
+    "demon_akantha",
+    "ingenieurs_siege",
+    "ravitaillement",
     "capitaine_mercenaire",
-    "choc_et_effroi",
-    "seigneur_tourments",
-    "abime_grandissant",
-    "choc_et_effroi",
-    "choc_et_effroi",
+    "a_couvert",
+    "maitre_chenil_infernal",
+    "morvak",
+    "archidemon_origines",
+    "tuteur_demoniaque",
+    "morvak",
+    "seigneur_abysses",
+    "seigneur_abysses",
+    "morvak",
+    "legion_morvak",
     "tuteur_demoniaque",
     "legion_morvak",
-    "bourreau_abime",
     "rituel_sang_noir",
-    "bourreau_abime",
-    "seigneur_abysses",
-    "dragon_infernal",
     "seigneur_tourments",
-    "legion_morvak",
-    "abime_grandissant"
+    "tuteur_demoniaque",
+    "rituel_sang_noir"
    ],
-   "w1": 44,
-   "g1": 61,
+   "w1": 45,
+   "g1": 62,
    "w2": 80,
    "g2": 145
   }
@@ -558,67 +558,67 @@
  "all": [
   {
    "id": "demons-1",
-   "w1": 23,
-   "g1": 60
-  },
-  {
-   "id": "demons-2",
-   "w1": 34,
-   "g1": 60
-  },
-  {
-   "id": "demons-3",
-   "w1": 30,
-   "g1": 60
-  },
-  {
-   "id": "demons-4",
-   "w1": 25,
-   "g1": 60
-  },
-  {
-   "id": "demons-5",
-   "w1": 46,
-   "g1": 60
-  },
-  {
-   "id": "demons-6",
-   "w1": 34,
-   "g1": 60
-  },
-  {
-   "id": "demons-7",
    "w1": 27,
    "g1": 60
   },
   {
+   "id": "demons-2",
+   "w1": 36,
+   "g1": 60
+  },
+  {
+   "id": "demons-3",
+   "w1": 21,
+   "g1": 60
+  },
+  {
+   "id": "demons-4",
+   "w1": 19,
+   "g1": 60
+  },
+  {
+   "id": "demons-5",
+   "w1": 37,
+   "g1": 60
+  },
+  {
+   "id": "demons-6",
+   "w1": 35,
+   "g1": 60
+  },
+  {
+   "id": "demons-7",
+   "w1": 30,
+   "g1": 60
+  },
+  {
    "id": "demons-8",
-   "w1": 23,
+   "w1": 14,
    "g1": 60
   },
   {
    "id": "demons-9",
-   "w1": 29,
+   "w1": 38,
    "g1": 60
   },
   {
    "id": "demons-10",
-   "w1": 28,
+   "w1": 29,
    "g1": 64
   },
   {
    "id": "demons-11",
-   "w1": 22,
+   "w1": 26,
    "g1": 60
   },
   {
    "id": "demons-12",
-   "w1": 23,
+   "w1": 25,
    "g1": 60
   },
   {
    "id": "demons-13",
-   "w1": 18,
+   "w1": 22,
    "g1": 60
   },
   {
@@ -628,22 +628,22 @@
   },
   {
    "id": "demons-15",
-   "w1": 31,
+   "w1": 36,
    "g1": 60
   },
   {
    "id": "demons-16",
-   "w1": 39,
+   "w1": 32,
    "g1": 61
   },
   {
    "id": "demons-17",
-   "w1": 25,
+   "w1": 33,
    "g1": 60
   },
   {
    "id": "demons-18",
-   "w1": 35,
+   "w1": 29,
    "g1": 60
   },
   {
@@ -653,32 +653,32 @@
   },
   {
    "id": "demons-20",
-   "w1": 45,
+   "w1": 38,
    "g1": 60
   },
   {
    "id": "demons-21",
-   "w1": 20,
+   "w1": 22,
    "g1": 60
   },
   {
    "id": "demons-22",
-   "w1": 31,
+   "w1": 29,
    "g1": 62
   },
   {
    "id": "demons-23",
-   "w1": 37,
+   "w1": 27,
    "g1": 60
   },
   {
    "id": "demons-24",
-   "w1": 29,
+   "w1": 34,
    "g1": 61
   },
   {
    "id": "demons-25",
-   "w1": 37,
+   "w1": 20,
    "g1": 61
   },
   {
@@ -688,242 +688,242 @@
   },
   {
    "id": "demons-27",
-   "w1": 34,
+   "w1": 27,
    "g1": 60
   },
   {
    "id": "demons-28",
-   "w1": 30,
+   "w1": 39,
    "g1": 63
   },
   {
    "id": "demons-29",
-   "w1": 21,
+   "w1": 20,
    "g1": 60
   },
   {
    "id": "demons-30",
-   "w1": 23,
+   "w1": 24,
    "g1": 61
   },
   {
    "id": "demons-31",
-   "w1": 35,
+   "w1": 34,
    "g1": 60
   },
   {
    "id": "demons-32",
-   "w1": 35,
+   "w1": 27,
    "g1": 60
   },
   {
    "id": "demons-33",
-   "w1": 25,
-   "g1": 60
-  },
-  {
-   "id": "demons-34",
-   "w1": 38,
-   "g1": 60
-  },
-  {
-   "id": "demons-35",
-   "w1": 19,
-   "g1": 60
-  },
-  {
-   "id": "demons-36",
-   "w1": 41,
-   "g1": 61
-  },
-  {
-   "id": "demons-37",
-   "w1": 27,
-   "g1": 60
-  },
-  {
-   "id": "demons-38",
-   "w1": 21,
-   "g1": 60
-  },
-  {
-   "id": "demons-39",
-   "w1": 34,
-   "g1": 61
-  },
-  {
-   "id": "demons-40",
-   "w1": 33,
-   "g1": 60
-  },
-  {
-   "id": "demons-41",
-   "w1": 33,
-   "g1": 61
-  },
-  {
-   "id": "demons-42",
-   "w1": 25,
-   "g1": 60
-  },
-  {
-   "id": "demons-43",
-   "w1": 20,
-   "g1": 61
-  },
-  {
-   "id": "demons-44",
-   "w1": 35,
-   "g1": 61
-  },
-  {
-   "id": "demons-45",
-   "w1": 43,
-   "g1": 60
-  },
-  {
-   "id": "demons-46",
-   "w1": 41,
-   "g1": 60
-  },
-  {
-   "id": "demons-47",
-   "w1": 38,
-   "g1": 60
-  },
-  {
-   "id": "demons-48",
-   "w1": 25,
-   "g1": 60
-  },
-  {
-   "id": "demons-49",
    "w1": 31,
    "g1": 60
   },
   {
-   "id": "demons-50",
-   "w1": 24,
-   "g1": 60
-  },
-  {
-   "id": "demons-51",
-   "w1": 33,
-   "g1": 60
-  },
-  {
-   "id": "demons-52",
-   "w1": 21,
-   "g1": 60
-  },
-  {
-   "id": "demons-53",
-   "w1": 25,
-   "g1": 60
-  },
-  {
-   "id": "demons-54",
-   "w1": 23,
-   "g1": 60
-  },
-  {
-   "id": "demons-55",
-   "w1": 34,
-   "g1": 60
-  },
-  {
-   "id": "demons-56",
-   "w1": 27,
-   "g1": 61
-  },
-  {
-   "id": "demons-57",
-   "w1": 33,
-   "g1": 60
-  },
-  {
-   "id": "demons-58",
-   "w1": 33,
-   "g1": 61
-  },
-  {
-   "id": "demons-59",
-   "w1": 34,
-   "g1": 60
-  },
-  {
-   "id": "demons-60",
-   "w1": 45,
-   "g1": 60
-  },
-  {
-   "id": "demons-61",
-   "w1": 27,
-   "g1": 60
-  },
-  {
-   "id": "demons-62",
-   "w1": 26,
-   "g1": 60
-  },
-  {
-   "id": "demons-63",
-   "w1": 29,
-   "g1": 60
-  },
-  {
-   "id": "demons-64",
-   "w1": 41,
-   "g1": 60
-  },
-  {
-   "id": "demons-65",
-   "w1": 25,
-   "g1": 64
-  },
-  {
-   "id": "demons-66",
-   "w1": 34,
-   "g1": 61
-  },
-  {
-   "id": "demons-67",
-   "w1": 38,
-   "g1": 60
-  },
-  {
-   "id": "demons-68",
-   "w1": 30,
-   "g1": 60
-  },
-  {
-   "id": "demons-69",
-   "w1": 32,
-   "g1": 60
-  },
-  {
-   "id": "demons-70",
-   "w1": 25,
-   "g1": 60
-  },
-  {
-   "id": "demons-71",
-   "w1": 30,
-   "g1": 60
-  },
-  {
-   "id": "demons-72",
+   "id": "demons-34",
    "w1": 36,
    "g1": 60
   },
   {
-   "id": "demons-73",
+   "id": "demons-35",
+   "w1": 17,
+   "g1": 60
+  },
+  {
+   "id": "demons-36",
+   "w1": 44,
+   "g1": 61
+  },
+  {
+   "id": "demons-37",
+   "w1": 26,
+   "g1": 60
+  },
+  {
+   "id": "demons-38",
+   "w1": 26,
+   "g1": 60
+  },
+  {
+   "id": "demons-39",
+   "w1": 38,
+   "g1": 61
+  },
+  {
+   "id": "demons-40",
    "w1": 34,
+   "g1": 60
+  },
+  {
+   "id": "demons-41",
+   "w1": 29,
+   "g1": 61
+  },
+  {
+   "id": "demons-42",
+   "w1": 26,
+   "g1": 60
+  },
+  {
+   "id": "demons-43",
+   "w1": 16,
+   "g1": 61
+  },
+  {
+   "id": "demons-44",
+   "w1": 30,
+   "g1": 61
+  },
+  {
+   "id": "demons-45",
+   "w1": 42,
+   "g1": 60
+  },
+  {
+   "id": "demons-46",
+   "w1": 29,
+   "g1": 60
+  },
+  {
+   "id": "demons-47",
+   "w1": 35,
+   "g1": 60
+  },
+  {
+   "id": "demons-48",
+   "w1": 23,
+   "g1": 60
+  },
+  {
+   "id": "demons-49",
+   "w1": 30,
+   "g1": 60
+  },
+  {
+   "id": "demons-50",
+   "w1": 16,
+   "g1": 60
+  },
+  {
+   "id": "demons-51",
+   "w1": 46,
+   "g1": 60
+  },
+  {
+   "id": "demons-52",
+   "w1": 18,
+   "g1": 60
+  },
+  {
+   "id": "demons-53",
+   "w1": 26,
+   "g1": 60
+  },
+  {
+   "id": "demons-54",
+   "w1": 26,
+   "g1": 60
+  },
+  {
+   "id": "demons-55",
+   "w1": 33,
+   "g1": 60
+  },
+  {
+   "id": "demons-56",
+   "w1": 36,
+   "g1": 61
+  },
+  {
+   "id": "demons-57",
+   "w1": 27,
+   "g1": 60
+  },
+  {
+   "id": "demons-58",
+   "w1": 41,
+   "g1": 61
+  },
+  {
+   "id": "demons-59",
+   "w1": 37,
+   "g1": 60
+  },
+  {
+   "id": "demons-60",
+   "w1": 37,
+   "g1": 60
+  },
+  {
+   "id": "demons-61",
+   "w1": 24,
+   "g1": 60
+  },
+  {
+   "id": "demons-62",
+   "w1": 27,
+   "g1": 60
+  },
+  {
+   "id": "demons-63",
+   "w1": 31,
+   "g1": 60
+  },
+  {
+   "id": "demons-64",
+   "w1": 25,
+   "g1": 60
+  },
+  {
+   "id": "demons-65",
+   "w1": 18,
+   "g1": 64
+  },
+  {
+   "id": "demons-66",
+   "w1": 35,
+   "g1": 61
+  },
+  {
+   "id": "demons-67",
+   "w1": 37,
+   "g1": 60
+  },
+  {
+   "id": "demons-68",
+   "w1": 34,
+   "g1": 60
+  },
+  {
+   "id": "demons-69",
+   "w1": 43,
+   "g1": 60
+  },
+  {
+   "id": "demons-70",
+   "w1": 22,
+   "g1": 60
+  },
+  {
+   "id": "demons-71",
+   "w1": 35,
+   "g1": 60
+  },
+  {
+   "id": "demons-72",
+   "w1": 41,
+   "g1": 60
+  },
+  {
+   "id": "demons-73",
+   "w1": 27,
    "g1": 61
   },
   {
    "id": "demons-74",
-   "w1": 35,
+   "w1": 39,
    "g1": 60
   },
   {
@@ -933,7 +933,7 @@
   },
   {
    "id": "demons-76",
-   "w1": 31,
+   "w1": 23,
    "g1": 60
   },
   {
@@ -943,17 +943,17 @@
   },
   {
    "id": "demons-78",
-   "w1": 23,
+   "w1": 25,
    "g1": 60
   },
   {
    "id": "demons-79",
-   "w1": 18,
+   "w1": 29,
    "g1": 60
   },
   {
    "id": "demons-80",
-   "w1": 15,
+   "w1": 19,
    "g1": 60
   },
   {
@@ -963,232 +963,232 @@
   },
   {
    "id": "demons-82",
-   "w1": 36,
+   "w1": 41,
    "g1": 60
   },
   {
    "id": "demons-83",
-   "w1": 29,
+   "w1": 32,
    "g1": 60
   },
   {
    "id": "demons-84",
-   "w1": 48,
+   "w1": 34,
    "g1": 60
   },
   {
    "id": "demons-85",
-   "w1": 27,
+   "w1": 19,
    "g1": 60
   },
   {
    "id": "demons-86",
-   "w1": 33,
+   "w1": 36,
    "g1": 62
   },
   {
    "id": "demons-87",
-   "w1": 31,
+   "w1": 37,
    "g1": 60
   },
   {
    "id": "demons-88",
-   "w1": 28,
+   "w1": 33,
    "g1": 60
   },
   {
    "id": "demons-89",
-   "w1": 41,
+   "w1": 36,
    "g1": 61
   },
   {
    "id": "demons-90",
-   "w1": 20,
+   "w1": 24,
    "g1": 60
   },
   {
    "id": "demons-91",
-   "w1": 21,
-   "g1": 60
-  },
-  {
-   "id": "demons-92",
-   "w1": 23,
-   "g1": 60
-  },
-  {
-   "id": "demons-93",
-   "w1": 31,
-   "g1": 60
-  },
-  {
-   "id": "demons-94",
-   "w1": 33,
-   "g1": 60
-  },
-  {
-   "id": "demons-95",
-   "w1": 40,
-   "g1": 60
-  },
-  {
-   "id": "demons-96",
-   "w1": 37,
-   "g1": 60
-  },
-  {
-   "id": "demons-97",
-   "w1": 48,
-   "g1": 60
-  },
-  {
-   "id": "demons-98",
-   "w1": 44,
-   "g1": 61
-  },
-  {
-   "id": "demons-99",
-   "w1": 30,
-   "g1": 60
-  },
-  {
-   "id": "demons-100",
-   "w1": 39,
-   "g1": 60
-  },
-  {
-   "id": "demons-101",
-   "w1": 31,
-   "g1": 60
-  },
-  {
-   "id": "demons-102",
-   "w1": 37,
-   "g1": 60
-  },
-  {
-   "id": "demons-103",
-   "w1": 37,
-   "g1": 60
-  },
-  {
-   "id": "demons-104",
-   "w1": 45,
-   "g1": 59
-  },
-  {
-   "id": "demons-105",
-   "w1": 32,
-   "g1": 61
-  },
-  {
-   "id": "demons-106",
-   "w1": 35,
-   "g1": 60
-  },
-  {
-   "id": "demons-107",
-   "w1": 25,
-   "g1": 60
-  },
-  {
-   "id": "demons-108",
-   "w1": 30,
-   "g1": 60
-  },
-  {
-   "id": "demons-109",
-   "w1": 29,
-   "g1": 59
-  },
-  {
-   "id": "demons-110",
-   "w1": 33,
-   "g1": 59
-  },
-  {
-   "id": "demons-111",
-   "w1": 38,
-   "g1": 59
-  },
-  {
-   "id": "demons-112",
-   "w1": 34,
-   "g1": 61
-  },
-  {
-   "id": "demons-113",
-   "w1": 43,
-   "g1": 59
-  },
-  {
-   "id": "demons-114",
-   "w1": 27,
-   "g1": 61
-  },
-  {
-   "id": "demons-115",
-   "w1": 31,
-   "g1": 59
-  },
-  {
-   "id": "demons-116",
-   "w1": 28,
-   "g1": 59
-  },
-  {
-   "id": "demons-117",
    "w1": 18,
    "g1": 60
   },
   {
-   "id": "demons-118",
-   "w1": 28,
+   "id": "demons-92",
+   "w1": 18,
+   "g1": 60
+  },
+  {
+   "id": "demons-93",
+   "w1": 21,
+   "g1": 60
+  },
+  {
+   "id": "demons-94",
+   "w1": 31,
+   "g1": 60
+  },
+  {
+   "id": "demons-95",
+   "w1": 41,
+   "g1": 60
+  },
+  {
+   "id": "demons-96",
+   "w1": 27,
+   "g1": 60
+  },
+  {
+   "id": "demons-97",
+   "w1": 51,
+   "g1": 60
+  },
+  {
+   "id": "demons-98",
+   "w1": 31,
    "g1": 61
   },
   {
-   "id": "demons-119",
+   "id": "demons-99",
+   "w1": 18,
+   "g1": 60
+  },
+  {
+   "id": "demons-100",
+   "w1": 36,
+   "g1": 60
+  },
+  {
+   "id": "demons-101",
+   "w1": 24,
+   "g1": 60
+  },
+  {
+   "id": "demons-102",
+   "w1": 39,
+   "g1": 60
+  },
+  {
+   "id": "demons-103",
    "w1": 32,
    "g1": 60
   },
   {
-   "id": "demons-120",
+   "id": "demons-104",
+   "w1": 40,
+   "g1": 59
+  },
+  {
+   "id": "demons-105",
+   "w1": 34,
+   "g1": 61
+  },
+  {
+   "id": "demons-106",
+   "w1": 26,
+   "g1": 60
+  },
+  {
+   "id": "demons-107",
+   "w1": 15,
+   "g1": 60
+  },
+  {
+   "id": "demons-108",
+   "w1": 28,
+   "g1": 60
+  },
+  {
+   "id": "demons-109",
+   "w1": 31,
+   "g1": 59
+  },
+  {
+   "id": "demons-110",
+   "w1": 36,
+   "g1": 59
+  },
+  {
+   "id": "demons-111",
+   "w1": 36,
+   "g1": 59
+  },
+  {
+   "id": "demons-112",
    "w1": 21,
+   "g1": 61
+  },
+  {
+   "id": "demons-113",
+   "w1": 40,
+   "g1": 59
+  },
+  {
+   "id": "demons-114",
+   "w1": 26,
+   "g1": 61
+  },
+  {
+   "id": "demons-115",
+   "w1": 41,
+   "g1": 59
+  },
+  {
+   "id": "demons-116",
+   "w1": 24,
+   "g1": 59
+  },
+  {
+   "id": "demons-117",
+   "w1": 22,
+   "g1": 60
+  },
+  {
+   "id": "demons-118",
+   "w1": 16,
+   "g1": 61
+  },
+  {
+   "id": "demons-119",
+   "w1": 29,
+   "g1": 60
+  },
+  {
+   "id": "demons-120",
+   "w1": 28,
    "g1": 59
   },
   {
    "id": "demons-121",
-   "w1": 25,
+   "w1": 19,
    "g1": 60
   },
   {
    "id": "demons-122",
-   "w1": 28,
+   "w1": 24,
    "g1": 60
   },
   {
    "id": "demons-123",
-   "w1": 25,
+   "w1": 32,
    "g1": 59
   },
   {
    "id": "demons-124",
-   "w1": 26,
+   "w1": 32,
    "g1": 59
   },
   {
    "id": "demons-125",
-   "w1": 11,
+   "w1": 15,
    "g1": 61
   },
   {
    "id": "demons-126",
-   "w1": 28,
+   "w1": 32,
    "g1": 59
   },
   {
    "id": "demons-127",
-   "w1": 37,
+   "w1": 45,
    "g1": 62
   },
   {
@@ -1198,132 +1198,132 @@
   },
   {
    "id": "demons-129",
-   "w1": 23,
+   "w1": 21,
    "g1": 59
   },
   {
    "id": "demons-130",
-   "w1": 26,
+   "w1": 29,
    "g1": 60
   },
   {
    "id": "demons-131",
-   "w1": 20,
+   "w1": 27,
    "g1": 61
   },
   {
    "id": "demons-132",
-   "w1": 33,
+   "w1": 27,
    "g1": 59
   },
   {
    "id": "demons-133",
-   "w1": 25,
+   "w1": 26,
    "g1": 61
   },
   {
    "id": "demons-134",
-   "w1": 27,
+   "w1": 30,
    "g1": 59
   },
   {
    "id": "demons-135",
-   "w1": 26,
+   "w1": 27,
    "g1": 59
   },
   {
    "id": "demons-136",
-   "w1": 27,
+   "w1": 29,
    "g1": 60
   },
   {
    "id": "demons-137",
-   "w1": 35,
+   "w1": 40,
    "g1": 59
   },
   {
    "id": "demons-138",
-   "w1": 29,
+   "w1": 35,
    "g1": 59
   },
   {
    "id": "demons-139",
-   "w1": 33,
+   "w1": 42,
    "g1": 59
   },
   {
    "id": "demons-140",
-   "w1": 29,
+   "w1": 33,
    "g1": 65
   },
   {
    "id": "demons-141",
-   "w1": 32,
+   "w1": 33,
    "g1": 61
   },
   {
    "id": "demons-142",
-   "w1": 26,
+   "w1": 31,
    "g1": 59
   },
   {
    "id": "demons-143",
-   "w1": 35,
+   "w1": 39,
    "g1": 61
   },
   {
    "id": "demons-144",
-   "w1": 26,
-   "g1": 59
-  },
-  {
-   "id": "demons-145",
-   "w1": 35,
-   "g1": 59
-  },
-  {
-   "id": "demons-146",
-   "w1": 33,
-   "g1": 59
-  },
-  {
-   "id": "demons-147",
-   "w1": 29,
-   "g1": 59
-  },
-  {
-   "id": "demons-148",
-   "w1": 35,
-   "g1": 61
-  },
-  {
-   "id": "demons-149",
-   "w1": 35,
-   "g1": 60
-  },
-  {
-   "id": "demons-150",
    "w1": 28,
    "g1": 59
   },
   {
+   "id": "demons-145",
+   "w1": 40,
+   "g1": 59
+  },
+  {
+   "id": "demons-146",
+   "w1": 32,
+   "g1": 59
+  },
+  {
+   "id": "demons-147",
+   "w1": 28,
+   "g1": 59
+  },
+  {
+   "id": "demons-148",
+   "w1": 40,
+   "g1": 61
+  },
+  {
+   "id": "demons-149",
+   "w1": 36,
+   "g1": 60
+  },
+  {
+   "id": "demons-150",
+   "w1": 25,
+   "g1": 59
+  },
+  {
    "id": "demons-151",
-   "w1": 44,
+   "w1": 38,
    "g1": 61
   },
   {
    "id": "demons-152",
-   "w1": 33,
+   "w1": 34,
    "g1": 59
   },
   {
    "id": "demons-153",
-   "w1": 23,
+   "w1": 27,
    "g1": 59
   },
   {
    "id": "demons-154",
-   "w1": 29,
+   "w1": 28,
    "g1": 59
   },
   {
@@ -1333,82 +1333,82 @@
   },
   {
    "id": "demons-156",
-   "w1": 31,
+   "w1": 26,
    "g1": 59
   },
   {
    "id": "demons-157",
-   "w1": 29,
+   "w1": 35,
    "g1": 59
   },
   {
    "id": "demons-158",
-   "w1": 16,
-   "g1": 59
-  },
-  {
-   "id": "demons-159",
    "w1": 24,
    "g1": 59
   },
   {
-   "id": "demons-160",
-   "w1": 30,
-   "g1": 59
-  },
-  {
-   "id": "demons-161",
-   "w1": 32,
-   "g1": 59
-  },
-  {
-   "id": "demons-162",
-   "w1": 23,
-   "g1": 59
-  },
-  {
-   "id": "demons-163",
-   "w1": 22,
-   "g1": 59
-  },
-  {
-   "id": "demons-164",
-   "w1": 29,
-   "g1": 59
-  },
-  {
-   "id": "demons-165",
+   "id": "demons-159",
    "w1": 31,
    "g1": 59
   },
   {
+   "id": "demons-160",
+   "w1": 33,
+   "g1": 59
+  },
+  {
+   "id": "demons-161",
+   "w1": 26,
+   "g1": 59
+  },
+  {
+   "id": "demons-162",
+   "w1": 37,
+   "g1": 59
+  },
+  {
+   "id": "demons-163",
+   "w1": 21,
+   "g1": 59
+  },
+  {
+   "id": "demons-164",
+   "w1": 33,
+   "g1": 59
+  },
+  {
+   "id": "demons-165",
+   "w1": 33,
+   "g1": 59
+  },
+  {
    "id": "demons-166",
-   "w1": 39,
+   "w1": 42,
    "g1": 59
   },
   {
    "id": "demons-167",
-   "w1": 39,
+   "w1": 34,
    "g1": 59
   },
   {
    "id": "demons-168",
-   "w1": 19,
+   "w1": 21,
    "g1": 60
   },
   {
    "id": "demons-169",
-   "w1": 35,
+   "w1": 37,
    "g1": 60
   },
   {
    "id": "demons-170",
-   "w1": 39,
+   "w1": 38,
    "g1": 61
   },
   {
    "id": "demons-171",
-   "w1": 34,
+   "w1": 37,
    "g1": 61
   },
   {
@@ -1418,27 +1418,27 @@
   },
   {
    "id": "demons-173",
-   "w1": 21,
+   "w1": 19,
    "g1": 59
   },
   {
    "id": "demons-174",
-   "w1": 32,
+   "w1": 36,
    "g1": 59
   },
   {
    "id": "demons-175",
-   "w1": 26,
+   "w1": 35,
    "g1": 61
   },
   {
    "id": "demons-176",
-   "w1": 32,
+   "w1": 38,
    "g1": 59
   },
   {
    "id": "demons-177",
-   "w1": 25,
+   "w1": 31,
    "g1": 59
   },
   {
@@ -1448,27 +1448,27 @@
   },
   {
    "id": "demons-179",
-   "w1": 36,
+   "w1": 42,
    "g1": 59
   },
   {
    "id": "demons-180",
-   "w1": 34,
+   "w1": 38,
    "g1": 59
   },
   {
    "id": "demons-181",
-   "w1": 37,
+   "w1": 38,
    "g1": 59
   },
   {
    "id": "demons-182",
-   "w1": 23,
+   "w1": 28,
    "g1": 62
   },
   {
    "id": "demons-183",
-   "w1": 31,
+   "w1": 35,
    "g1": 59
   },
   {
@@ -1478,42 +1478,42 @@
   },
   {
    "id": "demons-185",
-   "w1": 11,
+   "w1": 16,
    "g1": 60
   },
   {
    "id": "demons-186",
-   "w1": 27,
+   "w1": 23,
    "g1": 60
   },
   {
    "id": "demons-187",
-   "w1": 21,
+   "w1": 26,
    "g1": 60
   },
   {
    "id": "demons-188",
-   "w1": 24,
+   "w1": 22,
    "g1": 59
   },
   {
    "id": "demons-189",
-   "w1": 20,
+   "w1": 25,
    "g1": 61
   },
   {
    "id": "demons-190",
-   "w1": 23,
+   "w1": 29,
    "g1": 59
   },
   {
    "id": "demons-191",
-   "w1": 40,
+   "w1": 42,
    "g1": 59
   },
   {
    "id": "demons-192",
-   "w1": 39,
+   "w1": 22,
    "g1": 59
   },
   {
@@ -1523,32 +1523,32 @@
   },
   {
    "id": "demons-194",
-   "w1": 14,
+   "w1": 11,
    "g1": 61
   },
   {
    "id": "demons-195",
-   "w1": 30,
+   "w1": 24,
    "g1": 59
   },
   {
    "id": "demons-196",
-   "w1": 29,
+   "w1": 30,
    "g1": 59
   },
   {
    "id": "demons-197",
-   "w1": 26,
+   "w1": 31,
    "g1": 59
   },
   {
    "id": "demons-198",
-   "w1": 32,
+   "w1": 30,
    "g1": 59
   },
   {
    "id": "demons-199",
-   "w1": 29,
+   "w1": 28,
    "g1": 59
   },
   {
