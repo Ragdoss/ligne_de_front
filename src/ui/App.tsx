@@ -299,7 +299,7 @@ export function App() {
     content = <OptionsScreen profile={profile} update={update} onSwitchProfile={switchProfile} onBack={home} />;
   }
 
-  return <div className="app-zoom" style={{ zoom: o.scale, '--zoom-k': o.zoomScale ?? 1 } as React.CSSProperties}>{content}<HoverZoom /></div>;
+  return <div className="app-zoom" style={{ zoom: o.scale, '--zoom-k': o.zoomScale ?? 1, '--board-k': o.boardScale ?? 1, '--hand-k': o.handScale ?? 1 } as React.CSSProperties}>{content}<HoverZoom /></div>;
 }
 
 /** Partie en ligne : notre camp est en bas, le camp adverse est joué à distance. Revanche, série et emotes. */

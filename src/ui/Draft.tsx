@@ -54,28 +54,46 @@ export function SortChips({ value, set }: { value: DraftSort; set: (v: DraftSort
   );
 }
 
-/** Répartition d'une liste de cartes : par niveau, par type, par faction. */
-export function DraftStats({ ids }: { ids: string[] }) {
+/** Filtre du draft : niveaux, types et factions sélectionnés (vide = tout). Plusieurs valeurs à la fois. */
+export interface DraftFilter { levels: number[]; types: string[]; factions: string[] }
+export const NO_DRAFT_FILTER: DraftFilter = { levels: [], types: [], factions: [] };
+const factionsOf = (id: string) => [CARDS[id]!.faction as string, ...((CARDS[id]!.factions as string[] | undefined) ?? [])];
+export const passes = (f: DraftFilter, id: string) =>
+  (!f.levels.length || f.levels.includes(CARDS[id]!.niveau)) && (!f.types.length || f.types.includes(CARDS[id]!.cardType))
+  && (!f.factions.length || factionsOf(id).some(x => f.factions.includes(x)));
+const toggle = <T,>(list: T[], x: T) => (list.includes(x) ? list.filter(y => y !== x) : [...list, x]);
+
+/** Répartition d'une liste de cartes : par niveau, par type, par faction. Avec `filter`, chaque compteur est un filtre cliquable. */
+export function DraftStats({ ids, filter, setFilter }: { ids: string[]; filter?: DraftFilter; setFilter?: (f: DraftFilter) => void }) {
   const lvl = countOf(ids.map(id => String(CARDS[id]!.niveau)));
   const typ = countOf(ids.map(id => CARDS[id]!.cardType));
-  const fac = countOf(ids.map(id => CARDS[id]!.faction));
+  const fac = countOf(ids.flatMap(id => [...new Set(factionsOf(id))]));
+  const chip = (on: boolean, label: React.ReactNode, onClick: () => void, cls = 'pill') =>
+    filter && setFilter
+      ? <button type="button" className={`${cls} f-toggle${on ? ' on' : ''}`} aria-pressed={on} onClick={onClick}>{label}</button>
+      : <span className={cls}>{label}</span>;
+  const active = !!filter && (filter.levels.length + filter.types.length + filter.factions.length) > 0;
   return (
     <div className="draft-stats small">
-      <div><b>Niveaux</b> {[1, 2, 3, 4, 5].map(n => <span key={n} className="pill">niv. {n} : <b>{lvl[n] ?? 0}</b></span>)}</div>
-      <div><b>Types</b> {['Regiment', 'Leader', 'Tactique'].map(t => <span key={t} className="pill">{TYPE_PLURAL[t]} : <b>{typ[t] ?? 0}</b></span>)}</div>
-      <div><b>Factions</b> {FACTION_ORDER.filter(f => fac[f]).map(f => <span key={f} className={`fchip ${f}`}>{FACTION_LABEL[f as keyof typeof FACTION_LABEL]} <b>{fac[f]}</b></span>)}</div>
+      <div><b>Niveaux</b> {[1, 2, 3, 4, 5].map(n => <span key={n}>{chip(!!filter?.levels.includes(n), <>niv. {n} : <b>{lvl[n] ?? 0}</b></>, () => setFilter!({ ...filter!, levels: toggle(filter!.levels, n) }))}</span>)}</div>
+      <div><b>Types</b> {['Regiment', 'Leader', 'Tactique'].map(t => <span key={t}>{chip(!!filter?.types.includes(t), <>{TYPE_PLURAL[t]} : <b>{typ[t] ?? 0}</b></>, () => setFilter!({ ...filter!, types: toggle(filter!.types, t) }))}</span>)}</div>
+      <div><b>Factions</b> {FACTION_ORDER.filter(f => fac[f] || filter?.factions.includes(f)).map(f => <span key={f}>{chip(!!filter?.factions.includes(f), <>{FACTION_LABEL[f as keyof typeof FACTION_LABEL]} <b>{fac[f] ?? 0}</b></>, () => setFilter!({ ...filter!, factions: toggle(filter!.factions, f) }), `fchip ${f}`)}</span>)}</div>
+      {filter && setFilter && (
+        <div><button type="button" className="f-reset" disabled={!active} onClick={() => setFilter(NO_DRAFT_FILTER)}>Réinitialiser les filtres</button>{active && <span className="muted"> · filtre actif sur le paquet et sur tes cartes</span>}</div>
+      )}
     </div>
   );
 }
 
-export function PicksSummary({ picks, sort = 'faction' }: { picks: string[]; sort?: DraftSort }) {
+export function PicksSummary({ picks, sort = 'faction', filter, setFilter }: { picks: string[]; sort?: DraftSort; filter?: DraftFilter; setFilter?: (f: DraftFilter) => void }) {
   const n = countOf(picks);
+  const shown = Object.keys(n).filter(id => !filter || passes(filter, id)).sort(SORTS[sort]);
   return (
     <aside className="draft-picks" aria-label="Tes cartes draftées">
       <h2 className="sub">Tes cartes ({picks.length})</h2>
-      {picks.length > 0 && <DraftStats ids={picks} />}
+      {(picks.length > 0 || setFilter) && <DraftStats ids={picks} filter={filter} setFilter={setFilter} />}
       <div className="draft-list">
-        {Object.keys(n).sort(SORTS[sort]).map(id => (
+        {shown.map(id => (
           <div key={id} className={`deck-line ${CARDS[id]!.faction}`} {...zoomProps(id)}><span>{n[id]}</span>{cardName(id)}<small>niv. {CARDS[id]!.niveau}</small></div>
         ))}
       </div>
@@ -83,11 +101,12 @@ export function PicksSummary({ picks, sort = 'faction' }: { picks: string[]; sor
   );
 }
 
-/** Paquet en cours : cartes affichées dans l'ordre de tri choisi (le choix garde l'index d'origine). */
-export function PackGrid({ pack, sort, disabled, chosen, onPick }: { pack: string[]; sort: DraftSort; disabled?: boolean; chosen?: number | null; onPick: (index: number) => void }) {
-  const order = pack.map((id, i) => ({ id, i })).sort((x, y) => SORTS[sort](x.id, y.id) || x.i - y.i);
+/** Paquet en cours : cartes affichées dans l'ordre de tri choisi et selon le filtre (le choix garde l'index d'origine). */
+export function PackGrid({ pack, sort, disabled, chosen, onPick, filter }: { pack: string[]; sort: DraftSort; disabled?: boolean; chosen?: number | null; onPick: (index: number) => void; filter?: DraftFilter }) {
+  const order = pack.map((id, i) => ({ id, i })).filter(x => !filter || passes(filter, x.id)).sort((x, y) => SORTS[sort](x.id, y.id) || x.i - y.i);
   return (
     <div className={`camp-grid${disabled ? ' waiting' : ''}`}>
+      {order.length === 0 && <p className="muted">Aucune carte de ce paquet ne correspond aux filtres.</p>}
       {order.map(({ id, i }) => (
         <button type="button" key={`${id}-${i}`} className={`vn-pick${chosen === i ? ' on' : ''}`} disabled={disabled} aria-label={`Garder ${cardName(id)}`} onClick={() => { onPick(i); showZoom(null); }}><CardTile id={id} /></button>
       ))}
@@ -159,6 +178,7 @@ export function DraftScreen({ profile, onExit, gameOpts, reward, onMulti }: {
   const [game, setGame] = useState<{ opp: number; key: number; first: 'A' | 'B' } | null>(null);
   const [bestOf, setBestOf] = useState<BestOf>(1);
   const [sort, setSort] = useState<DraftSort>('faction');
+  const [filter, setFilter] = useState<DraftFilter>(NO_DRAFT_FILTER);
   const [editDeck, setEditDeck] = useState(false);
   /** Issue de la dernière partie jouée : match terminé ou non, score du match. */
   const [after, setAfter] = useState<{ done: boolean; score: [number, number] } | null>(null);
@@ -251,11 +271,9 @@ export function DraftScreen({ profile, onExit, gameOpts, reward, onMulti }: {
         <div className="draft-layout">
           <div>
             <SortChips value={sort} set={setSort} />
-            <PackGrid pack={st.packs[0]!} sort={sort} onPick={i => set(pickCard(st, i))} />
-            <h3 className="sub small">Ce paquet</h3>
-            <DraftStats ids={st.packs[0]!} />
+            <PackGrid pack={st.packs[0]!} sort={sort} filter={filter} onPick={i => set(pickCard(st, i))} />
           </div>
-          <PicksSummary picks={st.picks[0]!} sort={sort} />
+          <PicksSummary picks={st.picks[0]!} sort={sort} filter={filter} setFilter={setFilter} />
         </div>
       </div>
     );

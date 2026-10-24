@@ -42,6 +42,9 @@ export interface Options {
   romanLevels?: boolean;
   /** Combat : le régiment qui attaque se déplace jusqu'à sa cible (activé par défaut). */
   attackMotion?: boolean;
+  /** Taille des régiments sur le plateau et des cartes en main (1 = normale). */
+  boardScale?: number;
+  handScale?: number;
   /** Taille de la carte affichée en grand au survol (1 = normale). */
   zoomScale?: number;
   /** Mode vérification : cartes, images de profil et emotes affichées même non possédées (pour contrôler les illustrations). */

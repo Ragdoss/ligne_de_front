@@ -11,7 +11,7 @@ import { hostRoomMulti, joinRoom, newRoomCode, PROTOCOL, webrtcAvailable, type L
 import { defeatCoins, type Profile } from '../profile/profile';
 import { Avatar } from './avatars';
 import { CardTile } from './CardTile';
-import { Builder, byFactionLevel, countOf, DraftStats, PackGrid, PicksSummary, SortChips, type DraftSort } from './Draft';
+import { Builder, byFactionLevel, countOf, NO_DRAFT_FILTER, PackGrid, PicksSummary, SortChips, type DraftFilter, type DraftSort } from './Draft';
 import { GameScreen } from './GameScreen';
 import { showZoom, zoomProps } from './HoverZoom';
 import { cardName, FACTION_LABEL } from './labels';
@@ -38,6 +38,7 @@ export function MultiDraftScreen({ profile, onExit, gameOpts, reward }: {
   const [inbox, setInbox] = useState<Record<string, Action[]>>({});
   const [game, setGame] = useState<{ key: string; a: number; b: number } | null>(null);
   const [sort, setSort] = useState<DraftSort>('faction');
+  const [filter, setFilter] = useState<DraftFilter>(NO_DRAFT_FILTER);
   const [editDeck, setEditDeck] = useState(false);
   const stRef = useRef<MultiDraft | null>(null);
   const links = useRef(new Map<number, Link>()); // hôte : siège → liaison
@@ -302,11 +303,9 @@ export function MultiDraftScreen({ profile, onExit, gameOpts, reward }: {
         <div className="draft-layout">
           <div>
             <SortChips value={sort} set={setSort} />
-            <PackGrid pack={pack} sort={sort} disabled={done} chosen={st.chosen[me]} onPick={i => act({ t: 'dpick', index: i })} />
-            <h3 className="sub small">Ce paquet</h3>
-            <DraftStats ids={pack} />
+            <PackGrid pack={pack} sort={sort} filter={filter} disabled={done} chosen={st.chosen[me]} onPick={i => act({ t: 'dpick', index: i })} />
           </div>
-          <PicksSummary picks={st.picks[me]!} sort={sort} />
+          <PicksSummary picks={st.picks[me]!} sort={sort} filter={filter} setFilter={setFilter} />
         </div>
       </div>
     );
