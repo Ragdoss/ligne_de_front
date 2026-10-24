@@ -1,6 +1,6 @@
 // Écran de partie : plateau, mains, ciblage, choix, dialogues de scénario, journal, ordinateur.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { chooseAction, type ActionFilter } from '../ai/heuristic';
+import { chooseAction, chooseActionV3, STRONG_AI, type ActionFilter } from '../ai/heuristic';
 import { card, Ctx, recordStates } from '../engine/ctx';
 import { actingPlayer, applyAction, createGame, DEFAULT_LEVEL_THRESHOLDS, playsForHandCard, whyUnplayable, type GameSetup } from '../engine/game';
 import { drawCountFor } from '../engine/turn';
@@ -84,6 +84,8 @@ export interface GameScreenProps {
   onGame?: (game: GameState) => void;
   /** Images de profil affichées dans les barres des joueurs. */
   avatars?: Partial<Record<PlayerId, string | undefined>>;
+  /** IA forte (v3) ; sinon IA v2 (campagne et tutoriel : leur difficulté a été réglée avec la v2). */
+  strongAi?: boolean;
   /** Le régiment qui attaque se déplace jusqu'à sa cible (Options). */
   attackMotion?: boolean;
   /** Arts alternatifs choisis par chaque joueur (carte → clé d'art). */
@@ -164,7 +166,7 @@ export function ChoicePanel({ choice, onPick, onHover }: { choice: PendingChoice
   );
 }
 
-export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, intro, renderEnd, onQuit, animMul = 1, aiMul = 1, bannerMul = 1, initialReveal = false, onOver, remote, bottomSide, onGame, overlay, avatars, arts, attackMotion = attackMotionOn }: GameScreenProps) {
+export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, intro, renderEnd, onQuit, animMul = 1, aiMul = 1, bannerMul = 1, initialReveal = false, onOver, remote, bottomSide, onGame, overlay, avatars, arts, attackMotion = attackMotionOn, strongAi = false }: GameScreenProps) {
   const artsRef = useRef<Partial<Record<PlayerId, Record<string, string>>>>({});
   artsRef.current = arts ?? {};
   setGameArts(artsRef.current); // chaque camp avec ses propres arts (base pour l'ordinateur)
@@ -287,9 +289,9 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
   // Tour de l'ordinateur (et ses choix en attente). Il attend que les dialogues soient fermés.
   useEffect(() => {
     if (game.over || paused || busy.current || human[acting] || remote?.side === acting) return;
-    const t = setTimeout(() => { void apply(chooseAction(game, undefined, aiFilter)); }, (fast ? 250 : 450) * aiMul);
+    const t = setTimeout(() => { void apply(strongAi ? chooseActionV3(game, undefined, aiFilter, STRONG_AI) : chooseAction(game, undefined, aiFilter)); }, (fast ? 250 : 450) * aiMul);
     return () => clearTimeout(t);
-  }, [game, paused, acting, apply, human, fast, aiFilter, aiMul]);
+  }, [game, paused, acting, apply, human, fast, aiFilter, aiMul, strongAi]);
 
   useEffect(() => { onGame?.(game); }, [game, onGame]);
 

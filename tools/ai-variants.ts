@@ -15,7 +15,7 @@ const t0 = Date.now();
 for (let k = 0; k < N; k++) {
   const x = decks[(k * 7) % decks.length]!, y = decks[(k * 13 + 5) % decks.length]!;
   for (const side of ['A', 'B'] as PlayerId[]) {
-    let s = createGame({ seed: `var-${k}-${side}`, A: { faction: x.faction, deck: x.deck }, B: { faction: y.faction, deck: y.deck } });
+    let s = createGame({ seed: `var${process.env.SEED ?? ""}-${k}-${side}`, A: { faction: x.faction, deck: x.deck }, B: { faction: y.faction, deck: y.deck } });
     for (let n = 0; n < 5000 && !s.over && s.turn <= 80; n++) {
       const mine = s.active === side || (s.pending[0] && s.pending[0].player === side);
       const t = Date.now();

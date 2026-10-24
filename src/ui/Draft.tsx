@@ -173,6 +173,7 @@ export function DraftScreen({ profile, onExit, gameOpts, reward, onMulti }: {
       <GameScreen
         key={game.key}
         {...gameOpts}
+        strongAi
         setup={{ seed: `draft-${st.seed}-me-${opp}-${game.key}`, first: game.first, A: { faction: deckFaction(st.decks[0]!), deck: st.decks[0]! }, B: { faction: deckFaction(st.decks[opp]!), deck: st.decks[opp]! } }}
         names={nm}
         human={{ A: true, B: false }}

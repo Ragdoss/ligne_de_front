@@ -187,6 +187,7 @@ export function MultiDraftScreen({ profile, onExit, gameOpts, reward }: {
       <GameScreen
         key={key}
         {...gameOpts}
+        strongAi
         setup={{ seed: key, first: gameFirst(st, a, b), A: { faction: deckFaction(st.decks[a]!), deck: st.decks[a]! }, B: { faction: deckFaction(st.decks[b]!), deck: st.decks[b]! } }}
         names={names}
         human={{ A: mySide === 'A', B: mySide === 'B' }}

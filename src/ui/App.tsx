@@ -121,6 +121,7 @@ export function App() {
         names={names}
         human={{ A: setup.mode !== 'watch', B: setup.mode === 'hotseat' }}
         flip={setup.mode === 'hotseat'}
+        strongAi
         fast={setup.mode === 'watch'}
         avatars={setup.mode !== 'watch' ? { A: profile.avatar } : undefined}
         arts={setup.mode === 'watch' ? {} : { A: artsForDeck(profile, A.cards), B: setup.mode === 'hotseat' ? artsForDeck(profile, B.cards) : {} }}
