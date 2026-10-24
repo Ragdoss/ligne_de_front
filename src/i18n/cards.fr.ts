@@ -346,7 +346,7 @@ const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "basilics_oasis": {
     "name": "Basilics de l'Oasis",
-    "desc": "À son arrivée : +10 Endurance s'il est à l'avant ; Distance et +30 Initiative s'il est à l'arrière."
+    "desc": "À son arrivée, +10 Endurance s'il est à l'avant ; Distance et +30 Initiative s'il est à l'arrière."
   },
   "mirage": {
     "name": "Mirage",
