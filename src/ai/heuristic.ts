@@ -232,3 +232,93 @@ export function chooseAction(s: GameState, w: AiWeights = DEFAULT_WEIGHTS, filte
   }
   return best;
 }
+
+// ---------------------------------------------------------------------------------------------
+// IA v3 (essais) : options pour regarder plus loin. Mêmes principes que la v2 (pas d'information cachée).
+export interface AiOptions {
+  /** Nombre d'états supposés (tirages des cartes cachées) moyennés. */
+  samples?: number;
+  /** Après le coup étudié, continuer à jouer ses cartes (glouton rapide, jusqu'à N actions) avant de finir le tour. */
+  followUp?: number;
+  /** Au tour adverse : l'adversaire joue lui aussi (glouton rapide, jusqu'à N actions) au lieu de passer. */
+  oppReply?: number;
+}
+
+/** Joue jusqu'à `n` actions avec l'IA rapide (v1) pour le joueur `who` tant que c'est à lui ; s'arrête s'il veut finir le tour. */
+function greedyPlay(st: GameState, who: PlayerId, n: number, w: AiWeights): GameState {
+  let cur = st;
+  for (let i = 0; i < n && !cur.over && actingPlayer(cur) === who; i++) {
+    const a = chooseActionV1(cur, w);
+    if (a.type === 'endTurn') break;
+    const r = applyAction(cur, a);
+    if (!r.ok) break;
+    cur = r.state;
+  }
+  return cur;
+}
+
+function valueAfterTurnV3(st: GameState, me: PlayerId, w: AiWeights, o: AiOptions): number {
+  let cur = st;
+  for (let guard = 0; cur.pending.length && guard < 10 && !cur.over; guard++) {
+    if (actingPlayer(cur) !== me) break;
+    const r = applyAction(cur, chooseActionV1(cur, w));
+    if (!r.ok) break;
+    cur = r.state;
+  }
+  if (o.followUp) cur = greedyPlay(cur, me, o.followUp, w);
+  if (cur.over) return evaluate(cur, me, w);
+  const r = applyAction(cur, { type: 'endTurn' });
+  if (!r.ok) return evaluate(cur, me, w);
+  if (r.state.over) return evaluate(r.state, me, w);
+  let opp = r.state;
+  const q = opponentOf(me);
+  for (let guard = 0; opp.pending.length && guard < 10 && !opp.over; guard++) {
+    const x = applyAction(opp, { type: 'choose', option: 0 });
+    if (!x.ok) break;
+    opp = x.state;
+  }
+  if (o.oppReply && !opp.over && opp.active === q) opp = greedyPlay(opp, q, o.oppReply, w);
+  let after: number;
+  if (opp.over || opp.active === me) after = evaluate(opp, me, w);
+  else {
+    for (let guard = 0; opp.pending.length && guard < 10 && !opp.over; guard++) {
+      const x = applyAction(opp, { type: 'choose', option: 0 });
+      if (!x.ok) break;
+      opp = x.state;
+    }
+    const e = opp.over ? null : applyAction(opp, { type: 'endTurn' });
+    after = e && e.ok ? evaluate(e.state, me, w) : evaluate(opp, me, w);
+  }
+  return 0.4 * evaluate(r.state, me, w) + 0.6 * after;
+}
+
+export function chooseActionV3(s: GameState, w: AiWeights = DEFAULT_WEIGHTS, filter?: ActionFilter, o: AiOptions = {}): Action {
+  const me = actingPlayer(s);
+  const acts = legalActions(s);
+  if (acts.length === 1) return acts[0]!;
+  if (s.pending.length || s.active !== me) return chooseAction(s, w, filter);
+  const rand = mulberry((s.rng ^ (s.nextUid * 2654435761)) | 0);
+  const boards = Array.from({ length: Math.max(1, o.samples ?? 1) }, () => determinize(s, me, rand));
+  const value = (a: Action | null) => {
+    let t = 0;
+    for (const b of boards) {
+      if (!a) { t += valueAfterTurnV3(b, me, w, o); continue; }
+      const r = applyAction(b, a);
+      t += r.ok ? valueAfterTurnV3(r.state, me, w, o) : -1e7;
+    }
+    return t / boards.length;
+  };
+  let best: Action = { type: 'endTurn' };
+  let bestV = value(null);
+  const seen = new Set<string>();
+  for (const a of acts) {
+    if (a.type === 'endTurn') continue;
+    if (filter && !filter(s, a)) continue;
+    const k = key(a);
+    if (seen.has(k)) continue;
+    seen.add(k);
+    const v = value(a);
+    if (v > bestV + 0.01) { bestV = v; best = a; }
+  }
+  return best;
+}
