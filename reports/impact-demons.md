@@ -69,3 +69,5 @@ Fins de partie (toutes) : défaite-noRegiment 18 %, défaite-lassitude 28 %, vic
 | 62 | Chaînes de l’Abîme | 3 | 38 % | 45 % | -8 | 225 |
 | 63 | Grimoire interdit | 3 | 37 % | 45 % | -8 | 200 |
 | 64 | Dryade corrompue | 3 | 36 % | 46 % | -10 | 207 |
+
+Test avant l'IA v3
