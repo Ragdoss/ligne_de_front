@@ -1,54 +1,69 @@
 # Poids des cartes nomades contre les autres factions
 
-800 decks aléatoires, 3200 parties contre les 30 decks qualifiés des autres factions ; taux de victoire global 50 %.
-Fins de partie (toutes) : victoire-emptyDeck 42 %, défaite-lassitude 32 %, victoire-noRegiment 6 %, défaite-noRegiment 17 %, victoire-lassitude 2 %, défaite-emptyDeck 0 %.
+400 decks aléatoires, 1600 parties contre les 30 decks qualifiés des autres factions ; taux de victoire global 25 %.
+Fins de partie (toutes) : défaite-lassitude 38 %, défaite-noRegiment 37 %, victoire-emptyDeck 16 %, victoire-noRegiment 5 %, défaite-emptyDeck 1 %, victoire-lassitude 3 %.
 
 | # | Carte | Niv. | Avec | Sans | Écart | Exemplaires |
 |---|---|---|---|---|---|---|
-| 1 | Fuite dans les dunes | 2 | 56 % | 45 % | +11 | 626 |
-| 2 | Voleurs de provisions | 1 | 53 % | 44 % | +9 | 947 |
-| 3 | Jeune Nomade | 1 | 54 % | 44 % | +9 | 925 |
-| 4 | Puits empoisonné | 2 | 54 % | 46 % | +8 | 606 |
-| 5 | Archéotacticiens | 4 | 52 % | 45 % | +7 | 1382 |
-| 6 | Seigneur des caravanes perdues | 3 | 54 % | 48 % | +6 | 602 |
-| 7 | Marché Noir | 3 | 54 % | 48 % | +6 | 576 |
-| 8 | Bannière Déchirée | 3 | 53 % | 49 % | +4 | 566 |
-| 9 | Reine des Basilics | 5 | 52 % | 49 % | +3 | 1337 |
-| 10 | Guide du Désert | 2 | 52 % | 49 % | +3 | 596 |
-| 11 | Terre brûlée | 3 | 52 % | 49 % | +3 | 574 |
-| 12 | À couvert | 1 | 52 % | 49 % | +2 | 572 |
-| 13 | Oasis cachée | 2 | 51 % | 49 % | +2 | 624 |
-| 14 | Mirage de l’oasis | 1 | 51 % | 50 % | +2 | 525 |
-| 15 | Saboteur Nomade | 3 | 51 % | 50 % | +1 | 582 |
-| 16 | Choc et Effroi | 4 | 52 % | 51 % | +1 | 1307 |
-| 17 | Caravane Marchande | 2 | 51 % | 50 % | +1 | 597 |
-| 18 | Palissade | 2 | 51 % | 50 % | +1 | 568 |
-| 19 | Danseurs de sable | 2 | 50 % | 50 % | +0 | 577 |
-| 20 | Maître de Caravane | 2 | 50 % | 50 % | +0 | 543 |
-| 21 | Charmeur de Basilics | 2 | 50 % | 50 % | +0 | 569 |
-| 22 | Capitaine mercenaire | 2 | 50 % | 51 % | 0 | 592 |
-| 23 | Rançon du Désert | 4 | 50 % | 51 % | -1 | 1374 |
-| 24 | Embuscade | 1 | 51 % | 51 % | -1 | 623 |
-| 25 | Cheikh des Dunes | 4 | 50 % | 51 % | -1 | 1298 |
-| 26 | Marchand d’âmes | 3 | 50 % | 51 % | -1 | 576 |
-| 27 | Légat Varro | 4 | 50 % | 51 % | -1 | 1341 |
-| 28 | Razzieurs des dunes | 2 | 49 % | 51 % | -2 | 580 |
-| 29 | Basilics du Désert | 5 | 50 % | 52 % | -2 | 1283 |
-| 30 | Basilics de l'Oasis | 3 | 49 % | 51 % | -2 | 574 |
-| 31 | Mirage | 2 | 49 % | 51 % | -2 | 564 |
-| 32 | Volez le ravitaillement | 4 | 49 % | 52 % | -2 | 1345 |
-| 33 | Ravitaillement | 1 | 49 % | 51 % | -3 | 609 |
-| 34 | Tempête de Sable | 3 | 49 % | 52 % | -3 | 589 |
-| 35 | Chevaucheurs du mirage | 3 | 49 % | 52 % | -3 | 572 |
-| 36 | Frondeur Nomade | 1 | 49 % | 52 % | -3 | 921 |
-| 37 | Cor de ralliement | 2 | 49 % | 52 % | -3 | 569 |
-| 38 | Cavaliers des Dunes | 2 | 49 % | 52 % | -3 | 578 |
-| 39 | Marchand d'Ombres | 2 | 49 % | 52 % | -3 | 618 |
-| 40 | Chasseur de Reliques | 3 | 49 % | 52 % | -4 | 582 |
-| 41 | Frappez le ravitaillement | 3 | 48 % | 52 % | -4 | 570 |
-| 42 | Colporteur | 1 | 49 % | 53 % | -4 | 979 |
-| 43 | Cheikha Zahra | 5 | 49 % | 54 % | -4 | 1333 |
-| 44 | Éleveur de Basilics | 3 | 48 % | 53 % | -5 | 587 |
-| 45 | Mercenaires | 2 | 47 % | 53 % | -5 | 592 |
-| 46 | Ravitailleur | 1 | 48 % | 54 % | -6 | 964 |
-| 47 | Vétérans à louer | 3 | 48 % | 53 % | -6 | 586 |
+| 1 | Voleurs de provisions | 1 | 31 % | 19 % | +12 | 316 |
+| 2 | Marché Noir | 3 | 31 % | 22 % | +9 | 207 |
+| 3 | Razzieurs des dunes | 2 | 27 % | 23 % | +5 | 222 |
+| 4 | Contrat de convoi | 1 | 27 % | 23 % | +4 | 245 |
+| 5 | Caravane Marchande | 2 | 27 % | 23 % | +4 | 240 |
+| 6 | Émir des dunes | 4 | 26 % | 22 % | +4 | 537 |
+| 7 | Ingénieurs de siège | 3 | 27 % | 24 % | +3 | 216 |
+| 8 | Capitaine mercenaire | 2 | 27 % | 24 % | +3 | 214 |
+| 9 | Danseurs de sable | 2 | 26 % | 24 % | +3 | 229 |
+| 10 | Basilics de l'Oasis | 3 | 26 % | 24 % | +3 | 206 |
+| 11 | Marchand d’âmes | 3 | 26 % | 23 % | +3 | 222 |
+| 12 | Basilics du Désert | 5 | 25 % | 23 % | +2 | 576 |
+| 13 | Légat Varro | 4 | 26 % | 23 % | +2 | 528 |
+| 14 | Terre brûlée | 3 | 26 % | 24 % | +2 | 242 |
+| 15 | Tempête de Sable | 3 | 26 % | 24 % | +2 | 227 |
+| 16 | Jeune Nomade | 1 | 26 % | 24 % | +2 | 323 |
+| 17 | Seigneur des caravanes perdues | 3 | 26 % | 24 % | +2 | 221 |
+| 18 | Vivres de campagne | 2 | 26 % | 24 % | +2 | 211 |
+| 19 | Chevaucheurs du mirage | 3 | 26 % | 24 % | +1 | 215 |
+| 20 | Caravanier armé | 3 | 26 % | 25 % | +1 | 236 |
+| 21 | Éleveur de Basilics | 3 | 25 % | 24 % | +1 | 231 |
+| 22 | Oasis cachée | 2 | 25 % | 25 % | +1 | 227 |
+| 23 | À couvert | 1 | 25 % | 24 % | +1 | 218 |
+| 24 | Frondeur Nomade | 1 | 25 % | 25 % | +0 | 338 |
+| 25 | Archéotacticiens | 4 | 25 % | 25 % | +0 | 567 |
+| 26 | Choc et Effroi | 4 | 25 % | 25 % | +0 | 542 |
+| 27 | Marchand d'Ombres | 2 | 25 % | 25 % | +0 | 204 |
+| 28 | Palissade | 2 | 24 % | 25 % | 0 | 234 |
+| 29 | Tempête de lames | 3 | 25 % | 25 % | 0 | 227 |
+| 30 | Reine des Basilics | 5 | 24 % | 24 % | 0 | 524 |
+| 31 | Fuite dans les dunes | 2 | 25 % | 26 % | 0 | 227 |
+| 32 | Cheikha Zahra | 5 | 24 % | 25 % | 0 | 552 |
+| 33 | Mirage | 2 | 25 % | 26 % | -1 | 239 |
+| 34 | Vétérans à louer | 3 | 23 % | 24 % | -1 | 199 |
+| 35 | Cheikh des Dunes | 4 | 25 % | 26 % | -1 | 570 |
+| 36 | Quartier-maître | 2 | 24 % | 24 % | -1 | 217 |
+| 37 | Bannière Déchirée | 3 | 24 % | 25 % | -1 | 189 |
+| 38 | Puits empoisonné | 2 | 24 % | 25 % | -1 | 219 |
+| 39 | Ravitaillement | 1 | 24 % | 25 % | -1 | 231 |
+| 40 | Cor de ralliement | 2 | 24 % | 25 % | -1 | 189 |
+| 41 | Volez le ravitaillement | 4 | 24 % | 25 % | -1 | 524 |
+| 42 | Maître du bazar | 2 | 24 % | 25 % | -1 | 215 |
+| 43 | Milice de village | 1 | 24 % | 25 % | -1 | 306 |
+| 44 | Chasseur de Reliques | 3 | 24 % | 25 % | -1 | 211 |
+| 45 | Rançon du Désert | 4 | 24 % | 26 % | -1 | 530 |
+| 46 | Al-Mansur le Magnifique | 5 | 23 % | 25 % | -2 | 550 |
+| 47 | Mirage de l’oasis | 1 | 24 % | 26 % | -2 | 219 |
+| 48 | Guide du Désert | 2 | 23 % | 26 % | -2 | 231 |
+| 49 | Maître de Caravane | 2 | 24 % | 27 % | -3 | 241 |
+| 50 | Chamelier | 1 | 23 % | 26 % | -3 | 312 |
+| 51 | Embuscade | 1 | 24 % | 27 % | -3 | 234 |
+| 52 | Charmeur de Basilics | 2 | 23 % | 26 % | -3 | 202 |
+| 53 | Éclaireuse des sables | 1 | 23 % | 26 % | -3 | 302 |
+| 54 | Sentinelles de l’oasis | 2 | 22 % | 26 % | -3 | 227 |
+| 55 | Vent porteur | 2 | 22 % | 26 % | -3 | 219 |
+| 56 | Colporteur | 1 | 22 % | 26 % | -4 | 333 |
+| 57 | Saboteur Nomade | 3 | 23 % | 27 % | -4 | 232 |
+| 58 | Frappez le ravitaillement | 3 | 23 % | 26 % | -4 | 217 |
+| 59 | Basilic démoniaque | 3 | 22 % | 26 % | -4 | 189 |
+| 60 | Mercenaires | 2 | 22 % | 26 % | -5 | 203 |
+| 61 | Ravitailleur | 1 | 22 % | 27 % | -5 | 297 |
+| 62 | Cavaliers des Dunes | 2 | 21 % | 27 % | -6 | 229 |
