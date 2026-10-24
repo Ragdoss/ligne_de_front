@@ -1,0 +1,13 @@
+name: Notify Discord
+on: [push]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Discord notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: Ilshidur/action-discord@master
+        with:
+          args: "Nouveau push par {{ event.pusher.name }} sur {{ event.ref }}"
