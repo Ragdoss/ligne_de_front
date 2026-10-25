@@ -30,6 +30,7 @@ const GLOSS: Record<string, string> = {
   Lassitude: 'Points de défaite : en atteindre le seuil (50 en général) fait perdre la partie. Ils font aussi monter de niveau.',
   Leader: 'S’attache à un régiment sans Leader et lui donne ses bonus, tant que ce régiment n’a pas le Moral brisé.',
   Isolé: 'Emplacement à part, presque impossible à cibler, pour les unités de soutien.',
+  'Soin simple': 'Soigne 15 d\'Endurance à la cible.',
 };
 
 /** Termes cherchés dans le texte d'effet (ordre d'affichage). */
