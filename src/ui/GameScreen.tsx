@@ -13,6 +13,7 @@ import { Hand } from './Hand';
 import { ZoomCard } from './ZoomCard';
 import { statBubbles, type Bubbles } from './bubbles';
 import { playSound, playSounds, requestMusic, soundsFor } from './sound';
+import { DiscardViewer, Piles } from './Piles';
 import { cardDesc, cardName, choiceTitle, optionLabel, UNPLAYABLE } from './labels';
 
 const sameSlot = (a?: SlotRef, b?: SlotRef) => !!a && !!b && a.player === b.player && a.zone === b.zone && a.idx === b.idx;
@@ -97,29 +98,36 @@ export interface GameScreenProps {
   overlay?: React.ReactNode;
 }
 
-function PlayerBar({ game, p, label, active, avatar }: { game: GameState; p: PlayerId; label: string; active: boolean; avatar?: string }) {
+function PlayerBar({ game, p, label, active, avatar, where }: { game: GameState; p: PlayerId; label: string; active: boolean; avatar?: string; where: 'top' | 'bottom' }) {
   const pl = game.players[p];
-  const ctx = new Ctx(game);
   const thr = game.config.levelThresholds[p] ?? DEFAULT_LEVEL_THRESHOLDS;
-  const next = thr[pl.level];
+  const from = thr[pl.level - 1] ?? 0, next = thr[pl.level];
   const defeat = game.config.defeatLassitude[p];
   const noLimit = defeat >= 1e8;
-  const moral = ctx.units(p).filter(u => !card(u.cardId).excludeFromMoralTotal).reduce((n, u) => n + u.currentMor, 0);
+  const lvlPct = next === undefined ? 100 : Math.max(0, Math.min(100, (100 * (pl.points - from)) / (next - from)));
   return (
-    <div className={`pbar${active ? ' active' : ''}`}>
+    <div className={`pbar pbar-${where} ${pl.faction}${active ? ' active' : ''}`}>
       {avatar && <Avatar id={avatar} size={34} />}
       <strong className={`pname ${pl.faction}`}>{label}{active ? ' — à toi' : ''}</strong>
-      <span>Ressource <b>{pl.resource}</b></span>
-      <span>Niveau <b>{pl.level}</b></span>
-      <span title={`Niveau suivant à ${next ?? '—'} points ; ${noLimit ? 'pas de défaite par lassitude' : `défaite à ${defeat}`}`}>
+      <span className="pb-res" title={`Ressource : ${pl.resource}`}><i className="res-coin">{pl.resource}</i></span>
+      <span className="pb-gauge" title={next === undefined ? 'Niveau maximum' : `Niveau ${pl.level + 1} à ${next} points de lassitude`}>
+        Niveau <b>{pl.level}</b>
+        <span className="meter lvl"><i style={{ width: `${lvlPct}%` }} /></span>
+        <small>{next === undefined ? 'max' : `→ ${pl.level + 1} à ${next}`}</small>
+      </span>
+      <span className="pb-gauge" title={`Pioche ${drawCountFor(pl.level)} carte(s) par tour ; ${noLimit ? 'pas de défaite par lassitude' : `défaite à ${defeat}`}`}>
         Lassitude <b>{pl.points}</b>{noLimit ? '' : `/${defeat}`}
         {!noLimit && <span className="meter"><i style={{ width: `${Math.min(100, (100 * pl.points) / defeat)}%` }} /></span>}
       </span>
-      <span>Moral total <b>{moral}</b></span>
-      <span title={`Pioche ${drawCountFor(pl.level)} carte(s) par tour`}>Pioche <b>{pl.deck.length}</b>{pl.reserve.length ? ` (+${pl.reserve.length} niv. 4-5)` : ''}</span>
-      <span>Défausse <b>{pl.discard.length}</b></span>
     </div>
   );
+}
+
+/** Moral total d'un joueur, affiché entre les deux emplacements isolés. */
+function MoralTotal({ game, p }: { game: GameState; p: PlayerId }) {
+  const ctx = new Ctx(game);
+  const moral = ctx.units(p).filter(u => !card(u.cardId).excludeFromMoralTotal).reduce((n, u) => n + u.currentMor, 0);
+  return <div className={`iso-moral ${game.players[p].faction}`} title="Moral total des régiments (test de Moral)"><small>Moral total</small><b>{moral}</b></div>;
 }
 
 interface Banner { id: number; who: string; cardId: string; on?: string }
@@ -209,6 +217,8 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
   const [order, setOrder] = useState<Record<PlayerId, number[]>>({ A: [], B: [] });
   const [revealAI, setRevealAI] = useState(initialReveal);
   const [peek, setPeek] = useState(false);
+  /** Défausse ouverte (parcourir ses cartes). */
+  const [discardOf, setDiscardOf] = useState<PlayerId | null>(null);
   const [overClosed, setOverClosed] = useState(false);
   const [dialogs, setDialogs] = useState<{ title?: string; lines: DialogLine[] }[]>(() => (intro?.length ? [{ title, lines: intro }] : []));
   const busy = useRef(false);
@@ -421,16 +431,17 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
         </div>
       </header>
 
+      <PlayerBar game={view} p={top} label={names[top]} active={game.active === top} avatar={avatars?.[top]} where="top" />
       <section className="side">
         <h2 className="hand-title">Main — {names[top]}</h2>
         {handFor(top)}
-        <PlayerBar game={view} p={top} label={names[top]} active={game.active === top} avatar={avatars?.[top]} />
-        <Board game={view} player={top} bottom={false} isTarget={isTarget} isFirstPicked={r => sameSlot(sel?.first, r)} onSlot={onSlot} highlight={highlight} faded={faded} preview={preview?.units} onHover={setZoom} bubbles={bubbles} />
+        <Board game={view} player={top} bottom={false} isTarget={isTarget} isFirstPicked={r => sameSlot(sel?.first, r)} onSlot={onSlot} highlight={highlight} faded={faded} preview={preview?.units} onHover={setZoom} bubbles={bubbles}
+          left={<Piles pl={view.players[top]} p={top} onOpenDiscard={() => setDiscardOf(top)} onHover={setZoom} />} isoExtra={<MoralTotal game={view} p={top} />} />
       </section>
       <div className="frontline">ligne de front<span className="version-mark" aria-hidden="true">v {APP_VERSION}</span></div>
       <section className="side">
-        <Board game={view} player={bottom} bottom isTarget={isTarget} isFirstPicked={r => sameSlot(sel?.first, r)} onSlot={onSlot} highlight={highlight} faded={faded} preview={preview?.units} onHover={setZoom} bubbles={bubbles} />
-        <PlayerBar game={view} p={bottom} label={names[bottom]} active={game.active === bottom} avatar={avatars?.[bottom]} />
+        <Board game={view} player={bottom} bottom isTarget={isTarget} isFirstPicked={r => sameSlot(sel?.first, r)} onSlot={onSlot} highlight={highlight} faded={faded} preview={preview?.units} onHover={setZoom} bubbles={bubbles}
+          left={<Piles pl={view.players[bottom]} p={bottom} onOpenDiscard={() => setDiscardOf(bottom)} onHover={setZoom} />} isoExtra={<MoralTotal game={view} p={bottom} />} />
         <div className="controls">
           <button type="button" className={`eye-coin${peek ? ' open' : ''}`} disabled={!humanTurn || !!game.pending.length} onClick={() => setPeek(v => !v)}
             aria-pressed={peek} title={peek ? 'Masquer la simulation du combat' : 'Simuler le combat de fin de tour'}>
@@ -444,6 +455,7 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
         <h2 className="hand-title">Main — {names[bottom]}</h2>
         {handFor(bottom)}
       </section>
+      <PlayerBar game={view} p={bottom} label={names[bottom]} active={game.active === bottom} avatar={avatars?.[bottom]} where="bottom" />
 
       <details className="log" open>
         <summary>Journal</summary>
@@ -471,6 +483,8 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
           </div>
         </div>
       )}
+
+      {discardOf && <DiscardViewer pl={view.players[discardOf]} p={discardOf} name={names[discardOf]} onClose={() => { setDiscardOf(null); setZoom(null); }} onHover={setZoom} />}
 
       {zoom && <ZoomCard id={zoom.id} left={zoom.left} variant={artKeyFor(zoom.id, zoom.owner)} />}
 

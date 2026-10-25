@@ -28,6 +28,10 @@ export interface BoardProps {
   onHover?: (cardId: string | null, x?: number, owner?: PlayerId) => void;
   /** Bulles de variation de statistiques à afficher sur les régiments. */
   bubbles?: Bubbles | null;
+  /** Colonne de gauche (pioche, défausse). */
+  left?: React.ReactNode;
+  /** Sous l'emplacement isolé (côté ligne de front) : le Moral total. */
+  isoExtra?: React.ReactNode;
 }
 
 type Pv = { end: number; mor: number; dead: boolean };
@@ -97,7 +101,7 @@ function UnitCard({ u, ctx, highlight, faded, pv, onHover, side, bubbles }: { u:
   );
 }
 
-export function Board({ game, player, bottom, isTarget, isFirstPicked, onSlot, highlight, faded, preview, onHover, bubbles }: BoardProps) {
+export function Board({ game, player, bottom, isTarget, isFirstPicked, onSlot, highlight, faded, preview, onHover, bubbles, left, isoExtra }: BoardProps) {
   const ctx = new Ctx(game);
   const b = game.players[player].board;
   const slot = (zone: Zone, idx: number, u: Unit | null) => {
@@ -125,8 +129,9 @@ export function Board({ game, player, bottom, isTarget, isFirstPicked, onSlot, h
   const back = <div className="row back">{b.arriere.map((u, i) => slot('arriere', i, u))}</div>;
   return (
     <div className={`board ${bottom ? 'bottom' : 'top'}`}>
+      {left}
       <div className="rows">{bottom ? <>{front}{back}</> : <>{back}{front}</>}</div>
-      <div className="iso">{slot('isole', 0, b.isole)}</div>
+      <div className={`iso${isoExtra ? ' with-extra' : ''}`}>{bottom ? <>{isoExtra}{slot('isole', 0, b.isole)}</> : <>{slot('isole', 0, b.isole)}{isoExtra}</>}</div>
     </div>
   );
 }

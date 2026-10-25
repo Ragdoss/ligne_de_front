@@ -30,7 +30,7 @@ const STEPS: Step[] = [
     title: 'Le champ de bataille',
     body: <>
       <p>Ton camp est en bas, celui des Pillards en haut. Chaque camp a une <b>rangée avant</b> (le contact), une <b>rangée arrière</b> (derrière, protégée) et une case <b>isolée</b> à droite, pour les unités spéciales.</p>
-      <p>Entre les deux : la <b>ligne de front</b>. En dessous de ton plateau, ta barre de joueur : ressource, niveau, lassitude, Moral total, pioche.</p>
+      <p>Entre les deux : la <b>ligne de front</b>. Tout en bas, ta barre de joueur : ta ressource (la pièce), ton niveau et ta lassitude. À gauche de ton plateau, ta pioche et ta défausse (clique-la pour la parcourir) ; à droite, entre les deux emplacements isolés, le Moral total de chaque camp.</p>
     </>,
   },
   {
