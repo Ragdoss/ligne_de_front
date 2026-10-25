@@ -132,14 +132,14 @@ describe('Vague 2 suite : Démons', () => {
     r = act(r.state, { type: 'endTurn' }); // fin du tour de B : toujours sonné
     expect(hitsBy(r.events, 'recrue_imp')).toHaveLength(0);
   });
-  it('Bourreau de l’Abîme : +10 ATK par autre régiment au Moral brisé', () => {
+  it('Bourreau de l’Abîme : +5 ATK par autre régiment au Moral brisé', () => {
     const s = quiet();
     const b = place(s, 'A', 'avant', 0, 'bourreau_abime');
     const ctx = new Ctx(s);
     const a = ctx.effectiveAtk(b);
     place(s, 'A', 'avant', 1, 'recrue_imp', { brokenMorale: true, currentMor: 1 });
     place(s, 'B', 'avant', 1, 'recrue_imp', { brokenMorale: true, currentMor: 1 });
-    expect(ctx.effectiveAtk(b)).toBe(a + 20);
+    expect(ctx.effectiveAtk(b)).toBe(a + 10);
   });
   it('Seigneur des tourments : chaque régiment détruit par le porteur donne 1 lassitude', () => {
     const s = quiet();
