@@ -27,7 +27,7 @@ export const WAVE1_TEXT_FR: Record<string, { name: string; desc: string }> = {
   murmure_abime: { name: 'Murmure de l’Abîme', desc: 'Un régiment adverse au Moral brisé change de camp jusqu’à la fin du tour. Offrande 2 : il reste de ton côté et regagne tout son Moral.' },
   maitre_pactes: { name: 'Maître des pactes', desc: 'La première fois à chaque tour que tu gagnes de la lassitude par l’effet d’une carte, pioche 1 carte.' },
   rempart_chair: { name: 'Rempart de chair', desc: 'Jusqu’à ton prochain tour, un régiment allié gagne +15 ARM. Offrande 2 : tous tes Démons à la place.' },
-  gargouille_sentinelle: { name: 'Gargouille sentinelle', desc: 'Un régiment adverse qui attaque un de ses alliés adjacents perd 1 Moral.' },
+  gargouille_sentinelle: { name: 'Terreur, la sentinelle', desc: 'Un régiment adverse qui attaque un de ses alliés adjacents perd 1 Moral.' },
   legion_morvak: { name: 'Légion de Morvak', desc: 'Sacrifice niveau 1+ (avant, arrière ou isolé) : récupère les statistiques, les mots-clés et l’effet d’arrivée en jeu du régiment sacrifié.' },
   morvak: { name: 'Hiérophante Morvak', desc: 'À son arrivée, prends le contrôle du régiment adverse au Moral le plus bas jusqu’à la fin du tour. Chaque fois que tu sacrifies un régiment, pioche 1 carte.' },
   voleurs_provisions: { name: 'Voleurs de provisions', desc: 'Quand un de tes régiments est détruit, l’adversaire défausse la carte du dessus de sa pioche (une seule, même avec plusieurs Voleurs en jeu).' },

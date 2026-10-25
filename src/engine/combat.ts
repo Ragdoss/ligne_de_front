@@ -244,7 +244,7 @@ export function attack(ctx: Ctx, a: Unit, target: Unit, mult = 1): void {
     target.stunnedBy = a.uid;
     ctx.emit({ type: 'stunned', uid: target.uid, cardId: target.cardId, by: a.uid });
   }
-  // Gargouille sentinelle : attaquer un de ses alliés adjacents coûte du Moral à l'attaquant.
+  // Terreur, la sentinelle (ex-Gargouille sentinelle) : attaquer un de ses alliés adjacents coûte du Moral à l'attaquant.
   const tRef = ctx.slotOf(target.uid);
   let punish = 0;
   if (tRef) for (const g of ctx.neighbors(tRef)) if (!g.brokenMorale) punish += (card(g.cardId).punishesAttackersOfNeighbors as number | undefined) ?? 0;
