@@ -7,7 +7,7 @@ export interface GlossEntry { term: string; text: string }
 /** Définitions courtes (le X est la valeur indiquée sur la carte). */
 const GLOSS: Record<string, string> = {
   Distance: 'Peut attaquer n’importe quel régiment adverse (hors emplacement isolé), en visant le Moral le plus bas, depuis l’avant comme depuis l’arrière.',
-  Effrayant: 'Quand ce régiment attaque, sa cible perd X Moral en plus du 1 Moral habituel. Les Effrayant s’additionnent.',
+  'Effrayant X': 'Quand ce régiment attaque, sa cible perd X Moral en plus du 1 Moral habituel. Les Effrayant s’additionnent.',
   Ralliement: 'À son arrivée, ses voisins regagnent X Moral.',
   Mirage: 'Les X premières attaques qui le visent frappent le vide (au total, pas par tour).',
   Lent: 'N’attaque qu’au combat de fin de son propre tour, pas à celui de l’adversaire. Gardé même au Moral brisé.',
@@ -19,7 +19,7 @@ const GLOSS: Record<string, string> = {
   Prêt: 'Arrive prêt : pas de pénalité d’arrivée, il frappe avec toute son ATK dès le tour où il est posé (sinon, la moitié).',
   'Arrive prêt': 'Pas de pénalité d’arrivée : il frappe avec toute son ATK dès le tour où il est posé (sinon, la moitié).',
   Offrande: 'En jouant la carte, tu peux payer X lassitude pour obtenir l’effet renforcé.',
-  'Sacrifice X': 'Pour le poser, sacrifie un de tes régiments de niveau X ou plus : il prend sa place.',
+  'Sacrifice X': 'Pour le poser, sacrifie un de tes régiments de niveau X ou plus : il prend sa place.\nLe Meneur est détruit.',
   Formation: 'Bonus selon les régiments voisins sur la même ligne (à gauche et à droite seulement).',
   'Durée de vie': 'Quitte le plateau après le nombre de tours indiqué.',
   Communion: 'Actif tant que tu contrôles un Elfe et un Élémentaux (deux régiments distincts).',
