@@ -856,7 +856,8 @@ const BASE_CARDS: Record<string, CardDef> = {
     "ini": 32,
     "mor": 6,
     "keywords": [
-      "Effrayant 1"
+      "Effrayant 1",
+      "Sacrifice 1"
     ],
     "sacrificeMinLevel": 1,
     "sacrificeGainsStats": false
@@ -961,7 +962,8 @@ const BASE_CARDS: Record<string, CardDef> = {
     "ini": 0,
     "mor": 10,
     "keywords": [
-      "Effrayant 2"
+      "Effrayant 2",
+      "Sacrifice 3"
     ],
     "sacrificeMinLevel": 3,
     "sacrificeGainsStats": true,
