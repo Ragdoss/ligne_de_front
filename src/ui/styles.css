@@ -731,3 +731,8 @@ button.pile:not(:disabled):hover .pile-stack > * { outline: 2px solid var(--bras
 .spot-tag.edge-bottom { transform: translate(-50%, -100%); }
 .spot-tag.edge-top::after, .spot-tag.edge-bottom::after { display: none; }
 @media (prefers-reduced-motion: reduce) { .spot-box.on { animation: none; } }
+
+/* Écran d'erreur (ErrorBoundary) */
+.crash { max-width: 900px; margin: 40px auto; padding: 16px 24px; border: 1px solid var(--danger); border-radius: 8px; background: var(--bg-panel); }
+.crash h1 { margin-top: 0; color: var(--brass-bright); }
+.crash pre { white-space: pre-wrap; word-break: break-word; font-size: .8rem; background: #0006; padding: 10px; border-radius: 6px; max-height: 50vh; overflow: auto; }
