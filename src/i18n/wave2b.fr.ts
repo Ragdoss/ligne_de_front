@@ -14,7 +14,7 @@ export const WAVE2B_TEXT_FR: Record<string, { name: string; desc: string }> = {
   sorciere_pacte: { name: 'Sorcière du pacte', desc: 'Chaque fois que tu gagnes de la lassitude par une carte, elle gagne +5 ATK ce tour-ci.' },
   voile_ombre: { name: 'Voile d’ombre', desc: 'Le régiment ciblé gagne +10 ARM jusqu’à ton prochain tour. Offrande 2 : +20 ARM à la place.' },
   gardien_chaines: { name: 'Gardien des chaînes', desc: 'Sacrifice niveau 1+. Les régiments adverses qui attaquent un de ses voisins perdent 3 ATK par niveau du régiment sacrifié.' },
-  grimoire_interdit: { name: 'Grimoire interdit', desc: 'Pioche 3 cartes, puis remets-en 2 sur le dessus de ta pioche, dans l’ordre de ton choix. Offrande 1 : mélange ensuite ta pioche.' },
+  grimoire_interdit: { name: 'Grimoire interdit', desc: 'Pioche 4 cartes, puis remets-en 2 sur le dessus de ta pioche, dans l’ordre de ton choix. Offrande 1 : mélange ensuite ta pioche.' },
   chaines_abime: { name: 'Chaînes de l’Abîme', desc: 'Le régiment ciblé est sonné (il n’attaque pas ce combat). Offrande 2 : il le reste jusqu’à ton prochain tour.' },
   bourreau_abime: { name: 'Bourreau de l’Abîme', desc: '+5 ATK par autre régiment au Moral brisé en jeu (allié ou adverse).' },
   seigneur_tourments: { name: 'Seigneur des tourments', desc: 'Le porteur gagne Effrayant 1. Quand il détruit un régiment, l’adversaire gagne 1 lassitude.' },

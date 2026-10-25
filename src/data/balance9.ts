@@ -8,4 +8,5 @@ export const BALANCE_9: Record<string, Partial<CardDef>> = {
   bourreau_abime: { atkPerBrokenOnBoard: 5 },   // était +10 ATK par régiment au Moral brisé
   gargouille_sentinelle: { cout: 4 },           // était coût 3
   gargouille_cendres: { arm: 10 },              // était 15 ARM
+  // Grimoire interdit : pioche 4 au lieu de 3 (src/engine/play.ts), toujours 2 cartes remises : une carte nette en plus.
 };

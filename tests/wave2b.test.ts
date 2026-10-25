@@ -98,16 +98,16 @@ describe('Vague 2 suite : Démons', () => {
     const h = hitsBy(r.events, 'recrue_imp').find(x => x.target === nb.uid)!;
     expect(h.atk).toBe(new Ctx(s).effectiveAtk(s.players.B.board.avant[1]!) - 3);
   });
-  it('Grimoire interdit : pioche 3, remet 2 cartes choisies sur la pioche', () => {
+  it('Grimoire interdit : pioche 4, remet 2 cartes choisies sur la pioche', () => {
     let s = quiet(); s.players.A.level = 3; s.players.A.resource = 9;
     s.players.A.deck = ['lieutenant', 'paysans', 'archer_imp', 'recrue_imp', 'recrue_imp'];
     s = act(s, { type: 'play', handUid: give(s, 'A', 'grimoire_interdit') }).state;
     s = choose(s, 0); // sans Offrande
-    expect(s.players.A.hand).toHaveLength(3);
+    expect(s.players.A.hand).toHaveLength(4);
     s = act(s, { type: 'choose', option: s.pending[0]!.options!.findIndex(o => o.cardId === 'archer_imp') }).state;
     s = act(s, { type: 'choose', option: s.pending[0]!.options!.findIndex(o => o.cardId === 'lieutenant') }).state;
     expect(s.players.A.deck.slice(0, 2)).toEqual(['archer_imp', 'lieutenant']);
-    expect(s.players.A.hand.map(h => h.cardId)).toEqual(['paysans']);
+    expect(s.players.A.hand.map(h => h.cardId)).toEqual(['paysans', 'recrue_imp']);
   });
   it('Grimoire interdit avec Offrande : les 2 cartes remises sont mélangées dans la pioche', () => {
     let s = quiet(); s.players.A.level = 3; s.players.A.resource = 9;
@@ -117,8 +117,8 @@ describe('Vague 2 suite : Démons', () => {
     s = choose(s, 1);
     expect(s.players.A.points).toBe(lass + 1);
     s = choose(s, 0); s = choose(s, 0);
-    expect(s.players.A.hand).toHaveLength(1);
-    expect(s.players.A.deck).toHaveLength(22);
+    expect(s.players.A.hand).toHaveLength(2);
+    expect(s.players.A.deck).toHaveLength(21);
     expect(s.pending).toHaveLength(0);
   });
   it('Chaînes de l’Abîme avec Offrande : sonné aussi au combat du tour adverse', () => {

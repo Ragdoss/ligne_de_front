@@ -694,7 +694,7 @@ export function applyOffrande(ctx: Ctx, p: PlayerId, cardId: string, paid: boole
       ctx.emit({ type: 'stunned', uid: target.uid, cardId: target.cardId, by: -1 });
       break;
     case 'grimoire': {
-      for (let i = 0; i < 3 && !ctx.over; i++) ctx.draw(p, cardId);
+      for (let i = 0; i < 4 && !ctx.over; i++) ctx.draw(p, cardId); // Équilibrage 9 : pioche 4 (au lieu de 3)
       if (ctx.over) break;
       ctx.queueChoice('grimoire', p, cardId, { left: 2, placed: 0, shuffle: paid ? 1 : 0 });
       break;
