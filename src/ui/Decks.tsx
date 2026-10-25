@@ -1,20 +1,14 @@
 // Mes decks : liste des decks du joueur et créateur de deck (règles vérifiées en direct).
 import { useMemo, useState } from 'react';
 import { CARDS } from '../data/cards';
+import { exportDeck, parseDeck } from '../profile/deckText';
 import { autoComplete, checkDeck, MAX_COPIES, owned, sortedDecks, type Profile, type SavedDeck } from '../profile/profile';
 import { CardTile } from './CardTile';
 import { showZoom, zoomProps } from './HoverZoom';
 import { filterCards, FilterBar, NO_FILTER, type Filters } from './Collection';
 import { cardName, FACTION_LABEL, PLAYABLE_FACTIONS } from './labels';
 
-/** Lit une liste de cartes collée (format du simulateur, ou simple liste) : tous les identifiants reconnus. */
-export function parseDeck(text: string): { deck: string[]; unknown: string[] } {
-  const quoted = [...text.matchAll(/['"]([^'"]+)['"]/g)].map(m => m[1]!.trim());
-  const words = quoted.length ? quoted : text.split(/[\s,;]+/).filter(Boolean);
-  const deck: string[] = [], unknown: string[] = [];
-  for (const w of words) (CARDS[w] ? deck : unknown).push(w);
-  return { deck, unknown };
-}
+export { parseDeck } from '../profile/deckText';
 
 export function mainFaction(cards: string[]): string {
   const n: Record<string, number> = {};
@@ -68,6 +62,9 @@ function DeckBuilder({ profile, initial, onSave, onCancel, onDelete }: {
   const [f, setF] = useState<Filters>({ ...NO_FILTER, owned: profile.options.allUnlocked ? 'all' : 'owned' });
   const [autoFaction, setAutoFaction] = useState<string>(() => (initial.cards.length ? mainFaction(initial.cards) : 'empire'));
   const [importText, setImportText] = useState<string | null>(null);
+  const [importMsg, setImportMsg] = useState('');
+  const [showExport, setShowExport] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const count = useMemo(() => { const n: Record<string, number> = {}; for (const id of cards) n[id] = (n[id] ?? 0) + 1; return n; }, [cards]);
   const chk = checkDeck(cards, profile);
@@ -117,14 +114,33 @@ function DeckBuilder({ profile, initial, onSave, onCancel, onDelete }: {
           <button type="button" onClick={() => setCards(autoComplete(cards, profile, autoFaction))}>Compléter automatiquement</button>
         </div>
         <div className="choices row left">
-          <button type="button" onClick={() => setImportText(importText === null ? '' : null)}>Importer une liste</button>
+          <button type="button" onClick={() => { setImportText(importText === null ? '' : null); setShowExport(false); setImportMsg(''); }}>Importer une liste</button>
+          <button type="button" disabled={!cards.length} onClick={() => { setShowExport(!showExport); setImportText(null); setCopied(false); }}>Exporter</button>
           <button type="button" onClick={() => setCards([])}>Vider</button>
         </div>
         {importText !== null && (
           <div className="custom-deck">
-            <textarea rows={4} value={importText} onChange={e => setImportText(e.target.value)} placeholder="const DECK = ['recrue_imp', …]; ou recrue_imp, lancier_emp …" aria-label="Liste de cartes à importer" />
-            <button type="button" onClick={() => { setCards(parseDeck(importText).deck); setImportText(null); }}>Remplacer le deck par cette liste</button>
+            <textarea rows={6} value={importText} onChange={e => setImportText(e.target.value)} placeholder={'3 Recrues impériales\n2 Lanciers…  (liste exportée, ou identifiants)'} aria-label="Liste de cartes à importer" />
+            <button type="button" onClick={() => {
+              const r = parseDeck(importText);
+              setCards(r.deck);
+              if (r.name && /^(Nouveau deck|Deck sans nom)$/.test(name)) setName(r.name);
+              setImportText(null);
+              setImportMsg(r.unknown.length ? `Cartes non reconnues, ignorées : ${r.unknown.join(', ')}.` : '');
+            }}>Remplacer le deck par cette liste</button>
             <p className="muted small">Les cartes non possédées seront signalées dans les problèmes du deck.</p>
+          </div>
+        )}
+        {importMsg && <p className="warn small">{importMsg}</p>}
+        {showExport && (
+          <div className="custom-deck">
+            <textarea rows={8} readOnly value={exportDeck(cards, name)} aria-label="Liste du deck à copier" onFocus={e => e.currentTarget.select()} />
+            <button type="button" onClick={e => {
+              const ta = (e.currentTarget.previousElementSibling as HTMLTextAreaElement);
+              const fallback = () => { ta.focus(); ta.select(); try { document.execCommand('copy'); setCopied(true); } catch { /* sélection seule */ } };
+              try { navigator.clipboard.writeText(ta.value).then(() => setCopied(true), fallback); } catch { fallback(); }
+            }}>{copied ? 'Copié !' : 'Copier'}</button>
+            <p className="muted small">À coller dans « Importer une liste » (ici ou chez un autre joueur).</p>
           </div>
         )}
         <div className="choices row">
