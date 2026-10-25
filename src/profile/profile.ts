@@ -49,6 +49,10 @@ export interface Options {
   zoomScale?: number;
   /** Mode vérification : cartes, images de profil et emotes affichées même non possédées (pour contrôler les illustrations). */
   showAll?: boolean;
+  /** Volume des effets sonores et de la musique (0 à 1), son coupé (docs/SONS.md). */
+  sfxVolume?: number;
+  musicVolume?: number;
+  muted?: boolean;
 }
 
 export interface Profile {

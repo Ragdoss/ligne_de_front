@@ -1,4 +1,5 @@
 // Écrans de menu : accueil, jouer en local, campagnes, options.
+import { playSound } from './sound';
 import titleBg from './assets/title_bg.webp';
 import optionsBg from './assets/options_bg.webp';
 import localBg from './assets/local_bg.webp';
@@ -324,6 +325,15 @@ export function OptionsScreen({ profile, update, onBack, onSwitchProfile }: { pr
         {range('boardScale', 'Taille des cartes sur le plateau', 0.7, 1.8, 0.05, v => `${Math.round(v * 100)} %`)}
         {range('handScale', 'Taille des cartes en main', 0.7, 1.8, 0.05, v => `${Math.round(v * 100)} %`)}
         {range('zoomScale', 'Taille de la carte agrandie au survol', 0.8, 2, 0.1, v => `${Math.round(v * 100)} %`)}
+        <label className="check"><input type="checkbox" checked={!!o.muted} onChange={e => set('muted', e.target.checked)} /> Couper le son</label>
+        <label className="field">
+          <span>Volume des effets sonores : <b>{Math.round((o.sfxVolume ?? 0.7) * 100)} %</b></span>
+          <input type="range" min={0} max={1} step={0.05} value={o.sfxVolume ?? 0.7} disabled={!!o.muted} onChange={e => set('sfxVolume', Number(e.target.value))} onPointerUp={() => playSound(['test', 'clic'])} />
+        </label>
+        <label className="field">
+          <span>Volume de la musique : <b>{Math.round((o.musicVolume ?? 0.4) * 100)} %</b></span>
+          <input type="range" min={0} max={1} step={0.05} value={o.musicVolume ?? 0.4} disabled={!!o.muted} onChange={e => set('musicVolume', Number(e.target.value))} />
+        </label>
         {range('animSpeed', 'Durée des animations de combat', 0.25, 2, 0.25, v => (v === 1 ? 'normale' : `×${v}`))}
         {range('aiSpeed', 'Temps de réflexion affiché de l’ordinateur', 0.25, 3, 0.25, v => (v === 1 ? 'normal' : `×${v}`))}
         {range('bannerSpeed', 'Durée des bandeaux (tactiques, Leaders adverses)', 0.5, 4, 0.5, v => (v === 1 ? 'normale' : `×${v}`))}

@@ -1,4 +1,5 @@
 // Application : accueil, parties locales, campagne, collection (decks, cartes, paquets), options.
+import { requestMusic, setSoundOptions } from './sound';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { addToPool, bonusFor, difficultyOf, easeFor, bonusUnlocked, campaignDef, defeatsOn, currentScenario, defaultDeckSelection, saveCampaign, scenarioAiFilter, scenarioGameSetup, selectionToDeck, type CampaignSave } from '../campaign/campaign';
 import type { Action, DialogLine, GameState, PlayerId } from '../engine/types';
@@ -63,9 +64,19 @@ const CoinGain = () => <p className="coin-gain">+{COINS_PER_WIN} pièces</p>;
 const lossCoins = (g: GameState) => defeatCoins(g.players[g.over!.winner].level);
 const LossCoins = ({ n }: { n: number }) => <p className="coin-gain">{n > 0 ? `+${n} pièce${n > 1 ? 's' : ''}` : 'Aucune pièce'} <span className="muted small">(niveau adverse − 2)</span></p>;
 
+/** Musique de chaque écran : candidats, du plus précis au plus général. */
+function screenMusic(kind: Screen['kind']): string[] {
+  if (kind.startsWith('camp') && kind !== 'campaignMenu') return kind === 'campVictory' || kind === 'campEnd' ? ['victoire', 'camp', 'menu'] : ['camp', 'menu'];
+  if (kind === 'draft' || kind === 'draftMulti') return ['draft', 'menu'];
+  if (kind === 'collection') return ['collection', 'menu'];
+  return ['menu'];
+}
+
 export function App() {
   const [screen, setScreen] = useState<Screen>({ kind: 'home' });
   useEffect(() => { showZoom(null); }, [screen.kind]); // l'agrandissement ne survit pas à un changement d'écran
+  // Musique de l'écran (une partie demande la sienne par-dessus : GameScreen). Noms des morceaux : docs/SONS.md.
+  useEffect(() => requestMusic(screenMusic(screen.kind)), [screen.kind]);
   const [profile, setProfile] = useState<Profile>(() => loadProfile());
   /** Partie de campagne en cours, suivie par la bulle des règles du scénario. */
   const live = useRef(liveGameStore()).current;
@@ -84,6 +95,7 @@ export function App() {
   const o = profile.options;
   setRomanLevels(o.romanLevels !== false);
   setAttackMotion(o.attackMotion !== false);
+  setSoundOptions(o);
   setArtChoices(o.showAll ? profile.artChoice : Object.fromEntries(Object.entries(profile.artChoice).filter(([, k]) => profile.altArts.includes(k))));
   const gameOpts = { animMul: o.animSpeed, aiMul: o.aiSpeed, bannerMul: o.bannerSpeed, initialReveal: o.revealAiHand };
 
@@ -207,6 +219,7 @@ export function App() {
         key={screen.key}
         {...gameOpts}
         setup={scenarioGameSetup(sc, screen.deck, screen.key, bonusFor(c, sc.id), easeFor(sc.id, difficultyOf(c)))}
+        music={[`scenario-${sc.id}`, `combat-${c.id}`, 'combat-campagne', 'combat']}
         names={names}
         human={{ A: !AUTOPILOT, B: false }}
         fast={AUTOPILOT}

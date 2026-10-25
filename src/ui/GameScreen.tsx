@@ -12,6 +12,7 @@ import { APP_VERSION } from '../version';
 import { Hand } from './Hand';
 import { ZoomCard } from './ZoomCard';
 import { statBubbles, type Bubbles } from './bubbles';
+import { playSound, playSounds, requestMusic, soundsFor } from './sound';
 import { cardDesc, cardName, choiceTitle, optionLabel, UNPLAYABLE } from './labels';
 
 const sameSlot = (a?: SlotRef, b?: SlotRef) => !!a && !!b && a.player === b.player && a.zone === b.zone && a.idx === b.idx;
@@ -86,6 +87,8 @@ export interface GameScreenProps {
   avatars?: Partial<Record<PlayerId, string | undefined>>;
   /** IA forte (v3) ; sinon IA v2 (campagne et tutoriel : leur difficulté a été réglée avec la v2). */
   strongAi?: boolean;
+  /** Musique de la partie (candidats, du plus précis au plus général ; docs/SONS.md). */
+  music?: string[];
   /** Le régiment qui attaque se déplace jusqu'à sa cible (Options). */
   attackMotion?: boolean;
   /** Arts alternatifs choisis par chaque joueur (carte → clé d'art). */
@@ -166,7 +169,11 @@ export function ChoicePanel({ choice, onPick, onHover }: { choice: PendingChoice
   );
 }
 
-export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, intro, renderEnd, onQuit, animMul = 1, aiMul = 1, bannerMul = 1, initialReveal = false, onOver, remote, bottomSide, onGame, overlay, avatars, arts, attackMotion = attackMotionOn, strongAi = false }: GameScreenProps) {
+export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, intro, renderEnd, onQuit, animMul = 1, aiMul = 1, bannerMul = 1, initialReveal = false, onOver, remote, bottomSide, onGame, overlay, avatars, arts, attackMotion = attackMotionOn, strongAi = false, music = ['combat'] }: GameScreenProps) {
+  const musicKey = music.join('|');
+  useEffect(() => requestMusic(musicKey.split('|')), [musicKey]);
+  /** Joueur de cet écran (sons de victoire / défaite) ; null à deux sur le même écran ou en spectateur. */
+  const me: PlayerId | null = remote ? (remote.side === 'A' ? 'B' : 'A') : human.A !== human.B ? (human.A ? 'A' : 'B') : null;
   const artsRef = useRef<Partial<Record<PlayerId, Record<string, string>>>>({});
   artsRef.current = arts ?? {};
   setGameArts(artsRef.current); // chaque camp avec ses propres arts (base pour l'ordinateur)
@@ -243,6 +250,7 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
     const attacks = ev.map((e, i) => (e.type === 'attack' ? i : -1)).filter(i => i >= 0);
     if (action.type === 'endTurn' && attacks.length) {
       const startIdx = ev.findIndex(e => e.type === 'combatStart');
+      playSounds(soundsFor(ev.slice(0, attacks[0]), me));
       // Avant les attaques : effets d'avant-combat.
       const pre = at(attacks[0]! - 1);
       setShown(pre);
@@ -254,7 +262,10 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
         const e = ev[i] as Extract<GameEvent, { type: 'attack' }>;
         setShown(at(i - 1));
         setHighlight({ attacker: e.attacker, target: e.target });
+        const [swing, hit] = soundsFor([e], me);
+        playSound(swing!);
         await sleep(T * 0.75);
+        playSounds([hit!, ...soundsFor(ev.slice(i + 1, last + 1).filter(x => x.type !== 'turnStart'), me)]);
         // Résultat de l'attaque (et de ses suites : destructions, Moral perdu par les alliés…).
         const segment = ev.slice(i, last + 1);
         const killed = segment.filter(x => x.type === 'destroyed').map(x => (x as { uid: number }).uid);
@@ -272,11 +283,15 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
       setHighlight(null);
       setFaded(new Set());
       setShown(null);
+      // Début du tour suivant (pioche…) : sons après le combat.
+      const ts = ev.findIndex((y, k) => k > attacks[attacks.length - 1]! && y.type === 'turnStart');
+      if (ts >= 0) playSounds(soundsFor(ev.slice(ts), me));
       const tail = at(ev.length - 1);
       const endB = statBubbles(at(attacks[attacks.length - 1]!), tail, false);
       setBubbles(endB);
     } else {
-      // Autres actions (tactique, Leader, effet…) : bulles des variations de statistiques.
+      // Autres actions (tactique, Leader, effet…) : sons et bulles des variations de statistiques.
+      playSounds(soundsFor(r.events, me));
       const b = statBubbles(game, r.state);
       setBubbles(b);
     }
@@ -284,7 +299,7 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
     if (dlg.length) setDialogs(d => [...d, ...dlg]);
     setGame(r.state);
     busy.current = false;
-  }, [game, names, human, pushBanner, fast, animMul, remote, setBubbles]);
+  }, [game, names, human, pushBanner, fast, animMul, remote, setBubbles, me]);
 
   // Tour de l'ordinateur (et ses choix en attente). Il attend que les dialogues soient fermés.
   useEffect(() => {
