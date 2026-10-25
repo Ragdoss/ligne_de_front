@@ -695,9 +695,10 @@ button.pile:not(:disabled):hover .pile-stack > * { outline: 2px solid var(--bras
 /* Épaisseur du paquet : ombres décalées selon le nombre de cartes. */
 .pile-stack > * { position: absolute; inset: 0; border-radius: 6%/3.5%; box-shadow: calc(var(--depth, 1) * 1px) calc(var(--depth, 1) * 1px) 0 #0b0d0a, calc(var(--depth, 1) * 1.6px) calc(var(--depth, 1) * 1.6px) 0 #2a2f26, 0 3px 8px #0009; }
 .card-back { display: grid; place-items: center;
-  background: radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--fac-hi) 70%, #000) 0 18%, transparent 19%),
+  background: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--fac-hi) 70%, #000) 0 18%, transparent 19%),
     repeating-linear-gradient(45deg, #0000 0 6px, #ffffff0d 6px 7px), linear-gradient(160deg, var(--fac), #120d0a);
   border: 2px solid var(--card-brass, #c9a45a); }
+.card-back span { display: block; line-height: 1; transform: translateY(.06em); }
 .card-back span, .pile-count { font: 700 .95rem/1 'Cinzel', serif; color: #fff3df; text-shadow: 0 1px 3px #000; }
 .pile-count { position: absolute; right: 4px; bottom: 4px; background: #000a; border-radius: 10px; padding: 2px 6px; font-size: .8rem; }
 .discard-top { overflow: hidden; }
