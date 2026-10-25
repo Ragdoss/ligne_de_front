@@ -57,8 +57,8 @@ const STEPS: Step[] = [
     title: 'Lire un régiment',
     spots: [{ sel: '.board.bottom .unit .u-atk', label: 'ATK', max: 1 }, { sel: '.board.bottom .unit .u-arm', label: 'ARM', max: 1 }, { sel: '.board.bottom .unit .u-ini', label: 'INI', max: 1 }, { sel: '.board.bottom .unit .bar.end', label: 'END', max: 1 }, { sel: '.board.bottom .unit .bar.mor', label: 'MOR', max: 1 }],
     body: <>
-      <p><b>ATK</b> : les dégâts infligés. <b>END</b> : l’endurance, la quantité de dégat que peux subir le régiment. <b>ARM</b> : l’armure, retirée de chaque attaque reçue.</p>
-      <p><b>INI</b> : l’initiative, qui décide qui frappe en premier. <b>MOR</b> : le Moral, le courage du régiment.</p>
+      <p><b>ATK</b> : les dégâts infligés.\n<b>END</b> : l’endurance, la quantité de dégat que peux subir le régiment.\n<b>ARM</b> : l’armure, retirée de chaque attaque reçue.</p>
+      <p><b>INI</b> : l’initiative, qui décide qui frappe en premier.\n<b>MOR</b> : le Moral, le courage du régiment.</p>
       <p>Un régiment qui vient d’arriver frappe à <b>moitié de son ATK</b> à son premier combat (pénalité d’apparition).</p>
     </>,
   },
