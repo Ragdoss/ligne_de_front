@@ -2,7 +2,7 @@
 export const WAVE2_TEXT_FR: Record<string, { name: string; desc: string }> = {
   sentinelle_cimes: { name: 'Sentinelle des cimes', desc: '+10 ATK contre un régiment au Moral brisé.' },
   traqueuse_sylvestre: { name: 'Traqueuse sylvestre', desc: 'Vise le régiment adverse à l’Endurance la plus basse (au lieu du Moral le plus bas).' },
-  marque_chasseur: { name: 'Marque du chasseur', desc: 'Ce tour-ci, tes régiments à Distance attaquent le régiment ciblé et ignorent 10 ARM contre lui.' },
+  marque_chasseur: { name: 'Marque du chasseur', desc: 'Ce tour-ci, tes régiments à Distance attaquent le régiment ciblé, avec +10 ATK, et ignorent 10 ARM contre lui.' },
   chant_traque: { name: 'Chant de la traque', desc: 'Tes régiments à Distance frappent tout de suite, hors combat, leur cible habituelle.' },
   seigneure_chasse: { name: 'Seigneure de la chasse', desc: 'Chaque fois qu’un régiment adverse au Moral brisé est détruit, l’adversaire gagne 2 lassitude.' },
   visez_faibles: { name: 'Visez les faibles', desc: 'Ce tour-ci, tes régiments avant sans Distance attaquent le régiment arrière adverse ciblé, comme s’il était en face d’eux.' },

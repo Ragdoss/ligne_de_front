@@ -429,7 +429,7 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
       break;
     }
     case 'serenite':
-      ctx.loseLassitude(p, c.doubledWithElemental && ctx.controlsElemental(p) ? 6 : 3, c.id);
+      ctx.loseLassitude(p, ((c.lassitudeLoss as number | undefined) ?? 3) * (c.doubledWithElemental && ctx.controlsElemental(p) ? 2 : 1), c.id);
       for (let i = 0; i < ((c.drawAfter as number | undefined) ?? 0) && !ctx.over; i++) ctx.draw(p, c.id);
       break;
     case 'buffArchers': {
@@ -437,7 +437,7 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
       note('buffArchers');
       break;
     }
-    case 'soin10': ctx.heal(target!, 10, 0, c.id); break;
+    case 'soin10': ctx.heal(target!, (c.healAmount as number | undefined) ?? 10, 0, c.id); break; // Soin simple
     case 'brumeTrompeuse': {
       const elems = ctx.units(p).filter(u => u.types.includes('Élémentaux')).length;
       target!.tempIni -= 20;

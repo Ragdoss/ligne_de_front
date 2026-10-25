@@ -284,9 +284,9 @@ describe('Vague 1 : cross-faction et neutres', () => {
   it('Dryade corrompue : les soins font aussi baisser la lassitude (reliquat conservé)', () => {
     let s = blankGame(); s.players.A.resource = 5; s.players.A.points = 10;
     place(s, 'A', 'arriere', 0, 'dryade_corrompue');
-    place(s, 'A', 'avant', 0, 'recrue_imp', { currentEnd: 5 });
+    place(s, 'A', 'avant', 0, 'elem_terre', { currentEnd: 5 });
     s = act(s, { type: 'play', handUid: give(s, 'A', 'soin_simple', { generated: true }), target: slot('A', 'avant', 0) }).state;
-    expect(s.players.A.board.avant[0]!.currentEnd).toBe(15); // le soin n'est plus annulé
+    expect(s.players.A.board.avant[0]!.currentEnd).toBe(20); // le soin n'est plus annulé (Soin simple : 15 END)
     expect(s.players.A.points).toBe(10);
     s = act(s, { type: 'play', handUid: give(s, 'A', 'soin_simple', { generated: true }), target: slot('A', 'avant', 0) }).state;
     expect(s.players.A.points).toBe(9);

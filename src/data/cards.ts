@@ -4,6 +4,7 @@ import { BALANCE_5 } from './balance5';
 import { BALANCE_6 } from './balance6';
 import { BALANCE_7 } from './balance7';
 import { BALANCE_9 } from './balance9';
+import { BALANCE_10 } from './balance10';
 import { applyBalance8 } from './balance8';
 import { WAVE1 } from './wave1';
 import { WAVE2 } from './wave2';
@@ -1996,7 +1997,8 @@ const BASE_CARDS: Record<string, CardDef> = {
 
 /** Toutes les cartes : catalogue de base + vagues 1 et 2 de la première édition. */
 export const CARDS: Record<string, CardDef> = { ...BASE_CARDS, ...WAVE1, ...WAVE2, ...WAVE2B };
-for (const [id, over] of Object.entries({ ...BALANCE_5, ...BALANCE_6, ...BALANCE_7, ...BALANCE_9 })) CARDS[id] = { ...CARDS[id]!, ...over } as CardDef;
+// Chaque équilibrage s'applique par-dessus le précédent, champ par champ (une carte retouchée deux fois garde les deux retouches).
+for (const bal of [BALANCE_5, BALANCE_6, BALANCE_7, BALANCE_9, BALANCE_10]) for (const [id, over] of Object.entries(bal)) CARDS[id] = { ...CARDS[id]!, ...over } as CardDef;
 applyBalance8(CARDS);
 // Régiments qui arrivent prêts : le mot-clé Prêt est affiché sur la carte (au lieu d'un texte « Arrive prêt »).
 for (const c of Object.values(CARDS)) if (c.arrivesReady && !(c.keywords ?? []).includes('Prêt')) c.keywords = [...(c.keywords ?? []), 'Prêt'];

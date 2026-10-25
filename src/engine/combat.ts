@@ -213,6 +213,7 @@ export function attack(ctx: Ctx, a: Unit, target: Unit, mult = 1): void {
   if (vsBroken && target.brokenMorale && !a.brokenMorale) atk += vsBroken;
   // Maître des embuscades : + l'avance d'INI de l'attaquant sur sa cible.
   if (a.leader && !a.brokenMorale && card(a.leader).leaderIniDiffAtk) atk += Math.max(0, ctx.effectiveIni(a) - ctx.effectiveIni(target));
+  if (target.markedBy === a.controller && ctx.hasDistance(a)) atk += (card('marque_chasseur').markAtk as number | undefined) ?? 0; // Marque du chasseur
   // Pénétration d'armure X : l'attaquant ignore les X premiers points d'Armure de sa cible.
   const penVal = (a.brokenMorale ? 0 : keywordValue(a, 'Pénétration')) // cumulée, comme tout mot-clé chiffré
     + (target.markedBy === a.controller && ctx.hasDistance(a) ? ((card('marque_chasseur').markPen as number | undefined) ?? 5) : 0); // Marque du chasseur

@@ -138,7 +138,7 @@ const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "clerc_foret": {
     "name": "Clerc de la Forêt",
-    "desc": "Durée de vie 3 tours. Génère Soin simple en main chaque tour."
+    "desc": "Durée de vie 5 tours. Génère Soin simple en main chaque tour."
   },
   "elem_terre": {
     "name": "Élémentaire de Terre",
@@ -174,7 +174,7 @@ const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "soin_simple": {
     "name": "Soin simple",
-    "desc": "+10 Endurance à la cible."
+    "desc": "+15 Endurance à la cible."
   },
   "chamane_foret": {
     "name": "Chamane de la Forêt",
@@ -270,7 +270,7 @@ const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "serenite_foret": {
     "name": "Sérénité de la Forêt",
-    "desc": "Tu perds 3 points de lassitude, 6 si tu contrôles un Élémentaux (le niveau ne redescend jamais). Pioche 2 cartes."
+    "desc": "Tu perds 5 points de lassitude, 10 si tu contrôles un Élémentaux (le niveau ne redescend jamais). Pioche 2 cartes."
   },
   "chant_vent": {
     "name": "Chant du Vent",
