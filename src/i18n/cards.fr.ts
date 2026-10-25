@@ -30,19 +30,19 @@ const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "general_empire": {
     "name": "Général de l'Empire",
-    "desc": "Au début de chaque tour de son contrôleur, le porteur gagne 1 Moral par régiment Empire adjacent sur sa ligne."
+    "desc": "Au début de chaque tour de son contrôleur, le mené gagne 1 Moral par régiment Empire adjacent sur sa ligne."
   },
   "soldat_kragz": {
     "name": "Soldat de Kragz",
-    "desc": "+5 ARM tant qu'il porte un Leader."
+    "desc": "+5 ARM tant qu'il est mené."
   },
   "porte_etendard": {
     "name": "Porte-Étendard",
-    "desc": "Au début de ton tour, chaque régiment porteur d'un Leader gagne 1 Moral."
+    "desc": "Au début de ton tour, chaque régiment mené gagne 1 Moral."
   },
   "chevalier_templier": {
     "name": "Chevalier Templier",
-    "desc": "Tant qu'il porte un Leader, son Moral ne peut pas descendre sous 3."
+    "desc": "Tant qu'il est mené, son Moral ne peut pas descendre sous 3."
   },
   "cadets_academie": {
     "name": "Cadets de l'Académie",
@@ -58,23 +58,23 @@ const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "aumonier_guerre": {
     "name": "Aumônier de Guerre",
-    "desc": "À son attache puis au début de chaque tour de son contrôleur, le porteur regagne 10 END et 1 Moral."
+    "desc": "À son arrivé, puis au début de chaque tour de son contrôleur, le mené soigne 10 END et récupère 1 Moral."
   },
   "marechal_empire": {
     "name": "Maréchal d'Empire",
-    "desc": "Si le porteur est ton seul régiment, tu gagnes la comparaison de Moral de fin de tour."
+    "desc": "Si le mené est ton seul régiment, tu gagnes la comparaison de Moral de fin de tour."
   },
   "ralliement": {
     "name": "Ralliement",
-    "desc": "Cible un régiment allié porteur d'un Leader : il regagne 3 Moral (5 s'il a le Moral brisé)."
+    "desc": "Cible un régiment allié mené : il récupère 3 Moral (5 s'il a le Moral brisé)."
   },
   "formation_carre": {
     "name": "Formation en Carré",
-    "desc": "Jusqu'à ton prochain tour, tous tes régiments porteurs d'un Leader gagnent +10 ARM."
+    "desc": "Jusqu'à ton prochain tour, tous tes régiments menés gagnent +10 ARM."
   },
   "promotion": {
     "name": "Promotion",
-    "desc": "Défausse un Leader de ta main, révèle les 2 prochains Leaders de ton deck, choisis-en un et pioche-le, puis mélange le deck."
+    "desc": "Défausse un Meneur de ta main, révèle les 2 prochains Meneurs de ton deck, choisis-en un et pioche-le, puis mélange le deck."
   },
   "charge_imp": {
     "name": "Charge Impériale",
@@ -82,15 +82,15 @@ const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "convoi": {
     "name": "Convoi de Ravitaillement",
-    "desc": "Ne compte pas dans le Moral total de fin de tour. Avance d'un emplacement vers la droite à intervalle régulier ; sa destruction fait perdre le scénario, sa sortie du plateau le fait gagner."
+    "desc": "Ne compte pas dans le Moral total de fin de tour.\nAvance d'un emplacement vers la droite à intervalle régulier\nSa destruction fait perdre le scénario, sa sortie du plateau le fait gagner."
   },
   "garnison": {
     "name": "Garnison",
-    "desc": "Commence avec 3 Moral (maximum 6). Gagne 1 Moral chaque fois qu'un régiment adverse est vaincu."
+    "desc": "Commence avec 3 Moral de moins.\nRécupère 1 Moral chaque fois qu'un régiment adverse est vaincu."
   },
   "paysans": {
     "name": "Paysans",
-    "desc": "+1 ressource/tour à son contrôleur (+1 de plus niveau 4+)."
+    "desc": "+1 ressource/tour (+1 à partir du niveau 4)."
   },
   "lieutenant": {
     "name": "Lieutenant",
@@ -98,27 +98,27 @@ const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "etat_major": {
     "name": "État Major",
-    "desc": "+2 ressources/tour ; rallie 3 Moral aux régiments Empire au Moral brisé de son contrôleur."
+    "desc": "+2 ressources/tour\nVos régiments Empire au Moral brisé récupèrent 3 de Moral."
   },
   "ordre_haut_commandement": {
     "name": "Ordre du Haut Commandement",
-    "desc": "Tous vos régiments porteurs d'un Leader gagnent +10 ATK/+5 ARM ce tour-ci, et regagnent 4 Moral et 20 Endurance."
+    "desc": "Tous vos régiments menés gagnent +10 ATK et +5 ARM ce tour-ci, récupèrent 4 Moral et se soignent de 20 END."
   },
   "halte_convoi": {
     "name": "Halte du Convoi",
-    "desc": "Gratuite. Ton convoi saute sa prochaine avancée, et tu pioches une carte (scénarios d’escorte)."
+    "desc": "Ton convoi saute sa prochaine avancée, et tu pioches une carte."
   },
   "assassinat": {
     "name": "Assassinat",
-    "desc": "Détruit le Leader attaché au régiment adverse ciblé (le régiment lui-même survit)."
+    "desc": "Détruit le Meneur attaché au régiment adverse ciblé (le régiment lui-même survit)."
   },
   "espion_imperial": {
     "name": "Espion Impérial",
-    "desc": "Jouable sur un régiment adverse si vous contrôlez déjà un régiment Empire porteur d'un Leader. La cible gagne le mot-clé Lent."
+    "desc": "Jouable sur un régiment adverse si vous contrôlez déjà un régiment Empire mené.\nLa cible gagne le mot-clé Lent."
   },
   "cavaliers_dragons_elite": {
     "name": "Cavaliers Dragons Élite",
-    "desc": "À son arrivée, tous vos régiments Empire retrouvent un Moral plein."
+    "desc": "À son arrivée, tous vos régiments Empire récupèrent tout leur Moral."
   },
   "eclaireur_elfe": {
     "name": "Éclaireur Elfe",
@@ -126,7 +126,7 @@ const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "archer_bois": {
     "name": "Archer des Bois",
-    "desc": "Mot-clé Distance."
+    "desc": ""
   },
   "cavalier_elfe": {
     "name": "Cavalier Elfe",
@@ -138,7 +138,7 @@ const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "clerc_foret": {
     "name": "Clerc de la Forêt",
-    "desc": "Durée de vie 5 tours. Génère Soin simple en main chaque tour."
+    "desc": "Durée de vie 5 tours.\nGénère Soin Simple en main chaque tour."
   },
   "elem_terre": {
     "name": "Élémentaire de Terre",
@@ -146,7 +146,7 @@ const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "elem_eau": {
     "name": "Élémentaire d'Eau",
-    "desc": "À chaque fin de ton tour, soigne de 10 END ton régiment le plus blessé ; s'il atteint ainsi son END max, il gagne 1 Moral."
+    "desc": "À chaque fin de ton tour, soigne 10 END ton régiment le plus blessé. Si il atteint ainsi son END max, il récupère 1 Moral."
   },
   "elem_eveil_regiment": {
     "name": "Élémentaire Éveillé",
@@ -158,7 +158,7 @@ const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "vision": {
     "name": "Vision",
-    "desc": "Porteur Elfe ou Élémentaux. Les tactiques que tu joues coûtent 1 de moins (minimum 0, coûts variables compris). À l'attache : choisis une des 3 prochaines tactiques de ton deck, mélange le deck, puis mets-la en première carte."
+    "desc": "Les tactiques que tu joues coûtent 1 de moins (minimum 0, coûts variables compris).\nÀ son arrivé : choisis une des 3 prochaines tactiques de ton deck, mélange le deck, puis mets-la en première carte."
   },
   "sylvain": {
     "name": "Sylvain, Gardien Élémentaire",
@@ -174,19 +174,19 @@ const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "soin_simple": {
     "name": "Soin simple",
-    "desc": "+15 Endurance à la cible."
+    "desc": "Soigne 15 d'Endurance à la cible."
   },
   "chamane_foret": {
     "name": "Chamane de la Forêt",
-    "desc": "+25 END à l'arrivée puis +10 END à chaque fin de tour (des deux joueurs)."
+    "desc": "A son arrivé, soigne 25 END.\nA chaque fin de tour, Soigne 10 END."
   },
   "repositionnement": {
     "name": "Repositionnement",
-    "desc": "Échange la position d'un Elfe allié avec un autre emplacement ; +20 INI ce tour-ci aux deux."
+    "desc": "Échange la position d'un Elfe allié avec un autre emplacement ; +20 INI ce tour-ci aux deux régiments."
   },
   "rangers": {
     "name": "Rangers",
-    "desc": "Sa cible est Sonnée. Si un Elfe l'achève, Rangers + le tueur regagnent 2 Moral."
+    "desc": "Sa cible est Sonnée. Si un Elfe l'achève, Rangers et le tueur récupèrent 2 Moral."
   },
   "palissade_regiment": {
     "name": "Palissade",
@@ -194,15 +194,15 @@ const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "palissade_tactique": {
     "name": "Palissade",
-    "desc": "Coût variable (1 par emplacement avant vide). Crée un régiment Palissade (Minions) par emplacement vide."
+    "desc": "Coût variable (1 par emplacement avant vide).\nCrée un régiment Palissade (Minions) par emplacement vide."
   },
   "a_couvert": {
     "name": "À couvert",
-    "desc": "La cible perd 20 ATK (minimum 1 ATK restant) et gagne 30 Armure ce tour-ci ; si l'ATK aurait dû tomber à 0, elle ne gagne que 20 Armure à la place."
+    "desc": "La cible perd 20 ATK (minimum 1 ATK restant) et gagne 30 ARM ce tour-ci. Si l'ATK aurait dû tomber à 0, elle ne gagne que 20 ARM à la place."
   },
   "choc_et_effroi": {
     "name": "Choc et Effroi",
-    "desc": "Coût variable (= nb de régiments adverses au Moral brisé). Les sonne tous."
+    "desc": "Coût variable (= nb de régiments adverses au Moral brisé).\nLes sonne tous."
   },
   "cultiste": {
     "name": "Cultiste",
@@ -210,35 +210,35 @@ const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "chien_infernal": {
     "name": "Chien Infernal",
-    "desc": "Sacrifice niveau 1+ requis (coût d'accès, aucun gain)."
+    "desc": ""
   },
   "esclave_guerrier": {
     "name": "Esclave Guerrier",
-    "desc": "Regagne 2 Moral quand un autre régiment allié est détruit (même s'il est Minions)."
+    "desc": "Récupère 2 Moral quand un autre régiment allié est détruit (même s'il est Minions)."
   },
   "mercenaire_stagiaire": {
     "name": "Mercenaire stagiaire",
-    "desc": "Se bat pour l'argent, mais n'a trouvé qu'un stage non rémunéré. (Draft : à volonté.)"
+    "desc": ""
   },
   "acolyte_damne": {
     "name": "Acolyte Damné",
-    "desc": "Le régiment porteur ne perd pas de Moral quand un régiment allié est détruit."
+    "desc": "Le mené ne perd pas de Moral quand un régiment allié est détruit."
   },
   "pretre_sacrificiel": {
     "name": "Prêtre Sacrificiel",
-    "desc": "Le porteur gagne Minions et +1 niveau permanent."
+    "desc": "Le mené gagne Minions et +1 niveau permanent."
   },
   "suppot_infernal": {
     "name": "Suppôt Infernal",
-    "desc": "Doit remplacer un Leader déjà présent. Quand le régiment porteur est détruit : copie en main d'un régiment Démon de ta défausse, qui coûte 2 de moins à jouer."
+    "desc": "Doit remplacer un Meneur déjà présent.\nQuand le régiment mené est détruit, créer en main une copie d'un régiment Démon de ta défausse qui coûte 2 de moins à jouer."
   },
   "demon_akantha": {
     "name": "Démon d'Akantha",
-    "desc": "Sacrifice niveau 3+ : récupère ATK/END/ARM/INI réels du sacrifié. Soin 15 END si un ennemi meurt de Moral."
+    "desc": "Récupère les statistiques ATK, END, ARM, INI intiaux du sacrifié.\nSoigne 15 END si un ennemi est détruit par 0 de Moral."
   },
   "effroi_demoniaque": {
     "name": "Effroi Démoniaque",
-    "desc": "La cible perd 2 Moral + 1 par Démon allié. Si détruite ainsi, vos Démons regagnent 1 Moral."
+    "desc": "La cible perd 2 Moral + 1 par régiment Démon allié.\nSi détruite ainsi, vos régiments Démons récupèrent 1 Moral."
   },
   "brise_matin": {
     "name": "Brise du Matin",
@@ -246,31 +246,31 @@ const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "brume_trompeuse": {
     "name": "Brume Trompeuse",
-    "desc": "Un régiment adverse perd 20 INI pour ce combat, ainsi qu'un régiment adverse supplémentaire au hasard par régiment Élémentaux que tu contrôles."
+    "desc": "Un régiment adverse perd 20 INI pour ce combat, ainsi qu'un régiment adverse supplémentaire au hasard pour chaque régiment Élémentaux que tu contrôles."
   },
   "retraite_sylvestre": {
     "name": "Retraite Sylvestre",
-    "desc": "Un Elfe allié retourne en main (il y retrouve toutes ses stats de base, son Leader part en défausse). Aucune lassitude, aucune perte de Moral pour les alliés."
+    "desc": "Un Elfe allié retourne en main (il y retrouve toutes ses stats de base, son Meneur part à la défausse).\nAucun gain de lassitude, aucune perte de Moral pour les alliés."
   },
   "changement_tectonique": {
     "name": "Changement Tectonique",
-    "desc": "Déplace un régiment adverse (avant/arrière) vers un emplacement vide de son camp. Coûte 2 de moins si tu contrôles un Élémentaux."
+    "desc": "Coûte 2 de moins si tu contrôles un Élémentaux.\nDéplace un régiment adverse vers un emplacement vide."
   },
   "bourgeonnement": {
     "name": "Bourgeonnement",
-    "desc": "Soigne un régiment allié de 10 END et 1 Moral. Si tu contrôles un Élémentaux, crée une Floraison en main."
+    "desc": "Soigne un régiment allié de 10 END et récupère 1 Moral.\nSi tu contrôles un Élémentaux, crée une Floraison en main."
   },
   "floraison": {
     "name": "Floraison",
-    "desc": "Soigne un régiment allié de 30 END et 3 Moral. Si tu contrôles un Élémentaux, crée une Fructification en main."
+    "desc": "Soigne un régiment allié de 30 END et récupère 3 Moral.\nSi tu contrôles un Élémentaux, crée une Fructification en main."
   },
   "fructification": {
     "name": "Fructification",
-    "desc": "Soigne un régiment allié de 50 END et 5 Moral. Si tu contrôles un Élémentaux, tous tes autres régiments regagnent 10 END et 1 Moral."
+    "desc": "Soigne un régiment allié de 50 END et récupère 5 Moral.\nSi tu contrôles un Élémentaux, tous tes autres régiments soignent 10 END et récupèrent 1 Moral."
   },
   "serenite_foret": {
     "name": "Sérénité de la Forêt",
-    "desc": "Tu perds 5 points de lassitude, 10 si tu contrôles un Élémentaux (le niveau ne redescend jamais). Pioche 2 cartes."
+    "desc": "Tu perds 5 points de lassitude, 10 si tu contrôles un Élémentaux (le niveau ne redescend jamais).\nPioche 2 cartes."
   },
   "chant_vent": {
     "name": "Chant du Vent",
@@ -278,11 +278,11 @@ const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "veilleuse_sources": {
     "name": "Veilleuse des Sources",
-    "desc": "Chaque fois qu'un de tes régiments regagne de l'Endurance, tu perds 1 point de lassitude par tranche de 10 END soignées (reliquat conservé)."
+    "desc": "Chaque fois qu'un de tes régiments se soigne END\nChaque fois que tu cumules 10 END soignées, tu perds 1 point de lassitude."
   },
   "dryades_guerisseuses": {
     "name": "Dryades Guérisseuses",
-    "desc": "À chaque fin de ton tour, soigne de 15 END et 1 Moral ton régiment le plus blessé."
+    "desc": "À chaque fin de ton tour, ton régiment blessé avec le moins d'END soigne 15 END et récupère 1 Moral."
   },
   "pacte_sang": {
     "name": "Pacte de Sang",
@@ -290,7 +290,7 @@ const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "rancon_ames": {
     "name": "Rançon d'Âmes",
-    "desc": "Cible un Démon allié : gagne X points de lassitude (X au choix, de 1 à 5) ; il gagne +5 ATK par point payé pour ce combat."
+    "desc": "Cible un Démon allié. Choisis de gagner 1 à 5 points de lassitude. Le régiment gagne +5 ATK pour ce combat par point payé."
   },
   "dette_infernale": {
     "name": "Dette Infernale",
@@ -410,11 +410,11 @@ const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "gargouille_cendres": {
     "name": "Gargouille de Cendres",
-    "desc": "Sacrifice niveau 1+ requis. Regagne 1 Moral chaque fois que tu sacrifies un régiment."
+    "desc": "Sacrifice niveau 1+ requis. récupère 1 Moral chaque fois que tu sacrifies un régiment."
   },
   "seigneur_abysses": {
     "name": "Seigneur des Abysses",
-    "desc": "Le porteur gagne Effrayant 2. Chaque fois que tu sacrifies un régiment, le porteur regagne 10 END et 1 Moral."
+    "desc": "Le porteur gagne Effrayant 2. Chaque fois que tu sacrifies un régiment, le porteur récupère 10 END et 1 Moral."
   },
   "oeuf_dragon": {
     "name": "Œuf de Dragon",
@@ -470,7 +470,7 @@ const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "banniere_dechiree": {
     "name": "Bannière Déchirée",
-    "desc": "Un régiment allié regagne 4 Moral s'il a le Moral brisé, 2 sinon."
+    "desc": "Un régiment allié récupère 4 Moral s'il a le Moral brisé, 2 sinon."
   },
   "puits_sel_amar": {
     "name": "Puits de Sel-Amar",
