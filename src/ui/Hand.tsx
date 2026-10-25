@@ -117,6 +117,7 @@ export function Hand({ game, player, order, setOrder, canAct, hidden, selected, 
               onDragEnd={() => setDrag(null)}
               onDragOver={e => e.preventDefault()}
               onDrop={e => { e.stopPropagation(); if (drag !== null) move(drag, i); setDrag(null); }}
+              data-card={c.id}
               className={`hcard ${c.faction}${selected === h.uid ? ' selected' : ''}${playable ? '' : ' off'}`}
               aria-disabled={!playable}
               title={`${cardName(c.id)}\n${cardDesc(c.id)}${why && why !== 'turn' ? `\nInjouable : ${UNPLAYABLE[why] ?? why}` : ''}`}

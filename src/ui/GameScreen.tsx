@@ -110,12 +110,12 @@ function PlayerBar({ game, p, label, active, avatar, where }: { game: GameState;
       {avatar && <Avatar id={avatar} size={34} />}
       <strong className={`pname ${pl.faction}`}>{label}{active ? ' — à toi' : ''}</strong>
       <span className="pb-res" title={`Ressource : ${pl.resource}`}><i className="res-coin">{pl.resource}</i></span>
-      <span className="pb-gauge" title={next === undefined ? 'Niveau maximum' : `Niveau ${pl.level + 1} à ${next} points de lassitude`}>
+      <span className="pb-gauge pb-level" title={next === undefined ? 'Niveau maximum' : `Niveau ${pl.level + 1} à ${next} points de lassitude`}>
         Niveau <b>{pl.level}</b>
         <span className="meter lvl"><i style={{ width: `${lvlPct}%` }} /></span>
         <small>{next === undefined ? 'max' : `→ ${pl.level + 1} à ${next}`}</small>
       </span>
-      <span className="pb-gauge" title={`Pioche ${drawCountFor(pl.level)} carte(s) par tour ; ${noLimit ? 'pas de défaite par lassitude' : `défaite à ${defeat}`}`}>
+      <span className="pb-gauge pb-lass" title={`Pioche ${drawCountFor(pl.level)} carte(s) par tour ; ${noLimit ? 'pas de défaite par lassitude' : `défaite à ${defeat}`}`}>
         Lassitude <b>{pl.points}</b>{noLimit ? '' : `/${defeat}`}
         {!noLimit && <span className="meter"><i style={{ width: `${Math.min(100, (100 * pl.points) / defeat)}%` }} /></span>}
       </span>
@@ -432,14 +432,14 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
       </header>
 
       <PlayerBar game={view} p={top} label={names[top]} active={game.active === top} avatar={avatars?.[top]} where="top" />
-      <section className="side">
+      <section className="side side-top">
         <h2 className="hand-title">Main — {names[top]}</h2>
         {handFor(top)}
         <Board game={view} player={top} bottom={false} isTarget={isTarget} isFirstPicked={r => sameSlot(sel?.first, r)} onSlot={onSlot} highlight={highlight} faded={faded} preview={preview?.units} onHover={setZoom} bubbles={bubbles}
           left={<Piles pl={view.players[top]} p={top} onOpenDiscard={() => setDiscardOf(top)} onHover={setZoom} />} isoExtra={<MoralTotal game={view} p={top} />} />
       </section>
       <div className="frontline">ligne de front<span className="version-mark" aria-hidden="true">v {APP_VERSION}</span></div>
-      <section className="side">
+      <section className="side side-bottom">
         <Board game={view} player={bottom} bottom isTarget={isTarget} isFirstPicked={r => sameSlot(sel?.first, r)} onSlot={onSlot} highlight={highlight} faded={faded} preview={preview?.units} onHover={setZoom} bubbles={bubbles}
           left={<Piles pl={view.players[bottom]} p={bottom} onOpenDiscard={() => setDiscardOf(bottom)} onHover={setZoom} />} isoExtra={<MoralTotal game={view} p={bottom} />} />
         <div className="controls">

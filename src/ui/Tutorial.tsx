@@ -1,6 +1,7 @@
 // Tutoriel : un seul combat guidé (environ 5 minutes) qui présente le plateau, le combat, le Moral, la lassitude,
 // les niveaux, les Leaders, les tactiques et les mots-clés. Une bulle suit la partie et avance quand le joueur agit.
 import { useCallback, useEffect, useState } from 'react';
+import { Spotlight, type Spot } from './Spotlight';
 import { Ctx } from '../engine/ctx';
 import { TUTORIAL_SETUP } from '../campaign/tutorial';
 import type { GameState } from '../engine/types';
@@ -21,6 +22,8 @@ interface Step {
   /** Étape « à toi de jouer » : avance seule quand la condition est remplie. */
   wait?: (g: GameState) => boolean;
   task?: string;
+  /** Éléments de l'écran mis en évidence pendant l'étape (sélecteur CSS, étiquette). */
+  spots?: Spot[];
 }
 
 const units = (g: GameState) => new Ctx(g).units('A');
@@ -28,6 +31,7 @@ const units = (g: GameState) => new Ctx(g).units('A');
 const STEPS: Step[] = [
   {
     title: 'Le champ de bataille',
+    spots: [{ sel: '.board.bottom .row.front', label: 'Rangée avant' }, { sel: '.board.bottom .row.back', label: 'Rangée arrière' }, { sel: '.board.bottom .iso .slot', label: 'Case isolée' }, { sel: '.frontline', label: 'Ligne de front' }, { sel: '.pbar-bottom', label: 'Ta barre de joueur' }, { sel: '.board.bottom .piles', label: 'Pioche et défausse' }, { sel: '.iso-moral', label: 'Moral total' }],
     body: <>
       <p>Ton camp est en bas, celui des Pillards en haut. Chaque camp a une <b>rangée avant</b> (le contact), une <b>rangée arrière</b> (derrière, protégée) et une case <b>isolée</b> à droite, pour les unités spéciales.</p>
       <p>Entre les deux : la <b>ligne de front</b>. Tout en bas, ta barre de joueur : ta ressource (la pièce), ton niveau et ta lassitude. À gauche de ton plateau, ta pioche et ta défausse (clique-la pour la parcourir) ; à droite, entre les deux emplacements isolés, le Moral total de chaque camp.</p>
@@ -35,6 +39,7 @@ const STEPS: Step[] = [
   },
   {
     title: 'Ta main et ta ressource',
+    spots: [{ sel: '.side-bottom .hand', label: 'Ta main' }, { sel: '.side-bottom .hcard .h-cost', label: 'Coût', max: 1 }, { sel: '.side-bottom .hcard .h-lvl', label: 'Niveau requis', max: 1 }, { sel: '.pbar-bottom .res-coin', label: 'Ta ressource' }],
     body: <>
       <p>Chaque carte a un <b>coût</b> (en ressource) et un <b>niveau</b> requis. Tu commences au niveau 1 avec 1 ressource.</p>
       <p>Au début de chaque tour, tu reçois autant de ressource que ton niveau, <b>plus ce que tu n’as pas dépensé</b> au tour précédent.</p>
@@ -43,12 +48,14 @@ const STEPS: Step[] = [
   },
   {
     title: 'Déploie un régiment',
+    spots: [{ sel: '.side-bottom .hcard[data-card=recrue_imp]', label: 'Recrue Impériale' }, { sel: '.board.bottom .row.front', label: 'Ici' }],
     body: <p>Clique sur une <b>Recrue Impériale</b> dans ta main, puis sur une case <b>avant</b> en surbrillance. Face à un ennemi, c’est lui qu’elle attaquera.</p>,
     task: 'Pose une Recrue Impériale à l’avant.',
     wait: g => units(g).length > 0,
   },
   {
     title: 'Lire un régiment',
+    spots: [{ sel: '.board.bottom .unit .u-atk', label: 'ATK', max: 1 }, { sel: '.board.bottom .unit .u-arm', label: 'ARM', max: 1 }, { sel: '.board.bottom .unit .u-ini', label: 'INI', max: 1 }, { sel: '.board.bottom .unit .bar.end', label: 'END', max: 1 }, { sel: '.board.bottom .unit .bar.mor', label: 'MOR', max: 1 }],
     body: <>
       <p><b>ATK</b> : les dégâts infligés. <b>END</b> : l’endurance, la quantité de dégat que peux subir le régiment. <b>ARM</b> : l’armure, retirée de chaque attaque reçue.</p>
       <p><b>INI</b> : l’initiative, qui décide qui frappe en premier. <b>MOR</b> : le Moral, le courage du régiment.</p>
@@ -57,12 +64,14 @@ const STEPS: Step[] = [
   },
   {
     title: 'Termine ton tour',
+    spots: [{ sel: '.controls .primary', label: 'Fin du tour' }],
     body: <p>Clique sur <b>Fin du tour</b>. Un <b>combat</b> a lieu à la fin de <b>chaque</b> tour, le tien comme celui de l’adversaire : tous les régiments en jeu attaquent.</p>,
     task: 'Clique sur « Fin du tour » et regarde les deux combats.',
     wait: g => g.turn >= 2 && g.active === 'A',
   },
   {
     title: 'Le combat',
+    spots: [{ sel: '.board.top .row.front', label: 'Ennemis en face' }, { sel: '.board.bottom .row.front', label: 'Tes régiments' }],
     body: <>
       <p>Les régiments frappent par <b>initiative</b> décroissante. Un régiment avant attaque celui <b>en face</b> ; si la case est vide, il perce vers la rangée arrière.</p>
       <p>Dégâts = <b>ATK − ARM</b> de la cible. Chaque coup reçu retire aussi <b>1 Moral</b>. Un régiment blessé frappe moins fort.</p>
@@ -71,6 +80,7 @@ const STEPS: Step[] = [
   },
   {
     title: 'Le Moral',
+    spots: [{ sel: '.board.bottom .unit .bar.mor', label: 'Moral', max: 2 }, { sel: '.iso-moral', label: 'Moral total' }],
     body: <>
       <p>À un tiers de son Moral, un régiment a le <b>Moral brisé</b> : il perd les bonus de son Leader et <b>ses mots-clés</b> (même Distance), sauf les mots-clés négatifs comme <b>Lent</b>, qu’il garde. Les tactiques jouées sur lui s’appliquent toujours.</p>
       <p>Quand un régiment est détruit, <b>tous ses alliés perdent 1 Moral</b>. Une défaite peut en entraîner d’autres !</p>
@@ -79,6 +89,7 @@ const STEPS: Step[] = [
   },
   {
     title: 'Lassitude et niveaux',
+    spots: [{ sel: '.pbar-bottom .pb-lass', label: 'Lassitude' }, { sel: '.pbar-bottom .pb-level', label: 'Niveau' }],
     body: <>
       <p>La <b>lassitude</b>, c’est la fatigue de ton armée : régiment détruit (autant que son niveau), comparaison de Moral perdue… À <b>50</b>, tu perds la partie.</p>
       <p>Mais elle te fait aussi <b>monter de niveau</b> (à 4, 9, 16 et 25 points) : plus de ressource, plus de cartes piochées, et des cartes plus puissantes jouables. Une armée éprouvée devient plus redoutable.</p>
@@ -87,18 +98,21 @@ const STEPS: Step[] = [
   },
   {
     title: 'Le rang arrière',
+    spots: [{ sel: '.side-bottom .hcard[data-card=archer_imp]', label: 'Archer Impérial' }, { sel: '.board.bottom .row.back', label: 'Rang arrière' }],
     body: <p>Les régiments <b>arrière</b> sont protégés tant que l’avant tient. L’<b>Archer Impérial</b> a le mot-clé <b>Distance</b> : de l’arrière comme de l’avant, il frappe le régiment adverse au Moral le plus bas, où qu’il soit.</p>,
     task: 'Pose l’Archer Impérial à l’arrière.',
     wait: g => units(g).some(u => new Ctx(g).slotOf(u.uid)?.zone === 'arriere'),
   },
   {
     title: 'Les Leaders',
+    spots: [{ sel: '.side-bottom .hcard[data-card=lieutenant]', label: 'Lieutenant' }, { sel: '.board.bottom .unit', label: 'Une Recrue', max: 1 }],
     body: <p>Un <b>Leader</b> s’attache à un régiment sans Leader, qui partage les mêmes rôles et le renforce tant qu’il n’a pas le Moral brisé. Le <b>Lieutenant</b> (coût 0) donne +5 ATK, +5 INI et +2 Moral.</p>,
     task: 'Attache le Lieutenant à une Recrue : clique-le, puis clique la Recrue.',
     wait: g => units(g).some(u => u.leader),
   },
   {
     title: 'Les tactiques',
+    spots: [{ sel: '.side-bottom .hcard[data-card=ralliement]', label: 'Ralliement' }],
     body: <p>Une <b>Tactique</b> produit son effet tout de suite, puis part en défausse. <b>Ralliement</b> rend 3 Moral à un régiment qui porte un Leader (5 s’il a le Moral brisé).</p>,
     task: 'Joue Ralliement sur ta Recrue menée par le Lieutenant.',
     wait: g => !g.players.A.hand.some(h => h.cardId === 'ralliement'),
@@ -118,6 +132,7 @@ const STEPS: Step[] = [
   },
   {
     title: 'Gagner la partie',
+    spots: [{ sel: '.pbar-top .pb-lass', label: 'Limite des Pillards : 18' }, { sel: '.board.bottom .piles .pile', label: 'Pioche', max: 1 }],
     body: <>
       <p>Un joueur perd s’il atteint sa <b>limite de lassitude</b>, s’il n’a <b>plus aucun régiment</b> à l’avant ou à l’arrière (l’emplacement isolé ne compte pas) à la fin de son tour, ou s’il doit piocher dans une <b>pioche vide</b>.</p>
       <p>Les Pillards sont fragiles : leur limite n’est que de 18. Continue à jouer et à finir tes tours jusqu’à la victoire !</p>
@@ -161,6 +176,8 @@ export function Tutorial({ onExit, onCampaign, gameOpts }: { onExit: () => void;
   );
 
   return (
+    <>
+    {!hidden && !game?.over && cur.spots && <Spotlight spots={cur.spots} />}
     <GameScreen
       key={key}
       {...gameOpts}
@@ -188,5 +205,6 @@ export function Tutorial({ onExit, onCampaign, gameOpts }: { onExit: () => void;
         </div>
       )}
     />
+    </>
   );
 }
