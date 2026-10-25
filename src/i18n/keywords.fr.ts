@@ -19,7 +19,7 @@ const GLOSS: Record<string, string> = {
   Prêt: 'Arrive prêt : pas de pénalité d’arrivée, il frappe avec toute son ATK dès le tour où il est posé (sinon, la moitié).',
   'Arrive prêt': 'Pas de pénalité d’arrivée : il frappe avec toute son ATK dès le tour où il est posé (sinon, la moitié).',
   Offrande: 'En jouant la carte, tu peux payer X lassitude pour obtenir l’effet renforcé.',
-  Sacrifice: 'Pour le poser, sacrifie un de tes régiments du niveau indiqué ou plus : il prend sa place.',
+  'Sacrifice X': 'Pour le poser, sacrifie un de tes régiments de niveau X ou plus : il prend sa place.',
   Formation: 'Bonus selon les régiments voisins sur la même ligne (à gauche et à droite seulement).',
   'Durée de vie': 'Quitte le plateau après le nombre de tours indiqué.',
   Communion: 'Actif tant que tu contrôles un Elfe et un Élémentaux (deux régiments distincts).',
