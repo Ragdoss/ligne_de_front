@@ -44,6 +44,7 @@ export const WAVE2B_TEXT_FR: Record<string, { name: string; desc: string }> = {
 export const FLAVOR_FR: Record<string, string> = {
   archidemon_origines: 'J’étais là quand les Dieux sont tombés.',
   grimoire_interdit: 'Caché dans les recoins des bibliothèques infernals, on trouve des livres plus dangereux que les gardiens des lieux',
-  vivres_campagne: 'Aucune armée ne se bat l estomac vide',
-  sang_seve: 'Un démon ne refuse jamais une offrande, même celle de la foret'
+  vivres_campagne: 'Aucune armée ne se bat l’estomac vide',
+  sang_seve: 'Un démon ne refuse jamais une offrande, même celle de la foret',
+  mercenaire_stagiaire: 'Se bat pour l’argent, mais n’a trouvé qu’un stage non rémunéré.'
 };
