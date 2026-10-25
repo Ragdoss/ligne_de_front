@@ -50,7 +50,7 @@ const STEPS: Step[] = [
   {
     title: 'Lire un régiment',
     body: <>
-      <p><b>ATK</b> : les dégâts infligés. <b>END</b> : l’endurance (ses points de vie). <b>ARM</b> : l’armure, retirée de chaque attaque reçue.</p>
+      <p><b>ATK</b> : les dégâts infligés. <b>END</b> : l’endurance, la quantité de dégat que peux subir le régiment. <b>ARM</b> : l’armure, retirée de chaque attaque reçue.</p>
       <p><b>INI</b> : l’initiative, qui décide qui frappe en premier. <b>MOR</b> : le Moral, le courage du régiment.</p>
       <p>Un régiment qui vient d’arriver frappe à <b>moitié de son ATK</b> à son premier combat (pénalité d’apparition).</p>
     </>,
@@ -93,7 +93,7 @@ const STEPS: Step[] = [
   },
   {
     title: 'Les Leaders',
-    body: <p>Un <b>Leader</b> s’attache à un régiment sans Leader et le renforce tant qu’il n’a pas le Moral brisé. Le <b>Lieutenant</b> (coût 0) donne +5 ATK, +5 INI et +2 Moral.</p>,
+    body: <p>Un <b>Leader</b> s’attache à un régiment sans Leader, qui partage les mêmes rôles et le renforce tant qu’il n’a pas le Moral brisé. Le <b>Lieutenant</b> (coût 0) donne +5 ATK, +5 INI et +2 Moral.</p>,
     task: 'Attache le Lieutenant à une Recrue : clique-le, puis clique la Recrue.',
     wait: g => units(g).some(u => u.leader),
   },
@@ -113,7 +113,6 @@ const STEPS: Step[] = [
       <li><b>Pénétration X</b> : ignore X points d’armure. (Les mots-clés chiffrés s’additionnent : Effrayant 1 + Effrayant 2 = Effrayant 3.)</li>
       <li><b>Sonné</b> : saute sa prochaine attaque.</li>
       <li><b>Minions</b> : sa mort ne donne pas de lassitude et ne fait pas perdre de Moral aux alliés.</li>
-      <li><b>Monté</b> : cavalerie, vulnérable aux Lanciers (+15 ATK contre elle).</li>
       <li><b>Isolé</b> : se pose dans la case isolée ; il n’est jamais attaqué.</li>
     </ul>,
   },
