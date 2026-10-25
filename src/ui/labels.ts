@@ -4,7 +4,9 @@ import type { ChoiceOption, Faction, PendingChoice } from '../engine/types';
 import { CARD_TEXT_FR } from '../i18n/cards.fr';
 
 export const cardName = (id: string) => CARD_TEXT_FR[id]?.name ?? id;
-export const cardDesc = (id: string) => CARD_TEXT_FR[id]?.desc ?? '';
+/** Texte d'effet affiché. Les mots entre accolades, ex. « {Sonné} », ne s'affichent pas : ils servent seulement à faire
+ *  apparaître la définition d'un mot-clé dans le glossaire (src/i18n/keywords.fr.ts). */
+export const cardDesc = (id: string) => (CARD_TEXT_FR[id]?.desc ?? '').replace(/\s*\{[^}]*\}/g, '').trim();
 
 export const FACTION_LABEL: Record<Faction, string> = {
   empire: 'Empire', elfe: 'Royaumes Elfiques', demons: 'Invocateurs de Démons', nomades: 'Nomades', neutre: 'Neutre',

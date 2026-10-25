@@ -36,8 +36,8 @@ const GLOSS: Record<string, string> = {
 const IN_TEXT: [string, RegExp][] = [
   ['Distance', /\bDistance\b/], ['Effrayant', /Effrayant/], ['Ralliement', /Ralliement/], ['Mirage', /\bMirage\b/], ['Lent', /\bLent\b/],
   ['Minions', /Minions/], ['Marché', /\bMarché\b/], ['Pénétration', /Pénétration/], ['Pillage', /Pillage/], ['Débordement', /Débordement/],
-  ['Arrive prêt', /arrive(nt)? prêts?/i], ['Offrande', /Offrande/], ['Sacrifice', /Sacrifice niveau/], ['Formation', /Formation/],
-  ['Durée de vie', /Durée de vie/i], ['Communion', /Communion/], ['Alliance', /Alliance/], ['Sonné', /sonnés?\b/i],
+  ['Arrive prêt', /arrive(nt)? prête?s?/i], ['Offrande', /Offrande/], ['Sacrifice', /Sacrifice niveau/], ['Formation', /Formation/],
+  ['Durée de vie', /Durée de vie/i], ['Communion', /Communion/], ['Alliance', /Alliance/], ['Sonné', /\bsonn(?:ée?s?|es?|er|ent)(?![a-zà-ÿ])/i],
   ['Moral brisé', /Moral brisé/i], ['Lassitude', /lassitude/i], ['Isolé', /\bisolé\b/i],
 ];
 
@@ -58,7 +58,9 @@ export function glossaryFor(id: string): GlossEntry[] {
   if (c.vieTours) found.add('Durée de vie');
   if (c.cardType === 'Leader') found.add('Leader');
   const desc = CARD_TEXT_FR[id]?.desc ?? '';
-  for (const [term, re] of IN_TEXT) if (re.test(desc)) found.add(term);
+  for (const [term, re] of IN_TEXT) if (re.test(desc.replace(/\{[^}]*\}/g, ''))) found.add(term);
+  // Mots cachés entre accolades : « {Sonné} » ajoute la définition sans s'afficher sur la carte.
+  for (const m of desc.matchAll(/\{([^}]+)\}/g)) for (const w of m[1]!.split(',').map(x => x.trim())) if (GLOSS[base(w)]) found.add(base(w));
   const order = Object.keys(GLOSS);
   return [...found].sort((a, b) => order.indexOf(a) - order.indexOf(b)).map(term => ({ term, text: GLOSS[term]! }));
 }
