@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { CARDS } from '../data/cards';
 import { exportDeck, parseDeck } from '../profile/deckText';
 import { autoComplete, checkDeck, MAX_COPIES, owned, sortedDecks, type Profile, type SavedDeck } from '../profile/profile';
+import { altArtNumber, altArtsOf } from './CardFace';
 import { CardTile } from './CardTile';
 import { showZoom, zoomProps } from './HoverZoom';
 import { filterCards, FilterBar, NO_FILTER, type Filters } from './Collection';
@@ -59,6 +60,12 @@ function DeckBuilder({ profile, initial, onSave, onCancel, onDelete }: {
 }) {
   const [name, setName] = useState(initial.name);
   const [cards, setCards] = useState<string[]>(initial.cards);
+  /** Arts choisis pour ce deck (carte → clé d'art ou « base » ; absent : choix de la collection). */
+  const [arts, setArts] = useState<Record<string, string>>(initial.arts ?? {});
+  const [artOpen, setArtOpen] = useState<string | null>(null);
+  const unlocked = (k: string) => profile.altArts.includes(k) || !!profile.options.showAll;
+  /** Art montré pour une carte du deck : choix du deck, sinon de la collection (clé à passer en variante). */
+  const shownArt = (id: string): string => { const k = arts[id] ?? profile.artChoice[id]; return k && k !== 'base' && unlocked(k) ? k : id; };
   const [f, setF] = useState<Filters>({ ...NO_FILTER, owned: profile.options.allUnlocked ? 'all' : 'owned' });
   const [autoFaction, setAutoFaction] = useState<string>(() => (initial.cards.length ? mainFaction(initial.cards) : 'empire'));
   const [importText, setImportText] = useState<string | null>(null);
@@ -102,9 +109,30 @@ function DeckBuilder({ profile, initial, onSave, onCancel, onDelete }: {
         <div className="deck-cards">
           {listed.length === 0 && <p className="muted small">Ajoute des cartes avec les boutons + de la grille.</p>}
           {listed.map(([id, n]) => (
-            <button key={id} type="button" className={`deck-line ${CARDS[id]!.faction}`} {...zoomProps(id)} onClick={() => { remove(id); showZoom(null); }} title="Retirer un exemplaire">
-              <span>{n}×</span> {cardName(id)} <small>niv. {CARDS[id]!.niveau}</small>
-            </button>
+            <div key={id} className="dl-row">
+              <div className="deck-line-wrap">
+                <button type="button" className={`deck-line ${CARDS[id]!.faction}`} {...zoomProps(id, shownArt(id))} onClick={() => { remove(id); showZoom(null); }} title="Retirer un exemplaire">
+                  <span>{n}×</span> {cardName(id)} <small>niv. {CARDS[id]!.niveau}</small>
+                </button>
+                {altArtsOf(id).length > 0 && (
+                  <button type="button" className={`art-btn${artOpen === id ? ' on' : ''}${shownArt(id) !== id ? ' alt' : ''}`} onClick={() => setArtOpen(artOpen === id ? null : id)}
+                    title="Art de cette carte dans ce deck" aria-expanded={artOpen === id}>{shownArt(id) !== id ? `Alt ${altArtNumber(shownArt(id))}` : 'Art'}</button>
+                )}
+              </div>
+              {artOpen === id && (
+                <span className="art-pick deck-art" role="group" aria-label={`Art de ${cardName(id)} dans ce deck`}>
+                  <button type="button" className={arts[id] === undefined ? 'on' : ''} onClick={() => setArts(a => { const x = { ...a }; delete x[id]; return x; })}
+                    title="Suivre le choix fait dans la collection">Collection</button>
+                  <button type="button" className={arts[id] === 'base' ? 'on' : ''} onClick={() => setArts(a => ({ ...a, [id]: 'base' }))} {...zoomProps(id, id)}>Base</button>
+                  {altArtsOf(id).map(k => (
+                    <button key={k} type="button" className={arts[id] === k ? 'on' : ''} disabled={!unlocked(k)} onClick={() => setArts(a => ({ ...a, [id]: k }))}
+                      {...zoomProps(id, k)} title={unlocked(k) ? `Art alternatif ${altArtNumber(k)}` : 'Art alternatif à débloquer dans les paquets'}>
+                      {unlocked(k) ? `Alt ${altArtNumber(k)}` : '🔒'}
+                    </button>
+                  ))}
+                </span>
+              )}
+            </div>
           ))}
         </div>
         <div className="auto">
@@ -124,6 +152,7 @@ function DeckBuilder({ profile, initial, onSave, onCancel, onDelete }: {
             <button type="button" onClick={() => {
               const r = parseDeck(importText);
               setCards(r.deck);
+              if (r.arts && Object.keys(r.arts).length) setArts(r.arts);
               if (r.name && /^(Nouveau deck|Deck sans nom)$/.test(name)) setName(r.name);
               setImportText(null);
               setImportMsg(r.unknown.length ? `Cartes non reconnues, ignorées : ${r.unknown.join(', ')}.` : '');
@@ -134,7 +163,7 @@ function DeckBuilder({ profile, initial, onSave, onCancel, onDelete }: {
         {importMsg && <p className="warn small">{importMsg}</p>}
         {showExport && (
           <div className="custom-deck">
-            <textarea rows={8} readOnly value={exportDeck(cards, name)} aria-label="Liste du deck à copier" onFocus={e => e.currentTarget.select()} />
+            <textarea rows={8} readOnly value={exportDeck(cards, name, Object.fromEntries(Object.entries(arts).filter(([id]) => cards.includes(id))))} aria-label="Liste du deck à copier" onFocus={e => e.currentTarget.select()} />
             <button type="button" onClick={e => {
               const ta = (e.currentTarget.previousElementSibling as HTMLTextAreaElement);
               const fallback = () => { ta.focus(); ta.select(); try { document.execCommand('copy'); setCopied(true); } catch { /* sélection seule */ } };
@@ -148,7 +177,7 @@ function DeckBuilder({ profile, initial, onSave, onCancel, onDelete }: {
             ? <button type="button" className="danger" onClick={onDelete}>Confirmer la suppression</button>
             : <button type="button" onClick={() => setConfirmDelete(true)}>Supprimer</button>}
           <button type="button" onClick={onCancel}>Annuler</button>
-          <button type="button" className="primary" onClick={() => onSave({ ...initial, name: name.trim() || 'Deck sans nom', cards, updated: Date.now() })}>Enregistrer</button>
+          <button type="button" className="primary" onClick={() => onSave({ ...initial, name: name.trim() || 'Deck sans nom', cards, updated: Date.now(), arts: Object.fromEntries(Object.entries(arts).filter(([id]) => cards.includes(id))) })}>Enregistrer</button>
         </div>
       </aside>
     </div>

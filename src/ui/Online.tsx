@@ -29,7 +29,7 @@ export function OnlineLobby({ profile, onStart, onBack, goDecks }: { profile: Pr
   useEffect(() => () => cleanup.current?.(), []);
 
   const validDeck = deckKey.startsWith('my:') ? profile.decks.some(d => `my:${d.id}` === deckKey && checkDeck(d.cards, profile).ok) : profile.options.allUnlocked;
-  const mine = () => { const d = resolveDeck(profile, deckKey); return { name: name.trim() || 'Joueur', faction: d.faction, deck: d.cards, avatar: profile.avatar, arts: artsForDeck(profile, d.cards) }; };
+  const mine = () => { const d = resolveDeck(profile, deckKey); return { name: name.trim() || 'Joueur', faction: d.faction, deck: d.cards, avatar: profile.avatar, arts: artsForDeck(profile, d.cards, d.arts) }; };
 
   /** Une fois reliés : chacun se présente, puis l'hôte fixe la partie (graine, camp, decks) et l'envoie. */
   const handshake = (link: Link, isHost: boolean) => {

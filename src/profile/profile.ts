@@ -18,7 +18,12 @@ const NOT_COLLECTIBLE = new Set(['convoi', 'garnison', 'halte_convoi', 'palissad
   'dragonnet_infernal', 'puits_sel_amar', 'source_corrompue', 'portail_infernal', 'gardienne_nid', 'chariot_oeufs', 'oeuf_rituel', 'legionnaire_desert', 'garde_capitale', 'mercenaire_stagiaire']);
 export const COLLECTIBLE: string[] = Object.keys(CARDS).filter(id => !NOT_COLLECTIBLE.has(id));
 
-export interface SavedDeck { id: string; name: string; cards: string[]; updated: number; /** Deck favori : affiché en premier. */ fav?: boolean }
+export interface SavedDeck {
+  id: string; name: string; cards: string[]; updated: number;
+  /** Deck favori : affiché en premier. */ fav?: boolean;
+  /** Art choisi pour ce deck : carte → clé d'art alternatif, ou « base » ; sinon le choix de la collection. */
+  arts?: Record<string, string>;
+}
 
 /** Victoires et défaites par type de partie. */
 export interface Record2 { w: number; l: number }
@@ -103,8 +108,16 @@ export function newProfile(): Profile {
 }
 
 /** Arts choisis et débloqués pour une liste de cartes (envoyés à l'adversaire en ligne). */
-export const artsForDeck = (p: Profile, cards: string[]): Record<string, string> =>
-  Object.fromEntries(Object.entries(p.artChoice).filter(([id, k]) => cards.includes(id) && p.altArts.includes(k)));
+/** Le choix fait dans le deck (s'il y en a un) passe avant celui de la collection ; « base » impose l'art de base. */
+export function artsForDeck(p: Profile, cards: string[], deckArts?: Record<string, string>): Record<string, string> {
+  const out = Object.fromEntries(Object.entries(p.artChoice).filter(([id, k]) => cards.includes(id) && p.altArts.includes(k)));
+  for (const [id, k] of Object.entries(deckArts ?? {})) {
+    if (!cards.includes(id)) continue;
+    if (k === 'base') delete out[id];
+    else if (p.altArts.includes(k)) out[id] = k;
+  }
+  return out;
+}
 
 export const owned = (p: Profile, id: string) => (p.options.allUnlocked ? MAX_COPIES : Math.min(MAX_COPIES, p.collection[id] ?? 0));
 

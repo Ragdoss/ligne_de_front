@@ -17,3 +17,14 @@ describe('Export et import de deck', () => {
     expect(parseDeck('3 Carte inventée').unknown).toEqual(['Carte inventée']);
   });
 });
+
+describe('Arts du deck dans le texte', () => {
+  it('exporte et relit l’art choisi', () => {
+    const txt = exportDeck(['paysans', 'paysans', 'lancier_emp'], 'X', { paysans: 'paysans.alt2', lancier_emp: 'base' });
+    expect(txt).toContain('2 Paysans (art 2)');
+    expect(txt).toContain('(art de base)');
+    const r = parseDeck(txt);
+    expect(r.arts).toEqual({ paysans: 'paysans.alt2', lancier_emp: 'base' });
+    expect(r.deck.filter(x => x === 'paysans')).toHaveLength(2);
+  });
+});

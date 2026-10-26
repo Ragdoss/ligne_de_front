@@ -136,7 +136,7 @@ export function App() {
         strongAi
         fast={setup.mode === 'watch'}
         avatars={setup.mode !== 'watch' ? { A: profile.avatar } : undefined}
-        arts={setup.mode === 'watch' ? {} : { A: artsForDeck(profile, A.cards), B: setup.mode === 'hotseat' ? artsForDeck(profile, B.cards) : {} }}
+        arts={setup.mode === 'watch' ? {} : { A: artsForDeck(profile, A.cards, A.arts), B: setup.mode === 'hotseat' ? artsForDeck(profile, B.cards, B.arts) : {} }}
         onQuit={() => setScreen({ kind: 'local' })}
         onOver={g => {
           const winA = g.over!.winner === 'A';

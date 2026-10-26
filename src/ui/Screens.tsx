@@ -68,10 +68,10 @@ export type Mode = 'ai' | 'hotseat' | 'watch';
 export type FirstChoice = 'A' | 'B' | 'random';
 export interface LocalSetup { mode: Mode; A: string; B: string; first?: FirstChoice }
 
-export function resolveDeck(profile: Profile, key: string): { cards: string[]; faction: Faction; label: string } {
+export function resolveDeck(profile: Profile, key: string): { cards: string[]; faction: Faction; label: string; arts?: Record<string, string> } {
   if (key.startsWith('my:')) {
     const d = profile.decks.find(x => `my:${x.id}` === key)!;
-    return { cards: d.cards, faction: mainFaction(d.cards) as Faction, label: d.name };
+    return { cards: d.cards, faction: mainFaction(d.cards) as Faction, label: d.name, arts: d.arts };
   }
   if (key.startsWith('test:')) {
     const t = TEST_DECKS[key.slice(5)]!;

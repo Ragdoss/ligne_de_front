@@ -736,3 +736,15 @@ button.pile:not(:disabled):hover .pile-stack > * { outline: 2px solid var(--bras
 .crash { max-width: 900px; margin: 40px auto; padding: 16px 24px; border: 1px solid var(--danger); border-radius: 8px; background: var(--bg-panel); }
 .crash h1 { margin-top: 0; color: var(--brass-bright); }
 .crash pre { white-space: pre-wrap; word-break: break-word; font-size: .8rem; background: #0006; padding: 10px; border-radius: 6px; max-height: 50vh; overflow: auto; }
+
+/* Créateur de deck : art choisi pour chaque carte du deck */
+.dl-row { display: grid; gap: 2px; }
+.deck-line-wrap { display: flex; gap: 3px; }
+.deck-line-wrap .deck-line { flex: 1; min-width: 0; }
+.art-btn { flex: none; font-size: .7rem; padding: 0 7px; border: 1px solid var(--line); border-radius: 3px; background: var(--bg); color: var(--parchment-dim); }
+.art-btn.alt { color: var(--brass-bright); border-color: var(--brass); }
+.art-btn.on { background: var(--brass); color: #1a1509; }
+.art-pick.deck-art { padding: 2px 0 4px 10px; }
+.art-pick.deck-art button { height: 22px; padding: 0 7px; font-size: .7rem; font-weight: 600; border: 1px solid var(--line); border-radius: 3px; background: var(--bg); }
+.art-pick.deck-art button.on { background: var(--brass); border-color: var(--brass-bright); color: #1a1509; }
+.art-pick.deck-art button:disabled { opacity: .5; cursor: not-allowed; }
