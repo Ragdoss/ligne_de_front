@@ -748,3 +748,12 @@ button.pile:not(:disabled):hover .pile-stack > * { outline: 2px solid var(--bras
 .art-pick.deck-art button { height: 22px; padding: 0 7px; font-size: .7rem; font-weight: 600; border: 1px solid var(--line); border-radius: 3px; background: var(--bg); }
 .art-pick.deck-art button.on { background: var(--brass); border-color: var(--brass-bright); color: #1a1509; }
 .art-pick.deck-art button:disabled { opacity: .5; cursor: not-allowed; }
+/* Ligne du deck : [nombre et nom] [art] [niveau] — le niveau reste aligné en colonne. */
+.deck-line-wrap { align-items: center; background: var(--bg); border: 1px solid transparent; border-left: 3px solid var(--neutre); border-radius: 3px; padding-right: 8px; }
+.deck-line-wrap:has(.deck-line:hover) { border-color: var(--danger); }
+.deck-line-wrap.empire { border-left-color: var(--empire); } .deck-line-wrap.elfe { border-left-color: var(--elfe); }
+.deck-line-wrap.demons { border-left-color: var(--demons); } .deck-line-wrap.nomades { border-left-color: var(--nomades); }
+.deck-line-wrap .deck-line { border: 0; background: transparent; }
+.deck-line-wrap .deck-line:hover { border: 0; }
+.dl-lvl { flex: none; width: 5ch; text-align: right; color: var(--parchment-dim); font-size: .82rem; }
+.deck-line-wrap .art-btn { height: 20px; }

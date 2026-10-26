@@ -110,14 +110,15 @@ function DeckBuilder({ profile, initial, onSave, onCancel, onDelete }: {
           {listed.length === 0 && <p className="muted small">Ajoute des cartes avec les boutons + de la grille.</p>}
           {listed.map(([id, n]) => (
             <div key={id} className="dl-row">
-              <div className="deck-line-wrap">
-                <button type="button" className={`deck-line ${CARDS[id]!.faction}`} {...zoomProps(id, shownArt(id))} onClick={() => { remove(id); showZoom(null); }} title="Retirer un exemplaire">
-                  <span>{n}×</span> {cardName(id)} <small>niv. {CARDS[id]!.niveau}</small>
+              <div className={`deck-line-wrap ${CARDS[id]!.faction}`}>
+                <button type="button" className="deck-line" {...zoomProps(id, shownArt(id))} onClick={() => { remove(id); showZoom(null); }} title="Retirer un exemplaire">
+                  <span>{n}×</span> {cardName(id)}
                 </button>
                 {altArtsOf(id).length > 0 && (
                   <button type="button" className={`art-btn${artOpen === id ? ' on' : ''}${shownArt(id) !== id ? ' alt' : ''}`} onClick={() => setArtOpen(artOpen === id ? null : id)}
                     title="Art de cette carte dans ce deck" aria-expanded={artOpen === id}>{shownArt(id) !== id ? `Alt ${altArtNumber(shownArt(id))}` : 'Art'}</button>
                 )}
+                <small className="dl-lvl">niv. {CARDS[id]!.niveau}</small>
               </div>
               {artOpen === id && (
                 <span className="art-pick deck-art" role="group" aria-label={`Art de ${cardName(id)} dans ce deck`}>
