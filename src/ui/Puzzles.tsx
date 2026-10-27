@@ -14,6 +14,9 @@ import { GameScreen } from './GameScreen';
 import { cardName } from './labels';
 import { TopBar } from './Screens';
 
+/** Pièces gagnées la première fois qu'un puzzle est réussi, par étoile de difficulté. */
+export const PUZZLE_COINS_PER_STAR = 5;
+
 const STARS = ['', '★', '★★', '★★★', '★★★★', '★★★★★'];
 const DIFF = ['', 'Facile', 'Moyen', 'Difficile', 'Très difficile', 'Expert'];
 
@@ -30,14 +33,14 @@ export function PuzzleList({ profile, onPlay, onBack }: { profile: Profile; onPl
     <div className="setup">
       <TopBar title="Puzzles" onBack={onBack} />
       <section className="menu-block">
-        <p className="muted small">Une situation figée, un objectif, un seul tour pour l’atteindre : l’adversaire ne joue pas. Chaque puzzle a au moins une solution (vérifiée par le jeu).</p>
+        <p className="muted small">Une situation figée, un objectif, un seul tour pour l’atteindre : l’adversaire ne joue pas. Chaque puzzle a au moins une solution (vérifiée par le jeu). Première réussite : {PUZZLE_COINS_PER_STAR} pièces par étoile.</p>
         <div className="puzzle-list">
           {PUZZLES.map((pz, i) => (
             <button key={pz.id} type="button" className={`puzzle-item${done.has(pz.id) ? ' done' : ''}`} onClick={() => onPlay(pz.id)}>
               <span className="pz-num">{i + 1}</span>
               <span className="pz-main"><b>{pz.title}</b><small>{goalText(pz, buildPuzzle(pz).state)}</small></span>
               <span className="pz-diff" title={DIFF[pz.difficulty]}>{STARS[pz.difficulty]}</span>
-              <span className="pz-done">{done.has(pz.id) ? '✓ Réussi' : ''}</span>
+              <span className={`pz-done${done.has(pz.id) ? "" : " todo"}`}>{done.has(pz.id) ? "✓ Réussi" : `+${PUZZLE_COINS_PER_STAR * pz.difficulty} pièces`}</span>
             </button>
           ))}
         </div>
@@ -90,12 +93,23 @@ export function PuzzleGame({ id, profile, update, gameOpts, onBack, onNext }: {
   const [game, setGame] = useState<GameState>(built.state);
   const [hint, setHint] = useState('');
   const [folded, setFolded] = useState(false);
+  /** Pièces gagnées par cette réussite (première fois seulement). */
+  const [reward, setReward] = useState<number | null>(null);
   const status = puzzleStatus(pz, game, built.targetUid);
   const onGame = useCallback((g: GameState) => {
     setGame(g);
-    if (puzzleStatus(pz, g, built.targetUid) === 'won') update(p => { p.puzzlesDone = [...new Set([...(p.puzzlesDone ?? []), pz.id])]; });
+    if (puzzleStatus(pz, g, built.targetUid) === 'won') {
+      let gain = 0;
+      update(p => {
+        if ((p.puzzlesDone ?? []).includes(pz.id)) return;
+        gain = PUZZLE_COINS_PER_STAR * pz.difficulty;
+        p.puzzlesDone = [...(p.puzzlesDone ?? []), pz.id];
+        p.coins += gain;
+      });
+      setReward(gain);
+    }
   }, [pz, built, update]);
-  const restart = () => { setKey(k => k + 1); setHint(''); setGame(buildPuzzle(pz).state); };
+  const restart = () => { setKey(k => k + 1); setHint(''); setReward(null); setGame(buildPuzzle(pz).state); };
   const next = PUZZLES[idx + 1];
   const target = built.targetUid !== null ? new Ctx(game).findUnit(built.targetUid) : null;
 
@@ -104,6 +118,7 @@ export function PuzzleGame({ id, profile, update, gameOpts, onBack, onNext }: {
       <div className="box">
         <h2>{status === 'won' ? 'Puzzle réussi !' : 'Raté…'}</h2>
         <p>{status === 'won' ? 'Bien joué : objectif atteint en un seul tour.' : 'L’objectif n’est pas atteint à la fin de ton tour.'}</p>
+        {status === 'won' && (reward ? <p className="coin-gain">+{reward} pièces <span className="muted small">(première réussite)</span></p> : <p className="muted small">Déjà réussi : les pièces ne se gagnent qu’une fois.</p>)}
         <div className="choices row">
           <button type="button" onClick={restart}>Recommencer</button>
           <button type="button" onClick={onBack}>Liste des puzzles</button>

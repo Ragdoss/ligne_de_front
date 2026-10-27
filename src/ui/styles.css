@@ -770,3 +770,4 @@ button.pile:not(:disabled):hover .pile-stack > * { outline: 2px solid var(--bras
 .puzzle-item.done { border-left: 4px solid #6fae5a; }
 .pz-hint { background: #fff3c4; border-left: 3px solid #c9a14a; padding: 6px 8px; margin: 6px 0; font-size: .9rem; color: #2a2010; }
 .pz-target { font-size: .85rem; color: #4a3d28; margin: 4px 0; }
+.puzzle-item .pz-done.todo { color: var(--brass-bright); }

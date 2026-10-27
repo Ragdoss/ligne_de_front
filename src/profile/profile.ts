@@ -226,6 +226,7 @@ export function sanitizeProfile(raw: unknown): Profile {
     options: { ...DEFAULT_OPTIONS, ...(r.options ?? {}) },
     mergedCampaigns: Array.isArray(r.mergedCampaigns) ? r.mergedCampaigns.filter(x => typeof x === 'string') : [],
     name: typeof r.name === 'string' && r.name.trim() ? r.name.trim().slice(0, 24) : 'Joueur',
+    puzzlesDone: Array.isArray(r.puzzlesDone) ? [...new Set(r.puzzlesDone.filter(x => typeof x === 'string'))] : [],
     stats: Object.fromEntries((Object.keys(EMPTY_STATS) as (keyof Stats)[]).map(k => [k, { w: Math.max(0, Number(r.stats?.[k]?.w) | 0), l: Math.max(0, Number(r.stats?.[k]?.l) | 0) }])) as unknown as Stats,
     ...(() => {
       const emotes = [...new Set([...BASE_EMOTES, ...(Array.isArray(r.emotes) ? r.emotes : []).filter(x => EMOTE_IDS.includes(x))])];

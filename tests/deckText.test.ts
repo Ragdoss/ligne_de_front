@@ -28,3 +28,11 @@ describe('Arts du deck dans le texte', () => {
     expect(r.deck.filter(x => x === 'paysans')).toHaveLength(2);
   });
 });
+
+import { newProfile, sanitizeProfile } from '../src/profile/profile';
+describe('Profil : puzzles réussis', () => {
+  it('sont conservés au rechargement', () => {
+    const p = { ...newProfile(), puzzlesDone: ['marque', 'marque', 'coup-de-grace'] };
+    expect(sanitizeProfile(JSON.parse(JSON.stringify(p))).puzzlesDone).toEqual(['marque', 'coup-de-grace']);
+  });
+});
