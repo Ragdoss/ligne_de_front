@@ -57,7 +57,7 @@ export const ALL_PUZZLES: Puzzle[] = [
   {
     id: 'invocation_impossible',
     title: 'L’invocation impossible',
-    difficulty: 5,
+    difficulty: 4,
     intro: 'Notre seul espoir c’est de finir l’incantation de l’Archidémon afin qu’il renverse la maréchal impérial et son dragon',
     goal: { type: 'destroy', slot: 'avant.2' },
     A: {
