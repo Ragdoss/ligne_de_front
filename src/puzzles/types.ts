@@ -45,6 +45,8 @@ export interface Puzzle {
   /** Présentation de la situation (affichée au début). */
   intro: string;
   goal: PuzzleGoal;
+  /** Brouillon : absent du jeu et pas exigé par les tests (tools/puzzle-check.ts l'analyse quand même). */
+  draft?: boolean;
   /** Toi (tu joues ce tour), l'adversaire (il ne joue pas). */
   A: PuzzleSide;
   B: PuzzleSide;

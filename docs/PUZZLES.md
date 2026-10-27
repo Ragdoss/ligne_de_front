@@ -44,6 +44,12 @@ Une situation figée, un objectif, **un seul tour** pour l'atteindre ; l'adversa
 - Les identifiants de cartes sont ceux de `src/data/` (ex. `recrue_imp`, `marque_chasseur`) ; la liste des noms est dans
   `src/i18n/*.fr.ts`.
 
+## Brouillon
+
+`draft: true` dans un puzzle le retire du jeu et des tests : utile pour pousser un puzzle pas encore au point sans
+bloquer la publication (les tests doivent passer pour que GitHub Pages publie le jeu). `tools/puzzle-check.ts`
+l'analyse quand même.
+
 ## Vérification
 
 `npm test` vérifie chaque puzzle avec le solveur : il doit avoir au moins une solution, et finir le tour sans rien faire

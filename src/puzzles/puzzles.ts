@@ -4,7 +4,7 @@
 // en finissant simplement le tour.
 import type { Puzzle } from './types';
 
-export const PUZZLES: Puzzle[] = [
+export const ALL_PUZZLES: Puzzle[] = [
   {
     id: 'marque',
     title: 'La marque du chasseur',
@@ -73,6 +73,7 @@ export const PUZZLES: Puzzle[] = [
   },
   {
     id: 'invocation_impossible2',
+    draft: true, // brouillon : aucune solution trouvée (solveur, recherche complète) — à retirer une fois réglé
     title: 'L’invocation impossible 2',
     difficulty: 5,
     intro: 'Notre seul espoir c’est de ré-invoquer l’Archidémon afin qu’il renverse la maréchal impérial et son deuxième dragon !',
@@ -89,3 +90,6 @@ export const PUZZLES: Puzzle[] = [
      },
   },
 ];
+
+/** Puzzles jouables (sans les brouillons). */
+export const PUZZLES: Puzzle[] = ALL_PUZZLES.filter(p => !p.draft);

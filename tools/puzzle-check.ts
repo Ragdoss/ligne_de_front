@@ -4,7 +4,7 @@ import { applyAction } from '../src/engine/game';
 import type { GameState } from '../src/engine/types';
 import { cardName } from '../src/i18n/log.fr';
 import { buildPuzzle, puzzleStatus } from '../src/puzzles/build';
-import { PUZZLES } from '../src/puzzles/puzzles';
+import { ALL_PUZZLES as PUZZLES } from '../src/puzzles/puzzles';
 import { solvePuzzle } from '../src/puzzles/solve';
 
 const only = process.argv[2];
@@ -26,8 +26,8 @@ for (const pz of PUZZLES.filter(p => !only || p.id === only)) {
     combos.set(k, (combos.get(k) ?? 0) + 1);
   }
   const direct = r0.ok ? puzzleStatus(pz, r0.state, b.targetUid) : 'erreur';
-  console.log(`\n${pz.id} — ${pz.title} (${'★'.repeat(pz.difficulty)})`);
+  console.log(`\n${pz.id} — ${pz.title} (${'★'.repeat(pz.difficulty)})${pz.draft ? ' [brouillon]' : ''}`);
   console.log(`  Finir le tour sans rien jouer : ${direct === 'won' ? 'GAGNE (puzzle trop facile !)' : 'échoue'}`);
-  console.log(`  ${r.solutions.length}${r.complete ? '' : '+'} suites gagnantes, ${combos.size} combinaison(s) de cartes :`);
+  console.log(r.solutions.length ? `  ${r.solutions.length}${r.complete ? '' : '+'} suites gagnantes, ${combos.size} combinaison(s) de cartes :` : r.complete ? '  AUCUNE SOLUTION (toutes les suites de coups ont été essayées)' : '  Aucune solution trouvée dans la limite de recherche');
   for (const [k, n] of combos) console.log(`   - ${k}  (${n} ordre${n > 1 ? 's' : ''})`);
 }
