@@ -33,7 +33,8 @@ export interface PuzzleSide {
 export type PuzzleGoal =
   /** Gagner la partie avant la fin de ton tour (combat de fin de tour compris). */
   | { type: 'win' }
-  /** Détruire le régiment adverse posé à cet emplacement (ex. « avant.2 », « arriere.0 »), combat de fin de tour compris. */
+  /** Détruire le régiment adverse posé à cet emplacement, numéroté comme à l'écran à partir de 1 (ex. « avant.1 » = première
+   *  case avant à gauche, « arriere.2 », « isole.1 »), combat de fin de tour compris. */
   | { type: 'destroy'; slot: string };
 
 export interface Puzzle {

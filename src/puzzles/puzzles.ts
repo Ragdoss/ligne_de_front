@@ -10,7 +10,7 @@ export const PUZZLES: Puzzle[] = [
     title: 'La marque du chasseur',
     difficulty: 1,
     intro: 'Un chevalier blessé tient la ligne adverse. Tes archers visent d’habitude le Moral le plus bas… Détruis le Chevalier de Province ce tour-ci.',
-    goal: { type: 'destroy', slot: 'avant.2' },
+    goal: { type: 'destroy', slot: 'avant.3' },
     A: {
       faction: 'elfe', level: 2, resource: 1,
       hand: ['marque_chasseur', 'volee_fleches', 'brise_matin'],

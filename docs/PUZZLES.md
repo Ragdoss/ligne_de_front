@@ -15,7 +15,7 @@ Une situation figée, un objectif, **un seul tour** pour l'atteindre ; l'adversa
   title: 'La marque du chasseur',
   difficulty: 1,                      // 1 facile, 2 moyen, 3 difficile (étoiles)
   intro: 'Texte de présentation…',
-  goal: { type: 'destroy', slot: 'avant.2' },   // ou { type: 'win' }
+  goal: { type: 'destroy', slot: 'avant.3' },   // ou { type: 'win' }
   A: {                                // toi
     faction: 'elfe', level: 2, resource: 1,
     hand: ['marque_chasseur', 'volee_fleches', 'brise_matin'],
@@ -29,8 +29,10 @@ Une situation figée, un objectif, **un seul tour** pour l'atteindre ; l'adversa
 ```
 
 - **Objectifs** : `{ type: 'win' }` (faire perdre l'adversaire avant la fin de ton tour : en général, il est proche de
-  sa limite de lassitude) ou `{ type: 'destroy', slot: 'avant.2' }` (détruire le régiment adverse posé à cet
-  emplacement : `avant.0` à `avant.3`, `arriere.0` à `arriere.2`, `isole.0`). Le combat de fin de ton tour compte.
+  sa limite de lassitude) ou `{ type: 'destroy', slot: 'avant.3' }` (détruire le régiment adverse posé à cet
+  emplacement, **numéroté à partir de 1 comme à l'écran**, de gauche à droite : `avant.1` à `avant.4`, `arriere.1` à
+  `arriere.3`, `isole.1`). Exemple : avec `avant: [{ card: 'treant_millenaire' }, 'elem_terre', null, null]`, le Tréant
+  est en `avant.1` et l'Élémentaire en `avant.2`. Le combat de fin de ton tour compte.
 - **Un camp** : `faction`, `level` (1 à 5, débloque les cartes jouables), `resource` (ressource disponible ce tour ;
   par défaut le niveau), `lassitude` (actuelle), `limit` (limite de défaite, 50 par défaut), `hand` (cartes en main),
   `avant` (4 cases), `arriere` (3 cases), `isole`, `deck` (pioche, du dessus vers le dessous ; par défaut des Recrues

@@ -18,7 +18,7 @@ const DIFF = ['', 'Facile', 'Moyen', 'Difficile'];
 export function goalText(pz: Puzzle, s?: GameState): string {
   if (pz.goal.type === 'win') return 'Gagne la partie avant la fin de ton tour.';
   const [zone, idx] = pz.goal.slot.split('.') as [string, string];
-  const u = s?.players.B.board[zone as 'avant' | 'arriere']?.[Number(idx)] ?? (zone === 'isole' ? s?.players.B.board.isole : null);
+  const u = zone === 'isole' ? s?.players.B.board.isole : s?.players.B.board[zone as 'avant' | 'arriere']?.[Number(idx) - 1];
   return `Détruis la cible : ${u ? cardName(u.cardId) : 'le régiment désigné'} (${zone === 'avant' ? 'rangée avant' : zone === 'arriere' ? 'rangée arrière' : 'case isolée'} adverse) avant la fin de ton tour.`;
 }
 

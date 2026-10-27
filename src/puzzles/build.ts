@@ -33,7 +33,8 @@ export function buildPuzzle(pz: Puzzle): BuiltPuzzle {
       if (c.mor !== undefined) { u.currentMor = Math.min(u.maxMor, c.mor); u.brokenMorale = u.currentMor <= Math.floor(u.maxMor / 3); }
       if (c.leader) { u.leader = c.leader; u.leaderOwner = p; }
       ctx.setAt({ player: p, zone, idx }, u);
-      if (p === 'B' && pz.goal.type === 'destroy' && pz.goal.slot === `${zone}.${idx}`) targetUid = u.uid;
+      // Emplacement de la cible numéroté comme à l'écran : « avant.1 » = première case avant (à gauche).
+      if (p === 'B' && pz.goal.type === 'destroy' && pz.goal.slot === `${zone}.${idx + 1}`) targetUid = u.uid;
     };
     (side.avant ?? []).forEach((c, i) => put('avant', i, c));
     (side.arriere ?? []).forEach((c, i) => put('arriere', i, c));
