@@ -80,6 +80,8 @@ export interface Profile {
   altArts: string[];
   /** Art affiché pour une carte : clé d'un art alternatif possédé (absent = art de base). */
   artChoice: Record<string, string>;
+  /** Puzzles réussis (identifiants). */
+  puzzlesDone?: string[];
 }
 
 /** Decks triés : favoris d'abord, puis les plus récemment modifiés. */

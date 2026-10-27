@@ -1,4 +1,5 @@
 // Application : accueil, parties locales, campagne, collection (decks, cartes, paquets), options.
+import { PuzzleGame, PuzzleList } from './Puzzles';
 import { requestMusic, setSoundOptions } from './sound';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { addToPool, bonusFor, difficultyOf, easeFor, bonusUnlocked, campaignDef, defeatsOn, currentScenario, defaultDeckSelection, saveCampaign, scenarioAiFilter, scenarioGameSetup, selectionToDeck, type CampaignSave } from '../campaign/campaign';
@@ -30,6 +31,8 @@ type Screen =
   | { kind: 'home' }
   | { kind: 'local' }
   | { kind: 'tutorial'; key: number }
+  | { kind: 'puzzles' }
+  | { kind: 'puzzle'; id: string; key: number }
   | { kind: 'online' }
   | { kind: 'draft' }
   | { kind: 'draftMulti' }
@@ -116,7 +119,7 @@ export function App() {
   let content: React.ReactNode;
 
   if (screen.kind === 'home') {
-    content = <Home profile={profile} go={t => setScreen(t === 'tutorial' ? { kind: 'tutorial', key: Date.now() } : t === 'local' ? { kind: 'local' } : t === 'online' ? { kind: 'online' } : t === 'draft' ? { kind: 'draft' } : t === 'campaign' ? { kind: 'campaignMenu' } : t === 'collection' ? { kind: 'collection', tab: 'decks' } : t === 'options' ? { kind: 'options' } : { kind: 'home' })} />;
+    content = <Home profile={profile} go={t => setScreen(t === 'tutorial' ? { kind: 'tutorial', key: Date.now() } : t === 'puzzles' ? { kind: 'puzzles' } : t === 'local' ? { kind: 'local' } : t === 'online' ? { kind: 'online' } : t === 'draft' ? { kind: 'draft' } : t === 'campaign' ? { kind: 'campaignMenu' } : t === 'collection' ? { kind: 'collection', tab: 'decks' } : t === 'options' ? { kind: 'options' } : { kind: 'home' })} />;
   } else if (screen.kind === 'local') {
     content = <LocalPlay profile={profile} onBack={home} goDecks={() => setScreen({ kind: 'collection', tab: 'decks' })} onStart={setup => setScreen({ kind: 'localGame', setup, key: Date.now(), first: setup.first === 'B' ? 'B' : setup.first === 'A' ? 'A' : Math.random() < 0.5 ? 'A' : 'B' })} />;
   } else if (screen.kind === 'localGame') {
@@ -163,6 +166,11 @@ export function App() {
   } else if (screen.kind === 'draftMulti') {
     content = <MultiDraftScreen profile={profile} onExit={() => setScreen({ kind: 'draft' })} gameOpts={gameOpts}
       reward={r => update(p => { if (r.win !== undefined) { if (r.win) p.coins += COINS_PER_WIN; p.stats.online[r.win ? 'w' : 'l']++; } if (r.first) p.coins += DRAFT_FIRST_BONUS; if (r.consolation) p.coins += r.consolation; })} />;
+  } else if (screen.kind === 'puzzles') {
+    content = <PuzzleList profile={profile} onPlay={id => setScreen({ kind: 'puzzle', id, key: Date.now() })} onBack={home} />;
+  } else if (screen.kind === 'puzzle') {
+    content = <PuzzleGame key={screen.key} id={screen.id} profile={profile} update={update} gameOpts={{ animMul: o.animSpeed, aiMul: o.aiSpeed, bannerMul: o.bannerSpeed }}
+      onBack={() => setScreen({ kind: 'puzzles' })} onNext={id => setScreen({ kind: 'puzzle', id, key: Date.now() })} />;
   } else if (screen.kind === 'tutorial') {
     content = <Tutorial key={screen.key} gameOpts={{ animMul: o.animSpeed, aiMul: o.aiSpeed, bannerMul: o.bannerSpeed }} onExit={home} onCampaign={() => setScreen({ kind: 'campaignMenu' })} />;
   } else if (screen.kind === 'online') {

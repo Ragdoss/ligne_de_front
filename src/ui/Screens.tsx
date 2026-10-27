@@ -20,11 +20,12 @@ import { activeProfileId, createProfileEntry, deleteProfileEntry, listProfiles, 
 import { mainFaction } from './Decks';
 import { FACTION_LABEL, PLAYABLE_FACTIONS } from './labels';
 
-export type HomeTarget = 'tutorial' | 'local' | 'online' | 'draft' | 'campaign' | 'collection' | 'options';
+export type HomeTarget = 'tutorial' | 'puzzles' | 'local' | 'online' | 'draft' | 'campaign' | 'collection' | 'options';
 
 export function Home({ profile, go }: { profile: Profile; go: (t: HomeTarget) => void }) {
   const items: [HomeTarget, string, string][] = [
     ['tutorial', 'Tutoriel', 'Apprendre les règles en un combat guidé (5 minutes)'],
+    ['puzzles', 'Puzzles', 'Une situation, un objectif, un seul tour pour l’atteindre'],
     ['local', 'Jouer en local', 'Contre l’ordinateur, à deux sur le même écran, ou en spectateur'],
     ['online', 'Jouer en ligne', 'Contre un ami, de navigateur à navigateur (premier jet)'],
     ['draft', 'Draft à 4', 'Contre l’ordinateur ou entre amis en ligne (jusqu’à 4 joueurs), puis tournoi'],

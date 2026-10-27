@@ -88,6 +88,8 @@ export interface GameScreenProps {
   avatars?: Partial<Record<PlayerId, string | undefined>>;
   /** IA forte (v3) ; sinon IA v2 (campagne et tutoriel : leur difficulté a été réglée avec la v2). */
   strongAi?: boolean;
+  /** Partie déjà préparée (puzzles) : remplace la création à partir de `setup`. */
+  initialState?: GameState;
   /** Musique de la partie (candidats, du plus précis au plus général ; docs/SONS.md). */
   music?: string[];
   /** Le régiment qui attaque se déplace jusqu'à sa cible (Options). */
@@ -177,7 +179,7 @@ export function ChoicePanel({ choice, onPick, onHover }: { choice: PendingChoice
   );
 }
 
-export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, intro, renderEnd, onQuit, animMul = 1, aiMul = 1, bannerMul = 1, initialReveal = false, onOver, remote, bottomSide, onGame, overlay, avatars, arts, attackMotion = attackMotionOn, strongAi = false, music = ['combat'] }: GameScreenProps) {
+export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, intro, renderEnd, onQuit, animMul = 1, aiMul = 1, bannerMul = 1, initialReveal = false, onOver, remote, bottomSide, onGame, overlay, avatars, arts, attackMotion = attackMotionOn, strongAi = false, music = ['combat'], initialState }: GameScreenProps) {
   const musicKey = music.join('|');
   useEffect(() => requestMusic(musicKey.split('|')), [musicKey]);
   /** Joueur de cet écran (sons de victoire / défaite) ; null à deux sur le même écran ou en spectateur. */
@@ -187,7 +189,7 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
   setGameArts(artsRef.current); // chaque camp avec ses propres arts (base pour l'ordinateur)
   // En quittant la partie seulement (pas si une nouvelle partie, ex. revanche, a déjà pris la main).
   useEffect(() => () => clearGameArts(artsRef.current), []);
-  const [game, setGame] = useState<GameState>(() => createGame(setup));
+  const [game, setGame] = useState<GameState>(() => (initialState ? structuredClone(initialState) : createGame(setup)));
   useEffect(() => { setZoomState(null); }, [game]); // une carte jouée ou détruite ne reste pas affichée
   // Carte survolée, affichée en grand du côté opposé à la souris (fermée dès que le jeu change).
   const [zoom, setZoomState] = useState<{ id: string; left: boolean; owner?: PlayerId } | null>(null);
