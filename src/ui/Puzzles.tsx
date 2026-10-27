@@ -2,7 +2,10 @@
 import { useCallback, useMemo, useState } from 'react';
 import { buildPuzzle, puzzleStatus } from '../puzzles/build';
 import { PUZZLES } from '../puzzles/puzzles';
-import { solveFrom } from '../puzzles/solve';
+import { SAVED_SOLUTIONS } from '../puzzles/saved';
+import { positionKey, solveFrom } from '../puzzles/solve';
+import { applyAction } from '../engine/game';
+import type { Action } from '../engine/types';
 import type { Puzzle } from '../puzzles/types';
 import { Ctx } from '../engine/ctx';
 import type { GameState, SlotRef } from '../engine/types';
@@ -46,10 +49,26 @@ export function PuzzleList({ profile, onPlay, onBack }: { profile: Profile; onPl
 const slotText = (r?: SlotRef) => (r ? `${r.player === 'A' ? 'ta' : 'la'} ${r.zone === 'avant' ? `case avant ${r.idx + 1}` : r.zone === 'arriere' ? `case arrière ${r.idx + 1}` : 'case isolée'}${r.player === 'B' ? ' adverse' : ''}` : '');
 
 /** Premier coup d'une solution, en clair : depuis la position actuelle si elle est encore gagnable, sinon depuis le début. */
+/** Si la position actuelle est sur le chemin de la solution enregistrée : la suite de cette solution. */
+function savedFrom(pz: Puzzle, s: GameState): Action[] | null {
+  const sol = SAVED_SOLUTIONS[pz.id];
+  if (!sol) return null;
+  const k = positionKey(s);
+  let st = buildPuzzle(pz).state;
+  for (let i = 0; i <= sol.length; i++) {
+    if (positionKey(st) === k) return sol.slice(i);
+    if (i === sol.length) break;
+    const r = applyAction(st, sol[i]!);
+    if (!r.ok) return null;
+    st = r.state;
+  }
+  return null;
+}
+
 function hintFor(pz: Puzzle, s: GameState, targetUid: number | null): string {
-  const here = solveFrom(pz, s, targetUid, { maxSolutions: 1, maxNodes: 40_000 }).solutions[0];
+  const here = savedFrom(pz, s) ?? solveFrom(pz, s, targetUid, { maxSolutions: 1, maxNodes: 40_000 }).solutions[0];
   const start = buildPuzzle(pz);
-  const sol = here ?? solveFrom(pz, start.state, start.targetUid, { maxSolutions: 1, maxNodes: 60_000 }).solutions[0];
+  const sol = here ?? SAVED_SOLUTIONS[pz.id] ?? solveFrom(pz, start.state, start.targetUid, { maxSolutions: 1, maxNodes: 60_000 }).solutions[0];
   const base = here ? s : start.state;
   const a = sol?.[0];
   if (!a) return 'Pas d’indice trouvé à temps pour ce puzzle : essaie encore, ou recommence.';

@@ -15,7 +15,7 @@ const unitKey = (u: Unit | null) => {
   return rest;
 };
 /** Position sans les numéros internes (uid) : deux suites de coups qui mènent au même endroit donnent la même clé. */
-function positionKey(s: GameState): string {
+export function positionKey(s: GameState): string {
   const pl = (p: 'A' | 'B') => {
     const x = s.players[p];
     return {
@@ -73,6 +73,19 @@ export function solveFrom(pz: Puzzle, state: GameState, targetUid: number | null
   };
   dfs(state, []);
   return { solutions, explored, complete };
+}
+
+/** Rejoue une suite de coups depuis le début du puzzle : gagne-t-elle ? */
+export function checkSolution(pz: Puzzle, actions: Action[]): boolean {
+  const { state, targetUid } = buildPuzzle(pz);
+  let s = state;
+  for (const a of actions) {
+    if (puzzleStatus(pz, s, targetUid)) return false;
+    const r = applyAction(s, a);
+    if (!r.ok) return false;
+    s = r.state;
+  }
+  return puzzleStatus(pz, s, targetUid) === 'won';
 }
 
 export function solvePuzzle(pz: Puzzle, opts: { maxSolutions?: number; maxNodes?: number } = {}): SolveResult {

@@ -61,5 +61,11 @@ npx tsx tools/puzzle-check.ts            # tous les puzzles
 npx tsx tools/puzzle-check.ts marque     # un seul
 ```
 
-En jeu, le bouton **Indice** utilise le même solveur : il donne le premier coup d'une solution depuis la position
-actuelle (ou dit de recommencer si elle n'est plus gagnable).
+`tools/puzzle-check.ts` **enregistre aussi la solution la plus courte** de chaque puzzle dans
+`src/puzzles/solutions.json` (fichier généré, à pousser avec le puzzle). Les tests la rejouent au lieu de tout
+rechercher : indispensable pour les gros puzzles (le puzzle 5 demande près d'un million de positions, environ une
+minute). Si un puzzle est trop gros pour la recherche rapide des tests, le message d'erreur le dit : lance
+`npx tsx tools/puzzle-check.ts <id>`, puis pousse `solutions.json`.
+
+En jeu, le bouton **Indice** utilise le même solveur : il donne le coup suivant de la solution enregistrée si tu es sur son chemin,
+sinon cherche depuis ta position (ou dit de recommencer si elle n'est plus gagnable).

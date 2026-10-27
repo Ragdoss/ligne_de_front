@@ -1,0 +1,193 @@
+{
+ "marque": [
+  {
+   "type": "play",
+   "handUid": 1,
+   "target": {
+    "player": "B",
+    "zone": "avant",
+    "idx": 2
+   }
+  },
+  {
+   "type": "play",
+   "handUid": 2,
+   "target": {
+    "player": "A",
+    "zone": "arriere",
+    "idx": 1
+   }
+  },
+  {
+   "type": "endTurn"
+  }
+ ],
+ "coup-de-grace": [
+  {
+   "type": "play",
+   "handUid": 3
+  },
+  {
+   "type": "play",
+   "handUid": 2,
+   "target": {
+    "player": "A",
+    "zone": "avant",
+    "idx": 3
+   }
+  },
+  {
+   "type": "endTurn"
+  }
+ ],
+ "derriere-les-lignes": [
+  {
+   "type": "play",
+   "handUid": 6
+  },
+  {
+   "type": "play",
+   "handUid": 5,
+   "target": {
+    "player": "A",
+    "zone": "avant",
+    "idx": 0
+   }
+  },
+  {
+   "type": "play",
+   "handUid": 7,
+   "target": {
+    "player": "A",
+    "zone": "avant",
+    "idx": 2
+   }
+  },
+  {
+   "type": "play",
+   "handUid": 4,
+   "target": {
+    "player": "B",
+    "zone": "avant",
+    "idx": 0
+   },
+   "target2": {
+    "player": "B",
+    "zone": "arriere",
+    "idx": 0
+   }
+  },
+  {
+   "type": "play",
+   "handUid": 1,
+   "target": {
+    "player": "B",
+    "zone": "arriere",
+    "idx": 0
+   }
+  },
+  {
+   "type": "endTurn"
+  }
+ ],
+ "invocation_impossible": [
+  {
+   "type": "play",
+   "handUid": 3
+  },
+  {
+   "type": "choose",
+   "option": 0
+  },
+  {
+   "type": "choose",
+   "option": 0
+  },
+  {
+   "type": "choose",
+   "option": 0
+  },
+  {
+   "type": "play",
+   "handUid": 8
+  },
+  {
+   "type": "play",
+   "handUid": 14,
+   "target": {
+    "player": "A",
+    "zone": "avant",
+    "idx": 2
+   }
+  },
+  {
+   "type": "play",
+   "handUid": 6,
+   "target": {
+    "player": "A",
+    "zone": "avant",
+    "idx": 2
+   }
+  },
+  {
+   "type": "play",
+   "handUid": 1,
+   "target": {
+    "player": "A",
+    "zone": "avant",
+    "idx": 1
+   }
+  }
+ ],
+ "invocation_impossible2": [
+  {
+   "type": "play",
+   "handUid": 5
+  },
+  {
+   "type": "choose",
+   "option": 0
+  },
+  {
+   "type": "choose",
+   "option": 0
+  },
+  {
+   "type": "choose",
+   "option": 0
+  },
+  {
+   "type": "play",
+   "handUid": 3
+  },
+  {
+   "type": "choose",
+   "option": 2
+  },
+  {
+   "type": "choose",
+   "option": 2
+  },
+  {
+   "type": "choose",
+   "option": 1
+  },
+  {
+   "type": "play",
+   "handUid": 7
+  },
+  {
+   "type": "choose",
+   "option": 0
+  },
+  {
+   "type": "play",
+   "handUid": 18,
+   "target": {
+    "player": "A",
+    "zone": "avant",
+    "idx": 2
+   }
+  }
+ ]
+}
