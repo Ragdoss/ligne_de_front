@@ -20,7 +20,7 @@ for (const pz of PUZZLES.filter(p => !only || p.id === only)) {
     for (const a of sol) {
       if (a.type === 'play') { const h = s.players.A.hand.find(x => x.uid === a.handUid)!; parts.push(`${cardName(h.cardId)}${where(a.target)}`); }
       if (a.type === 'choose') parts.push(`choix « ${s.pending[0]?.options?.[a.option]?.label ?? a.option} »`);
-      s = applyAction(s, a).state as GameState;
+      const r2 = applyAction(s, a); if (!r2.ok) break; s = r2.state;
     }
     const k = parts.sort().join(' + ') || '(finir le tour)';
     combos.set(k, (combos.get(k) ?? 0) + 1);
