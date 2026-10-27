@@ -67,7 +67,7 @@ export const PUZZLES: Puzzle[] = [
       deck :['legion_morvak','dragon_infernal','mercenaire_stagiaire','pacte_sang','mercenaire_stagiaire','mercenaire_stagiaire','mercenaire_stagiaire','mercenaire_stagiaire','mercenaire_stagiaire','mercenaire_stagiaire']
     },
     B: {
-      faction: 'empire', level: 5, lassitude 25, limit: 50,
+      faction: 'empire', level: 5, lassitude: 25, limit: 50,
       avant: [ null,{ card: 'dragon_imp', leader : 'marechal_empire' }, null, null],
      },
   },
