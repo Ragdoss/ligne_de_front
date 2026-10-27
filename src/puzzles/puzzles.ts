@@ -54,4 +54,21 @@ export const PUZZLES: Puzzle[] = [
       arriere: [null,'lettree_conclave', null],
     },
   },
+  {
+    id: 'invocation_impossible',
+    title: 'L’invocation impossible',
+    difficulty: 5,
+    intro: 'Notre seul espoir c’est de finir l’incantation de l’Archidémon afin qu’il renverse la maréchal impérial et son dragon',
+    goal: { type: 'destroy', slot: 'avant.2' },
+    A: {
+      faction: 'demon', level: 5, resource: 2, lassitude: 38, limit: 50,
+      hand: ['archidemon_origines', 'rituel_sang_noir', 'augure_abime', 'pacte_mineur', 'grimoire_interdit', 'banquet_infernal','tuteur_demoniaque','pacte_sang','pacte_sang','pacte_sang'],
+      avant: [null, { card:'fanatiques', mor: 2} ,{ card:'fanatiques', mor: 1}, null],
+      deck :['legion_morvak','dragon_infernal','mercenaire_stagiaire','pacte_sang','mercenaire_stagiaire','mercenaire_stagiaire','mercenaire_stagiaire','mercenaire_stagiaire','mercenaire_stagiaire','mercenaire_stagiaire']
+    },
+    B: {
+      faction: 'empire', level: 5, lassitude 25, limit: 50,
+      avant: [ null,{ card: 'dragon_imp', leader : 'marechal_empire' }, null, null],
+     },
+  },
 ];
