@@ -44,7 +44,7 @@ export const PUZZLES: Puzzle[] = [
     intro: 'Le Tréant millénaire soigne toute l’armée adverse depuis l’arrière, hors d’atteinte… pour l’instant. Détruis-le ce tour-ci.',
     goal: { type: 'destroy', slot: 'avant.1' },
     A: {
-      faction: 'elfe', level: 3, resource: 1,
+      faction: 'elfe', level: 3, resource: 3,
       hand: ['visez_faibles', 'volee_fleches', 'sang_seve', 'changement_tectonique', 'chant_seve', 'brise_matin','pousse_sylve','racines_protectrices'],
       avant: ['eclaireur_elfe', 'danseuses_lames', null, null],
     },
