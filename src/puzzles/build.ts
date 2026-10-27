@@ -23,7 +23,9 @@ export function buildPuzzle(pz: Puzzle): BuiltPuzzle {
     pl.resource = side.resource ?? pl.level;
     pl.points = side.lassitude ?? 0;
     pl.hand = (side.hand ?? []).map(cardId => ({ uid: s.nextUid++, cardId }));
-    if (pl.level >= 4) { pl.deck = pl.deck.concat(pl.reserve); pl.reserve = []; }
+    // Pioche dans l'ordre écrit (pas de mélange), du dessus vers le dessous ; pas de paquet niveaux 4-5 à part.
+    pl.deck = [...(side.deck ?? FILLER)];
+    pl.reserve = [];
     const put = (zone: Zone, idx: number, cell: PuzzleCell | null | undefined) => {
       if (!cell) return;
       const c = typeof cell === 'string' ? { card: cell } : cell;
@@ -51,6 +53,7 @@ export function puzzleStatus(pz: Puzzle, s: GameState, targetUid: number | null)
   if (pz.goal.type === 'win') {
     if (s.over) return s.over.winner === 'A' ? 'won' : 'lost';
   } else {
+    if (s.over?.winner === 'B') return 'lost'; // détruire la cible en perdant la partie ne compte pas
     if (targetUid !== null && !new Ctx(s).findUnit(targetUid)) return 'won';
     if (s.over) return 'lost';
   }

@@ -13,7 +13,7 @@ Une situation figée, un objectif, **un seul tour** pour l'atteindre ; l'adversa
 {
   id: 'marque',                       // identifiant unique (sert à retenir les puzzles réussis)
   title: 'La marque du chasseur',
-  difficulty: 1,                      // 1 facile, 2 moyen, 3 difficile (étoiles)
+  difficulty: 1,                      // 1 facile … 5 expert (étoiles)
   intro: 'Texte de présentation…',
   goal: { type: 'destroy', slot: 'avant.3' },   // ou { type: 'win' }
   A: {                                // toi
@@ -32,11 +32,11 @@ Une situation figée, un objectif, **un seul tour** pour l'atteindre ; l'adversa
   sa limite de lassitude) ou `{ type: 'destroy', slot: 'avant.3' }` (détruire le régiment adverse posé à cet
   emplacement, **numéroté à partir de 1 comme à l'écran**, de gauche à droite : `avant.1` à `avant.4`, `arriere.1` à
   `arriere.3`, `isole.1`). Exemple : avec `avant: [{ card: 'treant_millenaire' }, 'elem_terre', null, null]`, le Tréant
-  est en `avant.1` et l'Élémentaire en `avant.2`. Le combat de fin de ton tour compte.
+  est en `avant.1` et l'Élémentaire en `avant.2`. Le combat de fin de ton tour compte ; détruire la cible en perdant la partie (lassitude…) ne compte pas.
 - **Un camp** : `faction`, `level` (1 à 5, débloque les cartes jouables), `resource` (ressource disponible ce tour ;
   par défaut le niveau), `lassitude` (actuelle), `limit` (limite de défaite, 50 par défaut), `hand` (cartes en main),
-  `avant` (4 cases), `arriere` (3 cases), `isole`, `deck` (pioche, du dessus vers le dessous ; par défaut des Recrues
-  sans importance).
+  `avant` (4 cases), `arriere` (3 cases), `isole`, `deck` (pioche **dans cet ordre, sans mélange**, du dessus vers le dessous ;
+  par défaut des Recrues sans importance ; pas de paquet niveaux 4-5 à part).
 - **Une case** : `null` (vide), un identifiant de carte (`'archer_bois'`), ou les détails :
   `{ card: 'chevalier_prov', end: 45, mor: 6, leader: 'lieutenant', fresh: true }` — END et Moral actuels (par défaut
   au maximum ; impossible de dépasser le maximum de la carte), Leader déjà attaché, `fresh` : posé ce tour (frappe à

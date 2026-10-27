@@ -2,18 +2,17 @@
 import { useCallback, useMemo, useState } from 'react';
 import { buildPuzzle, puzzleStatus } from '../puzzles/build';
 import { PUZZLES } from '../puzzles/puzzles';
-import { solvePuzzle } from '../puzzles/solve';
+import { solveFrom } from '../puzzles/solve';
 import type { Puzzle } from '../puzzles/types';
 import { Ctx } from '../engine/ctx';
-import * as GAME from '../engine/game';
-import type { Action, GameState, SlotRef } from '../engine/types';
+import type { GameState, SlotRef } from '../engine/types';
 import type { Profile } from '../profile/profile';
 import { GameScreen } from './GameScreen';
 import { cardName } from './labels';
 import { TopBar } from './Screens';
 
-const STARS = ['', '★', '★★', '★★★'];
-const DIFF = ['', 'Facile', 'Moyen', 'Difficile'];
+const STARS = ['', '★', '★★', '★★★', '★★★★', '★★★★★'];
+const DIFF = ['', 'Facile', 'Moyen', 'Difficile', 'Très difficile', 'Expert'];
 
 export function goalText(pz: Puzzle, s?: GameState): string {
   if (pz.goal.type === 'win') return 'Gagne la partie avant la fin de ton tour.';
@@ -46,35 +45,21 @@ export function PuzzleList({ profile, onPlay, onBack }: { profile: Profile; onPl
 
 const slotText = (r?: SlotRef) => (r ? `${r.player === 'A' ? 'ta' : 'la'} ${r.zone === 'avant' ? `case avant ${r.idx + 1}` : r.zone === 'arriere' ? `case arrière ${r.idx + 1}` : 'case isolée'}${r.player === 'B' ? ' adverse' : ''}` : '');
 
-/** Premier coup d'une solution, en clair. */
+/** Premier coup d'une solution, en clair : depuis la position actuelle si elle est encore gagnable, sinon depuis le début. */
 function hintFor(pz: Puzzle, s: GameState, targetUid: number | null): string {
-  // On cherche depuis la position actuelle si elle est encore gagnable, sinon depuis le début.
-  const fromHere = solveFrom(pz, s, targetUid);
+  const here = solveFrom(pz, s, targetUid, { maxSolutions: 1, maxNodes: 40_000 }).solutions[0];
   const start = buildPuzzle(pz);
-  const sol = fromHere ?? solvePuzzle(pz, { maxSolutions: 1 }).solutions[0];
-  const base = fromHere ? s : start.state;
+  const sol = here ?? solveFrom(pz, start.state, start.targetUid, { maxSolutions: 1, maxNodes: 60_000 }).solutions[0];
+  const base = here ? s : start.state;
   const a = sol?.[0];
-  if (!a) return 'Aucune solution trouvée depuis cette position : recommence le puzzle.';
-  const prefix = fromHere ? '' : 'Depuis cette position, ce n’est plus possible : recommence. ';
+  if (!a) return 'Pas d’indice trouvé à temps pour ce puzzle : essaie encore, ou recommence.';
+  const prefix = here ? '' : 'Depuis cette position, ce n’est plus possible : recommence. ';
   if (a.type === 'endTurn') return `${prefix}Tout est prêt : finis ton tour.`;
-  if (a.type === 'choose') return `${prefix}Choisis : ${base.pending[0]?.options?.[a.option]?.label ?? 'l’option ' + (a.option + 1)}.`;
+  if (a.type === 'choose') return `${prefix}Choisis : ${base.pending[0]?.options?.[a.option]?.label || 'l’option ' + (a.option + 1)}.`;
   const h = base.players.A.hand.find(x => x.uid === a.handUid);
-  return `${prefix}Commence par jouer ${h ? cardName(h.cardId) : 'une carte'}${a.target ? ` sur ${slotText(a.target)}` : ''}.`;
+  return `${prefix}Joue ${h ? cardName(h.cardId) : 'une carte'}${a.target ? ` sur ${slotText(a.target)}` : ''}.`;
 }
-function solveFrom(pz: Puzzle, s: GameState, targetUid: number | null): Action[] | null {
-  // Petit solveur depuis un état quelconque (même principe que solvePuzzle).
-  const { applyAction, legalActions } = GAME;
-  let found: Action[] | null = null, n = 0;
-  const dfs = (st: GameState, path: Action[]) => {
-    if (found || ++n > 50_000) return;
-    const r = puzzleStatus(pz, st, targetUid);
-    if (r === 'won') { found = path; return; }
-    if (r === 'lost') return;
-    for (const a of legalActions(st)) { const x = applyAction(st, a); if (x.ok) dfs(x.state, [...path, a]); if (found) return; }
-  };
-  dfs(s, []);
-  return found;
-}
+
 export function PuzzleGame({ id, profile, update, gameOpts, onBack, onNext }: {
   id: string; profile: Profile; update: (fn: (p: Profile) => void) => void;
   gameOpts: { animMul: number; aiMul: number; bannerMul: number }; onBack: () => void; onNext: (id: string) => void;

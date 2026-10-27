@@ -12,7 +12,7 @@ const where = (r?: { player: string; zone: string; idx: number }) => (r ? ` → 
 for (const pz of PUZZLES.filter(p => !only || p.id === only)) {
   const b = buildPuzzle(pz);
   const r0 = applyAction(b.state, { type: 'endTurn' });
-  const r = solvePuzzle(pz, { maxSolutions: 5000 });
+  const r = solvePuzzle(pz, { maxSolutions: 300, maxNodes: 3_000_000 });
   const combos = new Map<string, number>();
   for (const sol of r.solutions) {
     let s: GameState = buildPuzzle(pz).state;

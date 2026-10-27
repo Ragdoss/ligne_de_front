@@ -40,8 +40,8 @@ export type PuzzleGoal =
 export interface Puzzle {
   id: string;
   title: string;
-  /** 1 facile, 2 moyen, 3 difficile. */
-  difficulty: 1 | 2 | 3;
+  /** 1 facile, 2 moyen, 3 difficile, 4 très difficile, 5 expert (étoiles). */
+  difficulty: 1 | 2 | 3 | 4 | 5;
   /** Présentation de la situation (affichée au début). */
   intro: string;
   goal: PuzzleGoal;
