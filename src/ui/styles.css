@@ -776,3 +776,4 @@ button.pile:not(:disabled):hover .pile-stack > * { outline: 2px solid var(--bras
 .unit.is-prey { box-shadow: 0 0 0 2px #d24a3a, 0 0 12px #d24a3a99; }
 .u-prey { position: absolute; top: 34%; left: 50%; transform: translateX(-50%); z-index: 3; background: #b8352a; color: #fff3df; font: 700 .62rem/1 'Cinzel', serif;
   letter-spacing: .08em; text-transform: uppercase; padding: 3px 7px; border-radius: 10px; border: 1px solid #ffcfb8; box-shadow: 0 1px 4px #0008; pointer-events: none; }
+.options-screen .topbar h1 { text-shadow: 0 1px 6px rgba(0,0,0,.9); }

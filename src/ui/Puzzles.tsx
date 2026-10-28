@@ -13,6 +13,7 @@ import type { Profile } from '../profile/profile';
 import { GameScreen } from './GameScreen';
 import { cardName } from './labels';
 import { TopBar } from './Screens';
+import puzzleBg from './assets/puzzle_bg.webp';
 
 /** Pièces gagnées la première fois qu'un puzzle est réussi, par étoile de difficulté. */
 export const PUZZLE_COINS_PER_STAR = 5;
@@ -30,7 +31,7 @@ export function goalText(pz: Puzzle, s?: GameState): string {
 export function PuzzleList({ profile, onPlay, onBack }: { profile: Profile; onPlay: (id: string) => void; onBack: () => void }) {
   const done = new Set(profile.puzzlesDone ?? []);
   return (
-    <div className="setup">
+    <div className="setup options-screen" style={{ ["--screen-bg" as string]: `url(${puzzleBg})` }}>
       <TopBar title="Puzzles" onBack={onBack} />
       <section className="menu-block">
         <p className="muted small">Une situation figée, un objectif, un seul tour pour l’atteindre : l’adversaire ne joue pas. Chaque puzzle a au moins une solution (vérifiée par le jeu). Première réussite : {PUZZLE_COINS_PER_STAR} pièces par étoile.</p>
