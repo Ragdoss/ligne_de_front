@@ -295,6 +295,7 @@ function attachLeader(ctx: Ctx, p: PlayerId, c: CardDef, u: Unit): void {
   if (c.replaysAnyArrivalOnAttach) arrivalEffects(ctx, u.controller, u, u.cardId); // Légat Varro
   const res = c.resourceOnAttach as number | undefined; // Capitaine mercenaire
   if (res) { ctx.player(p).resource += res; ctx.emit({ type: 'resource', player: p, amount: res, source: c.id }); }
+  ctx.recheckBroken(u); // le Moral apporté par le Leader peut sortir le régiment du Moral brisé
 }
 
 // ---------- Effets d'arrivée des Nomades (rejoués par Mirage, Embuscade, Maître de Caravane) ----------

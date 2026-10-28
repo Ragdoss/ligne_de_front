@@ -45,3 +45,20 @@ describe('Équilibrage 10 — Elfes', () => {
     expect(s.players.A.hand.length).toBe(before + 1);
   });
 });
+
+describe('Leader sur un régiment au Moral brisé', () => {
+  it('le Moral apporté par le Leader le sort du Moral brisé s’il repasse au-dessus du tiers', () => {
+    let s = ready(quiet());
+    place(s, 'A', 'avant', 0, 'lancier_emp', { currentMor: 2, brokenMorale: true });
+    s = act(s, { type: 'play', handUid: give(s, 'A', 'lieutenant'), target: slot('A', 'avant', 0) }).state;
+    const u = s.players.A.board.avant[0]!;
+    expect(u.currentMor).toBe(4);
+    expect(u.brokenMorale).toBe(false);
+  });
+  it('reste brisé s’il ne dépasse pas le tiers', () => {
+    let s = ready(quiet());
+    place(s, 'A', 'avant', 0, 'lancier_emp', { currentMor: 1, brokenMorale: true });
+    s = act(s, { type: 'play', handUid: give(s, 'A', 'lieutenant'), target: slot('A', 'avant', 0) }).state;
+    expect(s.players.A.board.avant[0]!.brokenMorale).toBe(true);
+  });
+});

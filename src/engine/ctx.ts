@@ -399,6 +399,11 @@ export class Ctx {
   }
 
   // ---------- Moral ----------
+  /** Moral remonté au-dessus du tiers autrement que par un soin (ex. Leader qui donne du Moral) : le Moral n'est plus brisé. */
+  recheckBroken(u: Unit): void {
+    if (u.brokenMorale && u.currentMor > Math.floor(u.maxMor / 3)) u.brokenMorale = false;
+    else this.checkBroken(u);
+  }
   checkBroken(u: Unit): void {
     if (!u.brokenMorale && u.currentMor <= Math.floor(u.maxMor / 3)) {
       u.brokenMorale = true;
