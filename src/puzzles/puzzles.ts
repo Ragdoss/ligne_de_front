@@ -129,7 +129,7 @@ export const ALL_PUZZLES: Puzzle[] = [
     B: {
       faction: 'empire',
       level: 5,
-      avant: [{ card: 'cuirassiers_lourds', mor: 10 }, null, 'commandant_kragz', 'forteresse'],
+      avant: [{ card: 'cuirassiers_lourds', mor: 10 }, null, null, 'forteresse'],
       arriere: [null, 'tambour_bataillon', {card:'imperatrice_octavia', leader : 'heraut_imperial'}],
     },
   },

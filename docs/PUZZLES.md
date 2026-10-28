@@ -39,7 +39,8 @@ Une situation figée, un objectif, **un seul tour** pour l'atteindre ; l'adversa
   par défaut des Recrues sans importance ; pas de paquet niveaux 4-5 à part).
 - **Une case** : `null` (vide), un identifiant de carte (`'archer_bois'`), ou les détails :
   `{ card: 'chevalier_prov', end: 45, mor: 6, leader: 'lieutenant', fresh: true }` — END et Moral actuels (par défaut
-  au maximum ; impossible de dépasser le maximum de la carte), Leader déjà attaché, `fresh` : posé ce tour (frappe à
+  au maximum ; impossible de dépasser le maximum de la carte, Leader compris), Leader déjà attaché (ses bonus
+  s'appliquent comme s'il venait d'être joué : Moral, END, niveau, mots-clés), `fresh` : posé ce tour (frappe à
   moitié de son ATK). Par défaut, les régiments sont prêts.
 - Les identifiants de cartes sont ceux de `src/data/` (ex. `recrue_imp`, `marque_chasseur`) ; la liste des noms est dans
   `src/i18n/*.fr.ts`.

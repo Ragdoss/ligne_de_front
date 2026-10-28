@@ -1,5 +1,6 @@
 // Construction d'une partie à partir d'un puzzle, et suivi de l'objectif.
-import { Ctx } from '../engine/ctx';
+import { card, Ctx } from '../engine/ctx';
+import { attachLeader } from '../engine/play';
 import { createGame } from '../engine/game';
 import type { GameState, PlayerId, Zone } from '../engine/types';
 import type { Puzzle, PuzzleCell, PuzzleSide } from './types';
@@ -31,10 +32,13 @@ export function buildPuzzle(pz: Puzzle): BuiltPuzzle {
       const c = typeof cell === 'string' ? { card: cell } : cell;
       const u = ctx.makeUnit(c.card, p);
       u.justDeployed = !!c.fresh;
-      if (c.end !== undefined) u.currentEnd = Math.min(u.maxEnd, c.end);
-      if (c.mor !== undefined) { u.currentMor = Math.min(u.maxMor, c.mor); u.brokenMorale = u.currentMor <= Math.floor(u.maxMor / 3); }
-      if (c.leader) { u.leader = c.leader; u.leaderOwner = p; }
       ctx.setAt({ player: p, zone, idx }, u);
+      // Leader déjà attaché : ses effets d'attache s'appliquent (Moral, END, niveau, mots-clés…), comme en partie.
+      if (c.leader) attachLeader(ctx, p, card(c.leader), u);
+      // END et Moral écrits dans le puzzle : valeurs actuelles finales (après le Leader), sans dépasser le maximum.
+      if (c.end !== undefined) u.currentEnd = Math.min(u.maxEnd, c.end);
+      if (c.mor !== undefined) u.currentMor = Math.min(u.maxMor, c.mor);
+      u.brokenMorale = u.currentMor <= Math.floor(u.maxMor / 3);
       // Emplacement de la cible numéroté comme à l'écran : « avant.1 » = première case avant (à gauche).
       if (p === 'B' && pz.goal.type === 'destroy' && pz.goal.slot === `${zone}.${idx + 1}`) targetUid = u.uid;
     };

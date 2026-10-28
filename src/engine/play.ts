@@ -276,7 +276,7 @@ export function arrivalEffects(ctx: Ctx, p: PlayerId, u: Unit, asCard: string, s
   }
 }
 
-function attachLeader(ctx: Ctx, p: PlayerId, c: CardDef, u: Unit): void {
+export function attachLeader(ctx: Ctx, p: PlayerId, c: CardDef, u: Unit): void {
   if (u.leader) ctx.discardLeader(u); // remplacement (Leaders « requiert un Leader » uniquement)
   u.leader = c.id;
   u.leaderOwner = p;
