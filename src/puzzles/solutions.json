@@ -237,6 +237,19 @@
    }
   },
   {
+   "type": "play",
+   "handUid": 5
+  },
+  {
+   "type": "play",
+   "handUid": 3,
+   "target": {
+    "player": "A",
+    "zone": "avant",
+    "idx": 0
+   }
+  },
+  {
    "type": "endTurn"
   }
  ],

@@ -96,7 +96,7 @@ export const ALL_PUZZLES: Puzzle[] = [
     goal: { type: 'destroy', slot: 'avant.4' },
     A: {
       faction: 'elfe',
-      level: 2,
+      level: 3, // Chevaucheurs du mirage : carte de niveau 3
       resource: 4,
       hand: ['chevaucheurs_mirage', 'volee_fleches', 'chant_seve', 'cavalier_elfe', 'sentinelle_cimes', 'brise_matin', 'eclaireur_elfe', 'vent_porteur', 'ravitaillement'],
       avant: ['elem_terre', null, null, null],
@@ -129,7 +129,7 @@ export const ALL_PUZZLES: Puzzle[] = [
     B: {
       faction: 'empire',
       level: 5,
-      avant: [{ card: 'cuirassiers_lourds', mor: 10 }, null, null, 'forteresse'],
+      avant: [{ card: 'cuirassiers_lourds', mor: 10 }, null, 'commandant_kragz', 'forteresse'],
       arriere: [null, 'tambour_bataillon', {card:'imperatrice_octavia', leader : 'heraut_imperial'}],
     },
   },
