@@ -32,6 +32,18 @@ export function cardCost(ctx: Ctx, p: PlayerId, h: HandCard): number {
   return Math.max(0, cost);
 }
 
+/** Coût réel avec la cible : moins cher contre ta Proie (Racines, Changement Tectonique), +1 pour une Tactique
+ *  qui cible un régiment à toi désigné comme Proie par l'adversaire. */
+export function targetedCost(ctx: Ctx, p: PlayerId, h: HandCard, target?: SlotRef): number {
+  let cost = cardCost(ctx, p, h);
+  const c = card(h.cardId);
+  const u = target ? ctx.unitAt(target) : null;
+  if (c.cardType !== 'Tactique' || !u || h.freeCopy) return cost;
+  if (u.prey === p && c.costVsPrey !== undefined) cost = Math.min(cost, c.costVsPrey as number);
+  if (u.controller === p && u.prey === opponentOf(p)) cost += 1;
+  return cost;
+}
+
 // ---------- Jouabilité ----------
 /** Raison pour laquelle la carte ne peut pas être jouée maintenant (null = jouable, hors choix de cible). */
 export function unplayableReason(ctx: Ctx, p: PlayerId, h: HandCard): string | null {
@@ -40,7 +52,7 @@ export function unplayableReason(ctx: Ctx, p: PlayerId, h: HandCard): string | n
   if (c.niveau > pl.level && !h.levelFree) return 'level';
   if (c.unique && [...ctx.units('A'), ...ctx.units('B')].some(u => u.cardId === c.id || u.leader === c.id)) return 'unique'; // un seul en jeu, tous joueurs confondus
   if (c.dynamicCost && dynamicRawCost(ctx, c, p) <= 0 && !h.freeCopy) return 'noEffect';
-  if (cardCost(ctx, p, h) > pl.resource) return 'resource';
+  if (cardCost(ctx, p, h) > pl.resource && !(c.costVsPrey !== undefined && ctx.preyOf(p) && (c.costVsPrey as number) <= pl.resource)) return 'resource';
   if (c.requiresOwnEmpireLeaderToCast && !ctx.units(p).some(u => u.types.includes('Empire') && u.leader)) return 'condition';
   switch (c.effect) {
     case 'tectonique': {
@@ -69,7 +81,7 @@ export function targetCount(c: CardDef): 0 | 1 | 2 {
 }
 
 function targetsOpponent(c: CardDef): boolean {
-  return (c.cardType === 'Tactique' && (c.targetRule === 'ennemi-quelconque' || c.targetRule === 'ennemi-avec-leader' || c.targetRule === 'ennemi-puis-case-vide' || c.targetRule === 'ennemi-moral-brise' || c.targetRule === 'ennemi-arriere'))
+  return (c.cardType === 'Tactique' && (c.targetRule === 'ennemi-quelconque' || c.targetRule === 'ennemi-arriere-ou-proie' || c.targetRule === 'ennemi-avec-leader' || c.targetRule === 'ennemi-puis-case-vide' || c.targetRule === 'ennemi-moral-brise' || c.targetRule === 'ennemi-arriere'))
     || (c.cardType === 'Leader' && !!c.targetsEnemy);
 }
 
@@ -98,6 +110,7 @@ export function validFirstTarget(ctx: Ctx, p: PlayerId, c: CardDef, ref: SlotRef
   switch (c.targetRule) {
     case 'ennemi-moral-brise': return u.brokenMorale;
     case 'ennemi-arriere': return ref.zone === 'arriere';
+    case 'ennemi-arriere-ou-proie': return ref.zone === 'arriere' || (ref.zone === 'avant' && u.prey === opponentOf(ref.player));
     case 'ennemi-puis-case-vide': return ref.zone !== 'isole';
     case 'elfe-allie-puis-case': return ref.zone !== 'isole' && u.types.includes('Elfe');
     case 'allie-quelconque': case 'ennemi-quelconque': return true;
@@ -131,7 +144,8 @@ export function playCard(ctx: Ctx, p: PlayerId, handUid: number, target?: SlotRe
   if (n >= 1 && (!target || !validFirstTarget(ctx, p, c, target))) return 'badTarget';
   if (n === 2 && (!target2 || !validSecondTarget(ctx, c, target!, target2))) return 'badTarget2';
 
-  const cost = cardCost(ctx, p, h);
+  const cost = targetedCost(ctx, p, h, target);
+  if (cost > pl.resource) return 'resource';
   pl.resource -= cost;
   pl.hand.splice(hIdx, 1);
   ctx.emit({ type: 'cardPlayed', player: p, cardId: c.id, cost });
@@ -162,8 +176,8 @@ function onTacticPlayed(ctx: Ctx, p: PlayerId): void {
     }
     const ping = d.tacticPing as number | undefined; // Lyra
     if (ping) {
-      let t: Unit | null = null;
-      for (const e of ctx.units(q)) { const r = ctx.slotOf(e.uid); if (r && r.zone !== 'isole' && (!t || e.currentEnd < t.currentEnd)) t = e; }
+      let t: Unit | null = d.tacticPingPreyFirst ? ctx.preyOf(p) : null; // Lyra : la Proie d'abord
+      if (!t) for (const e of ctx.units(q)) { const r = ctx.slotOf(e.uid); if (r && r.zone !== 'isole' && (!t || e.currentEnd < t.currentEnd)) t = e; }
       if (!t) continue;
       t.currentEnd = Math.max(0, t.currentEnd - ping);
       ctx.emit({ type: 'effect', key: 'lyraPing', player: p, cardId: u.cardId, data: { uid: t.uid, target: t.cardId, damage: ping } });
@@ -226,6 +240,7 @@ export function arrivalEffects(ctx: Ctx, p: PlayerId, u: Unit, asCard: string, s
   if (rally) { const ref = ctx.slotOf(u.uid); if (ref) for (const n of ctx.neighbors(ref)) ctx.heal(n, 0, rally, asCard); }
   const ad = c.onArrivalDraw as number | undefined; // Ravitailleur
   if (ad) for (let i = 0; i < ad && !ctx.over; i++) ctx.draw(p, asCard);
+  if (c.preyOnArrival) ctx.designatePreyFrom(u, asCard); // Éclaireur Elfe, Éclaireuse des fourrés
   if (asCard === 'chuchoteur_abysses' && sacLevel > 0) ctx.queueChoice('chuchoteur', p, asCard, { left: sacLevel });
   const chains = c.chainsLossPerLevel as number | undefined; // Gardien des chaînes
   if (chains) u.chainsLoss = chains * sacLevel;
@@ -434,7 +449,7 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
       for (let i = 0; i < ((c.drawAfter as number | undefined) ?? 0) && !ctx.over; i++) ctx.draw(p, c.id);
       break;
     case 'buffArchers': {
-      for (const u of ctx.units(p)) if (u.types.includes('Archer')) u.tempAtk += 10;
+      for (const u of ctx.units(p)) if (u.types.includes('Archer')) { u.tempAtk += 10; u.tempAtkVsPrey = (u.tempAtkVsPrey ?? 0) + ((c.preyBonus as number | undefined) ?? 0); }
       note('buffArchers');
       break;
     }
@@ -442,6 +457,7 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
     case 'brumeTrompeuse': {
       const elems = ctx.units(p).filter(u => u.types.includes('Élémentaux')).length;
       target!.tempIni -= 20;
+      if (c.preyMoralLoss && target!.prey === p) { ctx.loseMoral(target!, c.preyMoralLoss as number); ctx.checkBroken(target!); } // la Proie perd aussi du Moral
       const hit = [target!.uid];
       const pool = ctx.units(q).filter(u => u.uid !== target!.uid);
       for (let i = 0; i < elems && pool.length; i++) {
@@ -482,6 +498,11 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
       first.tempIni += 20;
       ctx.emit({ type: 'moved', uid: first.uid, cardId: first.cardId, from: t1!, to: t2! });
       if (second) { second.tempIni += 20; ctx.emit({ type: 'moved', uid: second.uid, cardId: second.cardId, from: t2!, to: t1! }); }
+      // L'Elfe déplacé face à la Proie : +10 ATK ce tour ; Éclaireurs : nouvelle Proie après un déplacement.
+      const facing = t2!.zone === 'isole' ? null : ctx.player(q).board[t2!.zone][t2!.idx];
+      if (c.preyFacingAtk && facing && facing.prey === p) first.tempAtk += c.preyFacingAtk as number;
+      ctx.designatePreyFrom(first);
+      if (second) ctx.designatePreyFrom(second);
       break;
     }
     // --- Démons ---
@@ -662,11 +683,30 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
       break;
     case 'vivresCampagne': for (const x of ctx.units(p)) ctx.heal(x, 10, 1, c.id); break;
     // --- Vague 2 (Elfes) ---
-    case 'marqueChasseur': for (const e of ctx.units(q)) if (e.markedBy === p) e.markedBy = null; target!.markedBy = p; note('marqueChasseur', { uid: target!.uid }); break;
+    case 'marqueChasseur':
+      for (const e of ctx.units(q)) if (e.markedBy === p) e.markedBy = null;
+      target!.markedBy = p;
+      note('marqueChasseur', { uid: target!.uid });
+      if (c.designatesPrey) ctx.setPrey(p, target!, c.id);
+      break;
+    case 'hallali': {
+      // Hallali : si une Proie a été détruite ce tour-ci, pioche 2 et +1 ressource ; sinon, le Moral adverse le plus bas devient la Proie.
+      if (ctx.player(p).preyKilledAt === ctx.turnMarker()) {
+        for (let i = 0; i < 2 && !ctx.over; i++) ctx.draw(p, c.id);
+        ctx.player(p).resource += 1;
+        ctx.emit({ type: 'resource', player: p, amount: 1, source: c.id });
+      } else {
+        let t: Unit | null = null;
+        const b = ctx.player(q).board;
+        for (const e of [...b.avant, ...b.arriere]) if (e && (!t || e.currentMor < t.currentMor)) t = e;
+        ctx.setPrey(p, t, c.id);
+      }
+      break;
+    }
     case 'visezFaibles': target!.exposedTo = p; note('visezFaibles', { uid: target!.uid }); break;
     case 'racinesProtectrices': target!.guardOwner = p; note('racinesProtectrices', { uid: target!.uid }); break;
     case 'racinesImmobilisantes': target!.rootedBy = p; note('racinesImmobilisantes', { uid: target!.uid }); break;
-    case 'chantTraque': volley(ctx, p); break;
+    case 'chantTraque': volley(ctx, p, !!c.volleyAtPrey); break;
     case 'corRalliement': for (const x of ctx.units(p)) if (x.brokenMorale) ctx.heal(x, 0, 2, c.id); break;
     default:
       throw new Error(`Effet de tactique non implémenté : ${c.effect} (${c.id})`);

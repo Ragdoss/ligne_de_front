@@ -27,8 +27,10 @@ export function pickTarget(ctx: Ctx, a: Unit, p: PlayerId, zone: Zone, idx: numb
     const marked = all.find(u => u && u.markedBy === p);
     if (marked) return marked;
     // Sentinelle de chêne : les régiments à Distance doivent l'attaquer.
+    const preyFirst = card(a.cardId).targetsPreyFirst && !a.brokenMorale ? all.find(u => u && u.prey === p) : null; // Traqueuse sylvestre
     const taunts = all.filter(u => u && !u.brokenMorale && card(u.cardId).tauntsDistance);
     if (taunts.length) return lowestMoral(taunts);
+    if (preyFirst) return preyFirst;
     if (card(a.cardId).targetsLowestEnd && !a.brokenMorale) { // Traqueuse sylvestre
       let best: Unit | null = null;
       for (const u of all) if (u && (!best || u.currentEnd < best.currentEnd)) best = u;
@@ -37,8 +39,12 @@ export function pickTarget(ctx: Ctx, a: Unit, p: PlayerId, zone: Zone, idx: numb
     return lowestMoral(all);
   }
   if (zone === 'avant') {
-    const exposed = opp.arriere.find(u => u && u.exposedTo === p); // Visez les faibles
+    const exposed = all.find(u => u && u.exposedTo === p); // Visez les faibles (rangée arrière, ou la Proie)
     if (exposed) return exposed;
+    if (card(a.cardId).attacksPreyInFront && !a.brokenMorale) { // Cavalier Elfe : charge la Proie si elle est en première ligne
+      const prey = opp.avant.find(u => u && u.prey === p);
+      if (prey) return prey;
+    }
     return opp.avant[idx] ?? lowestMoral(ctx.adjBack(idx).map(k => opp.arriere[k]));
   }
   if (zone === 'arriere') return lowestMoral(ctx.adjFront(idx).map(i => opp.avant[i])) ?? opp.arriere[idx] ?? null;
@@ -46,14 +52,15 @@ export function pickTarget(ctx: Ctx, a: Unit, p: PlayerId, zone: Zone, idx: numb
 }
 
 /** Chant de la traque : les régiments à Distance de `p` frappent tout de suite (par initiative décroissante). */
-export function volley(ctx: Ctx, p: PlayerId): void {
+export function volley(ctx: Ctx, p: PlayerId, atPrey = false): void {
   const shooters = ctx.units(p).filter(u => ctx.hasDistance(u) && ctx.effectiveAtk(u) > 0 && !u.stunned)
     .sort((x, y) => ctx.effectiveIni(y) - ctx.effectiveIni(x));
   for (const u of shooters) {
     if (ctx.over) return;
     const pos = ctx.slotOf(u.uid);
     if (!pos || pos.player !== p || isRooted(ctx, u)) continue;
-    const t = pickTarget(ctx, u, p, pos.zone, pos.idx);
+    const prey = atPrey ? ctx.preyOf(p) : null; // Chant de la traque : la Proie d'abord
+    const t = prey ?? pickTarget(ctx, u, p, pos.zone, pos.idx);
     if (t) attack(ctx, u, t);
   }
   if (!ctx.over) for (const x of ctx.units(opponentOf(p))) if (x.markedBy === p) x.markedBy = null;
@@ -183,6 +190,7 @@ export function resolveCombat(ctx: Ctx, ending: PlayerId): void {
       u.woundedByFrondeur = false;
       u.blinded = false;
       u.markedBy = null; u.exposedTo = null; // Marque du chasseur, Visez les faibles : « ce tour-ci »
+      u.tempAtkVsPrey = 0;
     }
   }
   if (ctx.over) return;
@@ -209,8 +217,13 @@ export function attack(ctx: Ctx, a: Unit, target: Unit, mult = 1): void {
   if (vsMounted && target.types.includes('Monté') && !a.brokenMorale) atk += vsMounted;
   const vsTypes = card(a.cardId).bonusVsTypes as Record<string, number> | undefined;
   if (vsTypes && !a.brokenMorale) for (const [t, v] of Object.entries(vsTypes)) if (target.types.includes(t)) atk += v;
-  const vsBroken = card(a.cardId).bonusVsBroken as number | undefined; // Sentinelle des cimes
-  if (vsBroken && target.brokenMorale && !a.brokenMorale) atk += vsBroken;
+  const vsBroken = card(a.cardId).bonusVsBroken as number | undefined; // Sentinelle des cimes (Moral brisé ou Proie)
+  const isPrey = target.prey === a.controller;
+  if (vsBroken && (target.brokenMorale || (isPrey && card(a.cardId).bonusVsBrokenAlsoPrey)) && !a.brokenMorale) atk += vsBroken;
+  if (isPrey) {
+    if (!a.brokenMorale) atk += (card(a.cardId).bonusVsPrey as number | undefined) ?? 0; // Archer des Bois
+    atk += a.tempAtkVsPrey ?? 0; // Volée de Flèches
+  }
   // Maître des embuscades : + l'avance d'INI de l'attaquant sur sa cible.
   if (a.leader && !a.brokenMorale && card(a.leader).leaderIniDiffAtk) atk += Math.max(0, ctx.effectiveIni(a) - ctx.effectiveIni(target));
   if (target.markedBy === a.controller && ctx.hasDistance(a)) atk += (card('marque_chasseur').markAtk as number | undefined) ?? 0; // Marque du chasseur
@@ -245,6 +258,8 @@ export function attack(ctx: Ctx, a: Unit, target: Unit, mult = 1): void {
     target.stunnedBy = a.uid;
     ctx.emit({ type: 'stunned', uid: target.uid, cardId: target.cardId, by: a.uid });
   }
+  // Rangers, porteur de Chant du Vent : leur cible devient la Proie.
+  if (!dead && (card(a.cardId).preyOnAttack || (a.leader && !a.brokenMorale && card(a.leader).leaderPreyOnAttack))) ctx.setPrey(a.controller, target, a.cardId);
   // Terreur, la sentinelle (ex-Gargouille sentinelle) : attaquer un de ses alliés adjacents coûte du Moral à l'attaquant.
   const tRef = ctx.slotOf(target.uid);
   let punish = 0;

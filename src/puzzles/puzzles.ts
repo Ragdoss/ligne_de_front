@@ -9,7 +9,7 @@ export const ALL_PUZZLES: Puzzle[] = [
     id: 'marque',
     title: 'La marque du chasseur',
     difficulty: 1,
-    intro: 'Un chevalier blessé tient la ligne adverse. Tes archers visent d’habitude le Moral le plus bas… Détruis le Chevalier de Province ce tour-ci.',
+    intro: 'Un chevalier blessé tient la ligne adverse. Tes archers visent d’habitude le Moral le plus bas… Détruis le Chevalier Templier ce tour-ci.',
     goal: { type: 'destroy', slot: 'avant.3' },
     A: {
       faction: 'elfe', level: 2, resource: 1,
@@ -18,7 +18,7 @@ export const ALL_PUZZLES: Puzzle[] = [
     },
     B: {
       faction: 'empire', level: 3,
-      avant: [{ card: 'mercenaires', mor: 3 }, null, { card: 'chevalier_prov', end: 45 }, null],
+      avant: [{ card: 'mercenaires', mor: 3 }, null, { card: 'chevalier_templier', end: 60 }, null],
     },
   },
   {
@@ -44,7 +44,7 @@ export const ALL_PUZZLES: Puzzle[] = [
     intro: 'Le Tréant millénaire soigne toute l’armée adverse depuis l’arrière, hors d’atteinte… pour l’instant. Détruis-le ce tour-ci.',
     goal: { type: 'destroy', slot: 'avant.1' },
     A: {
-      faction: 'elfe', level: 3, resource: 3,
+      faction: 'elfe', level: 3, resource: 2,
       hand: ['visez_faibles', 'volee_fleches', 'sang_seve', 'changement_tectonique', 'chant_seve', 'brise_matin','pousse_sylve','racines_protectrices'],
       avant: ['eclaireur_elfe', 'danseuses_lames', null, null],
     },

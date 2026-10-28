@@ -48,7 +48,7 @@ describe('Déploiement', () => {
     const r = place(s, 'A', 'avant', 0, 'recrue_imp', { justDeployed: true });
     const f = place(s, 'A', 'avant', 1, 'elem_feu', { justDeployed: true });
     expect(ctx.effectiveAtk(r)).toBe(5);
-    expect(ctx.effectiveAtk(f)).toBe(25);
+    expect(ctx.effectiveAtk(f)).toBe(30);
   });
   it("l'ATK baisse avec l'Endurance (50 % à 0 END, 100 % à pleine END)", () => {
     const s = blankGame();

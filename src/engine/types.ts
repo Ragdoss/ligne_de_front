@@ -9,6 +9,7 @@ export type CardType = 'Regiment' | 'Leader' | 'Tactique';
 
 export type TargetRule =
   | 'none'
+  | 'ennemi-arriere-ou-proie'
   | 'allie-quelconque'
   | 'allie-avec-leader'
   | 'lancier-allie'
@@ -154,6 +155,10 @@ export interface Unit {
   markedBy?: PlayerId | null;
   /** Visez les faibles : les régiments avant de ce joueur l'attaquent ce tour-ci. */
   exposedTo?: PlayerId | null;
+  /** Proie : désignée par ce joueur (Elfes) ; une seule à la fois, jusqu'à sa destruction. */
+  prey?: PlayerId | null;
+  /** ATK en plus contre la Proie de son camp, ce tour-ci (Volée de Flèches). */
+  tempAtkVsPrey?: number;
   /** Racines immobilisantes : ne peut pas attaquer tant que ce joueur contrôle un Élémentaux. */
   rootedBy?: PlayerId | null;
   /** Racines protectrices : ne peut pas être détruit jusqu'au prochain tour de ce joueur. */
@@ -207,6 +212,8 @@ export interface PlayerState {
   discardedThisTurn?: number;
   /** Maître des pactes : tour (numéro de demi-tour) où la pioche a déjà été déclenchée. */
   pactDrawnAt?: number;
+  /** Dernier tour (repère tour × 2 + joueur actif) où une Proie de ce joueur a été détruite (Hallali). */
+  preyKilledAt?: number;
   /** Dryade corrompue : reliquat d'END de soins annulés. */
   dryadAcc?: number;
 }

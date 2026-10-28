@@ -26,6 +26,7 @@ const GLOSS: Record<string, string> = {
   Alliance: 'Bonus tant que tes autres régiments réunissent les deux rôles indiqués (au moins un de chaque ; un même régiment peut porter les deux).',
   Unique: 'Un seul exemplaire en jeu à la fois, tous joueurs confondus.',
   Sonné: 'Le régiment n’attaque pas lors du prochain combat.',
+  Proie: 'Régiment adverse désigné par un Elfe : une seule Proie à la fois, jusqu’à sa destruction (même déplacée). Des cartes Elfes la frappent plus fort ou en profitent quand elle tombe. Pour son propre camp, une Tactique qui la cible coûte 1 de plus.',
   'Moral brisé': 'À un tiers de son Moral ou moins : perd ses mots-clés positifs, les bonus de son Leader et ses capacités ; les tactiques jouées sur lui s’appliquent toujours.',
   Lassitude: 'Points de défaite : en atteindre le seuil (50 en général) fait perdre la partie. Ils font aussi monter de niveau.',
   Leader: 'S’attache à un régiment sans Leader et lui donne ses bonus, tant que ce régiment n’a pas le Moral brisé.',
@@ -37,7 +38,7 @@ const IN_TEXT: [string, RegExp][] = [
   ['Distance', /\bDistance\b/], ['Effrayant', /Effrayant/], ['Ralliement', /Ralliement/], ['Mirage', /\bMirage\b/], ['Lent', /\bLent\b/],
   ['Minions', /Minions/], ['Marché', /\bMarché\b/], ['Pénétration', /Pénétration/], ['Pillage', /Pillage/], ['Débordement', /Débordement/],
   ['Arrive prêt', /arrive(nt)? prête?s?/i], ['Offrande', /Offrande/], ['Sacrifice', /Sacrifice niveau/], ['Formation', /Formation/],
-  ['Durée de vie', /Durée de vie/i], ['Communion', /Communion/], ['Alliance', /Alliance/], ['Sonné', /\bsonn(?:ée?s?|es?|er|ent)(?![a-zà-ÿ])/i],
+  ['Durée de vie', /Durée de vie/i], ['Communion', /Communion/], ['Alliance', /Alliance/], ['Proie', /\bProie\b/i], ['Sonné', /\bsonn(?:ée?s?|es?|er|ent)(?![a-zà-ÿ])/i],
   ['Moral brisé', /Moral brisé/i], ['Lassitude', /lassitude/i], ['Isolé', /\bisolé\b/i],
 ];
 

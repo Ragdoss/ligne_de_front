@@ -192,6 +192,7 @@ export class Ctx {
     if (temporary) u.borrowed = { owner: u.borrowed?.owner ?? prev };
     else { u.owner = u.borrowed?.owner ?? u.owner ?? prev; u.borrowed = null; }
     u.pactShield = null; u.squareArm = 0; u.squareOwner = null; u.stunned = false; u.guardOwner = null; u.rootedBy = null; u.markedBy = null; u.exposedTo = null;
+    if (u.prey === p) u.prey = null; // pris par son chasseur : ce n'est plus une Proie
     this.setAt(dest, u);
     this.emit({ type: 'effect', key: temporary ? 'controlTaken' : 'controlKept', player: p, cardId: source, data: { uid: u.uid, target: u.cardId } });
     this.emit({ type: 'moved', uid: u.uid, cardId: u.cardId, from, to: dest });
@@ -396,6 +397,59 @@ export class Ctx {
     if (w === 'tempete' && !u.types.includes('Nomade')) ini -= 20;
     if (w === 'jour' && u.types.includes('Elfe')) ini += 15;
     return ini + u.tempIni;
+  }
+
+  // ---------- Proie (Elfes) ----------
+  /** Proie désignée par `hunter` (un régiment de son adversaire), s'il y en a une. */
+  preyOf(hunter: PlayerId): Unit | null {
+    return this.units(opponentOf(hunter)).find(u => u.prey === hunter) ?? null;
+  }
+  /** `hunter` désigne `u` comme sa Proie (une seule à la fois : l'ancienne perd l'état). */
+  setPrey(hunter: PlayerId, u: Unit | null | undefined, source: string): void {
+    if (!u || u.controller === hunter || u.prey === hunter) return;
+    for (const x of this.units(opponentOf(hunter))) if (x.prey === hunter) x.prey = null;
+    u.prey = hunter;
+    this.emit({ type: 'effect', key: 'prey', player: hunter, cardId: source, data: { uid: u.uid, target: u.cardId } });
+  }
+  /** Éclaireur Elfe, Éclaireuse des fourrés : désignent une Proie à leur arrivée et après un déplacement. */
+  designatePreyFrom(u: Unit, asCard: string = u.cardId): void {
+    const how = card(asCard).preyOnArrival as 'facing' | 'lowestMor' | undefined;
+    if (!how || u.brokenMorale) return;
+    const p = u.controller;
+    const opp = this.player(opponentOf(p)).board;
+    let t: Unit | null = null;
+    if (how === 'facing') {
+      const r = this.slotOf(u.uid);
+      if (r && r.zone !== 'isole') t = opp[r.zone][r.idx] ?? null;
+    } else {
+      for (const e of [...opp.avant, ...opp.arriere]) if (e && (!t || e.currentMor < t.currentMor)) t = e;
+    }
+    this.setPrey(p, t, u.cardId);
+  }
+  /** Repère du tour en cours (tour × 2 + joueur actif). */
+  turnMarker(): number { return this.s.turn * 2 + (this.s.active === 'A' ? 0 : 1); }
+
+  /** Une Proie est détruite : effets des cartes Elfes qui le précisent. */
+  onPreyDestroyed(u: Unit, killer: Unit | null, brokenAlreadyCounted: boolean): void {
+    const hunter = u.prey!;
+    const victim = u.controller;
+    this.player(hunter).preyKilledAt = this.turnMarker();
+    this.emit({ type: 'effect', key: 'preyDown', player: hunter, cardId: u.cardId, data: { target: u.cardId } });
+    // Seigneure de la chasse : +2 lassitude adverse (si ce n'est pas déjà compté comme Moral brisé), puis nouvelle Proie.
+    const lords = this.units(hunter).filter(x => !x.brokenMorale && card(x.cardId).preyDeathLassitude);
+    const lv = brokenAlreadyCounted ? 0 : lords.reduce((n, x) => n + (card(x.cardId).preyDeathLassitude as number), 0);
+    if (lv) { this.emit({ type: 'effect', key: 'seigneureChasse', player: hunter, cardId: 'seigneure_chasse', data: { target: u.cardId } }); this.gainLassitude(victim, lv, 'seigneure_chasse'); if (this.over) return; }
+    if (lords.some(x => card(x.cardId).preyRetargetMaxEnd)) {
+      let t: Unit | null = null;
+      const b = this.player(victim).board;
+      for (const e of [...b.avant, ...b.arriere]) if (e && (!t || e.currentEnd > t.currentEnd)) t = e;
+      this.setPrey(hunter, t, 'seigneure_chasse');
+    }
+    // Druide Ancien : le porteur qui détruit la Proie regagne de l'END et du Moral.
+    if (killer && killer.controller === hunter && killer.leader && this.isAlive(killer)) {
+      const d = card(killer.leader);
+      if (d.preyKillHealEnd || d.preyKillHealMor) this.heal(killer, (d.preyKillHealEnd as number) ?? 0, (d.preyKillHealMor as number) ?? 0, killer.leader);
+    }
   }
 
   // ---------- Moral ----------
@@ -673,6 +727,7 @@ export class Ctx {
     }
     this.emit({ type: 'destroyed', player: p, uid: u.uid, cardId: u.cardId, cause, lassitude: minion ? 0 : u.niveau });
     if (!minion) this.gainLassitude(p, u.niveau, 'destroyed');
+    if (u.prey && !this.over) this.onPreyDestroyed(u, killer, u.brokenMorale && !minion);
     if (!u.isToken) this.discard(u.borrowed?.owner ?? u.owner ?? p, u.cardId); // un régiment volé retourne dans la défausse de son propriétaire
     this.discardLeader(u);
     // Suppôt Infernal : le porteur détruit permet de récupérer une copie d'un Démon de la défausse.
@@ -692,12 +747,7 @@ export class Ctx {
     }
     if (killer) {
       if (!killer.keywords.includes('Minions')) this.addMoralRaw(killer, 1); // Minions : pas de Moral regagné en détruisant un régiment
-      if (u.stunnedBy !== null && killer.types.includes('Elfe')) {
-        this.addMoralRaw(killer, 2);
-        const ranger = this.findUnit(u.stunnedBy);
-        if (ranger) this.addMoralRaw(ranger, 2);
-        this.emit({ type: 'effect', key: 'rangersBonus', player: killer.controller, cardId: killer.cardId });
-      }
+      // (Rangers : l'ancien bonus « si un Elfe l'achève » a été retiré avec la refonte de la Proie.)
     }
     if (def.onDeathDraw) for (let i = 0; i < def.onDeathDraw && !this.over; i++) this.draw(p, u.cardId);
     const oppDraws = def.onDeathOpponentDraws as number | undefined;

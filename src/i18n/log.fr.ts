@@ -87,6 +87,8 @@ export function formatEvent(e: GameEvent, names: Record<PlayerId, string> = { A:
         lyraPing: `${cardName(e.cardId)} inflige ${e.data?.damage ?? 10} dégâts à ${cardName(String(e.data?.target ?? ''))}.`,
         growth: `${cardName(e.cardId)} grandit (Croissance).`,
         archidemon: `${cardName(e.cardId)} anéantit ${cardName(String(e.data?.target ?? ''))} à son arrivée.`,
+        prey: `${cardName(e.cardId)} : ${cardName(String(e.data?.target ?? ''))} devient la Proie de ${n(e.player)}.`,
+        preyDown: `La Proie de ${n(e.player)} (${cardName(String(e.data?.target ?? ''))}) est abattue.`,
         marqueChasseur: `${cardName(e.cardId)} : les tireurs de ${n(e.player)} visent la cible marquée ce tour-ci.`,
         visezFaibles: `${cardName(e.cardId)} : la première ligne de ${n(e.player)} attaque le soutien désigné ce tour-ci.`,
         racinesProtectrices: `${cardName(e.cardId)} : le régiment ciblé ne peut pas tomber jusqu’au prochain tour de ${n(e.player)}.`,

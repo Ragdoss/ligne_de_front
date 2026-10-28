@@ -771,3 +771,8 @@ button.pile:not(:disabled):hover .pile-stack > * { outline: 2px solid var(--bras
 .pz-hint { background: #fff3c4; border-left: 3px solid #c9a14a; padding: 6px 8px; margin: 6px 0; font-size: .9rem; color: #2a2010; }
 .pz-target { font-size: .85rem; color: #4a3d28; margin: 4px 0; }
 .puzzle-item .pz-done.todo { color: var(--brass-bright); }
+
+/* Proie (Elfes) */
+.unit.is-prey { box-shadow: 0 0 0 2px #d24a3a, 0 0 12px #d24a3a99; }
+.u-prey { position: absolute; top: 34%; left: 50%; transform: translateX(-50%); z-index: 3; background: #b8352a; color: #fff3df; font: 700 .62rem/1 'Cinzel', serif;
+  letter-spacing: .08em; text-transform: uppercase; padding: 3px 7px; border-radius: 10px; border: 1px solid #ffcfb8; box-shadow: 0 1px 4px #0008; pointer-events: none; }

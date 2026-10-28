@@ -43,6 +43,7 @@ function UnitCard({ u, ctx, highlight, faded, pv, onHover, side, bubbles }: { u:
   const atk = ctx.effectiveAtk(u), arm = ctx.effectiveArm(u), ini = ctx.effectiveIni(u);
   const cls = ['unit', d.faction];
   if (u.brokenMorale) cls.push('broken');
+  if (u.prey) cls.push('is-prey');
   if (faded) cls.push('dead');
   if (pv?.dead) cls.push('pv-dead');
   if (highlight?.attacker === u.uid) cls.push('attacking');
@@ -93,6 +94,7 @@ function UnitCard({ u, ctx, highlight, faded, pv, onHover, side, bubbles }: { u:
           <em>MOR {u.currentMor}/{u.maxMor}</em>
         </div>
       </div>
+      {u.prey && <div className="u-prey" title="Proie : désignée par un Elfe adverse">Proie</div>}
       {hatch > 0 && <div className="u-hatch" title="Tours avant l’éclosion">Éclot dans {hatch} tour{hatch > 1 ? 's' : ''}</div>}
       {bubbles && bubbles.length > 0 && (
         <div className="floaters">{bubbles.map((x, i) => <span key={i} className={`floater ${x.up ? 'up' : 'down'}`}>{x.text}</span>)}</div>

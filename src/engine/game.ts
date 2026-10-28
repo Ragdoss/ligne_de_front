@@ -2,7 +2,7 @@
 
 import { Ctx, card } from './ctx';
 import { activateChoices, resolveChoice } from './choices';
-import { cardCost, playCard, targetCount, unplayableReason, validFirstTarget, validSecondTarget } from './play';
+import { targetedCost, cardCost, playCard, targetCount, unplayableReason, validFirstTarget, validSecondTarget } from './play';
 import { seedFrom } from './rng';
 import { applyScenarioStart } from './scenario';
 import { endTurn } from './turn';
@@ -116,8 +116,10 @@ export function playsForHandCard(state: GameState, handUid: number): Action[] {
   if (n === 0) return [{ type: 'play', handUid }];
   const out: Action[] = [];
   const slotsBoth: SlotRef[] = [...ctx.allSlots('A'), ...ctx.allSlots('B')];
+  const res = state.players[p].resource;
   for (const t of slotsBoth) {
     if (!validFirstTarget(ctx, p, c, t)) continue;
+    if (targetedCost(ctx, p, h, t) > res) continue; // coût selon la cible (Proie)
     if (n === 1) { out.push({ type: 'play', handUid, target: t }); continue; }
     for (const t2 of slotsBoth) if (validSecondTarget(ctx, c, t, t2)) out.push({ type: 'play', handUid, target: t, target2: t2 });
   }
