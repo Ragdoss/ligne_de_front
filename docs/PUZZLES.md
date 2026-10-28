@@ -53,8 +53,9 @@ l'analyse quand même.
 ## Vérification
 
 `npm test` vérifie chaque puzzle avec le solveur : il doit avoir au moins une solution, et finir le tour sans rien faire
-doit échouer. Pour voir toutes les solutions d'un puzzle (utile pour régler la difficulté : s'il y en a trop, le
-puzzle est trop facile) :
+doit échouer. Pour voir les solutions d'un puzzle (utile pour régler la difficulté : s'il y en a trop, le puzzle est
+trop facile) — l'outil n'affiche que les solutions « essentielles » ; celles qui ajoutent des cartes inutiles à une
+autre solution sont seulement comptées :
 
 ```
 npx tsx tools/puzzle-check.ts            # tous les puzzles
@@ -69,3 +70,13 @@ minute). Si un puzzle est trop gros pour la recherche rapide des tests, le messa
 
 En jeu, le bouton **Indice** utilise le même solveur : il donne le coup suivant de la solution enregistrée si tu es sur son chemin,
 sinon cherche depuis ta position (ou dit de recommencer si elle n'est plus gagnable).
+
+## Conseils de conception
+
+- **Des coups dans un ordre imposé** : les meilleurs puzzles enchaînent des cartes qui ne marchent que dans un certain
+  ordre — Chevaucheurs du mirage (prêts seulement après une Tactique), Chant de la sève (bonus à la 2e Tactique),
+  Danseuses des lames ou Lyra (profitent des Tactiques jouées *après* leur arrivée), Cadets de l'Académie (le
+  Lieutenant n'existe qu'après), Ralliement (il faut d'abord un Leader), Prêtre Sacrificiel (le +1 niveau ouvre un
+  Sacrifice), Augure / Grimoire puis Tuteur ou une pioche, Changement Tectonique puis Visez les faibles…
+- **Des cartes inutiles mais tentantes** dans la main et sur le plateau : le solveur vérifie qu'elles n'ouvrent pas
+  une autre solution.

@@ -189,5 +189,91 @@
     "idx": 2
    }
   }
+ ],
+ "charge-du-mirage": [
+  {
+   "type": "play",
+   "handUid": 6
+  },
+  {
+   "type": "play",
+   "handUid": 1,
+   "target": {
+    "player": "A",
+    "zone": "avant",
+    "idx": 3
+   }
+  },
+  {
+   "type": "play",
+   "handUid": 3,
+   "target": {
+    "player": "A",
+    "zone": "avant",
+    "idx": 3
+   }
+  },
+  {
+   "type": "endTurn"
+  }
+ ],
+ "foi-du-fanatique": [
+  {
+   "type": "play",
+   "handUid": 4,
+   "target": {
+    "player": "A",
+    "zone": "avant",
+    "idx": 0
+   }
+  },
+  {
+   "type": "play",
+   "handUid": 1,
+   "target": {
+    "player": "A",
+    "zone": "avant",
+    "idx": 0
+   }
+  },
+  {
+   "type": "endTurn"
+  }
+ ],
+ "cadet-promu": [
+  {
+   "type": "play",
+   "handUid": 2
+  },
+  {
+   "type": "play",
+   "handUid": 1,
+   "target": {
+    "player": "A",
+    "zone": "avant",
+    "idx": 0
+   }
+  },
+  {
+   "type": "play",
+   "handUid": 16,
+   "target": {
+    "player": "A",
+    "zone": "avant",
+    "idx": 1
+   }
+  },
+  {
+   "type": "play",
+   "handUid": 3,
+   "target": {
+    "player": "A",
+    "zone": "avant",
+    "idx": 1
+   }
+  },
+  {
+   "type": "endTurn"
+  }
  ]
 }

@@ -1,5 +1,6 @@
 // Solveur : essaie toutes les suites de coups du tour (le moteur est déterministe) et renvoie les solutions.
 // Sert à vérifier les puzzles (tests, tools/puzzle-check.ts) et à donner un indice en jeu.
+// Seules les solutions minimales sont gardées : dès que finir le tour gagne, on n'essaie pas d'autres cartes en plus.
 // Pour rester rapide : deux cartes identiques jouées sur la même cible ne sont essayées qu'une fois, et deux positions
 // identiques (mêmes cartes, mêmes régiments, peu importe l'ordre dans lequel on y est arrivé) ne sont explorées qu'une fois.
 import { applyAction, legalActions } from '../engine/game';
@@ -65,7 +66,13 @@ export function solveFrom(pz: Puzzle, state: GameState, targetUid: number | null
     const k = hash(positionKey(s));
     if (seen.has(k)) return;
     seen.add(k);
+    // Finir le tour d'abord : si ça gagne, inutile d'essayer de jouer d'autres cartes avant (solutions minimales).
+    if (!s.pending.length) {
+      const end = applyAction(s, { type: 'endTurn' });
+      if (end.ok && puzzleStatus(pz, end.state, targetUid) === 'won') { solutions.push([...path, { type: 'endTurn' }]); return; }
+    }
     for (const a of distinctActions(s)) {
+      if (a.type === 'endTurn') continue; // déjà essayé
       const r = applyAction(s, a);
       if (r.ok) dfs(r.state, [...path, a]);
       if (solutions.length >= maxSolutions || !complete) return;

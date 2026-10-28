@@ -12,6 +12,17 @@ import { solvePuzzle } from '../src/puzzles/solve';
 const only = process.argv[2];
 const SAVE = 'src/puzzles/solutions.json';
 const saved = JSON.parse(readFileSync(SAVE, 'utf8')) as Record<string, unknown>;
+function describe(pz: (typeof PUZZLES)[number], sol: import('../src/engine/types').Action[]): string[] {
+  let s: GameState = buildPuzzle(pz).state;
+  const out: string[] = [];
+  for (const a of sol) {
+    if (a.type === 'play') { const h = s.players.A.hand.find(x => x.uid === a.handUid)!; out.push(`${cardName(h.cardId)}${where(a.target)}`); }
+    else if (a.type === 'choose') out.push(`« ${s.pending[0]?.options?.[a.option]?.label || a.option} »`);
+    else out.push('Fin du tour');
+    const r2 = applyAction(s, a); if (!r2.ok) break; s = r2.state;
+  }
+  return out;
+}
 const where = (r?: { player: string; zone: string; idx: number }) => (r ? ` → ${r.player === 'A' ? 'toi' : 'adv.'} ${r.zone} ${r.idx + 1}` : '');
 for (const pz of PUZZLES.filter(p => !only || p.id === only)) {
   const b = buildPuzzle(pz);
@@ -26,7 +37,6 @@ for (const pz of PUZZLES.filter(p => !only || p.id === only)) {
     const parts: string[] = [];
     for (const a of sol) {
       if (a.type === 'play') { const h = s.players.A.hand.find(x => x.uid === a.handUid)!; parts.push(`${cardName(h.cardId)}${where(a.target)}`); }
-      if (a.type === 'choose') parts.push(`choix « ${s.pending[0]?.options?.[a.option]?.label ?? a.option} »`);
       const r2 = applyAction(s, a); if (!r2.ok) break; s = r2.state;
     }
     const k = parts.sort().join(' + ') || '(finir le tour)';
@@ -35,8 +45,14 @@ for (const pz of PUZZLES.filter(p => !only || p.id === only)) {
   const direct = r0.ok ? puzzleStatus(pz, r0.state, b.targetUid) : 'erreur';
   console.log(`\n${pz.id} — ${pz.title} (${'★'.repeat(pz.difficulty)})${pz.draft ? ' [brouillon]' : ''}`);
   console.log(`  Finir le tour sans rien jouer : ${direct === 'won' ? 'GAGNE (puzzle trop facile !)' : 'échoue'}`);
-  console.log(r.solutions.length ? `  ${r.solutions.length}${r.complete ? '' : '+'} suites gagnantes, ${combos.size} combinaison(s) de cartes :` : r.complete ? '  AUCUNE SOLUTION (toutes les suites de coups ont été essayées)' : '  Aucune solution trouvée dans la limite de recherche');
-  for (const [k, n] of combos) console.log(`   - ${k}  (${n} ordre${n > 1 ? 's' : ''})`);
+  // On n'affiche que les combinaisons minimales : celles qui ajoutent des cartes inutiles à une autre solution sont résumées.
+  const keys = [...combos.keys()];
+  const partsOf = (k: string) => k.split(' + ');
+  const sub = (a: string, b: string) => a !== b && partsOf(a).every(x => partsOf(b).includes(x));
+  const minimal = keys.filter(k => !keys.some(o => sub(o, k)));
+  console.log(r.solutions.length ? `  ${minimal.length} solution(s) essentielle(s)${keys.length > minimal.length ? ` (+ ${keys.length - minimal.length} variante(s) avec des cartes inutiles en plus)` : ''}${r.complete ? '' : ' — recherche incomplète'} :` : r.complete ? '  AUCUNE SOLUTION (toutes les suites de coups ont été essayées)' : '  Aucune solution trouvée dans la limite de recherche');
+  for (const k of minimal) console.log(`   - ${k}`);
+  if (best) console.log(`  Solution enregistrée : ${describe(pz, best).join(' → ')}`);
 }
 
 writeFileSync(SAVE, JSON.stringify(saved, null, 1) + '\n');
