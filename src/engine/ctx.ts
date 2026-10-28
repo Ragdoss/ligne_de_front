@@ -427,7 +427,7 @@ export class Ctx {
     this.setPrey(p, t, u.cardId);
   }
   /** Repère du tour en cours (tour × 2 + joueur actif). */
-  turnMarker(): number { return this.s.turn * 2 + (this.s.active === 'A' ? 0 : 1); }
+  turnMarker(): number { return this.s.turn * 2 + (this.s.active === (this.s.first ?? 'A') ? 0 : 1); } // demi-tours, croissant
 
   /** Une Proie est détruite : effets des cartes Elfes qui le précisent. */
   onPreyDestroyed(u: Unit, killer: Unit | null, brokenAlreadyCounted: boolean): void {

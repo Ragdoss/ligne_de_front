@@ -223,6 +223,7 @@ export function attack(ctx: Ctx, a: Unit, target: Unit, mult = 1): void {
   if (isPrey) {
     if (!a.brokenMorale) atk += (card(a.cardId).bonusVsPrey as number | undefined) ?? 0; // Archer des Bois
     atk += a.tempAtkVsPrey ?? 0; // Volée de Flèches
+    for (const x of ctx.units(a.controller)) if (!x.brokenMorale) atk += (card(x.cardId).alliesAtkVsPrey as number | undefined) ?? 0; // Éclaireuse des fourrés
   }
   // Maître des embuscades : + l'avance d'INI de l'attaquant sur sa cible.
   if (a.leader && !a.brokenMorale && card(a.leader).leaderIniDiffAtk) atk += Math.max(0, ctx.effectiveIni(a) - ctx.effectiveIni(target));

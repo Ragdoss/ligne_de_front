@@ -9,7 +9,7 @@ export const ALL_PUZZLES: Puzzle[] = [
     id: 'marque',
     title: 'La marque du chasseur',
     difficulty: 1,
-    intro: 'Un chevalier blessé tient la ligne adverse. Tes archers visent d’habitude le Moral le plus bas… Détruis le Chevalier Templier ce tour-ci.',
+    intro: 'Des Cuirassiers lourds tiennent la ligne adverse. Tes archers visent d’habitude le Moral le plus bas… Détruis les Cuirassiers lourds ce tour-ci.',
     goal: { type: 'destroy', slot: 'avant.3' },
     A: {
       faction: 'elfe', level: 2, resource: 1,
@@ -18,7 +18,7 @@ export const ALL_PUZZLES: Puzzle[] = [
     },
     B: {
       faction: 'empire', level: 3,
-      avant: [{ card: 'mercenaires', mor: 3 }, null, { card: 'chevalier_templier', end: 60 }, null],
+      avant: [{ card: 'mercenaires', mor: 3 }, null, { card: 'cuirassiers_lourds' }, null],
     },
   },
   {

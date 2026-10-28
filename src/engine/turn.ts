@@ -14,7 +14,7 @@ export function endTurn(ctx: Ctx): void {
   const ending = ctx.s.active;
   // Copies gratuites d'Archéotacticiens non jouées : détruites en fin de tour.
   const pl = ctx.player(ending);
-  pl.hand = pl.hand.filter(h => !h.freeCopy);
+  pl.hand = pl.hand.filter(h => !h.freeCopy && !h.ephemeral); // + copies éphémères (Volée de Flèches)
   resolveCombat(ctx, ending);
   if (ctx.over) return;
   // Prise de contrôle temporaire : les régiments empruntés retournent à leur propriétaire.

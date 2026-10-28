@@ -105,4 +105,39 @@ describe('Proie', () => {
     expect(s.players.A.hand.length).toBe(hand + 2);
     expect(s.players.A.resource).toBe(res - 1 + 1);
   });
+
+  it('Volée de Flèches : une copie à +1 revient en main et disparaît à la fin du tour', () => {
+    let s = ready(quiet(), 5);
+    place(s, 'A', 'arriere', 0, 'archer_bois');
+    s = act(s, { type: 'play', handUid: give(s, 'A', 'volee_fleches'), target: slot('A', 'arriere', 0) }).state;
+    const copy = s.players.A.hand.find(h => h.cardId === 'volee_fleches')!;
+    expect(copy.ephemeral).toBe(true);
+    const res = s.players.A.resource;
+    s = act(s, { type: 'play', handUid: copy.uid, target: slot('A', 'arriere', 0) }).state;
+    expect(s.players.A.resource).toBe(res - 2);
+    expect(s.players.A.hand.filter(h => h.cardId === 'volee_fleches')).toHaveLength(1);
+    s = act(s, { type: 'endTurn' }).state;
+    expect(s.players.A.hand.some(h => h.cardId === 'volee_fleches')).toBe(false);
+  });
+
+  it('Éclaireuse des fourrés : toutes tes attaques contre la Proie +5 ATK', () => {
+    const atkOnPrey = (withScout: boolean) => {
+      const s = ready(quiet());
+      place(s, 'A', 'avant', 0, 'recrue_imp');
+      if (withScout) place(s, 'A', 'arriere', 3, 'eclaireuse_fourres');
+      place(s, 'B', 'avant', 0, 'forteresse', { prey: 'A' });
+      return hits(act(s, { type: 'endTurn' }).events, 'recrue_imp')[0]!.atk;
+    };
+    expect(atkOnPrey(true)).toBe(atkOnPrey(false) + 5);
+  });
+
+  it('Hallali : la fenêtre couvre le tour adverse et ton tour précédent', () => {
+    const s = ready(quiet(), 5);
+    place(s, 'B', 'avant', 0, 'recrue_imp');
+    s.players.A.preyKilledAt = new Ctx(s).turnMarker() - 2;
+    const hand = s.players.A.hand.length;
+    const r = act(s, { type: 'play', handUid: give(s, 'A', 'hallali') }).state;
+    expect(r.players.A.hand.length).toBe(hand + 2);
+    expect(preyOf(r, 'A')).toBeTruthy();
+  });
 });

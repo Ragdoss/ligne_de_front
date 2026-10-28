@@ -180,6 +180,8 @@ export interface HandCard {
   levelFree?: boolean;
   /** Réduction de coût propre à cet exemplaire (Suppôt Infernal, Charmeur de Basilics). */
   discount?: number;
+  /** Disparaît de la main à la fin du tour (copie de Volée de Flèches). */
+  ephemeral?: boolean;
   /** Copie gratuite d'Archéotacticiens : coût 0, détruite à la fin du tour de son propriétaire. */
   freeCopy?: boolean;
 }

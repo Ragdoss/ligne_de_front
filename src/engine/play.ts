@@ -156,6 +156,11 @@ export function playCard(ctx: Ctx, p: PlayerId, handUid: number, target?: SlotRe
     if (!h.generated) ctx.discard(p, c.id, true);
     pl.tacticsThisTurn = (pl.tacticsThisTurn ?? 0) + 1;
     resolveTactic(ctx, p, c, target, target2);
+    // Volée de Flèches : une copie qui coûte 1 de plus revient en main, jusqu'à la fin du tour.
+    if (c.echoCopy && !ctx.over) {
+      const copy = ctx.addToHand(p, c.id, { generated: true, ephemeral: true, discount: (h.discount ?? 0) - ((c.echoCopy as number) ?? 1) });
+      ctx.emit({ type: 'generated', player: p, cardId: copy.cardId, source: c.id });
+    }
     if (!ctx.over) onTacticPlayed(ctx, p);
   }
   return null;
@@ -690,16 +695,19 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
       if (c.designatesPrey) ctx.setPrey(p, target!, c.id);
       break;
     case 'hallali': {
-      // Hallali : si une Proie a été détruite ce tour-ci, pioche 2 et +1 ressource ; sinon, le Moral adverse le plus bas devient la Proie.
-      if (ctx.player(p).preyKilledAt === ctx.turnMarker()) {
+      // Hallali : si une Proie a été détruite depuis le début de ton tour précédent (son combat compris),
+      // pioche 2 et +1 ressource ; dans tous les cas, le Moral adverse le plus bas devient la Proie.
+      const killed = ctx.player(p).preyKilledAt;
+      if (killed !== undefined && killed >= ctx.turnMarker() - 2) {
         for (let i = 0; i < 2 && !ctx.over; i++) ctx.draw(p, c.id);
         ctx.player(p).resource += 1;
         ctx.emit({ type: 'resource', player: p, amount: 1, source: c.id });
-      } else {
+      }
+      if (!ctx.over) {
         let t: Unit | null = null;
         const b = ctx.player(q).board;
         for (const e of [...b.avant, ...b.arriere]) if (e && (!t || e.currentMor < t.currentMor)) t = e;
-        ctx.setPrey(p, t, c.id);
+        if (t) ctx.setPrey(p, t, c.id);
       }
       break;
     }

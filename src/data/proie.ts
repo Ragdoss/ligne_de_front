@@ -9,7 +9,7 @@ export const PROIE_CARDS: Record<string, CardDef> = {
 
 export const BALANCE_PROIE: Record<string, Partial<CardDef>> = {
   eclaireur_elfe: { preyOnArrival: 'facing' },            // désigne le régiment en face (arrivée, déplacement)
-  eclaireuse_fourres: { preyOnArrival: 'lowestMor' },     // désigne le Moral le plus bas (arrivée, déplacement)
+  eclaireuse_fourres: { preyOnArrival: 'lowestMor', alliesAtkVsPrey: 5 },     // désigne le Moral le plus bas (arrivée, déplacement)
   marque_chasseur: { designatesPrey: true },
   rangers: { preyOnAttack: true },                        // sa cible devient Proie (le bonus « si un Elfe l'achève » disparaît)
   chant_vent: { leaderPreyOnAttack: true },
@@ -19,7 +19,7 @@ export const BALANCE_PROIE: Record<string, Partial<CardDef>> = {
   brume_trompeuse: { preyMoralLoss: 2 },
   repositionnement: { preyFacingAtk: 10 },
   archer_bois: { bonusVsPrey: 10 },
-  volee_fleches: { preyBonus: 10 },                       // +10 ATK aux Archers, +20 contre la Proie
+  volee_fleches: { preyBonus: 10, echoCopy: 1 },                       // +10 ATK aux Archers, +20 contre la Proie
   sentinelle_cimes: { bonusVsBrokenAlsoPrey: true },
   traqueuse_sylvestre: { targetsPreyFirst: true },
   cavalier_elfe: { attacksPreyInFront: true },
