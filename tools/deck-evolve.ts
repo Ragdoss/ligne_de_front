@@ -23,6 +23,11 @@ const GENS = Number(process.argv[3] ?? 20);
 const N = Number(process.argv[4] ?? 40);
 const AI = process.argv[5] ?? 'v2';
 const V3: AiOptions = JSON.parse(process.env.AI_OPTS ?? '{"followUp":3}');
+// Variantes : EVO_MAX='{"carte":1,…}' limite le nombre d'exemplaires de certaines cartes ;
+// EVO_TAG=xxx écrit la population dans reports/evo-<faction>-xxx.json (la population officielle n'est pas touchée).
+const MAXC: Record<string, number> = JSON.parse(process.env.EVO_MAX ?? '{}');
+const TAG = process.env.EVO_TAG ? `-${process.env.EVO_TAG}` : '';
+const maxOf = (id: string) => MAXC[id] ?? 3;
 const POP = 10, PARENTS = 5, CHILDREN = 3, CROSS = 3, GAUNTLET = 4;
 
 let rng = seedFrom(`evo-${mine.join('-')}-${Date.now()}`);
@@ -59,7 +64,7 @@ for (const f of FACTIONS) {
 const score = (f: Faction, id: string) => Math.exp((impact[f]?.[id] ?? 0) / 5);
 const lvl1Regs = (d: string[]) => d.filter(id => CARDS[id]!.cardType === 'Regiment' && CARDS[id]!.niveau === 1).length;
 const count = (d: string[], id: string) => d.filter(x => x === id).length;
-const valid = (d: string[]) => d.length === 45 && d.filter(id => CARDS[id]!.niveau <= 3).length === 30 && lvl1Regs(d) >= 5 && d.every(id => count(d, id) <= 3);
+const valid = (d: string[]) => d.length === 45 && d.filter(id => CARDS[id]!.niveau <= 3).length === 30 && lvl1Regs(d) >= 5 && d.every(id => count(d, id) <= maxOf(id));
 
 function mutate(f: Faction, deck: string[]): string[] {
   for (let tries = 0; tries < 50; tries++) {
@@ -68,7 +73,7 @@ function mutate(f: Faction, deck: string[]): string[] {
     for (let i = 0; i < k; i++) {
       const idx = d.indexOf(pickW(d, id => 1 / score(f, id)));
       const band = CARDS[d[idx]!]!.niveau <= 3 ? pools[f]!.low : pools[f]!.high;
-      const add = pickW(band.filter(id => count(d, id) < 3 && id !== d[idx]), id => score(f, id));
+      const add = pickW(band.filter(id => count(d, id) < maxOf(id) && id !== d[idx]), id => score(f, id));
       d[idx] = add;
     }
     if (valid(d)) return d;
@@ -79,10 +84,11 @@ function cross(f: Faction, a: string[], b: string[]): string[] {
   for (let tries = 0; tries < 50; tries++) {
     const take = (band: (id: string) => boolean, n: number) => {
       const fromA = a.filter(band).filter(() => rnd() < 0.5);
-      const out = fromA.slice(0, n);
-      for (const id of b.filter(band)) { if (out.length >= n) break; if (count(out, id) < count(b, id)) out.push(id); }
+      const out: string[] = [];
+      for (const id of fromA) if (out.length < n && count(out, id) < maxOf(id)) out.push(id);
+      for (const id of b.filter(band)) { if (out.length >= n) break; if (count(out, id) < Math.min(count(b, id), maxOf(id))) out.push(id); }
       const pool = band(pools[f]!.low[0]!) ? pools[f]!.low : pools[f]!.high;
-      while (out.length < n) { const id = pickW(pool.filter(x => count(out, x) < 3), x => score(f, x)); out.push(id); }
+      while (out.length < n) { const id = pickW(pool.filter(x => count(out, x) < maxOf(x)), x => score(f, x)); out.push(id); }
       return out;
     };
     const d = [...take(id => CARDS[id]!.niveau <= 3, 30), ...take(id => CARDS[id]!.niveau >= 4, 15)];
@@ -102,8 +108,8 @@ function play(a: { faction: Faction; deck: string[] }, b: { faction: Faction; de
 
 interface Deck { deck: string[]; wins: number; games: number; born: number }
 interface EvoFile { faction: Faction; gen: number; pop: Deck[]; history: { gen: number; best: number; mean: number }[] }
-const file = (f: Faction) => `reports/evo-${f}.json`;
-const load = (f: Faction): EvoFile | null => (existsSync(file(f)) ? JSON.parse(readFileSync(file(f), 'utf8')) as EvoFile : null);
+const file = (f: Faction, own = false) => `reports/evo-${f}${own && mine.includes(f) ? TAG : ''}.json`;
+const load = (f: Faction, own = false): EvoFile | null => (existsSync(file(f, own)) ? JSON.parse(readFileSync(file(f, own), 'utf8')) as EvoFile : null);
 const ladderTop = (f: Faction) => (JSON.parse(readFileSync(`reports/echelle-${f}.json`, 'utf8')) as { top: { deck: string[] }[] }).top.map(t => t.deck);
 
 /** Adversaires : les meilleurs decks actuels des autres factions (population en cours, sinon échelle). */
@@ -115,8 +121,22 @@ function gauntlet(f: Faction): { faction: Faction; deck: string[] }[] {
   });
 }
 
+/** Ramène un deck sous les limites d'exemplaires : les copies en trop sont remplacées (même tranche de niveau). */
+function clip(f: Faction, deck: string[]): string[] {
+  const d = deck.slice();
+  for (let i = 0; i < d.length; i++) {
+    if (count(d, d[i]!) <= maxOf(d[i]!)) continue;
+    const band = CARDS[d[i]!]!.niveau <= 3 ? pools[f]!.low : pools[f]!.high;
+    d[i] = pickW(band.filter(id => count(d, id) < maxOf(id)), id => score(f, id));
+  }
+  return valid(d) ? d : mutate(f, d);
+}
 const state: Record<string, EvoFile> = {};
-for (const f of mine) state[f] = load(f) ?? { faction: f, gen: 0, pop: ladderTop(f).slice(0, POP).map(deck => ({ deck, wins: 0, games: 0, born: 0 })), history: [] };
+for (const f of mine) {
+  const base = load(f, true) ?? load(f) ?? { faction: f, gen: 0, pop: ladderTop(f).slice(0, POP).map(deck => ({ deck, wins: 0, games: 0, born: 0 })), history: [] };
+  if (TAG && !load(f, true)) base.pop = base.pop.map(d => ({ ...d, deck: clip(f, d.deck) }));
+  state[f] = base;
+}
 
 for (let g = 0; g < GENS; g++) {
   for (const f of mine) {
@@ -147,7 +167,7 @@ for (let g = 0; g < GENS; g++) {
     st.gen = gen;
     const mean = st.pop.reduce((t, d) => t + d.wins / d.games, 0) / st.pop.length;
     st.history.push({ gen, best: st.pop[0]!.wins / st.pop[0]!.games, mean });
-    writeFileSync(file(f), JSON.stringify(st, null, 1));
+    writeFileSync(file(f, true), JSON.stringify(st, null, 1));
     console.log(`${f} génération ${gen} : meilleur ${Math.round(100 * st.pop[0]!.wins / N)} %, moyenne ${Math.round(100 * mean)} %, nouveaux dans le top ${st.pop.filter(d => d.born === gen).length} (${Math.round((Date.now() - t0) / 1000)} s)`);
   }
 }
