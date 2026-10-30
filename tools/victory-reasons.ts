@@ -3,12 +3,16 @@
 // VR_FILES='{"nomades":"reports/evo-nomades-xxx.json"}' remplace la population d'une faction.
 import { readFileSync } from 'node:fs';
 import { chooseActionV3, DEFAULT_WEIGHTS, STRONG_AI } from '../src/ai/heuristic';
+import { CARDS } from '../src/data/cards';
 import { applyAction, createGame } from '../src/engine/game';
+import type { CardDef } from '../src/engine/types';
 import type { Faction } from '../src/engine/types';
 
 const [shard, n] = [Number(process.argv[2] ?? 0), Number(process.argv[3] ?? 1)];
 const F: Faction[] = ['empire', 'elfe', 'demons', 'nomades'];
 type D = { faction: Faction; deck: string[] };
+// VR_PATCH='{"carte":{"cout":3}}' modifie des cartes le temps de la mesure.
+for (const [id, o] of Object.entries(JSON.parse(process.env.VR_PATCH ?? '{}') as Record<string, Partial<CardDef>>)) CARDS[id] = { ...CARDS[id]!, ...o } as CardDef;
 const FILES: Record<string, string> = JSON.parse(process.env.VR_FILES ?? '{}');
 const champs: D[] = F.flatMap(f => (JSON.parse(readFileSync(FILES[f] ?? `reports/evo-${f}.json`, 'utf8')) as { pop: { deck: string[] }[] }).pop.slice(0, 5).map(p => ({ faction: f, deck: p.deck })));
 let k = 0;
