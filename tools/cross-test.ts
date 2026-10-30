@@ -14,7 +14,8 @@ const [shard, nShards] = [Number(process.argv[5] ?? 0), Number(process.argv[6] ?
 const F: Faction[] = ['empire', 'elfe', 'demons', 'nomades'];
 const top = (file: string, n: number) => (JSON.parse(readFileSync(file, 'utf8')) as { pop: { deck: string[] }[] }).pop.slice(0, n).map(p => p.deck);
 const mine = files.map(f => ({ name: f, deck: top(f, 1)[0]! }));
-const opps = F.filter(f => f !== me).flatMap(f => top(`reports/evo-${f}.json`, 5).map((deck, i) => ({ faction: f, i, deck })));
+const ONLY = process.env.XT_OPP?.split(',');
+const opps = F.filter(f => f !== me && (!ONLY || ONLY.includes(f))).flatMap(f => top(`reports/evo-${f}.json`, 5).map((deck, i) => ({ faction: f, i, deck })));
 let k = 0;
 for (const o of opps) for (let g = 0; g < N; g++) for (const m of mine) {
   if (k++ % nShards !== shard) continue;
