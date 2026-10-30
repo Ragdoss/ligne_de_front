@@ -12,18 +12,18 @@ Un écart de ±3 points est dans le bruit ; au-delà de ±6, la carte pèse vrai
 | 3 | Gargouille sentinelle | Démons | 3 | 49 % | 38 % | +11 | 218 |
 | 4 | Vétérans à louer | Démons | 3 | 49 % | 38 % | +11 | 205 |
 | 5 | Fanatiques | Démons | 3 | 47 % | 38 % | +10 | 243 |
-| 6 | Cavaliers de la Garde | Empire | 3 | 51 % | 42 % | +9 | 232 |
+| 6 | Cavaliers de la Garde | Empire | 3 | 54 % | 50 % | +4 | 232 |
 | 7 | Gargouille de Cendres | Démons | 2 | 49 % | 39 % | +9 | 228 |
 | 8 | Marché Noir | Nomades | 3 | 31 % | 22 % | +9 | 207 |
 | 9 | Bourreau de l’Abîme | Démons | 4 | 46 % | 37 % | +8 | 460 |
-| 10 | Chevaliers de l’Ordre | Empire | 3 | 51 % | 43 % | +7 | 244 |
+| 10 | Chevaliers de l’Ordre | Empire | 3 | 56 % | 48 % | +7 | 244 |
 | 11 | Choc et Effroi | Démons | 4 | 45 % | 38 % | +7 | 485 |
 | 12 | Diablotins | Démons | 2 | 46 % | 40 % | +6 | 197 |
 | 13 | Sentinelle de chêne | Elfes | 4 | 41 % | 42 % | -1 | 508 |
 | 14 | Voile d’ombre | Démons | 2 | 47 % | 40 % | +6 | 194 |
 | 15 | Banquet Infernal | Démons | 3 | 46 % | 40 % | +5 | 224 |
-| 16 | Colonel de la Ligne | Empire | 4 | 48 % | 44 % | +5 | 269 |
-| 17 | Contrat de convoi | Empire | 1 | 48 % | 43 % | +5 | 260 |
+| 16 | Colonel de la Ligne | Empire | 4 | 52 % | 51 % | +0 | 269 |
+| 17 | Contrat de convoi | Empire | 1 | 52 % | 51 % | +2 | 260 |
 | 18 | Esclave Guerrier | Démons | 2 | 46 % | 41 % | +5 | 201 |
 | 19 | Ingénieurs de siège | Elfes | 3 | 43 % | 39 % | +4 | 165 |
 | 20 | Ingénieurs de siège | Démons | 3 | 45 % | 40 % | +5 | 206 |
@@ -32,18 +32,18 @@ Un écart de ±3 points est dans le bruit ; au-delà de ±6, la carte pèse vrai
 | 23 | Caravane Marchande | Nomades | 2 | 27 % | 23 % | +4 | 240 |
 | 24 | Chien Infernal | Démons | 1 | 44 % | 39 % | +4 | 448 |
 | 25 | Contrat de convoi | Nomades | 1 | 27 % | 23 % | +4 | 245 |
-| 26 | Cuirassiers lourds | Empire | 4 | 48 % | 44 % | +4 | 280 |
+| 26 | Cuirassiers lourds | Empire | 4 | 53 % | 50 % | +3 | 280 |
 | 27 | Dryades Guérisseuses | Elfes | 3 | 38 % | 41 % | -3 | 148 |
-| 28 | Gardes du drapeau | Empire | 3 | 49 % | 45 % | +4 | 248 |
+| 28 | Gardes du drapeau | Empire | 3 | 52 % | 52 % | +0 | 248 |
 | 29 | Gardien des chaînes | Démons | 3 | 45 % | 41 % | +4 | 224 |
 | 30 | Gardienne de la Lumière | Elfes | 4 | 41 % | 40 % | +1 | 516 |
-| 31 | Ingénieurs de siège | Empire | 3 | 48 % | 44 % | +4 | 252 |
-| 32 | Inquisiteur déchu | Empire | 3 | 49 % | 45 % | +4 | 242 |
-| 33 | Lieutenant | Empire | 2 | 49 % | 45 % | +4 | 226 |
+| 31 | Ingénieurs de siège | Empire | 3 | 53 % | 50 % | +4 | 252 |
+| 32 | Inquisiteur déchu | Empire | 3 | 54 % | 49 % | +5 | 242 |
+| 33 | Lieutenant | Empire | 2 | 52 % | 51 % | +2 | 226 |
 | 34 | Mercenaires | Démons | 2 | 45 % | 41 % | +4 | 236 |
-| 35 | Paysans | Empire | 1 | 47 % | 43 % | +4 | 381 |
-| 36 | Sergents instructeurs | Empire | 2 | 49 % | 45 % | +4 | 261 |
-| 37 | Vétérans à louer | Empire | 3 | 49 % | 45 % | +4 | 254 |
+| 35 | Paysans | Empire | 1 | 53 % | 50 % | +3 | 381 |
+| 36 | Sergents instructeurs | Empire | 2 | 52 % | 51 % | +1 | 261 |
+| 37 | Vétérans à louer | Empire | 3 | 53 % | 52 % | +1 | 254 |
 | 38 | Éclaireuse des fourrés | Elfes | 2 | 45 % | 37 % | +8 | 163 |
 | 39 | Émir des dunes | Nomades | 4 | 26 % | 22 % | +4 | 537 |
 | 40 | Œuf de Dragon | Démons | 3 | 45 % | 41 % | +4 | 222 |
@@ -53,39 +53,39 @@ Un écart de ±3 points est dans le bruit ; au-delà de ±6, la carte pèse vrai
 | 44 | Capitaine mercenaire | Nomades | 2 | 27 % | 24 % | +3 | 214 |
 | 45 | Chant de la sève | Elfes | 1 | 39 % | 41 % | -2 | 165 |
 | 46 | Chuchoteur des abysses | Démons | 2 | 45 % | 42 % | +3 | 211 |
-| 47 | Cuirassiers de Kragz | Empire | 4 | 48 % | 45 % | +3 | 283 |
+| 47 | Cuirassiers de Kragz | Empire | 4 | 53 % | 50 % | +3 | 283 |
 | 48 | Cultiste | Démons | 1 | 43 % | 41 % | +3 | 446 |
 | 49 | Danseurs de sable | Nomades | 2 | 26 % | 24 % | +3 | 229 |
-| 50 | Espion Impérial | Empire | 4 | 48 % | 45 % | +3 | 264 |
+| 50 | Espion Impérial | Empire | 4 | 52 % | 53 % | -1 | 264 |
 | 51 | Garde-frontière sylvestre | Elfes | 2 | 39 % | 41 % | -2 | 194 |
 | 52 | Hiérophante Morvak | Démons | 5 | 43 % | 41 % | +3 | 485 |
 | 53 | Ingénieurs de siège | Nomades | 3 | 27 % | 24 % | +3 | 216 |
 | 54 | Lettrée du Conclave | Elfes | 2 | 43 % | 39 % | +4 | 179 |
 | 55 | Lyra, Éclaireuse de la Purification | Elfes | 5 | 42 % | 38 % | +4 | 517 |
-| 56 | L’Impératrice Octavia | Empire | 5 | 47 % | 44 % | +3 | 276 |
+| 56 | L’Impératrice Octavia | Empire | 5 | 56 % | 47 % | +8 | 276 |
 | 57 | Marchand d’âmes | Nomades | 3 | 26 % | 23 % | +3 | 222 |
-| 58 | Mercenaires | Empire | 2 | 48 % | 45 % | +3 | 246 |
-| 59 | Milice de village | Empire | 1 | 47 % | 44 % | +3 | 374 |
+| 58 | Mercenaires | Empire | 2 | 54 % | 49 % | +5 | 246 |
+| 59 | Milice de village | Empire | 1 | 49 % | 55 % | -6 | 374 |
 | 60 | Élémentaire de Terre | Elfes | 1 | 44 % | 35 % | +8 | 449 |
 | 61 | Acolyte Damné | Démons | 1 | 44 % | 42 % | +2 | 187 |
-| 62 | Appel aux armes | Empire | 4 | 48 % | 46 % | +2 | 320 |
-| 63 | Archer Impérial | Empire | 2 | 47 % | 45 % | +2 | 279 |
-| 64 | Aumônier de Guerre | Empire | 3 | 47 % | 45 % | +2 | 276 |
+| 62 | Appel aux armes | Empire | 4 | 49 % | 53 % | -4 | 320 |
+| 63 | Archer Impérial | Empire | 2 | 51 % | 52 % | -1 | 279 |
+| 64 | Aumônier de Guerre | Empire | 3 | 52 % | 51 % | +1 | 276 |
 | 65 | Basilics du Désert | Nomades | 5 | 25 % | 23 % | +2 | 576 |
 | 66 | Bourgeonnement | Elfes | 1 | 41 % | 40 % | +1 | 187 |
 | 67 | Brise du Matin | Elfes | 1 | 37 % | 41 % | -4 | 198 |
 | 68 | Chevaucheurs du mirage | Elfes | 3 | 43 % | 40 % | +3 | 186 |
-| 69 | Connétable | Empire | 4 | 47 % | 45 % | +2 | 252 |
+| 69 | Connétable | Empire | 4 | 50 % | 53 % | -3 | 252 |
 | 70 | Danseuses des lames | Elfes | 2 | 40 % | 40 % | 0 | 184 |
-| 71 | Dernier carré | Empire | 4 | 47 % | 45 % | +2 | 286 |
+| 71 | Dernier carré | Empire | 4 | 49 % | 54 % | -4 | 286 |
 | 72 | Dette Infernale | Démons | 3 | 43 % | 41 % | +2 | 206 |
 | 73 | Jeune Nomade | Nomades | 1 | 26 % | 24 % | +2 | 323 |
 | 74 | Légat Varro | Nomades | 4 | 26 % | 23 % | +2 | 528 |
 | 75 | Pacte de Sang | Démons | 2 | 44 % | 42 % | +2 | 214 |
-| 76 | Porte-Étendard | Empire | 2 | 48 % | 46 % | +2 | 256 |
+| 76 | Porte-Étendard | Empire | 2 | 51 % | 53 % | -2 | 256 |
 | 77 | Rite de Purification | Elfes | 3 | 41 % | 40 % | +1 | 169 |
 | 78 | Seigneur des caravanes perdues | Nomades | 3 | 26 % | 24 % | +2 | 221 |
-| 79 | Tambour de bataillon | Empire | 1 | 47 % | 45 % | +2 | 393 |
+| 79 | Tambour de bataillon | Empire | 1 | 52 % | 49 % | +3 | 393 |
 | 80 | Tempête de Sable | Nomades | 3 | 26 % | 24 % | +2 | 227 |
 | 81 | Terre brûlée | Nomades | 3 | 26 % | 24 % | +2 | 242 |
 | 82 | Vivres de campagne | Nomades | 2 | 26 % | 24 % | +2 | 211 |
@@ -95,45 +95,45 @@ Un écart de ±3 points est dans le bruit ; au-delà de ±6, la carte pèse vrai
 | 86 | Capitaine mercenaire | Elfes | 2 | 40 % | 40 % | +0 | 177 |
 | 87 | Capitaine mercenaire | Démons | 2 | 43 % | 42 % | +1 | 210 |
 | 88 | Caravanier armé | Nomades | 3 | 26 % | 25 % | +1 | 236 |
-| 89 | Cavaliers Dragons Élite | Empire | 4 | 47 % | 46 % | +1 | 266 |
+| 89 | Cavaliers Dragons Élite | Empire | 4 | 54 % | 50 % | +4 | 266 |
 | 90 | Chamane de la Forêt | Elfes | 3 | 40 % | 40 % | +0 | 173 |
 | 91 | Chevaucheurs du mirage | Nomades | 3 | 26 % | 24 % | +1 | 215 |
 | 92 | Druide Ancien | Elfes | 4 | 39 % | 42 % | -2 | 491 |
 | 93 | Effroi Démoniaque | Démons | 2 | 43 % | 43 % | +1 | 212 |
-| 94 | Forteresse l'Intuable | Empire | 5 | 46 % | 46 % | +1 | 257 |
+| 94 | Forteresse l'Intuable | Empire | 5 | 51 % | 52 % | -1 | 257 |
 | 95 | Gardien d’écorce | Elfes | 2 | 39 % | 41 % | -2 | 187 |
-| 96 | Grand Maître d’armes | Empire | 5 | 46 % | 45 % | +1 | 292 |
-| 97 | Général de l'Empire | Empire | 3 | 46 % | 46 % | +1 | 254 |
+| 96 | Grand Maître d’armes | Empire | 5 | 50 % | 54 % | -4 | 292 |
+| 97 | Général de l'Empire | Empire | 3 | 53 % | 50 % | +3 | 254 |
 | 98 | Maître du Chenil Infernal | Démons | 5 | 42 % | 42 % | +1 | 470 |
 | 99 | Milice de village | Elfes | 1 | 39 % | 41 % | -2 | 432 |
 | 100 | Oasis cachée | Nomades | 2 | 25 % | 25 % | +1 | 227 |
-| 101 | Quartier-maître | Empire | 2 | 47 % | 46 % | +1 | 248 |
+| 101 | Quartier-maître | Empire | 2 | 50 % | 53 % | -3 | 248 |
 | 102 | Quartier-maître | Elfes | 2 | 39 % | 41 % | -2 | 194 |
 | 103 | Racines immobilisantes | Elfes | 2 | 40 % | 41 % | 0 | 193 |
 | 104 | Racines protectrices | Elfes | 2 | 41 % | 39 % | +2 | 193 |
 | 105 | Sang de sève | Elfes | 2 | 40 % | 41 % | -1 | 190 |
 | 106 | Serment du traité | Elfes | 3 | 42 % | 40 % | +2 | 189 |
-| 107 | Soldat de Kragz | Empire | 2 | 46 % | 46 % | +1 | 229 |
+| 107 | Soldat de Kragz | Empire | 2 | 55 % | 50 % | +5 | 229 |
 | 108 | Sorcière du pacte | Démons | 2 | 43 % | 41 % | +1 | 221 |
 | 109 | Tréant Millénaire | Elfes | 5 | 41 % | 41 % | 0 | 520 |
-| 110 | Vivres de campagne | Empire | 2 | 47 % | 46 % | +1 | 236 |
+| 110 | Vivres de campagne | Empire | 2 | 52 % | 52 % | +1 | 236 |
 | 111 | À couvert | Nomades | 1 | 25 % | 24 % | +1 | 218 |
 | 112 | Éleveur de Basilics | Nomades | 3 | 25 % | 24 % | +1 | 231 |
 | 113 | Archéotacticiens | Nomades | 4 | 25 % | 25 % | 0 | 567 |
 | 114 | Cavalier Elfe | Elfes | 3 | 43 % | 39 % | +4 | 165 |
 | 115 | Cheikha Zahra | Nomades | 5 | 24 % | 25 % | 0 | 552 |
-| 116 | Chevalier Templier | Empire | 4 | 46 % | 45 % | 0 | 278 |
+| 116 | Chevalier Templier | Empire | 4 | 50 % | 52 % | -1 | 278 |
 | 117 | Choc et Effroi | Elfes | 4 | 40 % | 39 % | +0 | 475 |
 | 118 | Choc et Effroi | Nomades | 4 | 25 % | 25 % | 0 | 542 |
-| 119 | Cor de ralliement | Empire | 2 | 46 % | 46 % | 0 | 268 |
+| 119 | Cor de ralliement | Empire | 2 | 49 % | 55 % | -6 | 268 |
 | 120 | Cor de ralliement | Elfes | 2 | 40 % | 41 % | -1 | 200 |
 | 121 | Cor de ralliement | Démons | 2 | 42 % | 42 % | 0 | 233 |
 | 122 | Dryade corrompue | Elfes | 3 | 37 % | 42 % | -5 | 176 |
 | 123 | Frondeur Nomade | Nomades | 1 | 25 % | 25 % | 0 | 338 |
 | 124 | Fuite dans les dunes | Nomades | 2 | 25 % | 26 % | 0 | 227 |
-| 125 | Hallebardiers en ligne | Empire | 2 | 46 % | 46 % | 0 | 288 |
+| 125 | Hallebardiers en ligne | Empire | 2 | 51 % | 52 % | -1 | 288 |
 | 126 | Inquisiteur déchu | Démons | 3 | 42 % | 42 % | 0 | 232 |
-| 127 | Lanciers du rempart | Empire | 2 | 46 % | 46 % | 0 | 267 |
+| 127 | Lanciers du rempart | Empire | 2 | 53 % | 51 % | +1 | 267 |
 | 128 | Marchand d'Ombres | Nomades | 2 | 25 % | 25 % | 0 | 204 |
 | 129 | Maître des embuscades | Elfes | 3 | 41 % | 39 % | +2 | 176 |
 | 130 | Pacte de Survie | Démons | 3 | 42 % | 43 % | 0 | 213 |
@@ -147,32 +147,32 @@ Un écart de ±3 points est dans le bruit ; au-delà de ±6, la carte pèse vrai
 | 138 | Vivres de campagne | Elfes | 2 | 40 % | 40 % | +1 | 182 |
 | 139 | Élémentaire de Feu | Elfes | 2 | 44 % | 38 % | +6 | 183 |
 | 140 | Éveil Élémentaire | Elfes | 2 | 40 % | 40 % | -1 | 190 |
-| 141 | Arbalétriers en rang | Empire | 2 | 46 % | 46 % | -1 | 262 |
+| 141 | Arbalétriers en rang | Empire | 2 | 53 % | 52 % | +1 | 262 |
 | 142 | Archidémon des Origines | Démons | 5 | 42 % | 43 % | -1 | 428 |
 | 143 | Augure de l’Abîme | Démons | 1 | 41 % | 42 % | -1 | 195 |
-| 144 | Bannière Déchirée | Empire | 3 | 45 % | 46 % | -1 | 233 |
+| 144 | Bannière Déchirée | Empire | 3 | 52 % | 52 % | +0 | 233 |
 | 145 | Bannière Déchirée | Nomades | 3 | 24 % | 25 % | -1 | 189 |
 | 146 | Basilic démoniaque | Démons | 3 | 42 % | 43 % | -1 | 206 |
 | 147 | Brume Trompeuse | Elfes | 2 | 43 % | 39 % | +5 | 181 |
 | 148 | Bénédiction de la sylve | Elfes | 2 | 36 % | 43 % | -6 | 157 |
-| 149 | Capitaine de la Garde | Empire | 3 | 45 % | 46 % | -1 | 266 |
+| 149 | Capitaine de la Garde | Empire | 3 | 52 % | 52 % | +1 | 266 |
 | 150 | Changement Tectonique | Elfes | 3 | 42 % | 40 % | +2 | 182 |
 | 151 | Chasseur de Reliques | Nomades | 3 | 24 % | 25 % | -1 | 211 |
 | 152 | Cheikh des Dunes | Nomades | 4 | 25 % | 26 % | -1 | 570 |
 | 153 | Cor de ralliement | Nomades | 2 | 24 % | 25 % | -1 | 189 |
 | 154 | Cérémonie du Déclin | Démons | 3 | 41 % | 42 % | -1 | 207 |
-| 155 | Héraut impérial | Empire | 5 | 46 % | 48 % | -1 | 256 |
-| 156 | Lancier de l'Empire | Empire | 2 | 46 % | 47 % | -1 | 259 |
+| 155 | Héraut impérial | Empire | 5 | 52 % | 53 % | -1 | 256 |
+| 156 | Lancier de l'Empire | Empire | 2 | 53 % | 51 % | +2 | 259 |
 | 157 | Maître du bazar | Nomades | 2 | 24 % | 25 % | -1 | 215 |
 | 158 | Milice de village | Nomades | 1 | 24 % | 25 % | -1 | 306 |
 | 159 | Mirage | Nomades | 2 | 25 % | 26 % | -1 | 239 |
-| 160 | Palissade | Empire | 2 | 46 % | 47 % | -1 | 223 |
+| 160 | Palissade | Empire | 2 | 48 % | 53 % | -5 | 223 |
 | 161 | Palissade | Elfes | 2 | 39 % | 41 % | -2 | 195 |
 | 162 | Palissade | Démons | 2 | 42 % | 43 % | -1 | 210 |
 | 163 | Prêtresse des saisons | Elfes | 3 | 40 % | 41 % | -1 | 178 |
 | 164 | Puits empoisonné | Nomades | 2 | 24 % | 25 % | -1 | 219 |
 | 165 | Quartier-maître | Nomades | 2 | 24 % | 24 % | -1 | 217 |
-| 166 | Ralliement | Empire | 2 | 46 % | 46 % | -1 | 259 |
+| 166 | Ralliement | Empire | 2 | 48 % | 55 % | -6 | 259 |
 | 167 | Rançon du Désert | Nomades | 4 | 24 % | 26 % | -1 | 530 |
 | 168 | Ravitaillement | Elfes | 1 | 37 % | 42 % | -5 | 174 |
 | 169 | Ravitaillement | Nomades | 1 | 24 % | 25 % | -1 | 231 |
@@ -184,48 +184,48 @@ Un écart de ±3 points est dans le bruit ; au-delà de ±6, la carte pèse vrai
 | 175 | Vivres de campagne | Démons | 2 | 42 % | 43 % | -1 | 217 |
 | 176 | Volez le ravitaillement | Nomades | 4 | 24 % | 25 % | -1 | 524 |
 | 177 | Vétérans à louer | Nomades | 3 | 23 % | 24 % | -1 | 199 |
-| 178 | Écuyers de la Garde | Empire | 1 | 46 % | 47 % | -1 | 403 |
+| 178 | Écuyers de la Garde | Empire | 1 | 53 % | 51 % | +2 | 403 |
 | 179 | Al-Mansur le Magnifique | Nomades | 5 | 23 % | 25 % | -2 | 550 |
-| 180 | Cadets de l'Académie | Empire | 3 | 45 % | 47 % | -2 | 240 |
+| 180 | Cadets de l'Académie | Empire | 3 | 52 % | 51 % | +2 | 240 |
 | 181 | Chant de la traque | Elfes | 4 | 40 % | 40 % | 0 | 506 |
 | 182 | Chant du Vent | Elfes | 3 | 40 % | 40 % | +1 | 168 |
-| 183 | Charge décisive | Empire | 5 | 45 % | 47 % | -2 | 280 |
+| 183 | Charge décisive | Empire | 5 | 54 % | 49 % | +5 | 280 |
 | 184 | Démon d'Akantha | Démons | 3 | 41 % | 42 % | -2 | 202 |
-| 185 | Exécution exemplaire | Empire | 2 | 44 % | 46 % | -2 | 244 |
+| 185 | Exécution exemplaire | Empire | 2 | 51 % | 52 % | 0 | 244 |
 | 186 | Fructification | Elfes | 5 | 39 % | 43 % | -3 | 464 |
 | 187 | Gardienne du seuil | Elfes | 3 | 39 % | 41 % | -2 | 169 |
 | 188 | Guide du Désert | Nomades | 2 | 23 % | 26 % | -2 | 231 |
-| 189 | Maréchal d'Empire | Empire | 5 | 45 % | 47 % | -2 | 268 |
+| 189 | Maréchal d'Empire | Empire | 5 | 51 % | 52 % | -2 | 268 |
 | 190 | Mercenaires | Elfes | 2 | 40 % | 40 % | +0 | 167 |
 | 191 | Mirage de l’oasis | Nomades | 1 | 24 % | 26 % | -2 | 219 |
 | 192 | Murmure de l’Abîme | Démons | 3 | 42 % | 43 % | -2 | 201 |
-| 193 | Ordre du Haut Commandement | Empire | 4 | 45 % | 47 % | -2 | 271 |
+| 193 | Ordre du Haut Commandement | Empire | 4 | 52 % | 51 % | +1 | 271 |
 | 194 | Pousse de Sylve | Elfes | 1 | 40 % | 43 % | -3 | 413 |
 | 195 | Ravitailleur | Démons | 1 | 42 % | 44 % | -2 | 412 |
 | 196 | Sentinelle des cimes | Elfes | 2 | 43 % | 39 % | +4 | 183 |
-| 197 | Serment du traité | Empire | 3 | 45 % | 47 % | -2 | 262 |
+| 197 | Serment du traité | Empire | 3 | 52 % | 51 % | +1 | 262 |
 | 198 | Suppôt Infernal | Démons | 3 | 42 % | 43 % | -2 | 238 |
 | 199 | Visez les faibles | Elfes | 2 | 38 % | 42 % | -4 | 175 |
 | 200 | Volée de Flèches | Elfes | 2 | 39 % | 40 % | -1 | 187 |
-| 201 | À couvert | Empire | 1 | 45 % | 47 % | -2 | 258 |
+| 201 | À couvert | Empire | 1 | 52 % | 52 % | +0 | 258 |
 | 202 | Élémentaire d'Eau | Elfes | 2 | 40 % | 40 % | 0 | 182 |
-| 203 | État Major | Empire | 4 | 45 % | 47 % | -2 | 271 |
+| 203 | État Major | Empire | 4 | 52 % | 52 % | +0 | 271 |
 | 204 | Ancien de la canopée | Elfes | 4 | 40 % | 40 % | -1 | 523 |
-| 205 | Arbalétrier Impérial | Empire | 3 | 44 % | 47 % | -3 | 259 |
-| 206 | Assassinat | Empire | 4 | 45 % | 48 % | -3 | 248 |
+| 205 | Arbalétrier Impérial | Empire | 3 | 51 % | 52 % | -1 | 259 |
+| 206 | Assassinat | Empire | 4 | 51 % | 52 % | -1 | 248 |
 | 207 | Bannière Déchirée | Démons | 3 | 40 % | 43 % | -3 | 204 |
 | 208 | Chamelier | Nomades | 1 | 23 % | 26 % | -3 | 312 |
 | 209 | Charmeur de Basilics | Nomades | 2 | 23 % | 26 % | -3 | 202 |
-| 210 | Choc et Effroi | Empire | 4 | 45 % | 47 % | -3 | 259 |
-| 211 | Dragon Impérial | Empire | 5 | 45 % | 48 % | -3 | 267 |
+| 210 | Choc et Effroi | Empire | 4 | 51 % | 53 % | -2 | 259 |
+| 211 | Dragon Impérial | Empire | 5 | 52 % | 52 % | 0 | 267 |
 | 212 | Dragon Infernal | Démons | 5 | 41 % | 44 % | -3 | 470 |
 | 213 | Embuscade | Nomades | 1 | 24 % | 27 % | -3 | 234 |
 | 214 | Floraison | Elfes | 3 | 39 % | 40 % | -1 | 209 |
-| 215 | Garde-frontière sylvestre | Empire | 2 | 44 % | 47 % | -3 | 245 |
+| 215 | Garde-frontière sylvestre | Empire | 2 | 52 % | 52 % | 0 | 245 |
 | 216 | Maître de Caravane | Nomades | 2 | 24 % | 27 % | -3 | 241 |
 | 217 | Pacte mineur | Démons | 1 | 40 % | 43 % | -3 | 228 |
-| 218 | Promotion | Empire | 3 | 44 % | 47 % | -3 | 243 |
-| 219 | Ravitailleur | Empire | 1 | 45 % | 48 % | -3 | 381 |
+| 218 | Promotion | Empire | 3 | 50 % | 52 % | -2 | 243 |
+| 219 | Ravitailleur | Empire | 1 | 51 % | 54 % | -2 | 381 |
 | 220 | Retraite Sylvestre | Elfes | 2 | 39 % | 41 % | -3 | 197 |
 | 221 | Seigneur des tourments | Démons | 4 | 41 % | 45 % | -3 | 461 |
 | 222 | Sentinelles de l’oasis | Nomades | 2 | 22 % | 26 % | -3 | 227 |
@@ -233,22 +233,22 @@ Un écart de ±3 points est dans le bruit ; au-delà de ±6, la carte pèse vrai
 | 224 | À couvert | Démons | 1 | 40 % | 44 % | -3 | 228 |
 | 225 | Éclaireuse des sables | Nomades | 1 | 23 % | 26 % | -3 | 302 |
 | 226 | Basilic démoniaque | Nomades | 3 | 22 % | 26 % | -4 | 189 |
-| 227 | Capitaine mercenaire | Empire | 2 | 44 % | 47 % | -4 | 252 |
+| 227 | Capitaine mercenaire | Empire | 2 | 51 % | 52 % | -1 | 252 |
 | 228 | Chœur des saisons | Elfes | 3 | 38 % | 41 % | -3 | 189 |
 | 229 | Clerc de la Forêt | Elfes | 2 | 39 % | 41 % | -2 | 175 |
 | 230 | Colporteur | Nomades | 1 | 22 % | 26 % | -4 | 333 |
 | 231 | Exécution exemplaire | Démons | 2 | 40 % | 44 % | -4 | 226 |
 | 232 | Frappez le ravitaillement | Nomades | 3 | 23 % | 26 % | -4 | 217 |
-| 233 | Le Commandant de la campagne de Kragz | Empire | 5 | 44 % | 48 % | -4 | 274 |
+| 233 | Le Commandant de la campagne de Kragz | Empire | 5 | 53 % | 51 % | +2 | 274 |
 | 234 | Marque du chasseur | Elfes | 1 | 45 % | 39 % | +6 | 169 |
 | 235 | Quartier-maître | Démons | 2 | 40 % | 44 % | -4 | 219 |
 | 236 | Ravitaillement | Démons | 1 | 40 % | 44 % | -4 | 199 |
-| 237 | Recrue Impériale | Empire | 1 | 46 % | 50 % | -4 | 431 |
+| 237 | Recrue Impériale | Empire | 1 | 50 % | 56 % | -7 | 431 |
 | 238 | Saboteur Nomade | Nomades | 3 | 23 % | 27 % | -4 | 232 |
 | 239 | Sérénité de la Forêt | Elfes | 3 | 33 % | 43 % | -10 | 198 |
 | 240 | À couvert | Elfes | 1 | 39 % | 41 % | -2 | 193 |
 | 241 | Abîme Grandissant | Démons | 4 | 41 % | 46 % | -5 | 489 |
-| 242 | Légat Varro | Empire | 4 | 43 % | 48 % | -5 | 283 |
+| 242 | Légat Varro | Empire | 4 | 51 % | 52 % | -1 | 283 |
 | 243 | Mercenaires | Nomades | 2 | 22 % | 26 % | -5 | 203 |
 | 244 | Rangers | Elfes | 3 | 45 % | 38 % | +8 | 187 |
 | 245 | Ravitailleur | Nomades | 1 | 22 % | 27 % | -5 | 297 |
@@ -259,14 +259,14 @@ Un écart de ±3 points est dans le bruit ; au-delà de ±6, la carte pèse vrai
 | 250 | Marchand d’âmes | Démons | 3 | 38 % | 45 % | -6 | 190 |
 | 251 | Maître des pactes | Démons | 3 | 38 % | 45 % | -6 | 190 |
 | 252 | Rançon d'Âmes | Démons | 3 | 39 % | 44 % | -6 | 211 |
-| 253 | Ravitaillement | Empire | 1 | 43 % | 49 % | -6 | 269 |
+| 253 | Ravitaillement | Empire | 1 | 48 % | 54 % | -6 | 269 |
 | 254 | Rituel du sang noir | Démons | 4 | 40 % | 46 % | -6 | 440 |
 | 255 | Veilleur d'Os | Démons | 4 | 40 % | 46 % | -6 | 448 |
-| 256 | Chevalier de Province | Empire | 3 | 43 % | 49 % | -7 | 240 |
-| 257 | Formation en Carré | Empire | 3 | 42 % | 49 % | -7 | 295 |
+| 256 | Chevalier de Province | Empire | 3 | 53 % | 52 % | +0 | 240 |
+| 257 | Formation en Carré | Empire | 3 | 52 % | 53 % | -1 | 295 |
 | 258 | Prêtre Sacrificiel | Démons | 2 | 37 % | 45 % | -7 | 202 |
 | 259 | Ravitailleur | Elfes | 1 | 38 % | 44 % | -7 | 440 |
 | 260 | Chaînes de l’Abîme | Démons | 3 | 38 % | 45 % | -8 | 225 |
 | 261 | Grimoire interdit | Démons | 3 | 37 % | 45 % | -8 | 200 |
-| 262 | Charge Impériale | Empire | 2 | 41 % | 50 % | -10 | 262 |
+| 262 | Charge Impériale | Empire | 2 | 52 % | 52 % | -1 | 262 |
 | 263 | Dryade corrompue | Démons | 3 | 36 % | 46 % | -10 | 207 |

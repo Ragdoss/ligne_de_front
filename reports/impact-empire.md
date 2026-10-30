@@ -1,73 +1,73 @@
 # Poids des cartes empire contre les autres factions
 
-400 decks aléatoires, 1600 parties contre les 30 decks qualifiés des autres factions ; taux de victoire global 46 %.
-Fins de partie (toutes) : victoire-lassitude 36 %, victoire-emptyDeck 1 %, défaite-noRegiment 6 %, défaite-emptyDeck 12 %, défaite-lassitude 36 %, victoire-noRegiment 9 %.
+400 decks aléatoires, 1600 parties contre les 30 decks qualifiés des autres factions ; taux de victoire global 52 %.
+Fins de partie (toutes) : victoire-noRegiment 9 %, victoire-lassitude 41 %, défaite-emptyDeck 8 %, défaite-lassitude 35 %, défaite-noRegiment 5 %, victoire-emptyDeck 2 %.
 
 | # | Carte | Niv. | Avec | Sans | Écart | Exemplaires |
 |---|---|---|---|---|---|---|
-| 1 | Cavaliers de la Garde | 3 | 51 % | 42 % | +9 | 232 |
-| 2 | Chevaliers de l’Ordre | 3 | 51 % | 43 % | +7 | 244 |
-| 3 | Contrat de convoi | 1 | 48 % | 43 % | +5 | 260 |
-| 4 | Colonel de la Ligne | 4 | 48 % | 44 % | +5 | 269 |
-| 5 | Sergents instructeurs | 2 | 49 % | 45 % | +4 | 261 |
-| 6 | Cuirassiers lourds | 4 | 48 % | 44 % | +4 | 280 |
-| 7 | Vétérans à louer | 3 | 49 % | 45 % | +4 | 254 |
-| 8 | Lieutenant | 2 | 49 % | 45 % | +4 | 226 |
-| 9 | Inquisiteur déchu | 3 | 49 % | 45 % | +4 | 242 |
-| 10 | Gardes du drapeau | 3 | 49 % | 45 % | +4 | 248 |
-| 11 | Paysans | 1 | 47 % | 43 % | +4 | 381 |
-| 12 | Ingénieurs de siège | 3 | 48 % | 44 % | +4 | 252 |
-| 13 | Espion Impérial | 4 | 48 % | 45 % | +3 | 264 |
-| 14 | L’Impératrice Octavia | 5 | 47 % | 44 % | +3 | 276 |
-| 15 | Cuirassiers de Kragz | 4 | 48 % | 45 % | +3 | 283 |
-| 16 | Mercenaires | 2 | 48 % | 45 % | +3 | 246 |
-| 17 | Milice de village | 1 | 47 % | 44 % | +3 | 374 |
-| 18 | Connétable | 4 | 47 % | 45 % | +2 | 252 |
-| 19 | Tambour de bataillon | 1 | 47 % | 45 % | +2 | 393 |
-| 20 | Porte-Étendard | 2 | 48 % | 46 % | +2 | 256 |
-| 21 | Aumônier de Guerre | 3 | 47 % | 45 % | +2 | 276 |
-| 22 | Appel aux armes | 4 | 48 % | 46 % | +2 | 320 |
-| 23 | Archer Impérial | 2 | 47 % | 45 % | +2 | 279 |
-| 24 | Dernier carré | 4 | 47 % | 45 % | +2 | 286 |
-| 25 | Quartier-maître | 2 | 47 % | 46 % | +1 | 248 |
-| 26 | Grand Maître d’armes | 5 | 46 % | 45 % | +1 | 292 |
-| 27 | Vivres de campagne | 2 | 47 % | 46 % | +1 | 236 |
-| 28 | Général de l'Empire | 3 | 46 % | 46 % | +1 | 254 |
-| 29 | Forteresse l'Intuable | 5 | 46 % | 46 % | +1 | 257 |
-| 30 | Cavaliers Dragons Élite | 4 | 47 % | 46 % | +1 | 266 |
-| 31 | Soldat de Kragz | 2 | 46 % | 46 % | +1 | 229 |
-| 32 | Cor de ralliement | 2 | 46 % | 46 % | +0 | 268 |
-| 33 | Lanciers du rempart | 2 | 46 % | 46 % | +0 | 267 |
-| 34 | Chevalier Templier | 4 | 46 % | 45 % | +0 | 278 |
-| 35 | Hallebardiers en ligne | 2 | 46 % | 46 % | 0 | 288 |
-| 36 | Arbalétriers en rang | 2 | 46 % | 46 % | -1 | 262 |
-| 37 | Palissade | 2 | 46 % | 47 % | -1 | 223 |
-| 38 | Ralliement | 2 | 46 % | 46 % | -1 | 259 |
-| 39 | Lancier de l'Empire | 2 | 46 % | 47 % | -1 | 259 |
-| 40 | Bannière Déchirée | 3 | 45 % | 46 % | -1 | 233 |
-| 41 | Capitaine de la Garde | 3 | 45 % | 46 % | -1 | 266 |
-| 42 | Écuyers de la Garde | 1 | 46 % | 47 % | -1 | 403 |
-| 43 | Héraut impérial | 5 | 46 % | 48 % | -1 | 256 |
-| 44 | Cadets de l'Académie | 3 | 45 % | 47 % | -2 | 240 |
-| 45 | Maréchal d'Empire | 5 | 45 % | 47 % | -2 | 268 |
-| 46 | État Major | 4 | 45 % | 47 % | -2 | 271 |
-| 47 | Serment du traité | 3 | 45 % | 47 % | -2 | 262 |
-| 48 | Charge décisive | 5 | 45 % | 47 % | -2 | 280 |
-| 49 | Exécution exemplaire | 2 | 44 % | 46 % | -2 | 244 |
-| 50 | Ordre du Haut Commandement | 4 | 45 % | 47 % | -2 | 271 |
-| 51 | À couvert | 1 | 45 % | 47 % | -2 | 258 |
-| 52 | Arbalétrier Impérial | 3 | 44 % | 47 % | -3 | 259 |
-| 53 | Dragon Impérial | 5 | 45 % | 48 % | -3 | 267 |
-| 54 | Promotion | 3 | 44 % | 47 % | -3 | 243 |
-| 55 | Choc et Effroi | 4 | 45 % | 47 % | -3 | 259 |
-| 56 | Garde-frontière sylvestre | 2 | 44 % | 47 % | -3 | 245 |
-| 57 | Assassinat | 4 | 45 % | 48 % | -3 | 248 |
-| 58 | Ravitailleur | 1 | 45 % | 48 % | -3 | 381 |
-| 59 | Capitaine mercenaire | 2 | 44 % | 47 % | -4 | 252 |
-| 60 | Recrue Impériale | 1 | 46 % | 50 % | -4 | 431 |
-| 61 | Le Commandant de la campagne de Kragz | 5 | 44 % | 48 % | -4 | 274 |
-| 62 | Légat Varro | 4 | 43 % | 48 % | -5 | 283 |
-| 63 | Ravitaillement | 1 | 43 % | 49 % | -6 | 269 |
-| 64 | Chevalier de Province | 3 | 43 % | 49 % | -7 | 240 |
-| 65 | Formation en Carré | 3 | 42 % | 49 % | -7 | 295 |
-| 66 | Charge Impériale | 2 | 41 % | 50 % | -10 | 262 |
+| 1 | L’Impératrice Octavia | 5 | 56 % | 47 % | +8 | 276 |
+| 2 | Chevaliers de l’Ordre | 3 | 56 % | 48 % | +7 | 244 |
+| 3 | Soldat de Kragz | 2 | 55 % | 50 % | +5 | 258 |
+| 4 | Inquisiteur déchu | 3 | 54 % | 49 % | +5 | 240 |
+| 5 | Charge décisive | 5 | 54 % | 49 % | +5 | 296 |
+| 6 | Mercenaires | 2 | 54 % | 49 % | +5 | 238 |
+| 7 | Cavaliers de la Garde | 3 | 54 % | 50 % | +4 | 239 |
+| 8 | Cavaliers Dragons Élite | 4 | 54 % | 50 % | +4 | 261 |
+| 9 | Ingénieurs de siège | 3 | 53 % | 50 % | +4 | 257 |
+| 10 | Paysans | 1 | 53 % | 50 % | +3 | 422 |
+| 11 | Cuirassiers lourds | 4 | 53 % | 50 % | +3 | 254 |
+| 12 | Général de l'Empire | 3 | 53 % | 50 % | +3 | 240 |
+| 13 | Cuirassiers de Kragz | 4 | 53 % | 50 % | +3 | 258 |
+| 14 | Tambour de bataillon | 1 | 52 % | 49 % | +3 | 388 |
+| 15 | Écuyers de la Garde | 1 | 53 % | 51 % | +2 | 385 |
+| 16 | Lancier de l'Empire | 2 | 53 % | 51 % | +2 | 240 |
+| 17 | Le Commandant de la campagne de Kragz | 5 | 53 % | 51 % | +2 | 271 |
+| 18 | Cadets de l'Académie | 3 | 52 % | 51 % | +2 | 236 |
+| 19 | Contrat de convoi | 1 | 52 % | 51 % | +2 | 250 |
+| 20 | Lieutenant | 2 | 52 % | 51 % | +2 | 240 |
+| 21 | Ordre du Haut Commandement | 4 | 52 % | 51 % | +1 | 284 |
+| 22 | Arbalétriers en rang | 2 | 53 % | 52 % | +1 | 225 |
+| 23 | Sergents instructeurs | 2 | 52 % | 51 % | +1 | 274 |
+| 24 | Serment du traité | 3 | 52 % | 51 % | +1 | 281 |
+| 25 | Lanciers du rempart | 2 | 53 % | 51 % | +1 | 280 |
+| 26 | Aumônier de Guerre | 3 | 52 % | 51 % | +1 | 260 |
+| 27 | Vétérans à louer | 3 | 53 % | 52 % | +1 | 271 |
+| 28 | Vivres de campagne | 2 | 52 % | 52 % | +1 | 240 |
+| 29 | Capitaine de la Garde | 3 | 52 % | 52 % | +1 | 250 |
+| 30 | Bannière Déchirée | 3 | 52 % | 52 % | +0 | 236 |
+| 31 | Colonel de la Ligne | 4 | 52 % | 51 % | +0 | 288 |
+| 32 | Gardes du drapeau | 3 | 52 % | 52 % | +0 | 243 |
+| 33 | Chevalier de Province | 3 | 53 % | 52 % | +0 | 270 |
+| 34 | À couvert | 1 | 52 % | 52 % | +0 | 226 |
+| 35 | État Major | 4 | 52 % | 52 % | +0 | 284 |
+| 36 | Garde-frontière sylvestre | 2 | 52 % | 52 % | 0 | 212 |
+| 37 | Dragon Impérial | 5 | 52 % | 52 % | 0 | 250 |
+| 38 | Exécution exemplaire | 2 | 51 % | 52 % | 0 | 249 |
+| 39 | Assassinat | 4 | 51 % | 52 % | -1 | 282 |
+| 40 | Formation en Carré | 3 | 52 % | 53 % | -1 | 257 |
+| 41 | Hallebardiers en ligne | 2 | 51 % | 52 % | -1 | 244 |
+| 42 | Capitaine mercenaire | 2 | 51 % | 52 % | -1 | 241 |
+| 43 | Charge Impériale | 2 | 52 % | 52 % | -1 | 259 |
+| 44 | Forteresse l'Intuable | 5 | 51 % | 52 % | -1 | 256 |
+| 45 | Légat Varro | 4 | 51 % | 52 % | -1 | 264 |
+| 46 | Archer Impérial | 2 | 51 % | 52 % | -1 | 268 |
+| 47 | Arbalétrier Impérial | 3 | 51 % | 52 % | -1 | 259 |
+| 48 | Héraut impérial | 5 | 52 % | 53 % | -1 | 257 |
+| 49 | Chevalier Templier | 4 | 50 % | 52 % | -1 | 283 |
+| 50 | Espion Impérial | 4 | 52 % | 53 % | -1 | 310 |
+| 51 | Choc et Effroi | 4 | 51 % | 53 % | -2 | 268 |
+| 52 | Maréchal d'Empire | 5 | 51 % | 52 % | -2 | 271 |
+| 53 | Promotion | 3 | 50 % | 52 % | -2 | 267 |
+| 54 | Porte-Étendard | 2 | 51 % | 53 % | -2 | 284 |
+| 55 | Ravitailleur | 1 | 51 % | 54 % | -2 | 395 |
+| 56 | Connétable | 4 | 50 % | 53 % | -3 | 293 |
+| 57 | Quartier-maître | 2 | 50 % | 53 % | -3 | 246 |
+| 58 | Grand Maître d’armes | 5 | 50 % | 54 % | -4 | 298 |
+| 59 | Appel aux armes | 4 | 49 % | 53 % | -4 | 238 |
+| 60 | Dernier carré | 4 | 49 % | 54 % | -4 | 258 |
+| 61 | Palissade | 2 | 48 % | 53 % | -5 | 280 |
+| 62 | Ravitaillement | 1 | 48 % | 54 % | -6 | 256 |
+| 63 | Milice de village | 1 | 49 % | 55 % | -6 | 408 |
+| 64 | Ralliement | 2 | 48 % | 55 % | -6 | 261 |
+| 65 | Cor de ralliement | 2 | 49 % | 55 % | -6 | 264 |
+| 66 | Recrue Impériale | 1 | 50 % | 56 % | -7 | 417 |
