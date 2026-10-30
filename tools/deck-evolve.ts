@@ -28,7 +28,9 @@ const V3: AiOptions = JSON.parse(process.env.AI_OPTS ?? '{"followUp":3}');
 const MAXC: Record<string, number> = JSON.parse(process.env.EVO_MAX ?? '{}');
 const TAG = process.env.EVO_TAG ? `-${process.env.EVO_TAG}` : '';
 const maxOf = (id: string) => MAXC[id] ?? 3;
-const POP = 10, PARENTS = 5, CHILDREN = 3, CROSS = 3, GAUNTLET = 4;
+// EVO_OPP=elfe,demons limite les adversaires à ces factions ; EVO_GAUNTLET=n : nombre de decks adverses par faction.
+const OPP = process.env.EVO_OPP ? process.env.EVO_OPP.split(',') as Faction[] : null;
+const POP = 10, PARENTS = 5, CHILDREN = 3, CROSS = 3, GAUNTLET = Number(process.env.EVO_GAUNTLET ?? 4);
 
 let rng = seedFrom(`evo-${mine.join('-')}-${Date.now()}`);
 const rnd = () => { const r = nextRandom(rng); rng = r.state; return r.value; };
@@ -114,7 +116,7 @@ const ladderTop = (f: Faction) => (JSON.parse(readFileSync(`reports/echelle-${f}
 
 /** Adversaires : les meilleurs decks actuels des autres factions (population en cours, sinon échelle). */
 function gauntlet(f: Faction): { faction: Faction; deck: string[] }[] {
-  return FACTIONS.filter(x => x !== f).flatMap(x => {
+  return FACTIONS.filter(x => x !== f && (!OPP || OPP.includes(x))).flatMap(x => {
     const e = load(x);
     const list = e ? e.pop.slice(0, GAUNTLET).map(d => d.deck) : ladderTop(x).slice(0, GAUNTLET);
     return list.map(deck => ({ faction: x, deck }));
