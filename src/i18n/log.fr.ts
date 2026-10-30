@@ -102,6 +102,7 @@ export function formatEvent(e: GameEvent, names: Record<PlayerId, string> = { A:
         chuchoteurKeep: `${n(e.player)} garde la carte du dessus de sa pioche.`,
         marchandAmes: `${cardName(e.cardId)} retire ${cardName(String(e.data?.cardId ?? ''))} de la défausse adverse.`,
         terreBrulee: `${cardName(e.cardId)} : ${e.data?.count ?? 0} régiment(s) de la défausse alimentent l’usure, puis sont retirés de la partie.`,
+        formationGuard: `Formation en Carré : le régiment ciblé gagne +${e.data?.arm ?? 10} ARM avant la Tactique.`,
         rempartChair: `${cardName(e.cardId)} : +15 ARM jusqu’au prochain tour (${e.data?.count ?? 0} régiment(s)).`,
       };
       return special[e.key] ?? `${cardName(e.cardId)} : effet appliqué.`;

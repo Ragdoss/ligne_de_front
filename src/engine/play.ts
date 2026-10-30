@@ -96,6 +96,8 @@ export function validFirstTarget(ctx: Ctx, p: PlayerId, c: CardDef, ref: SlotRef
     return zones.includes(ref.zone) && !u;
   }
   if (!u) return false;
+  // Capitaine de la Garde : son porteur ne peut pas être ciblé par les Tactiques adverses.
+  if (c.cardType === 'Tactique' && ref.player !== p && u.leader && card(u.leader).untargetableByEnemyTactics) return false;
   if (c.cardType === 'Leader') {
     if (c.requiresLeader && !u.leader) return false;
     if (!c.requiresLeader && !c.targetsEnemy && u.leader) return false; // un seul Leader par régiment
@@ -115,6 +117,7 @@ export function validFirstTarget(ctx: Ctx, p: PlayerId, c: CardDef, ref: SlotRef
     case 'elfe-allie-puis-case': return ref.zone !== 'isole' && u.types.includes('Elfe');
     case 'allie-quelconque': case 'ennemi-quelconque': return true;
     case 'lancier-allie': return u.types.includes('Lancier');
+    case 'empire-allie': return u.types.includes('Empire');
     case 'archer-allie': return u.types.includes('Archer');
     case 'elfe-allie': return u.types.includes('Elfe');
     case 'demon-allie': return u.types.includes('Démon');
@@ -155,6 +158,12 @@ export function playCard(ctx: Ctx, p: PlayerId, handUid: number, target?: SlotRe
   else {
     if (!h.generated) ctx.discard(p, c.id, true);
     pl.tacticsThisTurn = (pl.tacticsThisTurn ?? 0) + 1;
+    // Formation en Carré adverse : ses régiments ciblés gagnent de l'Armure avant la résolution.
+    const guard = ctx.player(opponentOf(p)).squareGuard;
+    if (guard) for (const ref of [target, target2]) {
+      const u = ref && ref.player !== p ? ctx.unitAt(ref) : null;
+      if (u) { u.squareArm += guard; u.squareOwner = opponentOf(p); ctx.emit({ type: 'effect', key: 'formationGuard', player: opponentOf(p), cardId: 'formation_carre', data: { uid: u.uid, arm: guard } }); }
+    }
     resolveTactic(ctx, p, c, target, target2);
     // Volée de Flèches : une copie qui coûte 1 de plus revient en main, jusqu'à la fin du tour.
     if (c.echoCopy && !ctx.over) {
@@ -415,7 +424,9 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
     // --- Empire ---
     case 'formationCarre': {
       let n = 0;
-      for (const u of ctx.units(p)) if (u.leader) { u.squareArm = 10; u.squareOwner = p; n++; }
+      const arm = (c.squareArm as number | undefined) ?? 10;
+      for (const u of ctx.units(p)) if (u.leader) { u.squareArm = Math.max(u.squareArm, arm); u.squareOwner = p; n++; }
+      if (c.squareGuardArm) ctx.player(p).squareGuard = c.squareGuardArm as number;
       note('formationCarre', { count: n });
       break;
     }
@@ -434,7 +445,7 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
       }
       break;
     }
-    case 'ignoreArmure': target!.ignoreArmor = true; note('ignoreArmure', { uid: target!.uid }); break;
+    case 'ignoreArmure': target!.ignoreArmor = true; if (target!.types.includes('Lancier')) target!.tempAtk += (c.lancierAtk as number | undefined) ?? 0; note('ignoreArmure', { uid: target!.uid }); break;
     case 'ralliement': ctx.heal(target!, 0, target!.brokenMorale ? 5 : 3, c.id); break;
     // --- Elfes ---
     case 'eveilElementaire': {

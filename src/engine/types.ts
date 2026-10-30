@@ -13,6 +13,7 @@ export type TargetRule =
   | 'allie-quelconque'
   | 'allie-avec-leader'
   | 'lancier-allie'
+  | 'empire-allie'
   | 'archer-allie'
   | 'elfe-allie'
   | 'demon-allie'
@@ -210,6 +211,8 @@ export interface PlayerState {
   healAcc: number;
   /** Tactiques jouées pendant le tour en cours. */
   tacticsThisTurn?: number;
+  /** Formation en Carré : jusqu'à son prochain tour, ses régiments ciblés par une Tactique adverse gagnent de l'Armure. */
+  squareGuard?: number;
   /** Cartes mises dans la défausse de ce joueur pendant le tour en cours. */
   discardedThisTurn?: number;
   /** Maître des pactes : tour (numéro de demi-tour) où la pioche a déjà été déclenchée. */

@@ -48,6 +48,7 @@ export function startTurn(ctx: Ctx, p: PlayerId): void {
   const pl = ctx.player(p);
   const q = opponentOf(p);
   pl.tacticsThisTurn = 0;
+  pl.squareGuard = 0; // Formation en Carré : prend fin au début du tour de son lanceur
   pl.discardedThisTurn = 0;
   ctx.player(q).discardedThisTurn = 0;
   // Formation en Carré : prend fin au début du tour de son lanceur.
