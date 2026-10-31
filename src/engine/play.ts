@@ -473,7 +473,12 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
     case 'brumeTrompeuse': {
       const elems = ctx.units(p).filter(u => u.types.includes('Élémentaux')).length;
       target!.tempIni -= 20;
-      if (c.preyMoralLoss && target!.prey === p) { ctx.loseMoral(target!, c.preyMoralLoss as number); ctx.checkBroken(target!); } // la Proie perd aussi du Moral
+      if (c.preyMoralLoss && target!.prey === p) { // la Proie perd aussi du Moral
+        const lost = ctx.loseMoral(target!, c.preyMoralLoss as number);
+        if (lost) ctx.emit({ type: 'moralLoss', uid: target!.uid, cardId: target!.cardId, amount: lost, source: c.id });
+        ctx.checkBroken(target!);
+        if (target!.currentMor <= 0) { ctx.destroy(target!, 'moral'); if (ctx.over) break; }
+      }
       const hit = [target!.uid];
       const pool = ctx.units(q).filter(u => u.uid !== target!.uid);
       for (let i = 0; i < elems && pool.length; i++) {

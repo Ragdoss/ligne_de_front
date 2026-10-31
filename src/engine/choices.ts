@@ -16,7 +16,7 @@ function computeOptions(ctx: Ctx, c: PendingChoice): ChoiceOption[] {
     case 'promotionDiscard':
       return pl.hand.filter(h => card(h.cardId).cardType === 'Leader').map(h => ({ handUid: h.uid, cardId: h.cardId }));
     case 'promotionPick':
-      return pl.deck.filter(id => card(id).cardType === 'Leader').slice(0, 2).map(cardId => ({ cardId }));
+      return unique(pl.deck.filter(id => card(id).cardType === 'Leader')).map(cardId => ({ cardId })); // n'importe quel Leader du deck
     case 'recoverDemon':
       return unique(pl.discard.filter(isDemonRegiment)).map(cardId => ({ cardId }));
     case 'recoverDemonOs': {
