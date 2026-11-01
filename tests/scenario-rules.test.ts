@@ -1,6 +1,8 @@
 // Bulle des règles de scénario : chaque scénario de campagne produit des règles cohérentes.
 import { describe, expect, it } from 'vitest';
 import { SCENARIOS } from '../src/campaign/campaigns';
+import { scenarioGameSetup } from '../src/campaign/campaign';
+import { createGame } from '../src/engine/game';
 import { scenarioRules } from '../src/ui/ScenarioRules';
 
 describe('Règles de scénario', () => {
@@ -22,5 +24,12 @@ describe('Règles de scénario', () => {
   it('météo : tempête (n4) et nuit (e3)', () => {
     expect(scenarioRules(SCENARIOS.n4!).special.some(x => x.text.includes('Tempête de sable aux tours 2, 5, 8'))).toBe(true);
     expect(scenarioRules(SCENARIOS.e3!).special.some(x => x.text.includes('Nuit aux tours 3-4, 7-8'))).toBe(true);
+  });
+  it('seuil de lassitude affiché = seuil réel de la partie (aide du mode comprise)', () => {
+    const sc = SCENARIOS.e1!;
+    const g = createGame(scenarioGameSetup(sc, sc.A.deckList!, 'x'));
+    const n = g.config.defeatLassitude.A;
+    expect(n).not.toBe(sc.defeatLassitude!.A);
+    expect(scenarioRules(sc, g).defeat.some(x => x.text.startsWith(`Tu atteins ${n} de lassitude`))).toBe(true);
   });
 });

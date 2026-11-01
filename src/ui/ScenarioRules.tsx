@@ -30,10 +30,11 @@ const turnsList = (first: number, every: number, duration: number) => {
   return `${out.join(', ')}…`;
 };
 
-/** Règles d'un scénario, du point de vue du joueur (A). */
-export function scenarioRules(sc: CampaignScenario): ScenarioRuleSet {
+/** Règles d'un scénario, du point de vue du joueur (A). Avec la partie en cours, les seuils sont ceux réellement appliqués
+ *  (aide du mode de difficulté comprise), comme la barre de lassitude. */
+export function scenarioRules(sc: CampaignScenario, game?: GameState | null): ScenarioRuleSet {
   const victory: RuleLine[] = [], defeat: RuleLine[] = [], special: RuleLine[] = [], enemy: RuleLine[] = [];
-  const lass = (p: PlayerId) => sc.defeatLassitude?.[p] ?? 50;
+  const lass = (p: PlayerId) => game?.config.defeatLassitude?.[p] ?? sc.defeatLassitude?.[p] ?? 50;
   const noReg = (p: PlayerId) => sc.noRegimentDefeatFromTurn?.[p] ?? 1;
   const emptyDeck = (p: PlayerId) => (typeof sc.emptyDeckDefeat === 'object' ? sc.emptyDeckDefeat[p] ?? true : sc.emptyDeckDefeat ?? true);
   const enemyDeck = sc.B.deckList?.length ?? 0;
@@ -119,7 +120,7 @@ export function ScenarioRulesBubble({ sc, live }: { sc: CampaignScenario; live: 
   const [folded, setFolded] = useState(() => { try { return localStorage.getItem('ligneDeFront.jeu.reglesRepliees') === '1'; } catch { return false; } });
   const fold = (v: boolean) => { setFolded(v); try { localStorage.setItem('ligneDeFront.jeu.reglesRepliees', v ? '1' : '0'); } catch { /* rien */ } };
   if (game?.over) return null;
-  const r = scenarioRules(sc);
+  const r = scenarioRules(sc, game);
   const turn = game?.turn ?? 1;
   const w = sc.weather;
   const on = w ? turn >= w.first && (turn - w.first) % w.every < w.duration : false;
