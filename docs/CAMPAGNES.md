@@ -123,6 +123,41 @@ Ordre conseillé : Démons → Elfes → Nomades → Empire. Mais chaque campagn
 
 ---
 
+---
+
+## Campagne 5 — « La Couronne de cendres » (Empire, à embranchements)
+
+**Pitch** : le Hiérophante Morvak tient la cour par l'emprise (la « maladie » d'Octavia, c'est lui), avec l'appui de Capacocha qui veut la capitale entière en offrande. Le prince Maximilien est chassé et rassemble une coalition. Première campagne à **choix** : dialogues à options, branches d'acte 2, missions secondaires facultatives, 4 fins.
+**Pool de départ** : 22 cartes Empire (Recrues, Écuyers, Soldats de Kragz, Lanciers, Lanciers du rempart, Archers, Chevalier de province, Gardes du drapeau, Lieutenants, Capitaine, Officier de relève, Porte-drapeau, Ralliement, Ordre de relève, Ravitaillement). Maximilien rejoint le pool après le combat 1.
+**Volontaires** : faction Empire + celle de l'allié choisi. **Promotion** une fois sur deux (une carte du pool contre une de niveau +1/+2 du même type).
+
+### Acte 1 (commun)
+- **1. La nuit du coup d'État** : Maximilien vital, tenir jusqu'au tour 8 ; les gardes sous emprise changent de camp quand leur Moral se brise. *Choix* : retourner sauver Varro (`varro:sauve`) ou fuir.
+- **2. La route de l'exil** : escorte du convoi des fidèles. Varro sauvé : ses chevaliers arrivent au tour 3 ; perdu : Morvak connaît la route (renfort adverse).
+- **3. Le conseil des frontières** : avec les envoyés des trois peuples contre les assassins du culte. *Choix de l'allié* : Elfes (Lyra), Nomades (Al-Mansur) ou Cercle ancestral (Archidémon des Origines), qui rejoint le pool.
+
+### Acte 2 (selon l'allié)
+- **Elfes** : 4. Les sources noires (météo nuit) · 5. La forêt captive (libération d'elfes sous emprise) · 6. Le col des brumes (tenir jusqu'au tour 10).
+- **Nomades** : 4. L'or de Morvak (détruire le convoi du trésor) · 5. Le puits empoisonné (puits vital) · 6. La tempête (météo).
+- **Démons** : 4. Le prix du pacte (+1 lassitude par tour, contre les chasseurs de Sylvain) · 5. Le rituel des catacombes (œuf rituel vital) · 6. Le dragon noir (tuer le Dragon Infernal).
+
+### Acte 3 (commun)
+- **7. Les portes de la capitale** : siège ; Varro sauvé ouvre une poterne au tour 3.
+- **8. La salle du trône** : abattre Morvak, protégé par sa garde, Capacocha en soutien. Renforts selon les drapeaux : la Légion (tour 2), Forteresse (tour 4), Octavia guérie (tour 5). *Choix final* : prendre ou refuser la couronne.
+
+### Missions secondaires (au camp, facultatives)
+- **Le dragon sous la citadelle** (avant les combats 2-3) : libérer Forteresse, gardien de la famille impériale depuis avant l'Empire → `forteresse:libre`, elle vient au combat final.
+- **Le remède de la Source** (acte 2) : protéger le clerc jusqu'au tour 9 → `octavia:remede`, Octavia guérie au combat final et dans la fin.
+- **La Légion égarée** (avant le combat 7, si Varro est sauvé) : libérer des légionnaires → `legion:ralliee`.
+
+### Fins
+1. **Le trône vide** : couronne refusée, conseil des peuples.
+2. **La Couronne de cendres** : allié démon, l'Archidémon réclame son dû.
+3. **Les deux peuples** : Octavia guérie, abdication et paix avec les alliés.
+4. **L'aube grise** : Octavia meurt libérée trop tard, couronnement en deuil.
+
+**Portraits à dessiner** (affichés vides pour l'instant) : Maximilien, Impératrice Octavia, Capacocha, Al-Mansur, Archidémon des Origines, Forteresse.
+
 ## Nouvelles mécaniques à programmer (récapitulatif)
 
 | Mécanique | Utilisée par | Difficulté |
