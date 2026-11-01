@@ -137,9 +137,10 @@ export const SCENARIO_EASE: Record<string, Partial<Record<Difficulty, ScenarioEa
     histoire: { startResource: 0, lassitudeMul: 0.6 }, /* IA 81 % */
   },
   cc2: {
-    heros: { startResource: 2, lassitudeMul: 1.5, vitalEnd: 1.75, vitalMor: 2 }, /* IA 1 % limité par l’IA */
-    guerrier: { startResource: 4, lassitudeMul: 2.5, vitalEnd: 3, vitalMor: 4 }, /* IA 65 % limité par l’IA */
-    histoire: { startResource: 6, lassitudeMul: 4, vitalEnd: 4, vitalMor: 6 }, /* IA 100 % limité par l’IA */
+    // Chariot de ravitaillement (Convoi, END 30 de base) : END 20 en Héros, 30 en Guerrier, 45 en Histoire (demande de Nathan, 01/11/2026).
+    heros: { startResource: 2, lassitudeMul: 1.5, vitalEnd: 0.67, vitalMor: 2 },
+    guerrier: { startResource: 4, lassitudeMul: 2.5, vitalEnd: 1, vitalMor: 4 },
+    histoire: { startResource: 6, lassitudeMul: 4, vitalEnd: 1.5, vitalMor: 6 },
   },
   cc3: {
     heros: { startResource: 0, lassitudeMul: 0.6 }, /* IA 13 % */
