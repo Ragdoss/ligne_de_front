@@ -451,7 +451,7 @@ export const COURONNE_SCENARIOS: Record<string, CampaignScenario> = {
     ],
     A: { faction: 'empire', label: 'L’armée du prince', ai: false, start: { avant: { '1': 'garde_capitale', '2': 'garde_capitale' } } },
     B: { faction: 'demons', label: 'Morvak et Capacocha', deckList: TRONE, ai: true,
-      start: { avant: { '0': 'gardien_chaines', '1': 'bourreau_abime', '2': 'demon_akantha', '3': 'gardien_chaines' }, arriere: { '0': 'morvak', '2': 'capacocha' } } },
+      start: { avant: { '0': 'gardien_chaines', '1': 'bourreau_abime', '2': 'demon_akantha' }, arriere: { '0': 'morvak', '2': 'capacocha' } } },
     mustSurvive: { B: 'morvak' },
     defeatLassitude: { A: 50, B: NO_LIMIT },
     noRegimentDefeatFromTurn: { A: 2, B: NO_LIMIT },
@@ -463,7 +463,7 @@ export const COURONNE_SCENARIOS: Record<string, CampaignScenario> = {
         dialog: say('La verrière explose. Un dragon d’acier et de pierre se pose devant le trône.', [FORT, 'La famille impériale est sous ma garde depuis avant l’Empire. Recule, prêtre.']) },
       { turn: 5, pid: 'A', if: { all: ['octavia:remede'] }, spawn: [{ cardId: 'imperatrice_octavia', zone: 'arriere', idx: 1 }],
         dialog: say([OCT, 'Maximilien… La fiole… Je me souviens de mon nom. Gardes ! À votre Impératrice !']) },
-      { turn: 6, pid: 'B', resource: 3, spawn: [{ cardId: 'bourreau_abime', zone: 'avant', idx: 2 }], dialog: say([CAPA, 'Plus d’âmes ! Encore ! Livre-les-moi !']) },
+      { turn: 6, pid: 'B', resource: 2, dialog: say([CAPA, 'Plus d’âmes ! Encore ! Livre-les-moi !']) },
     ],
   },
   // =============================== Missions secondaires ===============================

@@ -178,7 +178,7 @@ export const SCENARIO_EASE: Record<string, Partial<Record<Difficulty, ScenarioEa
   },
   cc8: {
     heros: { startResource: 0, lassitudeMul: 1.25 }, /* avec 2 Gardes de la capitale au départ (01/11/2026) */
-    guerrier: { startResource: 1, lassitudeMul: 1.5 }, /* IA 64 % */
+    guerrier: { startResource: 2, lassitudeMul: 1.5 }, /* IA 86 % : retour de partie humaine, 10-15 essais avant (01/11/2026) */
     histoire: { startResource: 3, lassitudeMul: 2 },
   },
   cn4: {
