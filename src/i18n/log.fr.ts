@@ -31,7 +31,7 @@ export function formatEvent(e: GameEvent, names: Record<PlayerId, string> = { A:
     case 'attack':
       return `${cardName(e.attackerCard)} attaque ${cardName(e.targetCard)} : ${e.damage} dégâts (ATK ${e.atk} − ARM ${e.arm}), END ${e.end}, perd ${e.moralLoss} Moral (MOR ${e.mor}).`;
     case 'stunned': return `${cardName(e.cardId)} est sonné.`;
-    case 'skipAttack': return e.reason === 'stunned' ? `${cardName(e.cardId)} est sonné : il n'attaque pas.` : e.reason === 'rooted' ? `${cardName(e.cardId)} est immobilisé par les racines : il n'attaque pas.` : `${cardName(e.cardId)} n'a plus d'ATK : il n'attaque pas.`;
+    case 'skipAttack': return e.reason === 'stunned' ? `${cardName(e.cardId)} est sonné : il n'attaque pas.` : e.reason === 'rooted' ? `${cardName(e.cardId)} est immobilisé par les racines : il n'attaque pas.` : e.reason === 'aurora' ? `${cardName(e.cardId)} est trop lent (Vent de l’aurore) : il n'attaque pas.` : `${cardName(e.cardId)} n'a plus d'ATK : il n'attaque pas.`;
     case 'destroyed': {
       const why = e.cause === 'moral' ? ' (déroute)' : e.cause === 'end' ? '' : e.cause === 'both' ? ' (Endurance et Moral à 0)' : '';
       return `${cardName(e.cardId)} (${n(e.player)}) est détruit${why}${e.lassitude ? ` — +${e.lassitude} lassitude` : ''}.`;
@@ -102,6 +102,20 @@ export function formatEvent(e: GameEvent, names: Record<PlayerId, string> = { A:
         chuchoteurKeep: `${n(e.player)} garde la carte du dessus de sa pioche.`,
         marchandAmes: `${cardName(e.cardId)} retire ${cardName(String(e.data?.cardId ?? ''))} de la défausse adverse.`,
         terreBrulee: `${cardName(e.cardId)} : ${e.data?.count ?? 0} régiment(s) de la défausse alimentent l’usure, puis sont retirés de la partie.`,
+        prime: `${cardName(e.cardId)} frappe le premier (Prime).`,
+        holocaust: `${cardName(e.cardId)} passe sur le Démon invoqué (+5 ATK, +1 Moral ; passage n° ${e.data?.stacks ?? 1}).`,
+        leaderMoved: `${cardName(String(e.data?.leaderId ?? ''))} passe de ${cardName(String(e.data?.from ?? ''))} à ${cardName(String(e.data?.to ?? ''))}.`,
+        chapardeuse: `Chapardeuse : ${cardName(String(e.data?.cardId ?? ''))} coûte ${e.data?.tax ?? 0} de plus à l’adversaire.`,
+        interrogatoire: `Interrogatoire : tous les exemplaires de ${cardName(String(e.data?.cardId ?? ''))} coûtent 2 de plus à l’adversaire.`,
+        ranconnementRes: `${n(e.player)} perdra 2 ressources au début de son prochain tour.`,
+        dresseuse: `Dresseuse de basilics : ${cardName(String(e.data?.cardId ?? ''))} est placé sur le dessus de la pioche.`,
+        necropole: `Basilic de la nécropole : l’arrivée de ${cardName(String(e.data?.cardId ?? ''))} est rejouée.`,
+        recyclage: `Recyclage des sables : ${e.data?.count ?? 0} carte(s) de la défausse reviennent dans la pioche.`,
+        avantageDecisif: `Avantage décisif : 3 attaques avant l’adversaire feront piocher 2 cartes.`,
+        avantageDecisifOk: `Avantage décisif : réussi, ${n(e.player)} pioche 2 cartes.`,
+        ventAurore: `Vent de l’aurore : les régiments plus lents que le régiment ciblé n’attaqueront pas.`,
+        coupAvance: `Coup d’avance : le régiment ciblé gagne Prime : +20 ATK ce tour-ci.`,
+        forgeron: `Forgeron de campagne : ${cardName(String(e.data?.target ?? ''))} gagne +5 ARM.`,
         formationGuard: `Formation en Carré : le régiment ciblé gagne +${e.data?.arm ?? 10} ARM avant la Tactique.`,
         rempartChair: `${cardName(e.cardId)} : +15 ARM jusqu’au prochain tour (${e.data?.count ?? 0} régiment(s)).`,
       };

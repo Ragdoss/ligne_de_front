@@ -65,6 +65,11 @@ export function startTurn(ctx: Ctx, p: PlayerId): void {
   // Ressource : niveau + reliquat du tour précédent.
   const leftover = pl.resource;
   pl.resource = pl.level + leftover;
+  if (pl.resourcePenalty) { // Rançonnement, Bourse de guerre
+    const lost = Math.min(pl.resource, pl.resourcePenalty);
+    pl.resource -= lost; pl.resourcePenalty = 0;
+    if (lost) ctx.emit({ type: 'resource', player: p, amount: -lost, source: 'penalty' });
+  }
   let peasants = 0;
   for (const u of ctx.units(p)) if (u.keywords.includes('GenerateurRessource')) peasants += pl.level >= 4 ? 2 : 1;
   if (peasants) { pl.resource += peasants; ctx.emit({ type: 'resource', player: p, amount: peasants, source: 'paysans' }); }
@@ -152,6 +157,18 @@ export function startTurn(ctx: Ctx, p: PlayerId): void {
     const row = pl.board[ref.zone];
     const n = [ref.idx - 1, ref.idx + 1].filter(i => row[i]?.types.includes('Empire')).length;
     if (n) ctx.heal(u, 0, n, u.leader);
+  }
+  // Vétérans de la Ligne : leurs voisins de ligne regagnent du Moral. Forgeron de campagne : +5 ARM permanent à un régiment au hasard.
+  for (const u of ctx.units(p)) {
+    const d = card(u.cardId);
+    const rm = !u.brokenMorale ? d.rowMoralEachTurn as number | undefined : undefined;
+    const ref = rm ? ctx.slotOf(u.uid) : null;
+    if (rm && ref) for (const n of ctx.rowNeighbors(ref)) ctx.heal(n, 0, rm, u.cardId);
+    const fa = !u.brokenMorale ? d.armToRandomAllyEachTurn as number | undefined : undefined;
+    if (fa) {
+      const pool = ctx.units(p).filter(x => x.uid !== u.uid);
+      if (pool.length) { const t = pool[ctx.randomInt(pool.length)]!; t.baseArm += fa; ctx.emit({ type: 'effect', key: 'forgeron', player: p, cardId: u.cardId, data: { uid: t.uid, target: t.cardId } }); }
+    }
   }
   // Porte-Étendard : +1 Moral par exemplaire à chaque porteur de Leader. Aumônier : soin du porteur.
   const banners = ctx.units(p).reduce((n, u) => n + (card(u.cardId).moralToLeaderCarriersEachTurn ?? 0), 0);

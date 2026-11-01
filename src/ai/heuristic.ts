@@ -47,7 +47,10 @@ export function evaluate(s: GameState, p: PlayerId, w: AiWeights = DEFAULT_WEIGH
     // Proie : un régiment adverse désigné vaut un peu (les cartes Elfes en profitent), d'autant plus qu'il est gros.
     const prey = ctx.preyOf(x);
     const preyV = prey ? 4 + unitValue(ctx, prey) * 0.1 : 0;
-    return preyV + board * w.board + moral * w.moral + pl.hand.length * w.hand + pl.resource * w.resource - pl.points * w.lassitude * danger - decay;
+    // Ressources perdues au prochain tour (Rançonnement, Bourse de guerre) et cartes en main rendues plus chères (Chapardeuse, Interrogatoire).
+    const owed = (pl.resourcePenalty ?? 0) * w.resource;
+    const taxed = pl.hand.reduce((n, h) => n + Math.max(0, -(h.discount ?? 0)) + (pl.costTax?.[h.cardId] ?? 0), 0) * 0.5;
+    return preyV + board * w.board + moral * w.moral + pl.hand.length * w.hand + pl.resource * w.resource - owed - taxed - pl.points * w.lassitude * danger - decay;
   };
   // Course contre l'usure : quand notre pioche fond, la lassitude infligée à l'adversaire compte davantage
   // (il faut finir la partie avant d'être vidé). Urgence de 0 (pioche ≥ 2 × DECK_SAFE) à 1 (pioche vide).

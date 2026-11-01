@@ -12,6 +12,7 @@ import { applyBalance8 } from './balance8';
 import { WAVE1 } from './wave1';
 import { WAVE2 } from './wave2';
 import { WAVE2B } from './wave2b';
+import { WAVE3 } from './wave3';
 
 const BASE_CARDS: Record<string, CardDef> = {
   "recrue_imp": {
@@ -1999,7 +2000,7 @@ const BASE_CARDS: Record<string, CardDef> = {
 } as Record<string, CardDef>;
 
 /** Toutes les cartes : catalogue de base + vagues 1 et 2 de la première édition. */
-export const CARDS: Record<string, CardDef> = { ...BASE_CARDS, ...WAVE1, ...WAVE2, ...WAVE2B, ...PROIE_CARDS };
+export const CARDS: Record<string, CardDef> = { ...BASE_CARDS, ...WAVE1, ...WAVE2, ...WAVE2B, ...PROIE_CARDS, ...WAVE3 };
 // Chaque équilibrage s'applique par-dessus le précédent, champ par champ (une carte retouchée deux fois garde les deux retouches).
 for (const bal of [BALANCE_5, BALANCE_6, BALANCE_7, BALANCE_9, BALANCE_10, BALANCE_PROIE, BALANCE_11, BALANCE_12]) for (const [id, over] of Object.entries(bal)) CARDS[id] = { ...CARDS[id]!, ...over } as CardDef;
 applyBalance8(CARDS);

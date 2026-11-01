@@ -64,6 +64,8 @@ export class Ctx {
       }
     }
   }
+  /** Combat en cours : régiments qui ont déjà attaqué (Prime). null hors combat. */
+  combatAttacked: Set<number> | null = null;
   emit(e: GameEvent): void { this.events.push(e); if (recorder) recorder.push(structuredClone(this.s)); }
   get over(): boolean { return this.s.over !== null; }
   player(p: PlayerId): PlayerState { return this.s.players[p]; }
@@ -298,6 +300,7 @@ export class Ctx {
       ignoreArmor: false, stunned: false, stunnedBy: null,
       squareArm: 0, squareOwner: null,
       pactShield: null, woundedByFrondeur: false,
+      bornTurn: this.s.turn,
     };
   }
 
@@ -312,6 +315,10 @@ export class Ctx {
       // Abîme Grandissant : +X ATK par tranche de lassitude de son contrôleur.
       const step = l.lassitudeStep as number | undefined, per = l.atkPerLassitudeStep as number | undefined;
       if (step && per) atk += Math.floor(this.player(u.controller).points / step) * per;
+      const hol = l.holocaustLeader as { atk: number } | undefined; // Seigneur des holocaustes : +5 ATK par passage
+      if (hol) atk += hol.atk * (u.leaderStacks ?? 0);
+      atk += (card(u.cardId).atkBonusWithLeader as number | undefined) ?? 0; // Garde impériale
+      atk += this.enemyDiscardBonus(u); // Cheikh des ossements
     }
     // Bonus des tactiques (ce tour-ci) : ils s'appliquent même au Moral brisé.
     atk += u.tempAtk;
@@ -335,6 +342,7 @@ export class Ctx {
     if (u.leader && !u.brokenMorale) {
       arm += card(u.leader).bonusArm ?? 0;
       arm += card(u.cardId).armBonusWithLeader ?? 0;
+      arm += this.enemyDiscardBonus(u); // Cheikh des ossements
     }
     // Bonus des tactiques (À couvert, Formation en carré, Dernier carré…) : ils s'appliquent même au Moral brisé.
     arm += u.squareArm + u.tempArm;
@@ -355,6 +363,13 @@ export class Ctx {
       arm += this.wave2bArm(u);
     }
     return arm;
+  }
+  /** Cheikh des ossements : +1 ATK et +1 ARM par carte dans la défausse adverse (plafonné). */
+  enemyDiscardBonus(u: Unit): number {
+    const l = u.leader ? card(u.leader) : null;
+    const per = l?.statPerEnemyDiscard as number | undefined;
+    if (!per) return 0;
+    return Math.min((l!.statPerEnemyDiscardMax as number | undefined) ?? Infinity, per * this.player(opponentOf(u.controller)).discard.length);
   }
   /** Vague 2 (suite) : bonus d'ATK de Formation et d'aura. */
   wave2bAtk(u: Unit): number {
@@ -445,6 +460,9 @@ export class Ctx {
       for (const e of [...b.avant, ...b.arriere]) if (e && (!t || e.currentEnd > t.currentEnd)) t = e;
       this.setPrey(hunter, t, 'seigneure_chasse');
     }
+    // Chasseresse damnée : chaque Proie détruite retire de la lassitude à son chasseur.
+    const less = this.units(hunter).reduce((n, x) => n + (x.brokenMorale ? 0 : ((card(x.cardId).preyDeathLassitudeLoss as number | undefined) ?? 0)), 0);
+    if (less) this.loseLassitude(hunter, less, 'chasseresse_damnee');
     // Druide Ancien : le porteur qui détruit la Proie regagne de l'END et du Moral.
     if (killer && killer.controller === hunter && killer.leader && this.isAlive(killer)) {
       const d = card(killer.leader);
@@ -684,11 +702,34 @@ export class Ctx {
     for (const u of this.units(opponentOf(p))) {
       const g = u.leader ? card(u.leader).atkPerEnemyDiscard as number | undefined : undefined;
       if (g) { u.baseAtk += g; this.emit({ type: 'effect', key: 'cheikh', player: u.controller, cardId: u.leader!, data: { uid: u.uid } }); }
+      const grow = card(u.cardId).growOnEnemyHandDiscard as { atk: number; end: number } | undefined; // Basilics rôdeurs
+      if (grow) { u.baseAtk += grow.atk; u.maxEnd += grow.end; u.currentEnd += grow.end; this.emit({ type: 'effect', key: 'growth', player: u.controller, cardId: u.cardId, data: { uid: u.uid } }); }
     }
     return h.cardId;
   }
   discardLeader(u: Unit): void {
     if (u.leader) this.discard(u.leaderOwner ?? u.controller, u.leader);
+  }
+  /** Le Leader de `from` passe sur `to` (sans Leader), avec ses bonus et ses passages (Rite de passation, Ordre de relève, relève à la mort du porteur). */
+  moveLeader(from: Unit, to: Unit, source: string): void {
+    const id = from.leader;
+    if (!id || to.leader) return;
+    const l = card(id);
+    const stacks = from.leaderStacks ?? 0;
+    const mor = (l.bonusMor ?? 0) + stacks * (((l.holocaustLeader as { mor: number } | undefined)?.mor) ?? 0);
+    if (this.isAlive(from)) { // l'ancien porteur perd ce que le Leader lui apportait
+      if (mor) { from.maxMor = Math.max(1, from.maxMor - mor); from.currentMor = Math.min(from.currentMor, from.maxMor); }
+      if (l.bonusEnd) { from.maxEnd = Math.max(1, from.maxEnd - l.bonusEnd); from.currentEnd = Math.min(from.currentEnd, from.maxEnd); }
+      if (l.grantsKeywordOnAttach) from.keywords = from.keywords.filter(k => k !== l.grantsKeywordOnAttach);
+    }
+    to.leader = id; to.leaderOwner = from.leaderOwner ?? from.controller; to.leaderStacks = stacks;
+    from.leader = null; from.leaderOwner = null; from.leaderStacks = 0;
+    if (mor) { to.maxMor += mor; to.currentMor += mor; }
+    if (l.bonusEnd) { to.maxEnd += l.bonusEnd; to.currentEnd += l.bonusEnd; }
+    if (l.grantsKeywordOnAttach) addKeyword(to, l.grantsKeywordOnAttach);
+    this.recheckBroken(to);
+    if (this.isAlive(from)) this.checkBroken(from);
+    this.emit({ type: 'effect', key: 'leaderMoved', player: to.controller, cardId: source, data: { leaderId: id, from: from.cardId, to: to.cardId, uid: to.uid } });
   }
   /** Ajoute un choix à la file d'attente (ses options sont calculées quand il devient actif). */
   queueChoice(kind: ChoiceKind, player: PlayerId, source: string, data: Record<string, number | string | null> = {}): void {
@@ -717,6 +758,9 @@ export class Ctx {
         return;
       }
     }
+    // Officier de relève, Maréchal de campagne : le Leader passe sur un régiment Empire voisin sans Leader.
+    const relayTo = u.leader && card(u.leader).relayOnCarrierDeath
+      ? this.neighbors(ref).find(n => n.types.includes('Empire') && !n.leader && n.controller === p) ?? null : null;
     this.setAt(ref, null);
     const def = card(u.cardId);
     const minion = u.keywords.includes('Minions');
@@ -729,7 +773,13 @@ export class Ctx {
     if (!minion) this.gainLassitude(p, u.niveau, 'destroyed');
     if (u.prey && !this.over) this.onPreyDestroyed(u, killer, u.brokenMorale && !minion);
     if (!u.isToken) this.discard(u.borrowed?.owner ?? u.owner ?? p, u.cardId); // un régiment volé retourne dans la défausse de son propriétaire
-    this.discardLeader(u);
+    if (relayTo && this.isAlive(relayTo)) this.moveLeader(u, relayTo, u.leader!);
+    else if (u.leader && (u.leaderOwner ?? p) === p && this.units(p).some(x => card(x.cardId).leadersReturnToHand && !x.brokenMorale)) {
+      // Maximilien : le Leader revient dans la main au lieu de partir en défausse.
+      this.addToHand(p, u.leader);
+      this.emit({ type: 'returnedToHand', player: p, cardId: u.leader });
+      u.leader = null;
+    } else this.discardLeader(u);
     // Suppôt Infernal : le porteur détruit permet de récupérer une copie d'un Démon de la défausse.
     if (u.leader && card(u.leader).recoversDemonOnCarrierDeath) this.queueChoice('recoverDemon', p, u.leader);
     const vital = this.s.config.mustSurvive[p];

@@ -23,7 +23,9 @@ export type TargetRule =
   | 'ennemi-puis-case-vide'
   | 'ennemi-moral-brise'
   | 'ennemi-arriere'
-  | 'elfe-allie-puis-case';
+  | 'elfe-allie-puis-case'
+  | 'allie-avec-leader-puis-allie'
+  | 'allie-avec-leader-puis-empire';
 
 /** Définition d'une carte (données). Les champs optionnels décrivent les capacités spéciales. */
 export interface CardDef {
@@ -170,6 +172,12 @@ export interface Unit {
   stunHold?: PlayerId | null;
   /** Dernier carré : ne perd pas de Moral à la mort d'un allié jusqu'au prochain tour de ce joueur. */
   steadyOwner?: PlayerId | null;
+  /** Tour d'arrivée en jeu (Vaisseau de chair). */
+  bornTurn?: number;
+  /** Seigneur des holocaustes : nombre de passages d'un porteur sacrifié à un Démon invoqué (chacun : +5 ATK, +1 Moral). */
+  leaderStacks?: number;
+  /** Coup d'avance : Prime gagnée ce tour-ci (+ATK). */
+  tempPrimeAtk?: number;
 }
 
 export interface HandCard {
@@ -221,6 +229,14 @@ export interface PlayerState {
   preyKilledAt?: number;
   /** Dryade corrompue : reliquat d'END de soins annulés. */
   dryadAcc?: number;
+  /** Interrogatoire : surcoût de certaines cartes de ce joueur, pour toute la partie (cardId → +coût). */
+  costTax?: Record<string, number>;
+  /** Ressources perdues au début de son prochain tour (Rançonnement, Bourse de guerre). */
+  resourcePenalty?: number;
+  /** Avantage décisif : nombre d'exemplaires joués pour le combat de ce tour (repère de tour). */
+  decisive?: { marker: number; count: number };
+  /** Vent de l'aurore : régiment de référence pour le combat de ce tour. */
+  aurora?: { marker: number; uid: number };
 }
 
 export type ChoiceKind =
@@ -244,7 +260,14 @@ export type ChoiceKind =
   | 'marchandAmes'      // Marchand d'âmes : régiment de la défausse adverse à retirer
   | 'marche'            // Marché : défausser une carte pour en piocher une (ou non)
   | 'placeControlled'   // Prise de contrôle : case où poser le régiment pris (aucune case = défausse)
-  | 'placeToken';       // Jeton à poser dans une case avant vide choisie (Éveil Élémentaire)
+  | 'placeToken'        // Jeton à poser dans une case avant vide choisie (Éveil Élémentaire)
+  | 'pacteSuccession'   // Pacte de succession : Offrande 0, 1 ou 2
+  | 'ranconnement'      // Rançonnement : l'adversaire défausse une carte ou perdra 2 ressources
+  | 'dresseuse'         // Dresseuse de basilics : carte de la défausse adverse à retirer
+  | 'recupTactic'       // Récupérateur : Tactique de sa défausse à reprendre
+  | 'mirageMorts'       // Mirage des morts : Tactique Nomade de sa défausse à rejouer
+  | 'interrogatoire'    // Interrogatoire : carte de la main adverse à taxer (ou défausser)
+  | 'necropole';        // Basilic de la nécropole : régiment Nomade de sa défausse dont l'arrivée est rejouée
 
 export interface ChoiceOption {
   cardId?: string;
@@ -374,7 +397,7 @@ export type GameEvent =
   | { type: 'combatStart'; player: PlayerId }
   | { type: 'attack'; attacker: number; attackerCard: string; target: number; targetCard: string; atk: number; arm: number; damage: number; moralLoss: number; end: number; mor: number }
   | { type: 'stunned'; uid: number; cardId: string; by: number | null }
-  | { type: 'skipAttack'; uid: number; cardId: string; reason: 'stunned' | 'noAtk' | 'rooted' }
+  | { type: 'skipAttack'; uid: number; cardId: string; reason: 'stunned' | 'noAtk' | 'rooted' | 'aurora' }
   | { type: 'destroyed'; player: PlayerId; uid: number; cardId: string; cause: 'end' | 'moral' | 'both' | 'effect'; lassitude: number }
   | { type: 'heal'; uid: number; cardId: string; end: number; mor: number; source: string }
   | { type: 'moralLoss'; uid: number; cardId: string; amount: number; source: string }

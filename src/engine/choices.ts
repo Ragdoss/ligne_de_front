@@ -1,7 +1,7 @@
 // File des choix en attente : calcul des options quand un choix devient actif, et application du choix.
 
 import { Ctx, card, opponentOf } from './ctx';
-import { applyOffrande, isDemonRegiment } from './play';
+import { applyOffrande, arrivalEffects, isDemonRegiment } from './play';
 import { CARD_TEXT_FR } from '../i18n/cards.fr';
 import type { ChoiceOption, PendingChoice } from './types';
 
@@ -93,9 +93,31 @@ function computeOptions(ctx: Ctx, c: PendingChoice): ChoiceOption[] {
       if (!pl.hand.length || !pl.deck.length) return [];
       return [{ skip: true, label: 'Ne rien échanger' }, ...pl.hand.map(h => ({ handUid: h.uid, cardId: h.cardId, label: `Défausser ${cardName(h.cardId)} et piocher` }))];
     }
+    // --- Vague 3 ---
+    case 'pacteSuccession':
+      return [{ value: 0, label: 'Ne pas payer d’Offrande' }, { value: 1, label: 'Offrande 1 (+1 lassitude) : pioche 2 cartes' },
+        { value: 2, label: 'Offrande 2 (+2 lassitude) : pioche 2 cartes et gagne 2 ressources' }];
+    case 'ranconnement':
+      return [{ value: -1, label: 'Perdre 2 ressources au début de ton prochain tour' },
+        ...pl.hand.map(h => ({ handUid: h.uid, cardId: h.cardId, label: `Défausser ${cardName(h.cardId)}` }))];
+    case 'dresseuse':
+      return unique(opp.discard).map(cardId => ({ cardId, label: `Retirer ${cardName(cardId)} (Basilic de niveau ${card(cardId).niveau} ou moins)` }));
+    case 'recupTactic':
+      return unique(pl.discard.filter(id => card(id).cardType === 'Tactique')).map(cardId => ({ cardId }));
+    case 'mirageMorts':
+      return unique(pl.discard.filter(id => isNomadTactic(id) && id !== 'mirage_morts')).map(cardId => ({ cardId, label: `Rejouer ${cardName(cardId)} gratuitement` }));
+    case 'interrogatoire':
+      return opp.hand.map(h => ({ handUid: h.uid, cardId: h.cardId, label: opp.hand.length <= 3 ? `Défausser ${cardName(h.cardId)}` : `${cardName(h.cardId)} : +2 au coût de tous ses exemplaires` }));
+    case 'necropole': {
+      if (Number(c.data.left) <= 0 || !ctx.findUnit(Number(c.data.uid))) return [];
+      const chosen = String(c.data.chosen ?? '').split(',');
+      return unique(pl.discard.filter(id => card(id).cardType === 'Regiment' && card(id).types?.includes('Nomade') && id !== 'basilic_necropole' && !chosen.includes(id)))
+        .map(cardId => ({ cardId, label: `Rejouer l’arrivée de ${cardName(cardId)}` }));
+    }
   }
 }
 const cardName = (id: string) => CARD_TEXT_FR[id]?.name ?? id;
+const isNomadTactic = (id: string) => card(id).cardType === 'Tactique' && (card(id).faction === 'nomades' || ((card(id).factions as string[] | undefined) ?? []).includes('nomades'));
 
 /** Quand un choix n'a aucune option, il se termine sans effet (sauf la fin du vol de ravitaillement). */
 function finishWithoutOptions(ctx: Ctx, c: PendingChoice): void {
@@ -295,6 +317,58 @@ export function resolveChoice(ctx: Ctx, index: number): string | null {
         }
       }
       break;
+    case 'pacteSuccession':
+      if (o.value! > 0) ctx.gainLassitude(p, o.value!, c.source);
+      if (ctx.over || o.value === 0) break;
+      for (let i = 0; i < 2 && !ctx.over; i++) ctx.draw(p, c.source);
+      if (o.value === 2 && !ctx.over) { pl.resource += 2; ctx.emit({ type: 'resource', player: p, amount: 2, source: c.source }); }
+      break;
+    case 'ranconnement':
+      if (o.value === -1) { pl.resourcePenalty = (pl.resourcePenalty ?? 0) + 2; note('ranconnementRes'); }
+      else ctx.discardFromHand(p, o.handUid!, c.source);
+      break;
+    case 'dresseuse': {
+      removeFrom(opp.discard, o.cardId!);
+      const lvl = card(o.cardId!).niveau;
+      let best = -1;
+      pl.deck.forEach((id, i) => {
+        const d = card(id);
+        if (d.cardType === 'Regiment' && d.types?.includes('Basilic') && d.niveau <= lvl && (best < 0 || d.niveau > card(pl.deck[best]!).niveau)) best = i;
+      });
+      if (best < 0) { note('noTarget'); break; }
+      const id = pl.deck.splice(best, 1)[0]!;
+      pl.deck.unshift(id);
+      note('dresseuse', { cardId: id });
+      break;
+    }
+    case 'recupTactic':
+      removeFrom(pl.discard, o.cardId!);
+      ctx.addToHand(p, o.cardId!);
+      ctx.emit({ type: 'returnedToHand', player: p, cardId: o.cardId! });
+      break;
+    case 'mirageMorts':
+      // La Tactique quitte la défausse (retirée de la partie) : une copie gratuite à jouer ce tour-ci.
+      removeFrom(pl.discard, o.cardId!);
+      ctx.addToHand(p, o.cardId!, { generated: true, freeCopy: true });
+      ctx.emit({ type: 'freeCopy', player: p, cardId: o.cardId! });
+      break;
+    case 'interrogatoire': {
+      const h = opp.hand.find(x => x.uid === o.handUid);
+      if (!h) break;
+      if (opp.hand.length <= 3) { ctx.discardFromHand(q, h.uid, c.source); break; }
+      opp.costTax = { ...(opp.costTax ?? {}), [h.cardId]: (opp.costTax?.[h.cardId] ?? 0) + 2 };
+      note('interrogatoire', { cardId: h.cardId });
+      break;
+    }
+    case 'necropole': {
+      const u = ctx.findUnit(Number(c.data.uid));
+      if (!u) break;
+      note('necropole', { cardId: o.cardId });
+      arrivalEffects(ctx, p, u, o.cardId!);
+      const left = Number(c.data.left) - 1;
+      if (left > 0 && !ctx.over) ctx.s.pending.unshift({ ...c, options: null, data: { ...c.data, left, chosen: `${c.data.chosen ?? ''},${o.cardId}` } });
+      break;
+    }
     case 'ransomDesert': {
       removeFrom(opp.discard, o.cardId!);
       const n = card(o.cardId!).niveau;

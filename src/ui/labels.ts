@@ -57,6 +57,13 @@ export function choiceTitle(c: PendingChoice): string {
     case 'placeControlled': return `${cardName(c.source)} : choisis où poser le régiment dont tu prends le contrôle`;
     case 'placeToken': return `${cardName(c.source)} : choisis la case avant du jeton (encore ${c.data.left})`;
     case 'marche': return `${cardName(c.source)} — Marché : défausser une carte de ta main pour en piocher une ?`;
+    case 'pacteSuccession': return 'Pacte de succession : quelle Offrande paies-tu ?';
+    case 'ranconnement': return 'Rançonnement : défausse une carte de ta main, ou perds 2 ressources au début de ton prochain tour';
+    case 'dresseuse': return 'Dresseuse de basilics : retire une carte de la défausse adverse (le Basilic cherché sera de ce niveau ou moins)';
+    case 'recupTactic': return 'Récupérateur : reprends en main une Tactique de ta défausse';
+    case 'mirageMorts': return 'Mirage des morts : choisis une Tactique Nomade de ta défausse à rejouer gratuitement ce tour-ci';
+    case 'interrogatoire': return 'Interrogatoire : main adverse révélée, choisis une carte';
+    case 'necropole': return `Basilic de la nécropole : choisis un régiment Nomade de ta défausse dont l’arrivée est rejouée (encore ${c.data.left})`;
   }
 }
 

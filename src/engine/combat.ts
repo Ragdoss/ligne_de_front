@@ -141,6 +141,14 @@ export function resolveCombat(ctx: Ctx, ending: PlayerId): void {
   // Chevaucheurs du mirage : nombre d'attaques de chaque camp avant la première attaque adverse.
   const firstCount: Record<PlayerId, number> = { A: 0, B: 0 };
   const attacked: Record<PlayerId, boolean> = { A: false, B: false };
+  // Prime : on retient qui a déjà attaqué pendant ce combat.
+  const done = new Set<number>();
+  ctx.combatAttacked = done;
+  // Vent de l'aurore : ce tour-ci, les régiments moins rapides que le régiment ciblé n'attaquent pas.
+  const marker = ctx.turnMarker();
+  const aur = ctx.player(ending).aurora;
+  const aurUnit = aur && aur.marker === marker ? ctx.findUnit(aur.uid) : null;
+  const aurIni = aurUnit ? ctx.effectiveIni(aurUnit) : null;
   for (const a of eligible) {
     if (ctx.over) return;
     const pos = ctx.slotOf(a.u.uid);
@@ -151,6 +159,7 @@ export function resolveCombat(ctx: Ctx, ending: PlayerId): void {
       continue;
     }
     if (isRooted(ctx, a.u)) { ctx.emit({ type: 'skipAttack', uid: a.u.uid, cardId: a.u.cardId, reason: 'rooted' }); continue; }
+    if (aurIni !== null && ctx.effectiveIni(a.u) < aurIni) { ctx.emit({ type: 'skipAttack', uid: a.u.uid, cardId: a.u.cardId, reason: 'aurora' }); continue; }
     if (ctx.effectiveAtk(a.u) <= 0) {
       if ((card(a.u.cardId).atk ?? 0) > 0) ctx.emit({ type: 'skipAttack', uid: a.u.uid, cardId: a.u.cardId, reason: 'noAtk' });
       continue;
@@ -160,7 +169,14 @@ export function resolveCombat(ctx: Ctx, ending: PlayerId): void {
     if (!target) continue;
     if (!attacked[opponentOf(a.p)]) firstCount[a.p]++;
     attacked[a.p] = true;
-    attack(ctx, a.u, target);
+    const prime = attack(ctx, a.u, target);
+    done.add(a.u.uid);
+    // Première Lame : Prime, elle attaque une seconde fois.
+    if (prime && !ctx.over && card(a.u.cardId).primeExtraAttack && ctx.isAlive(a.u) && !a.u.brokenMorale) {
+      const posP = ctx.slotOf(a.u.uid);
+      const tP = posP && posP.player === a.p ? pickTarget(ctx, a.u, a.p, posP.zone, posP.idx) : null;
+      if (tP) attack(ctx, a.u, tP);
+    }
     // Cuirassiers lourds : une seconde attaque après avoir détruit un régiment (une fois par combat).
     if (!ctx.over && card(a.u.cardId).extraAttackOnKill && !ctx.isAlive(target) && ctx.isAlive(a.u) && !a.u.brokenMorale) {
       const pos3 = ctx.slotOf(a.u.uid);
@@ -174,7 +190,15 @@ export function resolveCombat(ctx: Ctx, ending: PlayerId): void {
       if (t2) attack(ctx, a.u, t2, 0.5);
     }
   }
+  ctx.combatAttacked = null;
   if (ctx.over) return;
+  // Avantage décisif : au moins 3 de tes régiments ont attaqué avant le premier adverse → pioche 2 (par exemplaire).
+  const dec = ctx.player(ending).decisive;
+  if (dec && dec.marker === marker && firstCount[ending] >= 3) {
+    ctx.emit({ type: 'effect', key: 'avantageDecisifOk', player: ending, cardId: 'avantage_decisif' });
+    for (let i = 0; i < 2 * dec.count && !ctx.over; i++) ctx.draw(ending, 'avantage_decisif');
+    if (ctx.over) return;
+  }
   for (const p of ['A', 'B'] as PlayerId[]) {
     if (firstCount[p] < 3) continue;
     for (const u of ctx.units(p)) if (card(u.cardId).mirageIfThreeFirstAttacks) { addKeyword(u, 'Mirage 1'); ctx.emit({ type: 'effect', key: 'mirageGained', player: p, cardId: u.cardId, data: { uid: u.uid } }); }
@@ -191,22 +215,46 @@ export function resolveCombat(ctx: Ctx, ending: PlayerId): void {
       u.blinded = false;
       u.markedBy = null; u.exposedTo = null; // Marque du chasseur, Visez les faibles : « ce tour-ci »
       u.tempAtkVsPrey = 0;
+      u.tempPrimeAtk = 0;
     }
   }
   if (ctx.over) return;
   moralCheck(ctx);
 }
 
-export function attack(ctx: Ctx, a: Unit, target: Unit, mult = 1): void {
+/** Prime : bonus d'ATK si l'attaquant a Prime (mot-clé, Leader, aura, tactique) ; null s'il n'a pas Prime. */
+function primeBonus(ctx: Ctx, a: Unit): number | null {
+  if (a.brokenMorale) return null;
+  const d = card(a.cardId);
+  let has = a.keywords.includes('Prime'), bonus = (d.primeAtk as number | undefined) ?? 0;
+  const lp = a.leader ? card(a.leader).leaderPrimeAtk as number | undefined : undefined; // Vif-argent
+  if (lp) { has = true; bonus += lp; }
+  if (a.tempPrimeAtk) { has = true; bonus += a.tempPrimeAtk; } // Coup d'avance
+  for (const x of ctx.units(a.controller)) { // Maîtresse de l'initiative : tes régiments ont Prime : +5 ATK
+    const au = x.leader && !x.brokenMorale ? card(x.leader).auraPrimeAtk as number | undefined : undefined;
+    if (au) { has = true; bonus += au; }
+  }
+  return has ? bonus : null;
+}
+
+/** Une attaque. Retourne true si Prime s'est déclenchée (l'attaquant a frappé avant que sa cible ait attaqué). */
+export function attack(ctx: Ctx, a: Unit, target: Unit, mult = 1): boolean {
   // Mirage X : l'attaque frappe le vide (X fois par partie ; perdu avec le Moral brisé).
   const mirage = target.brokenMorale ? 0 : keywordValue(target, 'Mirage');
   if (mirage > 0) {
     target.keywords = target.keywords.filter(k => !k.startsWith('Mirage '));
     if (mirage > 1) target.keywords.push(`Mirage ${mirage - 1}`);
     ctx.emit({ type: 'effect', key: 'mirage', player: target.controller, cardId: target.cardId, data: { uid: target.uid, attacker: a.cardId } });
-    return;
+    return false;
   }
-  let atk = Math.round(ctx.effectiveAtk(a) * mult);
+  const pb = primeBonus(ctx, a);
+  const prime = pb !== null && !ctx.combatAttacked?.has(target.uid);
+  const ad = card(a.cardId);
+  if (prime) {
+    ctx.emit({ type: 'effect', key: 'prime', player: a.controller, cardId: a.cardId, data: { uid: a.uid, target: target.cardId } });
+    if (ad.primeArm) a.tempArm += ad.primeArm as number; // Gardien du crépuscule
+  }
+  let atk = Math.round(ctx.effectiveAtk(a) * mult) + (prime ? pb! : 0);
   // Sentinelle de chêne : Communion, ses attaquants perdent de l'ATK.
   const loss = card(target.cardId).communionAttackerAtkLoss as number | undefined;
   if (loss && !target.brokenMorale && ctx.communion(target.controller)) atk = Math.max(0, atk - loss);
@@ -224,6 +272,7 @@ export function attack(ctx: Ctx, a: Unit, target: Unit, mult = 1): void {
     if (!a.brokenMorale) atk += (card(a.cardId).bonusVsPrey as number | undefined) ?? 0; // Archer des Bois
     atk += a.tempAtkVsPrey ?? 0; // Volée de Flèches
     for (const x of ctx.units(a.controller)) if (!x.brokenMorale) atk += (card(x.cardId).alliesAtkVsPrey as number | undefined) ?? 0; // Éclaireuse des fourrés
+    if (a.leader && !a.brokenMorale) atk += (card(a.cardId).preyAtkWithLeader as number | undefined) ?? 0; // Archers de la Garde sylvestre
   }
   // Maître des embuscades : + l'avance d'INI de l'attaquant sur sa cible.
   if (a.leader && !a.brokenMorale && card(a.leader).leaderIniDiffAtk) atk += Math.max(0, ctx.effectiveIni(a) - ctx.effectiveIni(target));
@@ -242,18 +291,27 @@ export function attack(ctx: Ctx, a: Unit, target: Unit, mult = 1): void {
     ctx.emit({ type: 'effect', key: 'pactEnd', player: sh.owner, cardId: 'pacte_survie', data: { uid: target.uid, avoided: damage } });
     damage = 0;
     if (g) ctx.gainLassitude(sh.owner, g, 'pacte_survie');
-    if (ctx.over) return;
+    if (ctx.over) return prime;
   }
   target.currentEnd = Math.max(0, target.currentEnd - damage);
   if (damage > 0 && card(a.cardId).woundInflictsFrondeurMill) target.woundedByFrondeur = true;
   const fearVal = a.brokenMorale ? 0 : ctx.fear(a);
-  const moralLoss = ctx.loseMoral(target, 1 + fearVal);
+  const moralLoss = ctx.loseMoral(target, 1 + fearVal + (prime ? ((ad.primeMoral as number | undefined) ?? 0) : 0)); // Archère du premier trait
   ctx.checkBroken(target);
   ctx.emit({
     type: 'attack', attacker: a.uid, attackerCard: a.cardId, target: target.uid, targetCard: target.cardId,
     atk, arm, damage, moralLoss, end: target.currentEnd, mor: target.currentMor,
   });
   const dead = target.currentEnd <= 0 || target.currentMor <= 0;
+  if (prime && !dead && ad.primeStun) { // Duelliste sylvestre
+    target.stunned = true; target.stunnedBy = a.uid;
+    ctx.emit({ type: 'stunned', uid: target.uid, cardId: target.cardId, by: a.uid });
+  }
+  if (prime && ad.primeDiscard) { // Coursiers du mirage
+    const oh = ctx.player(target.controller).hand;
+    for (let i = 0; i < (ad.primeDiscard as number) && oh.length && !ctx.over; i++) ctx.discardFromHand(target.controller, oh[ctx.randomInt(oh.length)]!.uid, a.cardId);
+    if (ctx.over) return prime;
+  }
   if (card(a.cardId).stunsTargetOnAttack && !dead) {
     target.stunned = true;
     target.stunnedBy = a.uid;
@@ -274,16 +332,16 @@ export function attack(ctx: Ctx, a: Unit, target: Unit, mult = 1): void {
       if (!b) continue;
       b.currentEnd = Math.max(0, b.currentEnd - over);
       ctx.emit({ type: 'effect', key: 'debordement', player: a.controller, cardId: a.cardId, data: { uid: b.uid, target: b.cardId, damage: over } });
-      if (b.currentEnd <= 0) { ctx.destroy(b, 'end', a); if (ctx.over) return; }
+      if (b.currentEnd <= 0) { ctx.destroy(b, 'end', a); if (ctx.over) return prime; }
     }
   }
   if (dead) {
     const cause = target.currentEnd <= 0 && target.currentMor <= 0 ? 'both' : target.currentEnd <= 0 ? 'end' : 'moral';
     ctx.destroy(target, cause, a);
-    if (ctx.over) return;
+    if (ctx.over) return prime;
     // Seigneur des tourments : chaque régiment détruit par le porteur donne de la lassitude à l'adversaire.
     const kl = a.leader && !a.brokenMorale && !ctx.isAlive(target) ? card(a.leader).leaderKillLassitude as number | undefined : undefined;
-    if (kl) { ctx.gainLassitude(owner, kl, a.leader!); if (ctx.over) return; }
+    if (kl) { ctx.gainLassitude(owner, kl, a.leader!); if (ctx.over) return prime; }
     if (ctx.isAlive(a) && !a.brokenMorale && !ctx.isAlive(target)) { // (Racines protectrices, Bénédiction : la cible a pu survivre)
       // Pillage X : l'adversaire défausse le dessus de sa pioche.
       const pil = keywordValue(a, 'Pillage');
@@ -300,6 +358,7 @@ export function attack(ctx: Ctx, a: Unit, target: Unit, mult = 1): void {
     ctx.checkBroken(a);
     if (a.currentMor <= 0) ctx.destroy(a, 'moral');
   }
+  return prime;
 }
 
 /** Lassitude de la comparaison de Moral selon le plus haut niveau des deux joueurs (niveaux 1 à 5). */

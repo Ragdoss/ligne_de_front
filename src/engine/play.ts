@@ -22,7 +22,7 @@ export function cardCost(ctx: Ctx, p: PlayerId, h: HandCard): number {
     const raw = dynamicRawCost(ctx, c, p);
     return raw <= 0 ? 0 : Math.max(0, raw - tacticReduction(ctx, p));
   }
-  let cost = c.cout - (h.discount ?? 0);
+  let cost = c.cout - (h.discount ?? 0) + (ctx.player(p).costTax?.[c.id] ?? 0); // Interrogatoire : surcoût de toutes les copies
   if (c.types?.includes('Basilic')) {
     for (const u of ctx.units(p)) cost -= (card(u.cardId).basilicCostReduction as number | undefined) ?? 0;
   }
@@ -75,7 +75,8 @@ export const isDemonRegiment = (id: string) => card(id).cardType === 'Regiment' 
 export function targetCount(c: CardDef): 0 | 1 | 2 {
   if (c.cardType === 'Tactique') {
     if (c.targetRule === 'none') return 0;
-    if (c.targetRule === 'ennemi-puis-case-vide' || c.targetRule === 'elfe-allie-puis-case') return 2;
+    if (c.targetRule === 'ennemi-puis-case-vide' || c.targetRule === 'elfe-allie-puis-case'
+      || c.targetRule === 'allie-avec-leader-puis-allie' || c.targetRule === 'allie-avec-leader-puis-empire') return 2;
   }
   return 1;
 }
@@ -123,6 +124,7 @@ export function validFirstTarget(ctx: Ctx, p: PlayerId, c: CardDef, ref: SlotRef
     case 'demon-allie': return u.types.includes('Démon');
     case 'nomade-allie': return u.types.includes('Nomade');
     case 'allie-avec-leader': case 'ennemi-avec-leader': return !!u.leader;
+    case 'allie-avec-leader-puis-allie': case 'allie-avec-leader-puis-empire': return !!u.leader && ref.zone !== 'isole';
     default: return false;
   }
 }
@@ -131,6 +133,16 @@ export function validSecondTarget(ctx: Ctx, c: CardDef, first: SlotRef, ref: Slo
   if (ref.zone === 'isole') return false;
   if (c.targetRule === 'ennemi-puis-case-vide') return ref.player === first.player && !ctx.unitAt(ref);
   if (c.targetRule === 'elfe-allie-puis-case') return ref.player === first.player && !(ref.zone === first.zone && ref.idx === first.idx);
+  if (c.targetRule === 'allie-avec-leader-puis-allie' || c.targetRule === 'allie-avec-leader-puis-empire') {
+    // Rite de passation, Ordre de relève : le Leader passe sur un autre de tes régiments sans Leader, qui peut le porter.
+    const from = ctx.unitAt(first), to = ctx.unitAt(ref);
+    if (!from?.leader || !to || to === from || to.leader || ref.player !== first.player) return false;
+    if (c.targetRule === 'allie-avec-leader-puis-empire' && !to.types.includes('Empire')) return false;
+    const l = card(from.leader);
+    const any = l.typesRequiredAny as string[] | undefined;
+    if (any && !any.some(t => to.types.includes(t))) return false;
+    return (l.typesRequired ?? []).every(t => to.types.includes(t));
+  }
   return false;
 }
 
@@ -221,21 +233,27 @@ function deployRegiment(ctx: Ctx, p: PlayerId, c: CardDef, ref: SlotRef): void {
       if (grant.arrivesReady) u.arrivesReady = true;
     }
     ctx.emit({ type: 'sacrificed', player: p, uid: sac.uid, cardId: sac.cardId, forCard: c.id });
-    const sacRes = card(sac.cardId).onSacrificedResource as number | undefined;
+    // Seigneur des holocaustes : son porteur sacrifié pour invoquer un Démon, il passe sur le Démon invoqué et grandit.
+    let heir: { id: string; owner: PlayerId; stacks: number } | null = null;
+    const hol = sac.leader ? card(sac.leader).holocaustLeader as { atk: number; mor: number } | undefined : undefined;
+    if (hol && u.types.includes('Démon')) {
+      heir = { id: sac.leader!, owner: sac.leaderOwner ?? p, stacks: (sac.leaderStacks ?? 0) + 1 };
+      sac.leader = null; sac.leaderOwner = null;
+    }
+    const born = sac.bornTurn ?? ctx.s.turn;
     ctx.destroy(sac, 'effect');
     if (ctx.over) return;
-    sacrificedDraw(ctx, p, sac.cardId);
-    if (sacRes) { pl.resource += sacRes; ctx.emit({ type: 'resource', player: p, amount: sacRes, source: sac.cardId }); }
-    // Gargouille de Cendres (Moral) et Seigneur des Abysses (soin du porteur) : chaque sacrifice les renforce.
-    for (const x of ctx.units(p)) {
-      const m = card(x.cardId).moralOnAllySacrificed as number | undefined;
-      if (m) ctx.heal(x, 0, m, x.cardId);
-      const h = x.leader ? card(x.leader).healOnOwnSacrifice as number | undefined : undefined;
-      if (h) ctx.heal(x, h, 1, x.leader!);
-      const dr = card(x.cardId).drawOnOwnSacrifice as number | undefined; // Hiérophante Morvak
-      if (dr) for (let i = 0; i < dr && !ctx.over; i++) ctx.draw(p, x.cardId);
-    }
+    afterSacrifice(ctx, p, sac.cardId, born);
     if (ctx.over) return;
+    if (heir) {
+      const l = card(heir.id);
+      u.leader = heir.id; u.leaderOwner = heir.owner; u.leaderStacks = heir.stacks;
+      const mor = (l.bonusMor ?? 0) + heir.stacks * hol!.mor;
+      if (mor) { u.maxMor += mor; u.currentMor += mor; }
+      if (l.bonusEnd) { u.maxEnd += l.bonusEnd; u.currentEnd += l.bonusEnd; }
+      if (l.grantsKeywordOnAttach) addKeyword(u, l.grantsKeywordOnAttach);
+      ctx.emit({ type: 'effect', key: 'holocaust', player: p, cardId: heir.id, data: { stacks: heir.stacks } });
+    }
   }
   if (u.types.includes('Basilic') && ctx.units(p).some(x => card(x.cardId).grantsBasilicsArriveReady)) u.arrivesReady = true;
   ctx.setAt(ref, u);
@@ -268,6 +286,10 @@ export function arrivalEffects(ctx: Ctx, p: PlayerId, u: Unit, asCard: string, s
     }
   }
   if (asCard === 'marchand_ames') ctx.queueChoice('marchandAmes', p, asCard);
+  // Marchand de damnés : l'adversaire défausse une carte de sa main (son choix), deux si le sacrifié était de niveau 3+.
+  if (asCard === 'marchand_damnes') ctx.queueChoice('handDiscard', q, asCard, { n: sacLevel >= 3 ? 2 : 1, sum: 0, thief: null, gainBase: 0 });
+  // Basilic de la nécropole : rejoue l'arrivée de 2 régiments Nomades de ta défausse (leurs bonus de stats sont pour lui).
+  if (asCard === 'basilic_necropole') ctx.queueChoice('necropole', p, asCard, { uid: u.uid, left: 2 });
   if (asCard === 'morvak') {
     let t: Unit | null = null;
     for (const e of ctx.units(q)) { const r = ctx.slotOf(e.uid); if (r && r.zone !== 'isole' && (!t || e.currentMor < t.currentMor)) t = e; }
@@ -306,7 +328,8 @@ export function arrivalEffects(ctx: Ctx, p: PlayerId, u: Unit, asCard: string, s
 }
 
 export function attachLeader(ctx: Ctx, p: PlayerId, c: CardDef, u: Unit): void {
-  if (u.leader) ctx.discardLeader(u); // remplacement (Leaders « requiert un Leader » uniquement)
+  const replaced = u.leader;
+  if (u.leader) { ctx.discardLeader(u); u.leaderStacks = 0; } // remplacement (Leaders « requiert un Leader » uniquement)
   u.leader = c.id;
   u.leaderOwner = p;
   if (c.bonusMor) { u.maxMor += c.bonusMor; u.currentMor = Math.min(u.maxMor, u.currentMor + c.bonusMor); }
@@ -325,6 +348,29 @@ export function attachLeader(ctx: Ctx, p: PlayerId, c: CardDef, u: Unit): void {
   const res = c.resourceOnAttach as number | undefined; // Capitaine mercenaire
   if (res) { ctx.player(p).resource += res; ctx.emit({ type: 'resource', player: p, amount: res, source: c.id }); }
   ctx.recheckBroken(u); // le Moral apporté par le Leader peut sortir le régiment du Moral brisé
+  const dr = c.drawOnAttach as number | undefined; // Usurpateur infernal
+  if (dr) for (let i = 0; i < dr && !ctx.over; i++) ctx.draw(p, c.id);
+  if (c.recoverTacticOnAttach) ctx.queueChoice('recupTactic', p, c.id); // Récupérateur
+  // Porte-drapeau de la Garde : un Leader qui s'attache à un de ses voisins lui rend du Moral.
+  const ref = ctx.slotOf(u.uid);
+  if (ref) for (const n of ctx.neighbors(ref)) {
+    const m = n.controller === u.controller && !n.brokenMorale ? card(n.cardId).moralOnNeighborLeaderAttach as number | undefined : undefined;
+    if (m) ctx.heal(u, 0, m, n.cardId);
+  }
+  // Héritier de l'Abîme : 1 Moral perdu par un régiment adverse au hasard, par niveau du Leader remplacé.
+  const per = c.moralLossPerReplacedLevel as number | undefined;
+  if (per && replaced && !ctx.over) {
+    const q = opponentOf(u.controller);
+    for (let i = 0; i < card(replaced).niveau * per; i++) {
+      const pool = ctx.units(q);
+      if (!pool.length) break;
+      const t = pool[ctx.randomInt(pool.length)]!;
+      const lost = ctx.loseMoral(t, 1);
+      if (lost) ctx.emit({ type: 'moralLoss', uid: t.uid, cardId: t.cardId, amount: lost, source: c.id });
+      ctx.checkBroken(t);
+      if (t.currentMor <= 0) { ctx.destroy(t, 'moral'); if (ctx.over) return; }
+    }
+  }
 }
 
 // ---------- Effets d'arrivée des Nomades (rejoués par Mirage, Embuscade, Maître de Caravane) ----------
@@ -372,6 +418,22 @@ function nomadArrival(ctx: Ctx, p: PlayerId, u: Unit, asCard: string = u.cardId)
       break;
     }
     case 'chasseur_reliques': ctx.queueChoice('relics', p, u.cardId, { uid: u.uid }); break;
+    case 'chapardeuse': {
+      // Une carte au hasard de la main adverse coûte autant de plus que son niveau (pour cet exemplaire, tant qu'il reste en main).
+      if (!opp.hand.length) { note('noTarget'); break; }
+      const h = opp.hand[ctx.randomInt(opp.hand.length)]!;
+      const tax = card(h.cardId).niveau;
+      h.discount = (h.discount ?? 0) - tax;
+      note('chapardeuse', { cardId: h.cardId, tax });
+      break;
+    }
+    case 'dresseuse_basilics': ctx.queueChoice('dresseuse', p, u.cardId); break;
+    case 'percepteur_imperial': {
+      const carriers = (x: PlayerId) => ctx.units(x).filter(v => v.leader).length;
+      if (carriers(p) <= carriers(q) || !opp.hand.length) { note('noTarget'); break; }
+      for (let i = 0; i < 2 && opp.hand.length && !ctx.over; i++) ctx.discardFromHand(q, opp.hand[ctx.randomInt(opp.hand.length)]!.uid, u.cardId);
+      break;
+    }
     case 'marchand_ombres': ctx.queueChoice('shadow', p, u.cardId); break;
     case 'caravane_marchande': ctx.queueChoice('caravane', p, u.cardId, { uid: u.uid }); break;
     case 'reine_basilics': {
@@ -675,19 +737,20 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
       ctx.queueChoice('offrande', p, c.id, { x: (c.offrande as number) ?? 0, uid: target?.uid ?? null });
       break;
     case 'rituelSang': {
-      const lvl = target!.niveau, id = target!.cardId;
+      const lvl = target!.niveau, id = target!.cardId, born = target!.bornTurn ?? ctx.s.turn;
       ctx.emit({ type: 'sacrificed', player: p, uid: target!.uid, cardId: id, forCard: c.id });
       ctx.destroy(target!, 'effect');
       for (let i = 0; i < lvl && !ctx.over; i++) ctx.draw(p, c.id);
-      if (!ctx.over) sacrificedDraw(ctx, p, id);
+      if (!ctx.over) afterSacrifice(ctx, p, id, born);
       break;
     }
     case 'executionExemplaire': {
-      const id = target!.cardId;
+      const id = target!.cardId, born = target!.bornTurn ?? ctx.s.turn;
       ctx.emit({ type: 'sacrificed', player: p, uid: target!.uid, cardId: id, forCard: c.id });
       ctx.destroy(target!, 'effect');
       if (ctx.over) break;
-      sacrificedDraw(ctx, p, id);
+      afterSacrifice(ctx, p, id, born);
+      if (ctx.over) break;
       for (const x of ctx.units(p)) ctx.heal(x, 0, 3, c.id);
       break;
     }
@@ -731,7 +794,55 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
     case 'racinesProtectrices': target!.guardOwner = p; note('racinesProtectrices', { uid: target!.uid }); break;
     case 'racinesImmobilisantes': target!.rootedBy = p; note('racinesImmobilisantes', { uid: target!.uid }); break;
     case 'chantTraque': volley(ctx, p, !!c.volleyAtPrey); break;
-    case 'corRalliement': for (const x of ctx.units(p)) if (x.brokenMorale) ctx.heal(x, 0, 2, c.id); break;
+    case 'corRalliement': for (const x of ctx.units(p)) if (x.brokenMorale) ctx.heal(x, 0, (c.rallyBroken as number | undefined) ?? 2, c.id); break;
+    // --- Vague 3 ---
+    case 'pacteSuccession': {
+      ctx.discardLeader(target!);
+      ctx.emit({ type: 'leaderDestroyed', uid: target!.uid, cardId: target!.cardId, leaderId: target!.leader! });
+      target!.leader = null; target!.leaderOwner = null; target!.leaderStacks = 0;
+      ctx.queueChoice('pacteSuccession', p, c.id);
+      break;
+    }
+    case 'ritePassation': case 'ordreReleve': {
+      const to = ctx.unitAt(t2!)!;
+      ctx.moveLeader(target!, to, c.id);
+      if (c.effect === 'ritePassation') ctx.heal(to, 0, 2, c.id); else ctx.heal(to, 10, 0, c.id);
+      break;
+    }
+    case 'coupAvance': target!.tempPrimeAtk = (target!.tempPrimeAtk ?? 0) + ((c.primeAtkGiven as number | undefined) ?? 20); note('coupAvance', { uid: target!.uid }); break;
+    case 'avantageDecisif': {
+      const m = ctx.turnMarker();
+      const d = pl.decisive && pl.decisive.marker === m ? pl.decisive : { marker: m, count: 0 };
+      d.count++;
+      pl.decisive = d;
+      note('avantageDecisif');
+      break;
+    }
+    case 'ventAurore': pl.aurora = { marker: ctx.turnMarker(), uid: target!.uid }; note('ventAurore', { uid: target!.uid }); break;
+    case 'ranconnement': ctx.queueChoice('ranconnement', q, c.id); break;
+    case 'recyclageSables': {
+      const pool = ctx.shuffle(pl.discard.map((id, i) => i)).slice(0, 5).sort((a, b) => b - a);
+      const back = pool.map(i => pl.discard.splice(i, 1)[0]!);
+      pl.deck = ctx.shuffle([...pl.deck, ...back]);
+      note('recyclage', { count: back.length });
+      ctx.draw(p, c.id);
+      break;
+    }
+    case 'mirageMorts': ctx.queueChoice('mirageMorts', p, c.id); break;
+    case 'interrogatoire': ctx.queueChoice('interrogatoire', p, c.id); break;
+    case 'ecoleOfficiers': {
+      const i = pl.deck.findIndex(id => card(id).cardType === 'Leader');
+      if (i === -1) { note('noTarget'); break; }
+      const id = pl.deck.splice(i, 1)[0]!;
+      const before = pl.hand.length;
+      ctx.deliverDrawn(p, id, c.id);
+      if (pl.hand.length > before) pl.hand[pl.hand.length - 1]!.discount = (pl.hand[pl.hand.length - 1]!.discount ?? 0) + 1;
+      break;
+    }
+    case 'bourseGuerre':
+      pl.resource += 3; ctx.emit({ type: 'resource', player: p, amount: 3, source: c.id });
+      pl.resourcePenalty = (pl.resourcePenalty ?? 0) + 1;
+      break;
     default:
       throw new Error(`Effet de tactique non implémenté : ${c.effect} (${c.id})`);
   }
@@ -770,6 +881,46 @@ export function applyOffrande(ctx: Ctx, p: PlayerId, cardId: string, paid: boole
       ctx.emit({ type: 'effect', key: 'rempartChair', player: p, cardId, data: { count: list.length } });
       break;
     }
+  }
+}
+
+/** Conséquences d'un sacrifice (invocation, Rituel, Exécution) : effets du régiment sacrifié et déclencheurs en jeu. */
+function afterSacrifice(ctx: Ctx, p: PlayerId, cardId: string, bornTurn: number): void {
+  const d = card(cardId);
+  sacrificedDraw(ctx, p, cardId);
+  if (ctx.over) return;
+  const pl = ctx.player(p);
+  const sacRes = d.onSacrificedResource as number | undefined; // Vaisseau de chair
+  if (sacRes) { pl.resource += sacRes; ctx.emit({ type: 'resource', player: p, amount: sacRes, source: cardId }); }
+  const perTurn = d.onSacrificedDemonMoralPerTurn as number | undefined; // Vaisseau de chair : 1 Moral par tour passé en jeu
+  if (perTurn) { const n = perTurn * Math.max(0, ctx.s.turn - bornTurn); if (n) for (const x of ctx.units(p)) if (x.types.includes('Démon')) ctx.heal(x, 0, n, cardId); }
+  let res = 0, lass = 0;
+  for (const x of ctx.units(p)) {
+    const xd = card(x.cardId);
+    // Gargouille de Cendres (Moral) et Seigneur des Abysses (soin du porteur) : chaque sacrifice les renforce.
+    const m = xd.moralOnAllySacrificed as number | undefined;
+    if (m) ctx.heal(x, 0, m, x.cardId);
+    const h = x.leader ? card(x.leader).healOnOwnSacrifice as number | undefined : undefined;
+    if (h) ctx.heal(x, h, 1, x.leader!);
+    const dr = xd.drawOnOwnSacrifice as number | undefined; // Hiérophante Morvak
+    if (dr) for (let i = 0; i < dr && !ctx.over; i++) ctx.draw(p, x.cardId);
+    const atk = xd.atkOnOwnSacrifice as number | undefined; // Collecteur d'âmes
+    if (atk && !x.brokenMorale) x.baseAtk += atk;
+    res += (xd.resourceOnOwnSacrifice as number | undefined) ?? 0; // Autel des âmes
+    lass += x.brokenMorale ? 0 : ((xd.lassitudeOnOwnSacrifice as number | undefined) ?? 0); // Capacocha
+    const bl = x.leader && !x.brokenMorale ? card(x.leader).leaderOnSacrifice as { mor: number; atk: number } | undefined : undefined; // Bourreau de la Légion
+    if (bl) { ctx.heal(x, 0, bl.mor, x.leader!); x.tempAtk += bl.atk; }
+  }
+  if (ctx.over) return;
+  if (res) { pl.resource += res; ctx.emit({ type: 'resource', player: p, amount: res, source: 'autel_ames' }); }
+  if (lass) ctx.gainLassitude(opponentOf(p), lass, 'capacocha');
+  // Chasseresse damnée : un sacrifice (de n'importe quel camp) désigne une Proie au hasard s'il n'y en a pas.
+  for (const side of ['A', 'B'] as PlayerId[]) {
+    if (ctx.over || ctx.preyOf(side)) continue;
+    const hunter = ctx.units(side).find(x => card(x.cardId).preyOnAnySacrifice && !x.brokenMorale);
+    if (!hunter) continue;
+    const pool = ctx.units(opponentOf(side)).filter(e => ctx.slotOf(e.uid)?.zone !== 'isole');
+    if (pool.length) ctx.setPrey(side, pool[ctx.randomInt(pool.length)]!, hunter.cardId);
   }
 }
 

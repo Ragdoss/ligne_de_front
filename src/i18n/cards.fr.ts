@@ -2,6 +2,7 @@
 import { WAVE1_TEXT_FR } from './wave1.fr';
 import { WAVE2_TEXT_FR } from './wave2.fr';
 import { WAVE2B_TEXT_FR } from './wave2b.fr';
+import { WAVE3_TEXT_FR } from './wave3.fr';
 import { PROIE_TEXT_FR } from './proie.fr';
 import { BALANCE12_TEXT_FR } from './balance12.fr';
 
@@ -508,7 +509,7 @@ const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   }
 };
 
-export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = { ...BASE_TEXT_FR, ...WAVE1_TEXT_FR, ...WAVE2_TEXT_FR, ...WAVE2B_TEXT_FR };
+export const CARD_TEXT_FR: Record<string, { name: string; desc: string }> = { ...BASE_TEXT_FR, ...WAVE1_TEXT_FR, ...WAVE2_TEXT_FR, ...WAVE2B_TEXT_FR, ...WAVE3_TEXT_FR };
 // Refonte des Elfes (la Proie) : nouveaux textes d'effet.
 for (const [id, t] of Object.entries(PROIE_TEXT_FR)) CARD_TEXT_FR[id] = { name: t.name ?? CARD_TEXT_FR[id]?.name ?? id, desc: t.desc };
 for (const [id, t] of Object.entries(BALANCE12_TEXT_FR)) CARD_TEXT_FR[id] = { name: CARD_TEXT_FR[id]?.name ?? id, desc: t.desc };
