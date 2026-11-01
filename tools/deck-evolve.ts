@@ -53,6 +53,15 @@ const nameToId: Record<string, string> = {};
       if (id && f) (impact[f] ??= {})[id] = Number(m[3]);
     }
   }
+  // Rapports par faction (plus récents, et ils contiennent les nouvelles cartes) : ils priment sur le tableau global.
+  for (const f of FACTIONS) {
+    const file = `reports/impact-${f}.md`;
+    if (!existsSync(file)) continue;
+    for (const m of readFileSync(file, 'utf8').matchAll(/^\| \d+ \| (.+?) \| \d \| \d+ % \| \d+ % \| ([+-]?\d+) \|/gm)) {
+      const id = nameToId[m[1]!];
+      if (id) (impact[f] ??= {})[id] = Number(m[2]);
+    }
+  }
 }
 const inFaction = (id: string, f: Faction) => {
   const c = CARDS[id]!;
