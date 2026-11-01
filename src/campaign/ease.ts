@@ -128,4 +128,87 @@ export const SCENARIO_EASE: Record<string, Partial<Record<Difficulty, ScenarioEa
     guerrier: { startResource: 0, lassitudeMul: 0.7 }, /* IA 52 % */
     histoire: { startResource: 0, lassitudeMul: 0.8 }, /* IA 83 % */
   },
+  // Campagne 5 « La Couronne de cendres » (01/11/2026, tools/tune-campaign.ts, 60 parties par essai, chaque branche d’allié).
+  // cc1 garde le réglage par défaut (l’ordinateur y gagne ~73 % quel que soit le réglage). cc2 (escorte) est limité par l’IA.
+  // cs_remede est joué dans les 3 branches : réglage le plus clément des trois.
+  cs_forteresse: {
+    heros: { startResource: 0, lassitudeMul: 0.4 }, /* IA 26 % */
+    guerrier: { startResource: 0, lassitudeMul: 0.5 }, /* IA 58 % */
+    histoire: { startResource: 0, lassitudeMul: 0.6 }, /* IA 81 % */
+  },
+  cc2: {
+    heros: { startResource: 2, lassitudeMul: 1.5, vitalEnd: 1.75, vitalMor: 2 }, /* IA 1 % limité par l’IA */
+    guerrier: { startResource: 4, lassitudeMul: 2.5, vitalEnd: 3, vitalMor: 4 }, /* IA 65 % limité par l’IA */
+    histoire: { startResource: 6, lassitudeMul: 4, vitalEnd: 4, vitalMor: 6 }, /* IA 100 % limité par l’IA */
+  },
+  cc3: {
+    heros: { startResource: 0, lassitudeMul: 0.6 }, /* IA 13 % */
+    guerrier: { startResource: 0, lassitudeMul: 0.9 }, /* IA 58 % (réglé à la main) */
+    histoire: { startResource: 0, lassitudeMul: 1 }, /* IA 79 % */
+  },
+  ce4: {
+    heros: { startResource: 0, lassitudeMul: 0.4 }, /* IA 23 % */
+    guerrier: { startResource: 0, lassitudeMul: 0.6 }, /* IA 62 % */
+    histoire: { startResource: 0, lassitudeMul: 0.8 }, /* IA 87 % */
+  },
+  cs_remede: {
+    heros: { startResource: 0, lassitudeMul: 0.5, vitalEnd: 1, vitalMor: 0 }, /* IA 31 % */
+    guerrier: { startResource: 0, lassitudeMul: 0.6, vitalEnd: 1, vitalMor: 0 }, /* IA 50 % */
+    histoire: { startResource: 0, lassitudeMul: 1, vitalEnd: 1.25, vitalMor: 1 }, /* IA 84 % */
+  },
+  ce5: {
+    heros: { startResource: 0, lassitudeMul: 0.4 }, /* IA 18 % */
+    guerrier: { startResource: 1, lassitudeMul: 1 }, /* IA 53 % (réglé à la main) */
+    histoire: { startResource: 2, lassitudeMul: 1.5 }, /* IA 78 % */
+  },
+  ce6: {
+    heros: { startResource: 0, lassitudeMul: 0.8 }, /* IA 23 % */
+    guerrier: { startResource: 0, lassitudeMul: 1 }, /* IA 71 % */
+    histoire: { startResource: 2, lassitudeMul: 1.5 }, /* IA 76 % */
+  },
+  cs_legion: {
+    heros: { startResource: 0, lassitudeMul: 0.5 }, /* IA 32 % */
+    guerrier: { startResource: 0, lassitudeMul: 0.6 }, /* IA 59 % */
+    histoire: { startResource: 2, lassitudeMul: 1.5 }, /* IA 80 % */
+  },
+  cc7: {
+    heros: { startResource: 0, lassitudeMul: 1.25 }, /* IA 26 % */
+    guerrier: { startResource: 4, lassitudeMul: 2.5 }, /* IA 64 % (réglé à la main) */
+    histoire: { startResource: 8, lassitudeMul: 6 }, /* IA 57 % */
+  },
+  cc8: {
+    heros: { startResource: 1, lassitudeMul: 1.25 }, /* IA 19 % */
+    guerrier: { startResource: 2, lassitudeMul: 1.5 }, /* IA 62 % */
+    histoire: { startResource: 4, lassitudeMul: 2 }, /* IA 80 % */
+  },
+  cn4: {
+    heros: { startResource: 0, lassitudeMul: 0.4 }, /* IA 33 % */
+    guerrier: { startResource: 0, lassitudeMul: 0.5 }, /* IA 64 % */
+    histoire: { startResource: 1, lassitudeMul: 1.5 }, /* IA 72 % */
+  },
+  cn5: {
+    heros: { startResource: 0, lassitudeMul: 0.6, vitalEnd: 1, vitalMor: 0 }, /* IA 21 % */
+    guerrier: { startResource: 0, lassitudeMul: 1, vitalEnd: 1.25, vitalMor: 1 }, /* IA 69 % */
+    histoire: { startResource: 1, lassitudeMul: 1.5, vitalEnd: 1.5, vitalMor: 2 }, /* IA 76 % */
+  },
+  cn6: {
+    heros: { startResource: 0, lassitudeMul: 0.8 }, /* IA 16 % */
+    guerrier: { startResource: 0, lassitudeMul: 1.25 }, /* IA 61 % */
+    histoire: { startResource: 1, lassitudeMul: 1.25 }, /* IA 73 % */
+  },
+  cd4: {
+    heros: { startResource: 0, lassitudeMul: 0.6 }, /* IA 9 % */
+    guerrier: { startResource: 0, lassitudeMul: 0.8 }, /* IA 65 % */
+    histoire: { startResource: 0, lassitudeMul: 1 }, /* IA 78 % */
+  },
+  cd5: {
+    heros: { startResource: 0, lassitudeMul: 0.5, vitalEnd: 1, vitalMor: 0 }, /* IA 24 % */
+    guerrier: { startResource: 1, lassitudeMul: 1.5, vitalEnd: 1.5, vitalMor: 2 }, /* IA 62 % */
+    histoire: { startResource: 6, lassitudeMul: 4, vitalEnd: 4, vitalMor: 6 }, /* IA 76 % */
+  },
+  cd6: {
+    heros: { startResource: 0, lassitudeMul: 1 }, /* IA 29 % */
+    guerrier: { startResource: 0, lassitudeMul: 1.25 }, /* IA 52 % */
+    histoire: { startResource: 2, lassitudeMul: 1.5 }, /* IA 71 % */
+  },
 };
