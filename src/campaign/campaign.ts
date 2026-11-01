@@ -292,7 +292,9 @@ export function sanitize(raw: unknown): CampaignSave | null {
     pool: c.pool.filter(id => typeof id === 'string' && CARDS[id]),
     idx: Math.max(0, Math.min(def.order.length - 1, c.idx | 0)),
     deck: c.deck && typeof c.deck === 'object' ? c.deck : null,
-    finished: !!c.finished,
+    // Campagne à embranchements : elle ne se termine qu'à un nœud sans suite. Répare les sauvegardes arrêtées par erreur
+    // au choix de l'allié (bug du 01/11/2026 : le choix était perdu à la fermeture du dialogue) : le combat est à rejouer.
+    finished: !!c.finished && !(def.start && typeof c.node === 'string' && SCENARIOS[c.node]?.next?.length),
     attempts: c.attempts && typeof c.attempts === 'object' ? Object.fromEntries(Object.entries(c.attempts).filter(([, v]) => typeof v === 'number')) : {},
     bonus: Math.max(0, Math.min(MAX_BONUS, Number(c.bonus) | 0)),
     difficulty: DIFFICULTIES.includes(c.difficulty as Difficulty) ? c.difficulty : DEFAULT_DIFFICULTY,

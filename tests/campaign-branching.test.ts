@@ -85,4 +85,9 @@ describe('Campagne à embranchements', () => {
     expect(s.node).toBe('cc2');
     expect(s.side).toBeUndefined();
   });
+  it('une sauvegarde arrêtée par erreur au choix de l’allié reprend au conseil des frontières', () => {
+    const c = { ...newCampaign('couronne'), node: 'cc3', idx: 2, finished: true };
+    expect(sanitize(JSON.parse(JSON.stringify(c)))!.finished).toBe(false);
+    expect(sanitize(JSON.parse(JSON.stringify({ ...c, node: 'cc8', idx: 7 })))!.finished).toBe(true);
+  });
 });

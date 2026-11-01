@@ -109,11 +109,14 @@ export function VnScene({ title, cast, speaking, past, now, center, actions, onA
 export function Dialog({ title, lines, onClose, onChoose, button = 'Continuer' }: { title?: string; lines: DialogLine[]; onClose: () => void; onChoose?: (c: DialogChoice) => void; button?: string }) {
   const [i, setI] = useState(0);
   const last = i >= lines.length - 1;
-  const cur = lines[i]!;
-  const asking = !!cur.choices?.length;
+  const cur = lines[Math.min(i, lines.length - 1)]!;
+  const asking = i < lines.length && !!cur.choices?.length;
   const next = () => (last ? onClose() : setI(i + 1));
   const skip = () => { const k = lines.findIndex((l, j) => j > i && l.choices?.length); if (asking) return; if (k === -1) onClose(); else setI(k); };
-  const pick = (c: DialogChoice) => { onChoose?.(c); next(); };
+  // Après un choix, on ne ferme jamais tout de suite : les drapeaux posés peuvent ajouter des répliques (réponse de l'allié…)
+  // et la fermeture doit voir la campagne à jour. On avance d'une réplique ; au-delà de la dernière, l'effet ci-dessous ferme.
+  const pick = (c: DialogChoice) => { onChoose?.(c); setI(i + 1); };
+  useEffect(() => { if (i >= lines.length) onClose(); }, [i, lines.length]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (asking) return;
