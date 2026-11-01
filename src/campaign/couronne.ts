@@ -422,13 +422,14 @@ export const COURONNE_SCENARIOS: Record<string, CampaignScenario> = {
   cc8: {
     id: 'cc8',
     title: 'La Couronne — 8. La salle du trône',
-    deckRules: { min: 25, text: 'Minimum 25 cartes. Abats le Hiérophante Morvak (rang arrière adverse, derrière sa garde) pour gagner. Capacocha l’insatiable le soutient.' },
+    deckRules: { min: 25, text: 'Minimum 25 cartes. Deux Gardes de la capitale combattent à tes côtés dès le début. Abats le Hiérophante Morvak (rang arrière adverse, derrière sa garde) pour gagner. Capacocha l’insatiable le soutient.' },
     intro: [
       ...say(
         'La salle du trône. Octavia, immobile sur son trône, les yeux fixés sur rien. À ses côtés, Morvak. Derrière lui, une ombre immense : Capacocha.',
         [MOR, 'Votre mère ne m’a jamais aussi bien obéi qu’aujourd’hui, Altesse.'],
         [CAPA, 'Une capitale entière… Tant d’âmes. Livre-la-moi, Morvak, comme tu l’as promis.'],
         [MAX, 'Personne ne sera livré à personne. Pas ce soir.'],
+        [CAP, 'La garde de la capitale est avec vous, Altesse. Elle tiendra le premier assaut.'],
       ),
       ...when({ all: ['octavia:remede'] }, { who: '', text: 'Dans ta besace, la fiole du sanctuaire de la Source. Il faudra atteindre Octavia.' }),
     ],
@@ -448,7 +449,7 @@ export const COURONNE_SCENARIOS: Record<string, CampaignScenario> = {
           { label: 'Refuser la couronne', set: ['fin:refus'] },
         ] },
     ],
-    A: { faction: 'empire', label: 'L’armée du prince', ai: false },
+    A: { faction: 'empire', label: 'L’armée du prince', ai: false, start: { avant: { '1': 'garde_capitale', '2': 'garde_capitale' } } },
     B: { faction: 'demons', label: 'Morvak et Capacocha', deckList: TRONE, ai: true,
       start: { avant: { '0': 'gardien_chaines', '1': 'bourreau_abime', '2': 'demon_akantha', '3': 'gardien_chaines' }, arriere: { '0': 'morvak', '2': 'capacocha' } } },
     mustSurvive: { B: 'morvak' },
