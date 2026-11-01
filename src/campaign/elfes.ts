@@ -58,7 +58,7 @@ export const ELF_SCENARIOS: Record<string, CampaignScenario> = {
   e2: {
     id: 'e2',
     title: 'La Purification — 2. Les captifs',
-    deckRules: { min: 20, text: 'Minimum 20 cartes. Un Esclave Guerrier ennemi dont le Moral se brise est libéré et rejoint ton camp. Ceux que tu libères rejoignent ton pool. Tu ne perds pas si ta pioche est vide.' },
+    deckRules: { min: 20, text: 'Minimum 20 cartes. Un Esclave Guerrier ennemi dont le Moral se brise est libéré et rejoint ton camp, avec la moitié de son END rendue. Ceux que tu libères rejoignent ton pool. Tu ne perds pas si ta pioche est vide.' },
     intro: say(
       'Les Démons ont enchaîné des elfes et des humains capturés, et les font combattre en première ligne.',
       [LY, 'Ce sont les nôtres, Sylvain. On ne peut pas les massacrer.'],

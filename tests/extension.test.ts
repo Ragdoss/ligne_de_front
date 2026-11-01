@@ -139,6 +139,15 @@ describe('Mécaniques de scénario', () => {
     for (let i = 0; i < 4; i++) s = act(s, { type: 'endTurn' }).state;
     expect(s.over).toEqual({ winner: 'A', reason: 'survived' });
   });
+  it('Libération : le régiment libéré regagne la moitié de son END maximale', () => {
+    const s = blankGame({ liberation: { pid: 'B', cardIds: ['esclave_guerrier'] }, moralCheck: false });
+    s.scenario = { events: [], fired: [], convoyHold: 0, liberated: 0 };
+    const u = place(s, 'B', 'avant', 0, 'esclave_guerrier', { currentMor: 1 });
+    u.currentEnd = 5;
+    new Ctx(s).checkBroken(u);
+    expect(u.controller).toBe('A');
+    expect(u.currentEnd).toBe(Math.min(u.maxEnd, 5 + Math.round(u.maxEnd / 2)));
+  });
   it('Libération : un Esclave Guerrier adverse au Moral brisé change de camp, Moral plein', () => {
     let s = blankGame({ liberation: { pid: 'B', cardIds: ['esclave_guerrier'] }, moralCheck: false });
     s.scenario = { events: [], fired: [], convoyHold: 0, liberated: 0 };

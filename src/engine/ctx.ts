@@ -482,7 +482,8 @@ export class Ctx {
       this.tryLiberate(u);
     }
   }
-  /** Libération (scénario) : un régiment désigné dont le Moral se brise change de camp, Moral plein. */
+  /** Libération (scénario) : un régiment désigné dont le Moral se brise change de camp, Moral plein, et regagne la moitié
+   *  de son END maximale (02/11/2026 : sinon le régiment libéré, déjà bien entamé, meurt aussitôt et coûte de la lassitude). */
   tryLiberate(u: Unit): void {
     const lib = this.s.config.liberation;
     if (!lib || u.controller !== lib.pid || !lib.cardIds.includes(u.cardId) || u.currentMor <= 0 || u.currentEnd <= 0) return;
@@ -503,6 +504,7 @@ export class Ctx {
     u.leader = null; u.leaderOwner = null;
     u.controller = q;
     u.currentMor = u.maxMor; u.brokenMorale = false;
+    u.currentEnd = Math.min(u.maxEnd, u.currentEnd + Math.round(u.maxEnd / 2));
     u.justDeployed = true; u.stunned = false; u.pactShield = null;
     board[zone][idx] = u;
     if (this.s.scenario) this.s.scenario.liberated = (this.s.scenario.liberated ?? 0) + 1;

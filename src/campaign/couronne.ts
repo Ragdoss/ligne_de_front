@@ -82,7 +82,7 @@ export const COURONNE_SCENARIOS: Record<string, CampaignScenario> = {
   cc1: {
     id: 'cc1',
     title: 'La Couronne — 1. La nuit du coup d’État',
-    deckRules: { min: 20, text: 'Minimum 20 cartes. Maximilien (avant) doit survivre jusqu’au début du tour 8. Les gardes sous l’emprise de Morvak reviennent à eux quand leur Moral se brise : ils changent de camp, et ceux libérés te rejoignent.' },
+    deckRules: { min: 20, text: 'Minimum 20 cartes. Maximilien (avant) doit survivre jusqu’au début du tour 8. Les gardes sous l’emprise de Morvak reviennent à eux quand leur Moral se brise : ils changent de camp avec la moitié de leur END rendue, et ceux libérés te rejoignent.' },
     intro: say(
       'Le palais impérial, au cœur de la nuit. Le conseil vient de s’achever quand l’Impératrice s’effondre sur son trône.',
       [OCT, 'Maximilien… les voix… elles ne se taisent plus…'],
@@ -213,7 +213,7 @@ export const COURONNE_SCENARIOS: Record<string, CampaignScenario> = {
   ce5: {
     id: 'ce5',
     title: 'La Couronne — 5. La forêt captive',
-    deckRules: { min: 25, text: 'Minimum 25 cartes. Les Elfes sous l’emprise reviennent à eux quand leur Moral se brise : ils changent de camp, et ceux libérés rejoignent ton pool.' },
+    deckRules: { min: 25, text: 'Minimum 25 cartes. Les Elfes sous l’emprise reviennent à eux quand leur Moral se brise : ils changent de camp avec la moitié de leur END rendue, et ceux libérés rejoignent ton pool.' },
     intro: say(
       'Au cœur de la forêt, des archers elfes montent la garde aux côtés de légionnaires. Leurs yeux sont vides.',
       [LYRA, 'Ce sont mes frères. Ne les tue pas, Prince. Brise ce qui les tient.'],
@@ -471,7 +471,7 @@ export const COURONNE_SCENARIOS: Record<string, CampaignScenario> = {
     id: 'cs_forteresse',
     side: true,
     title: 'Mission secondaire — Le dragon sous la citadelle',
-    deckRules: { min: 20, text: 'Minimum 20 cartes. Forteresse, enchaînée par le culte, combat contre toi. Brise son Moral (sans la détruire) pour rompre l’emprise : elle change de camp et rejoint ton pool. Détruite, elle est perdue.' },
+    deckRules: { min: 20, text: 'Minimum 20 cartes. Forteresse, enchaînée par le culte, combat contre toi. Brise son Moral (sans la détruire) pour rompre l’emprise : elle change de camp avec la moitié de son END rendue et rejoint ton pool. Détruite, elle est perdue.' },
     intro: say(
       'Sous la vieille citadelle, des chaînes grosses comme des troncs retiennent un dragon d’acier et de pierre.',
       [CAP, 'Forteresse. Le gardien de votre famille, Altesse, depuis avant même que l’Empire ait un nom.'],
@@ -519,7 +519,7 @@ export const COURONNE_SCENARIOS: Record<string, CampaignScenario> = {
     id: 'cs_legion',
     side: true,
     title: 'Mission secondaire — La Légion égarée',
-    deckRules: { min: 25, text: 'Minimum 25 cartes. Les légionnaires sous l’emprise reviennent à eux quand leur Moral se brise : ils changent de camp. Libère-en au moins un pour rallier la Légion au dernier combat.' },
+    deckRules: { min: 25, text: 'Minimum 25 cartes. Les légionnaires sous l’emprise reviennent à eux quand leur Moral se brise : ils changent de camp avec la moitié de leur END rendue. Libère-en au moins un pour rallier la Légion au dernier combat.' },
     intro: say(
       'Un camp de la Légion, aux portes de la capitale. Les soldats montent la garde comme des statues.',
       [VARRO, 'Ce sont mes hommes. Si je les réveille, ils me suivront jusqu’au trône.'],
