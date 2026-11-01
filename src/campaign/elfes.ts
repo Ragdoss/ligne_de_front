@@ -10,7 +10,8 @@ const START_POOL = cards('eclaireur_elfe*3', 'lames_aube*2', 'pousse_sylve*2', '
   'bourgeonnement*2', 'brise_matin', 'marque_chasseur', 'repositionnement', 'dryades_guerisseuses', 'benediction_sylve');
 
 // 24/10/2026 : 4 cartes de plus dans chaque deck démon (trop de victoires du joueur par pioche vide adverse).
-const DEMONS_SOURCE = cards('cultiste*7', 'chien_infernal*5', 'esclave_guerrier*3', 'acolyte_damne*2', 'effroi_demoniaque*2', 'pacte_sang*2', 'diablotins*4');
+// 02/11/2026 : 2 Chiens Infernaux au lieu de 5 (retour de Nathan : injouable sans les aides et une très bonne main de départ).
+const DEMONS_SOURCE = cards('cultiste*9', 'chien_infernal*2', 'esclave_guerrier*3', 'acolyte_damne*2', 'effroi_demoniaque*2', 'pacte_sang*2', 'diablotins*5');
 const DEMONS_CAPTIFS = cards('esclave_guerrier*6', 'cultiste*7', 'diablotins*4', 'chien_infernal*4', 'fanatiques*2', 'acolyte_damne*2', 'effroi_demoniaque*2',
   'pacte_survie', 'demon_akantha', 'banquet_infernal');
 const DEMONS_NUIT = cards('chien_infernal*5', 'demon_akantha*2', 'cultiste*6', 'fanatiques*2', 'esclave_guerrier*3', 'effroi_demoniaque*3',
@@ -41,13 +42,13 @@ export const ELF_SCENARIOS: Record<string, CampaignScenario> = {
     ),
     A: { faction: 'elfe', label: 'Royaumes Elfiques', deckList: START_POOL, ai: false },
     B: { faction: 'demons', label: 'Cultistes de la source', deckList: DEMONS_SOURCE, ai: true,
-      start: { avant: { '1': 'cultiste', '2': 'chien_infernal' }, arriere: { '1': 'source_corrompue' } } },
+      start: { avant: { '1': 'cultiste', '2': 'cultiste' }, arriere: { '1': 'source_corrompue' } } },
     mustSurvive: { B: 'source_corrompue' },
     emptyDeckDefeat: { A: false },
     defeatLassitude: { A: 45, B: 40 },
     noRegimentDefeatFromTurn: { A: 2, B: NO_LIMIT },
     events: [
-      { turn: 4, pid: 'B', resource: 2, dialog: say(['Cultiste', 'Le maître nous protège ! La source nous protège !']) },
+      { turn: 4, pid: 'B', dialog: say(['Cultiste', 'Le maître nous protège ! La source nous protège !']) },
     ],
     reward: {
       gifts: cards('dryades_guerisseuses', 'elem_eau*2'),

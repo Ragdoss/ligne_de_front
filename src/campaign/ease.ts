@@ -64,9 +64,10 @@ export const SCENARIO_EASE: Record<string, Partial<Record<Difficulty, ScenarioEa
     histoire: { startResource: 0, lassitudeMul: 1.25, vitalEnd: 1.5, vitalMor: 2 }, /* IA 73 % */
   },
   e1: {
-    heros: { startResource: 0, lassitudeMul: 0.6 }, /* IA 29 % */
-    guerrier: { startResource: 0, lassitudeMul: 0.8 }, /* IA 57 % */
-    histoire: { startResource: 0, lassitudeMul: 1 }, /* IA 90 % */
+    // 02/11/2026 : deck démon allégé (2 Chiens), plus de ressources bonus au tour 4 ; l'ordinateur gagne ~100 % en Guerrier.
+    heros: { startResource: 0, lassitudeMul: 1 },
+    guerrier: { startResource: 1, lassitudeMul: 1.5 },
+    histoire: { startResource: 2, lassitudeMul: 2 },
   },
   e2: {
     heros: { startResource: 0, lassitudeMul: 0.6 }, /* IA 30 % */
