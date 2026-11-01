@@ -70,9 +70,10 @@ export const SCENARIO_EASE: Record<string, Partial<Record<Difficulty, ScenarioEa
     histoire: { startResource: 2, lassitudeMul: 2 },
   },
   e2: {
-    heros: { startResource: 0, lassitudeMul: 0.6 }, /* IA 30 % */
-    guerrier: { startResource: 0, lassitudeMul: 0.8 }, /* IA 42 % */
-    histoire: { startResource: 0, lassitudeMul: 1 }, /* IA 75 % */
+    // 02/11/2026 : retour de Nathan (4 essais en Guerrier) : +1 ressource au départ et seuil de lassitude moins sévère.
+    heros: { startResource: 0, lassitudeMul: 1 },
+    guerrier: { startResource: 1, lassitudeMul: 1.25 }, /* IA 87 % */
+    histoire: { startResource: 2, lassitudeMul: 1.75 },
   },
   e3: {
     heros: { startResource: 0, lassitudeMul: 0.6 }, /* IA 8 % */
