@@ -1,79 +1,98 @@
 # Poids des cartes elfe contre les autres factions
 
-400 decks aléatoires, 1600 parties contre les 30 decks qualifiés des autres factions ; taux de victoire global 40 %.
-Fins de partie (toutes) : victoire-lassitude 24 %, défaite-noRegiment 9 %, défaite-lassitude 36 %, victoire-noRegiment 15 %, défaite-emptyDeck 15 %, victoire-emptyDeck 1 %.
+400 decks aléatoires, 1600 parties contre les 30 decks qualifiés des autres factions ; taux de victoire global 46 %.
+Fins de partie (toutes) : victoire-lassitude 26 %, victoire-noRegiment 19 %, défaite-lassitude 39 %, défaite-emptyDeck 7 %, défaite-noRegiment 8 %, victoire-emptyDeck 1 %.
 
 | # | Carte | Niv. | Avec | Sans | Écart | Exemplaires |
 |---|---|---|---|---|---|---|
-| 1 | Élémentaire de Terre | 1 | 44 % | 35 % | +8 | 414 |
-| 2 | Éclaireuse des fourrés | 2 | 45 % | 37 % | +8 | 188 |
-| 3 | Rangers | 3 | 45 % | 38 % | +8 | 172 |
-| 4 | Marque du chasseur | 1 | 45 % | 39 % | +6 | 171 |
-| 5 | Élémentaire de Feu | 2 | 44 % | 38 % | +6 | 186 |
-| 6 | Repositionnement | 2 | 43 % | 38 % | +5 | 194 |
-| 7 | Brume Trompeuse | 2 | 43 % | 39 % | +5 | 161 |
-| 8 | Lettrée du Conclave | 2 | 43 % | 39 % | +4 | 164 |
-| 9 | Cavalier Elfe | 3 | 43 % | 39 % | +4 | 170 |
-| 10 | Sylvain, Gardien Élémentaire | 4 | 41 % | 37 % | +4 | 502 |
-| 11 | Lyra, Éclaireuse de la Purification | 5 | 42 % | 38 % | +4 | 499 |
-| 12 | Sentinelle des cimes | 2 | 43 % | 39 % | +4 | 164 |
-| 13 | Ingénieurs de siège | 3 | 43 % | 39 % | +4 | 197 |
-| 14 | Hallali | 3 | 43 % | 39 % | +3 | 191 |
-| 15 | Archer des Bois | 2 | 42 % | 39 % | +3 | 185 |
-| 16 | Chevaucheurs du mirage | 3 | 43 % | 40 % | +3 | 177 |
-| 17 | Serment du traité | 3 | 42 % | 40 % | +2 | 173 |
-| 18 | Racines protectrices | 2 | 41 % | 39 % | +2 | 161 |
-| 19 | Maître des embuscades | 3 | 41 % | 39 % | +2 | 172 |
-| 20 | Changement Tectonique | 3 | 42 % | 40 % | +2 | 161 |
-| 21 | Traqueuse sylvestre | 3 | 41 % | 39 % | +2 | 186 |
-| 22 | Bourgeonnement | 1 | 41 % | 40 % | +1 | 182 |
-| 23 | Éclaireur Elfe | 1 | 40 % | 39 % | +1 | 426 |
-| 24 | Vétérans à louer | 3 | 41 % | 40 % | +1 | 181 |
-| 25 | Chant du Vent | 3 | 40 % | 40 % | +1 | 192 |
-| 26 | Rite de Purification | 3 | 41 % | 40 % | +1 | 173 |
-| 27 | Gardienne de la Lumière | 4 | 41 % | 40 % | +1 | 475 |
-| 28 | Vivres de campagne | 2 | 40 % | 40 % | +1 | 155 |
-| 29 | Chamane de la Forêt | 3 | 40 % | 40 % | +0 | 183 |
-| 30 | Capitaine mercenaire | 2 | 40 % | 40 % | +0 | 186 |
-| 31 | Choc et Effroi | 4 | 40 % | 39 % | +0 | 502 |
-| 32 | Mercenaires | 2 | 40 % | 40 % | +0 | 167 |
-| 33 | Chant de la traque | 4 | 40 % | 40 % | 0 | 507 |
-| 34 | Tréant Millénaire | 5 | 41 % | 41 % | 0 | 524 |
-| 35 | Danseuses des lames | 2 | 40 % | 40 % | 0 | 185 |
-| 36 | Vent porteur | 2 | 40 % | 40 % | 0 | 197 |
-| 37 | Racines immobilisantes | 2 | 40 % | 41 % | 0 | 173 |
-| 38 | Élémentaire d'Eau | 2 | 40 % | 40 % | 0 | 183 |
-| 39 | Ancien de la canopée | 4 | 40 % | 40 % | -1 | 530 |
-| 40 | Éveil Élémentaire | 2 | 40 % | 40 % | -1 | 165 |
-| 41 | Prêtresse des saisons | 3 | 40 % | 41 % | -1 | 168 |
-| 42 | Volée de Flèches | 2 | 39 % | 40 % | -1 | 178 |
-| 43 | Floraison | 3 | 39 % | 40 % | -1 | 189 |
-| 44 | Sentinelle de chêne | 4 | 41 % | 42 % | -1 | 483 |
-| 45 | Sang de sève | 2 | 40 % | 41 % | -1 | 173 |
-| 46 | Cor de ralliement | 2 | 40 % | 41 % | -1 | 183 |
-| 47 | Clerc de la Forêt | 2 | 39 % | 41 % | -2 | 169 |
-| 48 | Vision | 3 | 39 % | 41 % | -2 | 188 |
-| 49 | Garde-frontière sylvestre | 2 | 39 % | 41 % | -2 | 162 |
-| 50 | Palissade | 2 | 39 % | 41 % | -2 | 185 |
-| 51 | À couvert | 1 | 39 % | 41 % | -2 | 185 |
-| 52 | Gardien d’écorce | 2 | 39 % | 41 % | -2 | 187 |
-| 53 | Druide Ancien | 4 | 39 % | 42 % | -2 | 495 |
-| 54 | Chant de la sève | 1 | 39 % | 41 % | -2 | 193 |
-| 55 | Milice de village | 1 | 39 % | 41 % | -2 | 450 |
-| 56 | Gardienne du seuil | 3 | 39 % | 41 % | -2 | 187 |
-| 57 | Quartier-maître | 2 | 39 % | 41 % | -2 | 189 |
-| 58 | Retraite Sylvestre | 2 | 39 % | 41 % | -3 | 166 |
-| 59 | Chœur des saisons | 3 | 38 % | 41 % | -3 | 170 |
-| 60 | Dryades Guérisseuses | 3 | 38 % | 41 % | -3 | 189 |
-| 61 | Veilleuse des Sources | 4 | 39 % | 42 % | -3 | 491 |
-| 62 | Fructification | 5 | 39 % | 43 % | -3 | 524 |
-| 63 | Seigneure de la chasse | 5 | 40 % | 43 % | -3 | 468 |
-| 64 | Pousse de Sylve | 1 | 40 % | 43 % | -3 | 471 |
-| 65 | Visez les faibles | 2 | 38 % | 42 % | -4 | 184 |
-| 66 | Brise du Matin | 1 | 37 % | 41 % | -4 | 177 |
-| 67 | Ravitaillement | 1 | 37 % | 42 % | -5 | 165 |
-| 68 | Dryade corrompue | 3 | 37 % | 42 % | -5 | 169 |
-| 69 | Bénédiction de la sylve | 2 | 36 % | 43 % | -6 | 205 |
-| 70 | Ravitailleur | 1 | 38 % | 44 % | -7 | 435 |
-| 71 | Bannière Déchirée | 3 | 35 % | 42 % | -7 | 182 |
-| 72 | Sérénité de la Forêt | 3 | 33 % | 43 % | -10 | 166 |
+| 1 | Archère du premier trait | 2 | 53 % | 44 % | +9 | 140 |
+| 2 | Élémentaire de Terre | 1 | 51 % | 42 % | +9 | 305 |
+| 3 | Racines protectrices | 2 | 52 % | 44 % | +8 | 150 |
+| 4 | Prêtresse des saisons | 3 | 52 % | 44 % | +8 | 136 |
+| 5 | Vision | 3 | 50 % | 45 % | +5 | 126 |
+| 6 | Danseuses des lames | 2 | 50 % | 45 % | +5 | 166 |
+| 7 | Garde du corps | 1 | 50 % | 45 % | +5 | 134 |
+| 8 | Maître des embuscades | 3 | 49 % | 45 % | +5 | 140 |
+| 9 | Vent de l’aurore | 4 | 48 % | 43 % | +5 | 385 |
+| 10 | Capitaine mercenaire | 2 | 50 % | 45 % | +5 | 152 |
+| 11 | Bourgeonnement | 1 | 49 % | 45 % | +4 | 141 |
+| 12 | Rangers | 3 | 49 % | 45 % | +4 | 134 |
+| 13 | Élémentaire d'Eau | 2 | 49 % | 45 % | +4 | 131 |
+| 14 | Sentinelle de chêne | 4 | 47 % | 43 % | +4 | 374 |
+| 15 | Lyra, Éclaireuse de la Purification | 5 | 47 % | 44 % | +4 | 393 |
+| 16 | Duelliste sylvestre | 3 | 49 % | 45 % | +3 | 137 |
+| 17 | Gardien du crépuscule | 4 | 47 % | 44 % | +3 | 388 |
+| 18 | Cor de ralliement | 2 | 48 % | 45 % | +3 | 157 |
+| 19 | Fructification | 5 | 48 % | 45 % | +3 | 385 |
+| 20 | Élémentaire de Feu | 2 | 48 % | 46 % | +3 | 127 |
+| 21 | Volée de Flèches | 2 | 48 % | 45 % | +3 | 141 |
+| 22 | Brume Trompeuse | 2 | 47 % | 45 % | +2 | 154 |
+| 23 | Visez les faibles | 2 | 48 % | 46 % | +2 | 150 |
+| 24 | Avantage décisif | 3 | 47 % | 44 % | +2 | 177 |
+| 25 | Lames de l’aube | 1 | 48 % | 45 % | +2 | 303 |
+| 26 | Éclaireuse des fourrés | 2 | 47 % | 45 % | +2 | 142 |
+| 27 | Pousse de Sylve | 1 | 47 % | 45 % | +2 | 323 |
+| 28 | Sang de sève | 2 | 48 % | 46 % | +2 | 148 |
+| 29 | Changement Tectonique | 3 | 47 % | 45 % | +2 | 144 |
+| 30 | Archers de la Garde sylvestre | 3 | 47 % | 46 % | +2 | 144 |
+| 31 | Dryades Guérisseuses | 3 | 47 % | 45 % | +2 | 142 |
+| 32 | Chant du Vent | 3 | 48 % | 46 % | +1 | 143 |
+| 33 | Sentinelle des cimes | 2 | 47 % | 46 % | +1 | 145 |
+| 34 | Quartier-maître | 2 | 47 % | 46 % | +1 | 157 |
+| 35 | Éveil Élémentaire | 2 | 47 % | 46 % | +1 | 153 |
+| 36 | Coursiers du mirage | 2 | 47 % | 46 % | +1 | 131 |
+| 37 | Rite de Purification | 3 | 47 % | 46 % | +1 | 114 |
+| 38 | Première Lame | 5 | 47 % | 46 % | +1 | 348 |
+| 39 | Cavalier Elfe | 3 | 47 % | 46 % | +1 | 153 |
+| 40 | Retraite Sylvestre | 2 | 46 % | 45 % | +1 | 154 |
+| 41 | Vétérans à louer | 3 | 46 % | 46 % | +0 | 152 |
+| 42 | Marque du chasseur | 1 | 46 % | 46 % | +0 | 148 |
+| 43 | Ingénieurs de siège | 3 | 46 % | 46 % | +0 | 133 |
+| 44 | Hallali | 3 | 46 % | 46 % | 0 | 138 |
+| 45 | Archer des Bois | 2 | 46 % | 46 % | 0 | 131 |
+| 46 | Éclaireur Elfe | 1 | 46 % | 46 % | 0 | 332 |
+| 47 | Sylvain, Gardien Élémentaire | 4 | 46 % | 47 % | 0 | 378 |
+| 48 | Chasseresse damnée | 3 | 46 % | 46 % | -1 | 162 |
+| 49 | Bannière Déchirée | 3 | 46 % | 46 % | -1 | 127 |
+| 50 | Floraison | 3 | 46 % | 46 % | -1 | 134 |
+| 51 | Serment du traité | 3 | 46 % | 47 % | -1 | 153 |
+| 52 | Éclaireur mercenaire | 2 | 46 % | 47 % | -1 | 147 |
+| 53 | Maîtresse de l’initiative | 4 | 46 % | 47 % | -1 | 364 |
+| 54 | Vif-argent | 2 | 45 % | 46 % | -1 | 163 |
+| 55 | Racines immobilisantes | 2 | 45 % | 46 % | -1 | 132 |
+| 56 | Chevaucheurs du mirage | 3 | 45 % | 46 % | -1 | 139 |
+| 57 | Chamane de la Forêt | 3 | 45 % | 46 % | -1 | 131 |
+| 58 | Veilleuse des Sources | 4 | 45 % | 46 % | -1 | 352 |
+| 59 | À couvert | 1 | 45 % | 46 % | -1 | 127 |
+| 60 | Chant de la sève | 1 | 45 % | 46 % | -1 | 154 |
+| 61 | Chant de la traque | 4 | 46 % | 47 % | -2 | 360 |
+| 62 | Tréant Millénaire | 5 | 45 % | 47 % | -2 | 356 |
+| 63 | Druide Ancien | 4 | 46 % | 47 % | -2 | 425 |
+| 64 | Repositionnement | 2 | 45 % | 47 % | -2 | 166 |
+| 65 | Bourse de guerre | 1 | 45 % | 47 % | -2 | 132 |
+| 66 | Lettrée du Conclave | 2 | 44 % | 46 % | -2 | 154 |
+| 67 | Mercenaires | 2 | 45 % | 47 % | -2 | 157 |
+| 68 | Gardienne du seuil | 3 | 45 % | 47 % | -2 | 146 |
+| 69 | Gardienne de la Lumière | 4 | 45 % | 48 % | -3 | 380 |
+| 70 | Sentinelle de la route | 1 | 45 % | 48 % | -3 | 339 |
+| 71 | Vivres de campagne | 2 | 43 % | 47 % | -3 | 144 |
+| 72 | Seigneure de la chasse | 5 | 45 % | 49 % | -3 | 361 |
+| 73 | Traqueuse sylvestre | 3 | 43 % | 47 % | -4 | 141 |
+| 74 | Brise du Matin | 1 | 43 % | 47 % | -4 | 122 |
+| 75 | Clerc de la Forêt | 2 | 43 % | 47 % | -4 | 139 |
+| 76 | Milice de village | 1 | 44 % | 48 % | -4 | 355 |
+| 77 | Ancien de la canopée | 4 | 44 % | 48 % | -4 | 372 |
+| 78 | Choc et Effroi | 4 | 44 % | 48 % | -4 | 379 |
+| 79 | Palissade | 2 | 42 % | 47 % | -4 | 126 |
+| 80 | Bénédiction de la sylve | 2 | 43 % | 47 % | -5 | 148 |
+| 81 | Chœur des saisons | 3 | 42 % | 47 % | -5 | 139 |
+| 82 | Ravitaillement | 1 | 43 % | 48 % | -5 | 132 |
+| 83 | Gardien d’écorce | 2 | 43 % | 48 % | -5 | 144 |
+| 84 | Ralliement d’urgence | 3 | 43 % | 48 % | -5 | 149 |
+| 85 | Forgeron de campagne | 2 | 42 % | 48 % | -5 | 153 |
+| 86 | Vent porteur | 2 | 42 % | 48 % | -6 | 154 |
+| 87 | Coup d’avance | 1 | 42 % | 48 % | -6 | 146 |
+| 88 | Garde-frontière sylvestre | 2 | 42 % | 48 % | -6 | 136 |
+| 89 | Sérénité de la Forêt | 3 | 41 % | 48 % | -6 | 117 |
+| 90 | Dryade corrompue | 3 | 41 % | 49 % | -7 | 163 |
+| 91 | Ravitailleur | 1 | 42 % | 51 % | -9 | 301 |
