@@ -2,7 +2,7 @@
 import { PuzzleGame, PuzzleList } from './Puzzles';
 import { requestMusic, setSoundOptions } from './sound';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { addToPool, bonusFor, difficultyOf, easeFor, bonusUnlocked, campaignDef, defeatsOn, currentScenario, defaultDeckSelection, saveCampaign, scenarioAiFilter, scenarioGameSetup, selectionToDeck, type CampaignSave } from '../campaign/campaign';
+import { addToPool, bonusFor, difficultyOf, easeFor, bonusUnlocked, campaignDef, defeatsOn, currentScenario, defaultDeckSelection, rewardWithDraft, saveCampaign, scenarioAiFilter, scenarioGameSetup, selectionToDeck, type CampaignSave } from '../campaign/campaign';
 import type { Action, DialogLine, GameState, PlayerId } from '../engine/types';
 import { formatEvent } from '../i18n/log.fr';
 import { artsForDeck, COINS_PER_WIN, defeatCoins, loadProfile, mergeCampaignPool, saveProfile, type Profile } from '../profile/profile';
@@ -272,12 +272,12 @@ export function App() {
   } else if (screen.kind === 'campVictory') {
     const c = screen.campaign;
     const sc = currentScenario(c);
-    const after = () => setScreen(sc.reward ? { kind: 'campReward', campaign: c } : advance(c));
+    const after = () => setScreen(rewardWithDraft(c) ? { kind: 'campReward', campaign: c } : advance(c));
     const lines = [...(sc.victoryDialog?.length ? sc.victoryDialog : [{ who: '', text: 'Victoire !' }]), ...(screen.extra ?? [])];
     content = <div className="camp-bg"><Dialog title={sc.title} lines={lines} onClose={after} /></div>;
   } else if (screen.kind === 'campReward') {
     const c = screen.campaign;
-    content = <div className="camp-bg"><Rewards campaign={c} hero={campaignDef(c).hero} reward={currentScenario(c).reward!} owned={id => profile.collection[id] ?? 0} onDone={updated => setScreen(advance(updated))} /></div>;
+    content = <div className="camp-bg"><Rewards campaign={c} hero={campaignDef(c).hero} reward={rewardWithDraft(c)!} owned={id => profile.collection[id] ?? 0} onDone={updated => setScreen(advance(updated))} /></div>;
   } else if (screen.kind === 'campEnd') {
     const gained = Object.entries(screen.gained);
     const total = gained.reduce((n, [, k]) => n + k, 0);

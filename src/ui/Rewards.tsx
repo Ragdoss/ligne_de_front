@@ -1,13 +1,13 @@
 // Récompenses de fin de scénario, présentées comme un dialogue : renforts offerts, échange optionnel, cartes à choisir.
 import { useEffect, useState } from 'react';
-import { addToPool, removeFromPool, type CampaignSave } from '../campaign/campaign';
+import { addToPool, draftOptions, removeFromPool, type CampaignSave } from '../campaign/campaign';
 import type { Reward } from '../campaign/types';
 import type { DialogLine } from '../engine/types';
 import { CardTile } from './CardTile';
 import { cardName } from './labels';
 import { VnScene } from './VnDialog';
 
-type Step = 'gifts' | 'exchange' | 'picks';
+type Step = 'gifts' | 'exchange' | 'picks' | 'draft';
 
 const listCards = (ids: string[]) => {
   const n: Record<string, number> = {};
@@ -26,12 +26,15 @@ export function Rewards({ campaign, reward, onDone, hero = 'Commandant', owned }
   const order: Step[] = (reward.order ?? ['exchange', 'gifts', 'picks']).filter(s =>
     (s === 'gifts' && reward.gifts?.length) ||
     (s === 'exchange' && reward.exchange && campaign.pool.filter(x => x === reward.exchange!.from).length >= reward.exchange.count) ||
-    (s === 'picks' && reward.picks));
+    (s === 'picks' && reward.picks) ||
+    (s === 'draft' && reward.draft));
   const [c] = useState<CampaignSave>(() => structuredClone(campaign));
   const [i, setI] = useState(0);
   const [pickNo, setPickNo] = useState(1);
   const [options, setOptions] = useState<string[]>(reward.picks?.options ?? []);
   const [taken, setTaken] = useState<string[]>([]);
+  const [round, setRound] = useState(1);
+  const [drafted, setDrafted] = useState<string[]>([]);
   const next = () => { if (i + 1 >= order.length) onDone(c); else setI(i + 1); };
   const step = order[i];
   useEffect(() => { if (!order.length) onDone(c); }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -65,6 +68,33 @@ export function Rewards({ campaign, reward, onDone, hero = 'Commandant', owned }
         <button type="button" className="vn-next" onClick={() => { for (let k = 0; k < ex.count; k++) { removeFromPool(c, ex.from); addToPool(c, ex.to); } next(); }}>
           Promouvoir
         </button>
+      </>
+    );
+  } else if (step === 'draft') {
+    const dr = reward.draft!;
+    const opts = draftOptions(c, round, dr.size, dr.maxLevel);
+    const done = () => { if (round >= dr.rounds) next(); else setRound(round + 1); };
+    title = 'Récompense — Volontaires';
+    line = round === 1
+      ? say(`Des volontaires demandent à rejoindre nos rangs. Choisis qui nous accompagne (choix 1 sur ${dr.rounds}).`)
+      : { who: hero, text: `D’autres se présentent. (choix ${round} sur ${dr.rounds})` };
+    center = (
+      <div className="vn-cards picks">
+        {opts.map(id => (
+          <button type="button" key={`${round}-${id}`} className="vn-pick" aria-label={`Prendre ${cardName(id)}`} onClick={() => {
+            addToPool(c, id);
+            setDrafted(t => [...t, id]);
+            done();
+          }}>
+            <CardTile id={id} badge={owned ? ownedBadge(owned(id)) : undefined} />
+          </button>
+        ))}
+      </div>
+    );
+    actions = (
+      <>
+        <span className="vn-hint">{drafted.length ? `Déjà choisi : ${listCards(drafted)}` : 'Clique sur une carte pour la prendre.'}</span>
+        <button type="button" className="vn-alt" onClick={done}>Personne cette fois</button>
       </>
     );
   } else {

@@ -5,7 +5,9 @@ import type { CampaignDef, CampaignScenario } from './types';
 const H = 'Hiérophante Morvak';
 const AC = 'Acolyte';
 
-const START_POOL = cards('cultiste*6', 'chien_infernal*4', 'esclave_guerrier*3', 'diablotins*3', 'acolyte_damne*2', 'effroi_demoniaque*2', 'pacte_sang');
+// 01/11/2026 : deck de départ plus varié (13 cartes différentes au lieu de 7).
+const START_POOL = cards('cultiste*3', 'chien_infernal*2', 'garde_asura*2', 'esclave_guerrier*2', 'diablotins*2', 'sorciere_pacte', 'gargouille_cendres',
+  'acolyte_damne', 'pretre_sacrificiel', 'effroi_demoniaque', 'pacte_sang', 'augure_abime', 'voile_ombre', 'pacte_mineur');
 
 const NOMADES_NID = cards('jeune_nomade*4', 'frondeur_nomade*4', 'marchand_ombres*2', 'basilics_oasis*2', 'charmeur_basilics*2',
   'eleveur_basilics', 'embuscade*2', 'guide_desert*2', 'caravane_marchande*2');

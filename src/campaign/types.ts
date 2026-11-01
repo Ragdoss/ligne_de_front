@@ -12,12 +12,14 @@ export interface SideDef {
 }
 
 export interface Reward {
-  order?: ('gifts' | 'exchange' | 'picks')[];
+  order?: ('gifts' | 'exchange' | 'picks' | 'draft')[];
   gifts?: string[];
   exchange?: { from: string; to: string; count: number };
   picks?: { count: number; options: string[]; unique?: boolean; title?: string; text?: string };
+  /** Volontaires : `rounds` fois, `size` cartes tirées au hasard dans la faction (niveau ≤ maxLevel), on en garde une. */
+  draft?: { rounds: number; size: number; maxLevel: number };
   /** Réplique qui présente chaque étape de la récompense (sinon : texte par défaut du Commandant). */
-  lines?: Partial<Record<'gifts' | 'exchange' | 'picks', DialogLine>>;
+  lines?: Partial<Record<'gifts' | 'exchange' | 'picks' | 'draft', DialogLine>>;
 }
 
 export interface CampaignScenario {

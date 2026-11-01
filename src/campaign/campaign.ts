@@ -1,5 +1,7 @@
 // Campagne : passage d'un scénario à une partie du moteur, pool de cartes, récompenses, sauvegarde.
 import { CARDS } from '../data/cards';
+import { nextRandom, seedFrom } from '../engine/rng';
+import { COLLECTIBLE } from '../profile/profile';
 import { keyFor } from '../profile/store';
 import { DEFAULT_LEVEL_THRESHOLDS, type GameSetup } from '../engine/game';
 import type { Action, GameState, PlayerId } from '../engine/types';
@@ -123,6 +125,40 @@ export function scenarioAiFilter(sc: CampaignScenario | null) {
     }
     return true;
   };
+}
+
+// ---------- Volontaires (récompense tirée au hasard, 01/11/2026) ----------
+/** Récompense réelle d'un scénario : celle écrite dans le scénario, plus des volontaires à choisir (3 fois 1 carte parmi 3),
+ *  de niveau croissant au fil de la campagne, pour que chaque partie de campagne fasse évoluer le deck différemment. */
+export function rewardWithDraft(c: CampaignSave): CampaignScenario['reward'] {
+  const sc = currentScenario(c);
+  const base = sc.reward ?? {};
+  if (base.draft || c.idx >= campaignDef(c).order.length - 1) return sc.reward;
+  const order = base.order ?? (['exchange', 'gifts', 'picks'] as const);
+  return { ...base, order: [...order, 'draft'], draft: { rounds: 3, size: 3, maxLevel: Math.min(5, c.idx + 2) } };
+}
+/** Cartes proposées au tour `round` des volontaires : tirage déterministe (même partie, même scénario = mêmes cartes). */
+export function draftOptions(c: CampaignSave, round: number, size: number, maxLevel: number): string[] {
+  const f = campaignDef(c).faction;
+  const owned = poolCounts(c.pool);
+  const pool = COLLECTIBLE.filter(id => {
+    const d = CARDS[id]!;
+    const ok = d.faction === f || d.faction === 'neutre' || ((d.factions as string[] | undefined) ?? []).includes(f);
+    return ok && d.niveau <= maxLevel && (owned[id] ?? 0) < 3;
+  });
+  // Les cartes de la faction d'abord : les neutres comptent pour moitié.
+  const weight = (id: string) => (CARDS[id]!.faction === 'neutre' ? 1 : 2);
+  let st = seedFrom(`${c.id}|${c.idx}|${round}`);
+  const out: string[] = [];
+  const left = pool.slice();
+  while (out.length < size && left.length) {
+    const tot = left.reduce((n, id) => n + weight(id), 0);
+    const r = nextRandom(st); st = r.state;
+    let x = r.value * tot, k = 0;
+    while (k < left.length - 1 && (x -= weight(left[k]!)) > 0) k++;
+    out.push(left.splice(k, 1)[0]!);
+  }
+  return out;
 }
 
 // ---------- Pool et deck ----------

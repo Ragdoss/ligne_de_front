@@ -5,7 +5,9 @@ import type { CampaignDef, CampaignScenario } from './types';
 const SY = 'Sylvain';
 const LY = 'Éclaireuse Lyra';
 
-const START_POOL = cards('eclaireur_elfe*6', 'archer_bois*3', 'elem_terre*3', 'bourgeonnement*3', 'brise_matin*2', 'repositionnement*2', 'dryades_guerisseuses');
+// 01/11/2026 : deck de départ plus varié (13 cartes différentes au lieu de 7).
+const START_POOL = cards('eclaireur_elfe*3', 'lames_aube*2', 'pousse_sylve*2', 'elem_terre*2', 'archer_bois*2', 'sentinelle_cimes', 'archere_premier_trait',
+  'bourgeonnement*2', 'brise_matin', 'marque_chasseur', 'repositionnement', 'dryades_guerisseuses', 'benediction_sylve');
 
 // 24/10/2026 : 4 cartes de plus dans chaque deck démon (trop de victoires du joueur par pioche vide adverse).
 const DEMONS_SOURCE = cards('cultiste*7', 'chien_infernal*5', 'esclave_guerrier*3', 'acolyte_damne*2', 'effroi_demoniaque*2', 'pacte_sang*2', 'diablotins*4');

@@ -6,7 +6,9 @@ const Z = 'Cheikha Zahra';
 const ID = 'Éclaireur Idris';
 const LEGAT = 'Légat Varro';
 
-const START_POOL = cards('jeune_nomade*5', 'frondeur_nomade*5', 'marchand_ombres*3', 'caravane_marchande*2', 'embuscade*2', 'guide_desert*2', 'basilics_oasis*2');
+// 01/11/2026 : deck de départ plus varié (13 cartes différentes au lieu de 7).
+const START_POOL = cards('jeune_nomade*3', 'frondeur_nomade*2', 'chamelier*2', 'eclaireuse_sables*2', 'chapardeuse*2', 'marchand_ombres*2', 'caravane_marchande',
+  'basilics_rodeur', 'basilics_oasis', 'guide_desert', 'embuscade', 'mirage_oasis', 'oasis_cachee');
 
 const LEGION_AVANTGARDE = cards('recrue_imp*5', 'archer_imp*3', 'lancier_emp*3', 'legionnaire_desert*4', 'soldat_kragz*2', 'lieutenant*2', 'ralliement', 'charge_imp', 'porte_etendard');
 const LEGION_PUITS = cards('recrue_imp*4', 'legionnaire_desert*4', 'archer_imp*3', 'lancier_emp*3', 'soldat_kragz*2', 'lieutenant*2', 'capitaine_garde',
