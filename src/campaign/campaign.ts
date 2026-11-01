@@ -4,7 +4,7 @@ import { nextRandom, seedFrom } from '../engine/rng';
 import { COLLECTIBLE } from '../profile/profile';
 import { keyFor } from '../profile/store';
 import { DEFAULT_LEVEL_THRESHOLDS, type GameSetup } from '../engine/game';
-import type { Action, GameState, PlayerId } from '../engine/types';
+import type { Action, DialogLine, Faction, FlagCond, GameState, PlayerId } from '../engine/types';
 import { CAMPAIGN_BY_ID, SCENARIOS } from './campaigns';
 import { DEFAULT_DIFFICULTY, DIFFICULTIES, MODE_EASE, SCENARIO_EASE, type Difficulty } from './ease';
 import type { CampaignDef, CampaignScenario } from './types';
@@ -28,7 +28,29 @@ export interface CampaignSave {
   bonus: number;
   /** Mode de difficulté (modifiable au camp entre deux combats). */
   difficulty?: Difficulty;
+  // ----- Campagnes à embranchements -----
+  /** Drapeaux posés par les choix de dialogue et les victoires. */
+  flags?: string[];
+  /** Scénario en cours sur la carte (sinon : order[idx]). */
+  node?: string;
+  /** Scénarios principaux déjà gagnés, dans l'ordre. */
+  path?: string[];
+  /** Missions secondaires gagnées. */
+  sidesDone?: string[];
+  /** Mission secondaire en cours (non sauvegardée : un retour au camp l'abandonne). */
+  side?: string;
 }
+
+// ---------- Drapeaux ----------
+export const hasFlags = (c: Pick<CampaignSave, 'flags'>, cond?: FlagCond): boolean => {
+  if (!cond) return true;
+  const f = c.flags ?? [];
+  return (cond.all ?? []).every(x => f.includes(x)) && !(cond.none ?? []).some(x => f.includes(x)) && (!cond.any?.length || cond.any.some(x => f.includes(x)));
+};
+export const withFlags = (c: CampaignSave, set: string[] | undefined): CampaignSave =>
+  set?.length ? { ...c, flags: [...new Set([...(c.flags ?? []), ...set])] } : c;
+/** Répliques visibles selon les drapeaux. */
+export const linesFor = (c: Pick<CampaignSave, 'flags'>, lines: DialogLine[] | undefined): DialogLine[] => (lines ?? []).filter(l => hasFlags(c, l.if));
 
 /** Une aide de +1 ressource de départ se débloque toutes les 2 défaites sur un même scénario (3 au plus). */
 export const FAILS_PER_BONUS = 2;
@@ -41,9 +63,50 @@ export const campaignDef = (c: CampaignSave | string): CampaignDef => CAMPAIGN_B
 
 export function newCampaign(campaign = 'empire'): CampaignSave {
   const def = campaignDef(campaign);
-  return { version: 1, id: `camp-${def.id}-${Date.now()}`, campaign: def.id, pool: def.scenarios[def.order[0]!]!.A.deckList!.slice(), idx: 0, deck: null, finished: false, attempts: {}, bonus: 0 };
+  const first = def.start ?? def.order[0]!;
+  return { version: 1, id: `camp-${def.id}-${Date.now()}`, campaign: def.id, pool: def.scenarios[first]!.A.deckList!.slice(), idx: 0, deck: null, finished: false, attempts: {}, bonus: 0,
+    ...(def.start ? { node: def.start, flags: [], path: [], sidesDone: [] } : {}) };
 }
-export const currentScenario = (c: CampaignSave): CampaignScenario => SCENARIOS[campaignDef(c).order[c.idx]!]!;
+/** Scénario tel qu'il se joue avec les drapeaux de la partie : répliques, événements, deck adverse et récompense choisis. */
+export function resolveScenario(c: Pick<CampaignSave, 'flags'>, sc: CampaignScenario): CampaignScenario {
+  if (!sc.next && !sc.rewardVariants && !sc.B.deckVariants && !sc.side && !(c.flags?.length)) return sc;
+  const deck = sc.B.deckVariants?.find(v => hasFlags(c, v.if))?.deckList;
+  return {
+    ...sc,
+    intro: linesFor(c, sc.intro),
+    victoryDialog: sc.victoryDialog && linesFor(c, sc.victoryDialog),
+    events: sc.events.filter(e => hasFlags(c, e.if)).map(e => (e.dialog ? { ...e, dialog: linesFor(c, e.dialog) } : e)),
+    B: deck ? { ...sc.B, deckList: deck } : sc.B,
+    reward: sc.rewardVariants?.find(v => hasFlags(c, v.if))?.reward ?? sc.reward,
+  };
+}
+export const currentScenario = (c: CampaignSave): CampaignScenario =>
+  resolveScenario(c, SCENARIOS[c.side ?? c.node ?? campaignDef(c).order[c.idx]!]!);
+/** Missions secondaires proposées au camp maintenant. */
+export function availableSides(c: CampaignSave): CampaignScenario[] {
+  const def = campaignDef(c);
+  if (!def.sides || c.finished || !c.node) return [];
+  return def.sides.filter(s => s.at.includes(c.node!) && !(c.sidesDone ?? []).includes(s.id) && hasFlags(c, s.if)).map(s => resolveScenario(c, SCENARIOS[s.id]!));
+}
+/** Après une victoire : la campagne suivante (carte à embranchements ou ligne droite), null = fin de la campagne. */
+export function nextNode(c: CampaignSave): string | null {
+  const def = campaignDef(c);
+  if (!def.start) return c.idx >= def.order.length - 1 ? null : def.order[c.idx + 1]!;
+  const sc = SCENARIOS[c.node!]!;
+  return sc.next?.find(n => hasFlags(c, n.if))?.to ?? null;
+}
+/** Fin atteinte (campagne à embranchements) : la première dont la condition est remplie. */
+export function endingOf(c: CampaignSave): { title: string; text: string } {
+  const def = campaignDef(c);
+  const e = def.endings?.find(x => hasFlags(c, x.if));
+  return e ?? { title: def.endTitle, text: def.endText };
+}
+/** Factions dont les cartes entrent dans les Volontaires : celle de la campagne, plus les alliées. */
+export function draftFactions(c: CampaignSave): Faction[] {
+  const def = campaignDef(c);
+  const allies = Object.entries(def.allies ?? {}).filter(([flag]) => (c.flags ?? []).includes(flag)).map(([, f]) => f);
+  return [def.faction, ...allies];
+}
 
 /** Construit la partie du moteur correspondant à un scénario, avec le deck choisi par le joueur. */
 /**
@@ -133,19 +196,44 @@ export function scenarioAiFilter(sc: CampaignScenario | null) {
 export function rewardWithDraft(c: CampaignSave): CampaignScenario['reward'] {
   const sc = currentScenario(c);
   const base = sc.reward ?? {};
-  if (base.draft || c.idx >= campaignDef(c).order.length - 1) return sc.reward;
-  const order = base.order ?? (['exchange', 'gifts', 'picks'] as const);
-  return { ...base, order: [...order, 'draft'], draft: { rounds: 3, size: 3, maxLevel: Math.min(5, c.idx + 2) } };
+  if (base.draft || (!c.side && nextNode(c) === null)) return sc.reward;
+  const order = [...(base.order ?? (['exchange', 'gifts', 'picks'] as const))];
+  // Une fois sur deux : la Promotion (une carte du pool contre une de niveau supérieur).
+  const promote = !c.side && c.idx % 2 === 1 && promoteOffers(c).length > 0;
+  return { ...base, order: [...order, ...(promote ? ['promote' as const] : []), 'draft'], draft: { rounds: 3, size: 3, maxLevel: Math.min(5, c.idx + 2) } };
+}
+const inFactions = (id: string, fs: Faction[]) => {
+  const d = CARDS[id]!;
+  return d.faction === 'neutre' || fs.includes(d.faction) || ((d.factions as string[] | undefined) ?? []).some(f => fs.includes(f as Faction));
+};
+/** Promotion : jusqu'à 3 offres « une carte de niveau X du pool contre une de niveau X+1 ou X+2, du même type ». */
+export function promoteOffers(c: CampaignSave): { from: string; to: string }[] {
+  const fs = draftFactions(c);
+  const owned = poolCounts(c.pool);
+  let st = seedFrom(`${c.id}|${c.idx}|promotion`);
+  const rnd = () => { const r = nextRandom(st); st = r.state; return r.value; };
+  const froms = Object.keys(owned).filter(id => CARDS[id]!.niveau <= 4 && COLLECTIBLE.includes(id)).sort();
+  const out: { from: string; to: string }[] = [];
+  const used = new Set<string>();
+  while (out.length < 3 && froms.length) {
+    const from = froms.splice(Math.floor(rnd() * froms.length), 1)[0]!;
+    const d = CARDS[from]!;
+    const targets = COLLECTIBLE.filter(id => {
+      const t = CARDS[id]!;
+      return t.cardType === d.cardType && t.niveau > d.niveau && t.niveau <= d.niveau + 2 && inFactions(id, fs) && (owned[id] ?? 0) < 3 && !used.has(id);
+    }).sort();
+    if (!targets.length) continue;
+    const to = targets[Math.floor(rnd() * targets.length)]!;
+    used.add(to);
+    out.push({ from, to });
+  }
+  return out;
 }
 /** Cartes proposées au tour `round` des volontaires : tirage déterministe (même partie, même scénario = mêmes cartes). */
 export function draftOptions(c: CampaignSave, round: number, size: number, maxLevel: number): string[] {
-  const f = campaignDef(c).faction;
+  const fs = draftFactions(c);
   const owned = poolCounts(c.pool);
-  const pool = COLLECTIBLE.filter(id => {
-    const d = CARDS[id]!;
-    const ok = d.faction === f || d.faction === 'neutre' || ((d.factions as string[] | undefined) ?? []).includes(f);
-    return ok && d.niveau <= maxLevel && (owned[id] ?? 0) < 3;
-  });
+  const pool = COLLECTIBLE.filter(id => inFactions(id, fs) && CARDS[id]!.niveau <= maxLevel && (owned[id] ?? 0) < 3);
   // Les cartes de la faction d'abord : les neutres comptent pour moitié.
   const weight = (id: string) => (CARDS[id]!.faction === 'neutre' ? 1 : 2);
   let st = seedFrom(`${c.id}|${c.idx}|${round}`);
@@ -208,6 +296,12 @@ export function sanitize(raw: unknown): CampaignSave | null {
     attempts: c.attempts && typeof c.attempts === 'object' ? Object.fromEntries(Object.entries(c.attempts).filter(([, v]) => typeof v === 'number')) : {},
     bonus: Math.max(0, Math.min(MAX_BONUS, Number(c.bonus) | 0)),
     difficulty: DIFFICULTIES.includes(c.difficulty as Difficulty) ? c.difficulty : DEFAULT_DIFFICULTY,
+    ...(def.start ? {
+      flags: Array.isArray(c.flags) ? c.flags.filter(x => typeof x === 'string') : [],
+      node: typeof c.node === 'string' && SCENARIOS[c.node] ? c.node : def.start,
+      path: Array.isArray(c.path) ? c.path.filter(x => typeof x === 'string') : [],
+      sidesDone: Array.isArray(c.sidesDone) ? c.sidesDone.filter(x => typeof x === 'string') : [],
+    } : {}),
   };
 }
 export function saveCampaign(c: CampaignSave): void {

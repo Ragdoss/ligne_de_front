@@ -2,7 +2,7 @@
 // les autres estompés ; une réplique à la fois dans le bandeau du bas (la précédente reste visible, estompée).
 // VnScene sert aussi aux récompenses de campagne (cartes au centre, choix dans le bandeau).
 import { useEffect, useState } from 'react';
-import type { DialogLine } from '../engine/types';
+import type { DialogChoice, DialogLine } from '../engine/types';
 import soldat from './assets/soldat.png';
 import empireChevalier from './assets/portraits/empire/1.webp';
 import empireEpeiste from './assets/portraits/empire/2.webp';
@@ -47,6 +47,8 @@ const PORTRAITS: Record<string, string> = {
   'Nomade': nomadesGuide,
   'Cavalier des dunes': nomadesPillard,
 };
+/** Personnages de la campagne 5 sans portrait pour l'instant (Nathan les dessine) : emplacement vide. */
+const NO_PORTRAIT = new Set(['Maximilien', 'Impératrice Octavia', 'Capacocha', 'Al-Mansur', 'Archidémon des Origines', 'Forteresse']);
 const portraitOf = (who: string) => PORTRAITS[who] ?? soldat;
 
 /** Placement : 1er à gauche, 2e à droite, 3e à droite (en retrait), 4e à gauche (en retrait)… */
@@ -73,9 +75,9 @@ export function VnScene({ title, cast, speaking, past, now, center, actions, onA
   const shown = cast.slice(0, 5);
   const left = shown.filter(w => sideOf(shown, w) === 'left');
   const right = shown.filter(w => sideOf(shown, w) === 'right').reverse(); // le premier à droite reste au bord
-  const fig = (w: string, s: 'left' | 'right', inner: boolean) => (
-    <img key={w} className={`vn-fig ${s}${inner ? ' inner' : ''}${speaking === w ? ' speaking' : ''}`} src={portraitOf(w)} alt={w} />
-  );
+  const fig = (w: string, s: 'left' | 'right', inner: boolean) => NO_PORTRAIT.has(w)
+    ? <div key={w} className={`vn-fig vn-empty ${s}${inner ? ' inner' : ''}${speaking === w ? ' speaking' : ''}`} role="img" aria-label={w}><span>{w}</span></div>
+    : <img key={w} className={`vn-fig ${s}${inner ? ' inner' : ''}${speaking === w ? ' speaking' : ''}`} src={portraitOf(w)} alt={w} />;
   const line = (l: DialogLine, cls: string) => (
     <p className={`vn-line ${cls} ${l.who ? sideOf(shown, l.who) : 'narr'}`}>{l.who && <b>{l.who} : </b>}{l.text}</p>
   );
@@ -100,20 +102,28 @@ export function VnScene({ title, cast, speaking, past, now, center, actions, onA
   );
 }
 
-export function Dialog({ title, lines, onClose, button = 'Continuer' }: { title?: string; lines: DialogLine[]; onClose: () => void; button?: string }) {
+/**
+ * Dialogue à la suite. Une réplique avec des `choices` attend une réponse : `onChoose` reçoit les drapeaux posés
+ * (campagne à embranchements). « Passer » saute jusqu'au prochain choix, s'il y en a un.
+ */
+export function Dialog({ title, lines, onClose, onChoose, button = 'Continuer' }: { title?: string; lines: DialogLine[]; onClose: () => void; onChoose?: (c: DialogChoice) => void; button?: string }) {
   const [i, setI] = useState(0);
   const last = i >= lines.length - 1;
+  const cur = lines[i]!;
+  const asking = !!cur.choices?.length;
   const next = () => (last ? onClose() : setI(i + 1));
+  const skip = () => { const k = lines.findIndex((l, j) => j > i && l.choices?.length); if (asking) return; if (k === -1) onClose(); else setI(k); };
+  const pick = (c: DialogChoice) => { onChoose?.(c); next(); };
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (asking) return;
       if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowRight') { e.preventDefault(); next(); }
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') skip();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   });
   const cast = [...new Set(lines.map(l => l.who).filter(Boolean))];
-  const cur = lines[i]!;
   return (
     <VnScene
       title={title}
@@ -121,10 +131,12 @@ export function Dialog({ title, lines, onClose, button = 'Continuer' }: { title?
       speaking={cur.who}
       past={i > 0 ? lines[i - 1] : undefined}
       now={cur}
-      onAdvance={next}
-      onSkip={onClose}
+      onAdvance={asking ? undefined : next}
+      onSkip={asking ? undefined : skip}
       count={`${i + 1} / ${lines.length}`}
-      actions={<button type="button" className="vn-next" autoFocus onClick={e => { e.stopPropagation(); next(); }}>{last ? button : 'Suivant ▸'}</button>}
+      actions={asking
+        ? <div className="vn-choices">{cur.choices!.map((c, k) => <button key={k} type="button" className="vn-choice" autoFocus={k === 0} onClick={e => { e.stopPropagation(); pick(c); }}>{c.label}</button>)}</div>
+        : <button type="button" className="vn-next" autoFocus onClick={e => { e.stopPropagation(); next(); }}>{last ? button : 'Suivant ▸'}</button>}
     />
   );
 }

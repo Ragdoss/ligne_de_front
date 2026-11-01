@@ -3,7 +3,8 @@
 // Usage : npm run difficulty -- [parties par scénario, défaut 200] [campagne : empire|demons|elfes|nomades|all] [--patch balance/fichier.json]
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { chooseAction } from '../src/ai/heuristic';
-import { addToPool, newCampaign, removeFromPool, scenarioAiFilter, scenarioGameSetup } from '../src/campaign/campaign';
+import { scenarioAiFilter, scenarioGameSetup } from '../src/campaign/campaign';
+import { campaignSteps } from './campaign-paths';
 import { CAMPAIGNS, SCENARIOS } from '../src/campaign/campaigns';
 import { patchFromArgs } from '../src/data/patch';
 import { applyAction, createGame } from '../src/engine/game';
@@ -13,23 +14,10 @@ const { args, patch, changes } = patchFromArgs(process.argv.slice(2));
 const N = Number(args[0] ?? 200);
 const which = args[1] ?? 'all';
 const camps = CAMPAIGNS.filter(d => which === 'all' || d.id === which);
-const CAMPAIGN_ORDER: string[] = camps.flatMap(d => d.order);
-
-// Pool à chaque étape : récompenses acceptées, et pour les choix les premières options proposées.
-const pools: string[][] = [];
-for (const def of camps) {
-const c = newCampaign(def.id);
-for (const id of def.order) {
-  pools.push(c.pool.slice());
-  const rw = SCENARIOS[id]!.reward;
-  if (!rw) continue;
-  for (const step of rw.order ?? ['exchange', 'gifts', 'picks']) {
-    if (step === 'gifts') rw.gifts?.forEach(g => addToPool(c, g));
-    if (step === 'exchange' && rw.exchange) for (let k = 0; k < rw.exchange.count; k++) if (removeFromPool(c, rw.exchange.from)) addToPool(c, rw.exchange.to);
-    if (step === 'picks' && rw.picks) rw.picks.options.slice(0, rw.picks.count).forEach(o => addToPool(c, o));
-  }
-}
-}
+const STEPS = camps.flatMap(campaignSteps);
+const CAMPAIGN_ORDER = STEPS.map(x => x.id);
+const pools = STEPS.map(x => x.pool);
+const RESOLVED = STEPS.map(x => x.sc);
 
 const lines = ['# Difficulté des scénarios de campagne', ''];
 if (patch) lines.push(`Modifications testées (\`${patch}\`) :`, '', ...changes.map(x => `- ${x}`), '');
@@ -38,7 +26,7 @@ lines.push(`${N} parties par scénario. Le camp du joueur est joué par l'ordina
 const REASONS: Record<string, string> = { lassitude: 'lassitude', noRegiment: 'plus de régiment', emptyDeck: 'pioche vide', vitalDestroyed: 'régiment vital détruit', convoyArrived: 'convoi passé', survived: 'tenu jusqu’au tour limite', blocage: 'partie bloquée' };
 const t0 = Date.now();
 CAMPAIGN_ORDER.forEach((id: string, k: number) => {
-  const sc = SCENARIOS[id]!;
+  const sc = RESOLVED[k]!;
   const filter = scenarioAiFilter(sc);
   let wins = 0, turns = 0;
   const losses: Record<string, number> = {};

@@ -321,8 +321,21 @@ export interface GameConfig {
 }
 
 // ---------- Scénarios ----------
-export interface DialogLine { who: string; text: string }
+/** Condition sur les drapeaux d'une campagne à embranchements : tous ceux de `all`, aucun de `none`, au moins un de `any`. */
+export interface FlagCond { all?: string[]; none?: string[]; any?: string[] }
+/** Réponse proposée au joueur dans un dialogue : pose des drapeaux. */
+export interface DialogChoice { label: string; set?: string[] }
+export interface DialogLine {
+  who: string;
+  text: string;
+  /** Campagne à embranchements : réplique affichée seulement si la condition est remplie. */
+  if?: FlagCond;
+  /** Réponses à choisir (le dialogue attend le choix avant de continuer). */
+  choices?: DialogChoice[];
+}
 export interface ScenarioEvent {
+  /** Campagne à embranchements : événement gardé seulement si la condition est remplie. */
+  if?: FlagCond;
   turn: number;
   pid: PlayerId;
   dialog?: DialogLine[];

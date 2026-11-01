@@ -777,3 +777,14 @@ button.pile:not(:disabled):hover .pile-stack > * { outline: 2px solid var(--bras
 .u-prey { position: absolute; top: 34%; left: 50%; transform: translateX(-50%); z-index: 3; background: #b8352a; color: #fff3df; font: 700 .62rem/1 'Cinzel', serif;
   letter-spacing: .08em; text-transform: uppercase; padding: 3px 7px; border-radius: 10px; border: 1px solid #ffcfb8; box-shadow: 0 1px 4px #0008; pointer-events: none; }
 .options-screen .topbar h1 { text-shadow: 0 1px 6px rgba(0,0,0,.9); }
+
+/* Campagne 5 : portraits pas encore dessinés, choix de dialogue, promotions. */
+.vn-fig.vn-empty { width: min(22vw, 260px); display: grid; place-items: end center; padding-bottom: 12%; border: 2px dashed color-mix(in srgb, var(--navy) 45%, transparent); border-bottom: none; border-radius: 120px 120px 0 0; background: color-mix(in srgb, var(--slate) 70%, transparent); }
+.vn-fig.vn-empty span { font-family: 'Cinzel', serif; color: var(--navy); font-size: clamp(.8rem, 1.6vw, 1.1rem); text-align: center; padding: 0 8px; }
+.vn-fig.vn-empty.right { transform: none; }
+.vn-choices { display: flex; flex-wrap: wrap; gap: 10px; }
+.vn-choice { padding: 10px 16px; border: 2px solid var(--navy); border-radius: 8px; background: var(--parchment, #f6efe0); color: var(--navy); font: inherit; font-size: clamp(.9rem, 1.8vw, 1.05rem); cursor: pointer; text-align: left; }
+.vn-choice:hover, .vn-choice:focus-visible { background: var(--navy); color: #fff; }
+.promo-pair { display: flex; align-items: center; gap: 6px; }
+.promo-pair .ccard { width: 150px; }
+.hub-sides { display: grid; gap: 6px; }

@@ -2,7 +2,7 @@
 import { PuzzleGame, PuzzleList } from './Puzzles';
 import { requestMusic, setSoundOptions } from './sound';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { addToPool, bonusFor, difficultyOf, easeFor, bonusUnlocked, campaignDef, defeatsOn, currentScenario, defaultDeckSelection, rewardWithDraft, saveCampaign, scenarioAiFilter, scenarioGameSetup, selectionToDeck, type CampaignSave } from '../campaign/campaign';
+import { addToPool, bonusFor, difficultyOf, easeFor, bonusUnlocked, campaignDef, defeatsOn, currentScenario, defaultDeckSelection, endingOf, nextNode, rewardWithDraft, saveCampaign, withFlags, scenarioAiFilter, scenarioGameSetup, selectionToDeck, type CampaignSave } from '../campaign/campaign';
 import type { Action, DialogLine, GameState, PlayerId } from '../engine/types';
 import { formatEvent } from '../i18n/log.fr';
 import { artsForDeck, COINS_PER_WIN, defeatCoins, loadProfile, mergeCampaignPool, saveProfile, type Profile } from '../profile/profile';
@@ -103,8 +103,23 @@ export function App() {
   const gameOpts = { animMul: o.animSpeed, aiMul: o.aiSpeed, bannerMul: o.bannerSpeed, initialReveal: o.revealAiHand };
 
   /** Passe au scénario suivant ou termine la campagne (fusion du pool dans la collection). */
-  const advance = (c: CampaignSave): Screen => {
-    if (c.idx >= campaignDef(c).order.length - 1) {
+  const advance = (c0: CampaignSave): Screen => {
+    // Mission secondaire gagnée : retour au camp, la campagne n'avance pas.
+    if (c0.side) {
+      const back = { ...c0, side: undefined, sidesDone: [...new Set([...(c0.sidesDone ?? []), c0.side])] };
+      saveCampaign(back);
+      return { kind: 'campHub', campaign: back };
+    }
+    const c = c0;
+    const to = nextNode(c);
+    if (campaignDef(c).start) {
+      if (to) {
+        const next = { ...c, idx: c.idx + 1, node: to, path: [...(c.path ?? []), c.node!], bonus: 0 };
+        saveCampaign(next);
+        return { kind: 'campHub', campaign: next };
+      }
+    }
+    if (to === null) {
       const done = { ...c, finished: true };
       saveCampaign(done);
       let gained: Record<string, number> = {};
@@ -187,6 +202,14 @@ export function App() {
       <CampHub
         campaign={c}
         scenario={sc}
+        onSide={id => {
+          const sel = defaultDeckSelection(c);
+          const s2 = { ...c, side: id };
+          const min = currentScenario(s2).deckRules.min;
+          if (Object.values(sel).reduce((a, b) => a + b, 0) < min) { setScreen({ kind: 'campDeck', campaign: c }); return; }
+          setScreen({ kind: 'campGame', campaign: s2, deck: selectionToDeck(sel), key: Date.now() });
+        }}
+        onChoose={ch => { const next = withFlags(c, ch.set); saveCampaign(next); setScreen({ kind: 'campHub', campaign: next }); }}
         onDeck={() => setScreen({ kind: 'campDeck', campaign: c })}
         onOptions={() => setScreen({ kind: 'campOptions', campaign: c })}
         onMenu={home}
@@ -236,7 +259,7 @@ export function App() {
         intro={sc.intro}
         onGame={live.set}
         overlay={<ScenarioRulesBubble sc={sc} live={live} />}
-        onQuit={() => setScreen({ kind: 'campHub', campaign: c })}
+        onQuit={() => setScreen({ kind: 'campHub', campaign: { ...c, side: undefined } })}
         onOver={g => {
           update(p => { p.stats.campaign[g.over!.winner === 'A' ? 'w' : 'l']++; });
           if (g.over!.winner === 'A') { update(p => { p.coins += COINS_PER_WIN; }); return; }
@@ -252,8 +275,9 @@ export function App() {
             <button type="button" className="primary" onClick={() => {
               // Libération : les régiments libérés rejoignent le pool (4 au plus).
               const freed = sc.liberation ? Math.min(4, g.scenario?.liberated ?? 0) : 0;
-              if (!freed) { setScreen({ kind: 'campVictory', campaign: c }); return; }
-              const next = structuredClone(c);
+              const won = withFlags(c, [...(sc.onWin ?? []), ...(freed && sc.onLiberated ? [sc.onLiberated] : [])]);
+              if (!freed) { setScreen({ kind: 'campVictory', campaign: won }); return; }
+              const next = structuredClone(won);
               for (let k = 0; k < freed; k++) addToPool(next, sc.liberation!.cardIds[0]!);
               saveCampaign(next);
               setScreen({ kind: 'campVictory', campaign: next, extra: [{ who: '', text: `${freed} captif(s) libéré(s) rejoignent ton pool de cartes.` }] });
@@ -263,7 +287,7 @@ export function App() {
           <EndBox title="Scénario échoué" text={formatEvent({ type: 'gameOver', winner: g.over!.winner, reason: g.over!.reason }, names) ?? ''}
             extra={<><LossCoins n={lossCoins(g)} /><p className="muted small">Défaites sur ce combat : {defeatsOn(c, sc.id)}.{bonusUnlocked(c, sc.id) > bonusFor(c, sc.id) ? ' Une aide est disponible au camp : des ressources en plus au départ.' : ''}</p></>}>
             <button type="button" onClick={close}>Voir le plateau</button>
-            <button type="button" onClick={() => setScreen({ kind: 'campHub', campaign: c })}>Retour au camp</button>
+            <button type="button" onClick={() => setScreen({ kind: 'campHub', campaign: { ...c, side: undefined } })}>Retour au camp</button>
             <button type="button" className="primary" onClick={() => setScreen({ kind: 'campGame', campaign: c, deck: screen.deck, key: Date.now() })}>Réessayer le scénario</button>
           </EndBox>
         )}
@@ -272,9 +296,11 @@ export function App() {
   } else if (screen.kind === 'campVictory') {
     const c = screen.campaign;
     const sc = currentScenario(c);
-    const after = () => setScreen(rewardWithDraft(c) ? { kind: 'campReward', campaign: c } : advance(c));
     const lines = [...(sc.victoryDialog?.length ? sc.victoryDialog : [{ who: '', text: 'Victoire !' }]), ...(screen.extra ?? [])];
-    content = <div className="camp-bg"><Dialog title={sc.title} lines={lines} onClose={after} /></div>;
+    // Les choix du dialogue de victoire posent des drapeaux (campagne à embranchements) avant la suite.
+    content = <div className="camp-bg"><Dialog title={sc.title} lines={lines}
+      onChoose={ch => setScreen(cur => (cur.kind === 'campVictory' ? { ...cur, campaign: withFlags(cur.campaign, ch.set) } : cur))}
+      onClose={() => { saveCampaign(c); setScreen(rewardWithDraft(c) ? { kind: 'campReward', campaign: c } : advance(c)); }} /></div>;
   } else if (screen.kind === 'campReward') {
     const c = screen.campaign;
     content = <div className="camp-bg"><Rewards campaign={c} hero={campaignDef(c).hero} reward={rewardWithDraft(c)!} owned={id => profile.collection[id] ?? 0} onDone={updated => setScreen(advance(updated))} /></div>;
@@ -283,8 +309,8 @@ export function App() {
     const total = gained.reduce((n, [, k]) => n + k, 0);
     content = (
       <div className="camp">
-        <TopBar title={campaignDef(screen.campaign).endTitle} onBack={home} />
-        <p>{campaignDef(screen.campaign).endText}</p>
+        <TopBar title={endingOf(screen.campaign).title} onBack={home} />
+        <p className="camp-ending">{endingOf(screen.campaign).text}</p>
         <h2 className="sub">{total ? `${total} carte(s) rejoignent ta collection` : 'Aucune nouvelle carte pour ta collection'}</h2>
         <p className="muted small">Pour chaque carte, ta collection monte au nombre d’exemplaires de ton pool de campagne (3 maximum). Chaque campagne terminée compte : recommence-la en choisissant d’autres cartes pour compléter ta collection.</p>
         {gained.length > 0 && (

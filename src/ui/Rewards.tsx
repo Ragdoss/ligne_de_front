@@ -1,13 +1,13 @@
 // Récompenses de fin de scénario, présentées comme un dialogue : renforts offerts, échange optionnel, cartes à choisir.
 import { useEffect, useState } from 'react';
-import { addToPool, draftOptions, removeFromPool, type CampaignSave } from '../campaign/campaign';
+import { addToPool, draftOptions, promoteOffers, removeFromPool, type CampaignSave } from '../campaign/campaign';
 import type { Reward } from '../campaign/types';
 import type { DialogLine } from '../engine/types';
 import { CardTile } from './CardTile';
 import { cardName } from './labels';
 import { VnScene } from './VnDialog';
 
-type Step = 'gifts' | 'exchange' | 'picks' | 'draft';
+type Step = 'gifts' | 'exchange' | 'picks' | 'draft' | 'promote';
 
 const listCards = (ids: string[]) => {
   const n: Record<string, number> = {};
@@ -27,7 +27,8 @@ export function Rewards({ campaign, reward, onDone, hero = 'Commandant', owned }
     (s === 'gifts' && reward.gifts?.length) ||
     (s === 'exchange' && reward.exchange && campaign.pool.filter(x => x === reward.exchange!.from).length >= reward.exchange.count) ||
     (s === 'picks' && reward.picks) ||
-    (s === 'draft' && reward.draft));
+    (s === 'draft' && reward.draft) ||
+    s === 'promote');
   const [c] = useState<CampaignSave>(() => structuredClone(campaign));
   const [i, setI] = useState(0);
   const [pickNo, setPickNo] = useState(1);
@@ -68,6 +69,30 @@ export function Rewards({ campaign, reward, onDone, hero = 'Commandant', owned }
         <button type="button" className="vn-next" onClick={() => { for (let k = 0; k < ex.count; k++) { removeFromPool(c, ex.from); addToPool(c, ex.to); } next(); }}>
           Promouvoir
         </button>
+      </>
+    );
+  } else if (step === 'promote') {
+    const offers = promoteOffers(c);
+    title = 'Récompense — Promotion';
+    line = say('Certains de nos soldats ont gagné leurs galons. Tu peux en promouvoir un : la carte quitte ton pool et la nouvelle la remplace.');
+    center = (
+      <div className="vn-cards picks">
+        {offers.map(o => (
+          <button type="button" key={`${o.from}-${o.to}`} className="vn-pick promo" aria-label={`Promouvoir ${cardName(o.from)} en ${cardName(o.to)}`}
+            onClick={() => { removeFromPool(c, o.from); addToPool(c, o.to); next(); }}>
+            <span className="promo-pair">
+              <CardTile id={o.from} badge={<span className="count">−1</span>} />
+              <span className="vn-arrow" aria-hidden="true">→</span>
+              <CardTile id={o.to} badge={owned ? ownedBadge(owned(o.to)) : <span className="count">+1</span>} />
+            </span>
+          </button>
+        ))}
+      </div>
+    );
+    actions = (
+      <>
+        <span className="vn-hint">Clique sur une promotion pour l’accepter.</span>
+        <button type="button" className="vn-alt" onClick={next}>Personne cette fois</button>
       </>
     );
   } else if (step === 'draft') {
