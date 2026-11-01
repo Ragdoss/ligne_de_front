@@ -114,14 +114,17 @@ export function CampHub({ campaign, scenario, onDeck, onFight, onOptions, onMenu
             </button>
           )}
         </div>
-        {!campaign.finished && <AttemptsPanel campaign={campaign} scenario={scenario} onBonus={onBonus} onDifficulty={onDifficulty} />}
-        {sides.length > 0 && onSide && (
-          <aside className="hub-help hub-sides" aria-label="Missions secondaires">
-            <b>Mission{sides.length > 1 ? 's' : ''} secondaire{sides.length > 1 ? 's' : ''}</b>
-            <span className="muted">Facultative, une seule fois : elle ne fait pas avancer la campagne, mais peut changer la suite.</span>
-            {sides.map(s => <button key={s.id} type="button" onClick={() => onSide(s.id)}>{s.title}</button>)}
-          </aside>
-        )}
+        {/* Panneaux en bas à droite, empilés : missions secondaires au-dessus, réglages de la campagne en dessous. */}
+        <div className="hub-panels">
+          {sides.length > 0 && onSide && (
+            <aside className="hub-help hub-sides" aria-label="Missions secondaires">
+              <b>Mission{sides.length > 1 ? 's' : ''} secondaire{sides.length > 1 ? 's' : ''}</b>
+              <span className="muted">Facultative, une seule fois : elle ne fait pas avancer la campagne, mais peut changer la suite.</span>
+              {sides.map(s => <button key={s.id} type="button" onClick={() => onSide(s.id)}>{s.title}</button>)}
+            </aside>
+          )}
+          {!campaign.finished && <AttemptsPanel campaign={campaign} scenario={scenario} onBonus={onBonus} onDifficulty={onDifficulty} />}
+        </div>
       </div>
       <nav className="hub-bar" aria-label="Actions du camp">
         <button type="button" onClick={onDeck}>Votre deck</button>

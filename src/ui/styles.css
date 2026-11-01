@@ -649,8 +649,10 @@ button.danger { background: var(--danger); border: 1px solid var(--danger); colo
 .camp-hub .hub-head h1 { color: var(--brass-bright); text-shadow: 0 1px 6px rgba(0,0,0,.8); }
 .camp-hub .hub-step, .camp-hub .hub-deck { color: #e8dfc3; text-shadow: 0 1px 4px rgba(0,0,0,.8); }
 .camp-hub .hub-bar { grid-row: 3; z-index: 1; align-self: end; background: rgba(200,208,218,.88); backdrop-filter: blur(4px); }
-.camp-hub .hub-help { bottom: 90px; z-index: 1; }
-@media (max-width: 560px) { .camp-hub .hub-help { position: absolute; bottom: 150px; left: 16px; right: 16px; max-width: none; } }
+.camp-hub .hub-panels { position: absolute; right: 16px; bottom: 90px; z-index: 1; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; max-width: min(360px, calc(100% - 32px)); }
+.camp-hub .hub-panels:empty { display: none; }
+.camp-hub .hub-panels .hub-help { position: static; max-width: 100%; }
+@media (max-width: 560px) { .camp-hub .hub-panels { bottom: 150px; left: 16px; right: 16px; max-width: none; align-items: stretch; } .camp-hub .hub-panels .hub-help { justify-items: start; text-align: left; } }
 
 /* Paquets : dos de carte, emotes et images de profil au format des cartes (9:16). */
 .pack-slot .pack-back, .pack-slot .cosmo { aspect-ratio: 941 / 1672; min-height: 0; width: 100%; box-sizing: border-box; }
