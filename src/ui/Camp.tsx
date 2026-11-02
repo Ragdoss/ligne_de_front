@@ -10,6 +10,20 @@ import campElfesImg from './assets/camp_elfes.webp';
 import campNomadesImg from './assets/camp_nomades.webp';
 import campDemonsImg from './assets/camp_demons.webp';
 import { Dialog } from './VnDialog';
+import camp_cc1 from './assets/camps/cc1.webp';
+import camp_cc2 from './assets/camps/cc2.webp';
+import camp_cc3 from './assets/camps/cc3.webp';
+import camp_ce4 from './assets/camps/ce4.webp';
+import camp_ce5 from './assets/camps/ce5.webp';
+import camp_ce6 from './assets/camps/ce6.webp';
+import camp_cn4 from './assets/camps/cn4.webp';
+import camp_cn5 from './assets/camps/cn5.webp';
+import camp_cn6 from './assets/camps/cn6.webp';
+import camp_cd4 from './assets/camps/cd4.webp';
+import camp_cd5 from './assets/camps/cd5.webp';
+import camp_cd6 from './assets/camps/cd6.webp';
+import camp_cc7 from './assets/camps/cc7.webp';
+import camp_cc8 from './assets/camps/cc8.webp';
 
 /** Décor du camp par campagne (les autres campagnes gardent le décor par défaut). `troops` : zone cliquable « Discuter », en % de l'image. */
 interface CampArt { src: string; ratio: number; alt: string; troops: { left: number; top: number; width: number; height: number } }
@@ -38,6 +52,24 @@ const CAMP_ART: Record<string, CampArt> = {
     src: campDemonsImg, ratio: 1400 / 933, alt: 'Le camp des Invocateurs de Démons : autel, braseros et statue cornue au milieu des ruines',
     troops: { left: 6, top: 44, width: 40, height: 46 },
   },
+};
+
+/** Décor propre à chaque combat de La Couronne de cendres (prioritaire sur celui de la campagne). */
+const CAMP_ART_BY_SCENARIO: Record<string, CampArt> = {
+  cc1: { src: camp_cc1, ratio: 1400 / 788, alt: 'Le camp impérial au palais, à la tombée de la nuit', troops: { left: 22, top: 40, width: 56, height: 46 } },
+  cc2: { src: camp_cc2, ratio: 1400 / 788, alt: 'Le camp de fortune des exilés sur la route, la capitale fumant au loin', troops: { left: 10, top: 48, width: 60, height: 42 } },
+  cc3: { src: camp_cc3, ratio: 1400 / 788, alt: 'La tente de conseil aux frontières : elfes, nomades et démons autour de la table', troops: { left: 22, top: 40, width: 56, height: 46 } },
+  ce4: { src: camp_ce4, ratio: 1400 / 788, alt: 'Le camp à la lisière de la forêt, face aux sources noires', troops: { left: 10, top: 45, width: 58, height: 42 } },
+  ce5: { src: camp_ce5, ratio: 1400 / 788, alt: 'Le campement elfe dans les arbres de la forêt captive', troops: { left: 14, top: 45, width: 60, height: 42 } },
+  ce6: { src: camp_ce6, ratio: 1400 / 788, alt: 'Le camp elfe et impérial sur le col des brumes', troops: { left: 10, top: 50, width: 66, height: 38 } },
+  cn4: { src: camp_cn4, ratio: 1400 / 788, alt: 'Le camp nomade à l’oasis, au crépuscule', troops: { left: 14, top: 45, width: 60, height: 42 } },
+  cn5: { src: camp_cn5, ratio: 1400 / 788, alt: 'Le camp nomade autour du puits empoisonné', troops: { left: 14, top: 50, width: 60, height: 38 } },
+  cn6: { src: camp_cn6, ratio: 1400 / 788, alt: 'Le camp nomade avant la tempête de sable', troops: { left: 10, top: 50, width: 66, height: 38 } },
+  cd4: { src: camp_cd4, ratio: 1400 / 788, alt: 'Le camp démoniaque dans les ruines volcaniques, devant le brasero', troops: { left: 8, top: 35, width: 76, height: 50 } },
+  cd5: { src: camp_cd5, ratio: 1400 / 788, alt: 'Le camp devant l’entrée des catacombes, sous les torches rouges', troops: { left: 4, top: 30, width: 62, height: 60 } },
+  cd6: { src: camp_cd6, ratio: 1400 / 788, alt: 'Le camp au pied du volcan, face au dragon noir enchaîné', troops: { left: 4, top: 35, width: 70, height: 55 } },
+  cc7: { src: camp_cc7, ratio: 1400 / 788, alt: 'L’armée alliée campe devant les portes de la capitale', troops: { left: 4, top: 35, width: 62, height: 55 } },
+  cc8: { src: camp_cc8, ratio: 1400 / 788, alt: 'La cour du palais, devant les portes de la salle du trône', troops: { left: 4, top: 40, width: 40, height: 50 } },
 };
 
 /** En bas à droite du camp : nombre d'essais et aide au départ (+1, +2… ressources) après plusieurs défaites. */
@@ -94,7 +126,7 @@ export function CampHub({ campaign, scenario, onDeck, onFight, onOptions, onMenu
   const def = campaignDef(campaign);
   const lines = linesFor(campaign, def.talks[campaign.finished ? 'fin' : scenario.id]);
   const sides = availableSides(campaign);
-  const art = CAMP_ART[campaign.campaign] ?? DEFAULT_ART;
+  const art = CAMP_ART_BY_SCENARIO[scenario.id] ?? CAMP_ART[campaign.campaign] ?? DEFAULT_ART;
   return (
     <div className="camp-hub">
       <header className="hub-head">
