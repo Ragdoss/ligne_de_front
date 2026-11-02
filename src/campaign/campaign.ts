@@ -140,6 +140,7 @@ export function scenarioGameSetup(sc: CampaignScenario, playerDeck: string[], se
       emptyDeckDefeat: sc.emptyDeckDefeat ?? true,
       winAtTurn: sc.winAtTurn,
       liberation: sc.liberation,
+      noSacrifice: sc.noSacrifice,
     },
     scenario: {
       events: sc.events,

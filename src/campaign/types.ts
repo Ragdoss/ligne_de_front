@@ -53,6 +53,8 @@ export interface CampaignScenario {
   winAtTurn?: Partial<Record<PlayerId, number>>;
   /** Libération : ces régiments adverses changent de camp au Moral brisé ; ceux libérés rejoignent le pool après la victoire. */
   liberation?: { pid: PlayerId; cardIds: string[] };
+  /** Ces régiments ne peuvent pas être sacrifiés. */
+  noSacrifice?: string[];
   weather?: Weather;
   alarm?: Alarm;
   // ----- Campagnes à embranchements -----

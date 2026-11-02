@@ -72,7 +72,8 @@ export function scenarioRules(sc: CampaignScenario, game?: GameState | null): Sc
   if (w?.kind === 'tempete') special.push({ text: `Tempête de sable aux tours ${turnsList(w.first, w.every, w.duration)} : les régiments non Nomades perdent Distance et 20 INI.` });
   if (w?.kind === 'nuit') special.push({ text: `Nuit aux tours ${turnsList(w.first, w.every, w.duration)} : les Démons gagnent +10 ATK. Le reste du temps il fait jour : les Elfes gagnent +15 INI.` });
   if (sc.alarm) special.push({ text: `Alarme : l’adversaire ne pose aucun régiment avant l’alarme. Elle sonne au tour ${sc.alarm.turn}, ou dès qu’il perd un régiment ; des renforts arrivent alors${sc.alarm.resource ? ` avec ${sc.alarm.resource} ressources` : ''}.` });
-  if (sc.liberation) special.push({ text: `Libération : un ${sc.liberation.cardIds.map(cardName).join(' ou ')} adverse dont le Moral se brise change de camp, Moral plein. Ceux libérés rejoignent ton pool après la victoire (4 au plus).` });
+  if (sc.liberation) special.push({ text: `Libération : un ${sc.liberation.cardIds.map(cardName).join(' ou ')} adverse dont le Moral se brise change de camp, Moral plein et la moitié de son END rendue. Ceux libérés rejoignent ton pool après la victoire (4 au plus).` });
+  if (sc.noSacrifice?.length) special.push({ text: `${sc.noSacrifice.map(cardName).join(', ')} ne peut pas être sacrifié.`, tag: 'nouveau' });
   if (sc.moralCheckLassitude) special.push({ text: `La comparaison de Moral de fin de tour ne donne que ${sc.moralCheckLassitude} point de lassitude au perdant, quel que soit le niveau.` });
   if (sc.endTurnLassitude?.A) special.push({ text: `Chaque fin de ton tour te coûte ${sc.endTurnLassitude.A} point(s) de lassitude.` });
   if (sc.startLevel?.A) special.push({ text: `Tu commences au niveau ${sc.startLevel.A}.` });

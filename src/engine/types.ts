@@ -318,6 +318,8 @@ export interface GameConfig {
   winAtTurn?: Partial<Record<PlayerId, number>>;
   /** Libération : ces régiments de `pid` passent dans l'autre camp quand leur Moral se brise. */
   liberation?: { pid: PlayerId; cardIds: string[] };
+  /** Ces régiments ne peuvent pas être sacrifiés (invocation par sacrifice, Rituel de sang noir, Exécution exemplaire). */
+  noSacrifice?: string[];
 }
 
 // ---------- Scénarios ----------

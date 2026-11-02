@@ -471,7 +471,7 @@ export const COURONNE_SCENARIOS: Record<string, CampaignScenario> = {
     id: 'cs_forteresse',
     side: true,
     title: 'Mission secondaire — Le dragon sous la citadelle',
-    deckRules: { min: 20, text: 'Minimum 20 cartes. Forteresse, enchaînée par le culte, combat contre toi. Brise son Moral (sans la détruire) pour rompre l’emprise : elle change de camp avec la moitié de son END rendue et rejoint ton pool. Détruite, elle est perdue.' },
+    deckRules: { min: 20, text: 'Minimum 20 cartes. Forteresse, enchaînée par le culte, combat contre toi ; les Démons ne peuvent pas la sacrifier. Brise son Moral (sans la détruire) pour rompre l’emprise : elle change de camp avec la moitié de son END rendue et rejoint ton pool. Détruite, elle est perdue.' },
     intro: say(
       'Sous la vieille citadelle, des chaînes grosses comme des troncs retiennent un dragon d’acier et de pierre.',
       [CAP, 'Forteresse. Le gardien de votre famille, Altesse, depuis avant même que l’Empire ait un nom.'],
@@ -488,6 +488,8 @@ export const COURONNE_SCENARIOS: Record<string, CampaignScenario> = {
     A: { faction: 'empire', label: 'L’armée du prince', ai: false },
     B: { faction: 'demons', label: 'Geôliers du culte', deckList: GEOLIERS, ai: true, start: { avant: { '1': 'forteresse', '2': 'cultiste' } } },
     liberation: { pid: 'B', cardIds: ['forteresse'] },
+    // 03/11/2026 : les geôliers ne peuvent pas sacrifier Forteresse (demande de Nathan).
+    noSacrifice: ['forteresse'],
     onLiberated: 'forteresse:libre',
     defeatLassitude: { A: 45, B: 45 },
     events: [],

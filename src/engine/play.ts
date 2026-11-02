@@ -90,6 +90,9 @@ function targetsOpponent(c: CardDef): boolean {
 export function validFirstTarget(ctx: Ctx, p: PlayerId, c: CardDef, ref: SlotRef): boolean {
   if (ref.player !== (targetsOpponent(c) ? opponentOf(p) : p)) return false;
   const u = ctx.unitAt(ref);
+  // Scénario : certains régiments ne peuvent pas être sacrifiés (Forteresse enchaînée, campagne 5).
+  const sacrifice = (c.cardType === 'Regiment' && !!c.sacrificeMinLevel) || c.effect === 'rituelSang' || c.effect === 'executionExemplaire';
+  if (sacrifice && u && ctx.s.config.noSacrifice?.includes(u.cardId)) return false;
   if (c.cardType === 'Regiment') {
     const min = c.sacrificeMinLevel as number | undefined;
     if (min) return !!u && (c.slotTypes ?? [c.slotType]).includes(ref.zone) && u.niveau >= min; // invocation par sacrifice

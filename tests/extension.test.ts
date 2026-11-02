@@ -2,6 +2,8 @@
 import { describe, expect, it } from 'vitest';
 import { Ctx, addKeyword, keywordValue } from '../src/engine/ctx';
 import { createGame, whyUnplayable } from '../src/engine/game';
+import { validFirstTarget } from '../src/engine/play';
+import { CARDS } from '../src/data/cards';
 import { act, blankGame, give, place } from './helpers';
 
 const slot = (player: 'A' | 'B', zone: 'avant' | 'arriere', idx: number) => ({ player, zone, idx });
@@ -138,6 +140,16 @@ describe('Mécaniques de scénario', () => {
     place(s, 'B', 'avant', 3, 'recrue_imp');
     for (let i = 0; i < 4; i++) s = act(s, { type: 'endTurn' }).state;
     expect(s.over).toEqual({ winner: 'A', reason: 'survived' });
+  });
+  it('Scénario : un régiment protégé ne peut pas être sacrifié (Forteresse enchaînée)', () => {
+    const s = blankGame({ noSacrifice: ['forteresse'] });
+    place(s, 'B', 'avant', 0, 'forteresse');
+    place(s, 'B', 'avant', 1, 'cultiste');
+    const ctx = new Ctx(s);
+    const rituel = CARDS.rituel_sang_noir!;
+    expect(validFirstTarget(ctx, 'B', rituel, { player: 'B', zone: 'avant', idx: 0 })).toBe(false);
+    expect(validFirstTarget(ctx, 'B', rituel, { player: 'B', zone: 'avant', idx: 1 })).toBe(true);
+    expect(validFirstTarget(ctx, 'B', CARDS.capacocha!, { player: 'B', zone: 'avant', idx: 0 })).toBe(false);
   });
   it('Libération : le régiment libéré regagne la moitié de son END maximale', () => {
     const s = blankGame({ liberation: { pid: 'B', cardIds: ['esclave_guerrier'] }, moralCheck: false });
