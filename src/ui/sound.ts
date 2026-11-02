@@ -120,10 +120,13 @@ export function soundsFor(events: GameEvent[], me: PlayerId | null): string[][] 
 // ---------- Musique ----------
 // Chaque écran demande une musique (liste de candidats, du plus précis au plus général) ; la dernière demande active gagne.
 // Changement de morceau en fondu ; un morceau boucle.
+// Un candidat « couches-<camp> » est une musique en 5 couches (<camp>-piste1…5.ogg, voir docs/SONS.md) : on joue autant
+// de couches que le niveau du joueur (setMusicLevel).
 interface Request { id: number; keys: string[] }
+interface Playing { key: string; setVolume: (v: number) => void; stop: () => void }
 let requests: Request[] = [];
 let nextId = 1;
-let current: { key: string; el: HTMLAudioElement } | null = null;
+let current: Playing | null = null;
 const FADE_MS = 900;
 
 /** Demande une musique ; renvoie de quoi retirer la demande. */
@@ -142,9 +145,88 @@ function scheduleRefresh(): void {
   queueMicrotask(() => { refreshQueued = false; refreshMusic(); });
 }
 
+// ---- Musique par couches (WebAudio) ----
+// Chaque fichier contient 1 s de raccord avant et après la boucle : la boucle se fait au milieu du fichier, sans accroc.
+const LAYERS = 5, LAYER_PAD = 1;
+/** Niveau sonore naturel (dB) de la musique cumulée à chaque niveau, et niveau visé : les niveaux bas ne sont pas trop faibles. */
+const LAYER_NATURAL_DB: Record<string, number[]> = {
+  empire: [-28.8, -25.8, -22.6, -20.8, -18.0], elfes: [-28.6, -25.1, -22.6, -20.9, -18.1],
+  demons: [-29.3, -25.2, -23.3, -20.9, -18.0], nomades: [-30.1, -27.4, -24.8, -23.7, -19.1],
+};
+const LAYER_TARGET_DB = [-26, -24.5, -23, -21.5, -19];
+const layerNames = (name: string) => Array.from({ length: LAYERS }, (_, i) => `${name}-piste${i + 1}`);
+const hasLayers = (name: string) => layerNames(name).every(n => MUSIC[n]);
+const isLayered = (key: string) => key.startsWith('couches-');
+const available = (key: string) => (isLayered(key) ? hasLayers(key.slice(8)) : !!MUSIC[key]);
+
+let musicLevel = 1;
+let layerCtx: AudioContext | null = null;
+const layerBuffers = new Map<string, Promise<AudioBuffer[]>>();
+let layerGains: GainNode[] = [];
+let layerName = '';
+
+/** Niveau du joueur (1 à 5) : nombre de couches jouées. */
+export function setMusicLevel(level: number): void {
+  const l = Math.max(1, Math.min(LAYERS, Math.round(level) || 1));
+  if (l === musicLevel) return;
+  musicLevel = l;
+  applyLayerGains(0.8);
+}
+function applyLayerGains(seconds: number): void {
+  if (!layerCtx || !layerGains.length) return;
+  const nat = LAYER_NATURAL_DB[layerName]?.[musicLevel - 1] ?? LAYER_TARGET_DB[musicLevel - 1]!;
+  const comp = 10 ** ((LAYER_TARGET_DB[musicLevel - 1]! - nat) / 20);
+  layerGains.forEach((g, i) => g.gain.setTargetAtTime(i < musicLevel ? comp : 0, layerCtx!.currentTime, seconds / 3));
+}
+function loadLayers(ctx: AudioContext, name: string): Promise<AudioBuffer[]> {
+  let p = layerBuffers.get(name);
+  if (!p) {
+    p = Promise.all(layerNames(name).map(async n => ctx.decodeAudioData(await (await fetch(MUSIC[n]![0]!)).arrayBuffer())));
+    p.catch(() => layerBuffers.delete(name));
+    layerBuffers.set(name, p);
+  }
+  return p;
+}
+function startLayers(key: string, name: string): Playing {
+  const Ctor = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+  layerCtx ??= new Ctor();
+  const ctx = layerCtx;
+  const master = ctx.createGain();
+  master.gain.value = 0;
+  master.connect(ctx.destination);
+  let srcs: AudioBufferSourceNode[] = [], stopped = false;
+  const me: Playing = {
+    key,
+    setVolume: v => master.gain.setTargetAtTime(v, ctx.currentTime, 0.15),
+    stop: () => {
+      stopped = true;
+      master.gain.setTargetAtTime(0, ctx.currentTime, FADE_MS / 3000);
+      setTimeout(() => { srcs.forEach(s => { try { s.stop(); } catch { /* déjà arrêtée */ } }); master.disconnect(); }, FADE_MS + 300);
+    },
+  };
+  void (async () => {
+    try {
+      if (ctx.state === 'suspended') await ctx.resume();
+      const bufs = await loadLayers(ctx, name);
+      if (stopped) return;
+      const dur = bufs[0]!.duration - 2 * LAYER_PAD, t0 = ctx.currentTime + 0.1;
+      layerName = name;
+      layerGains = bufs.map(() => { const g = ctx.createGain(); g.gain.value = 0; g.connect(master); return g; });
+      srcs = bufs.map((b, i) => {
+        const s = ctx.createBufferSource();
+        s.buffer = b; s.loop = true; s.loopStart = LAYER_PAD; s.loopEnd = LAYER_PAD + dur;
+        s.connect(layerGains[i]!); s.start(t0, LAYER_PAD); return s;
+      });
+      applyLayerGains(0.01);
+      master.gain.setTargetAtTime(musicVolume, ctx.currentTime, FADE_MS / 3000);
+    } catch { /* lecture impossible : le jeu reste silencieux */ }
+  })();
+  return me;
+}
+
 function wanted(): string | null {
   for (let i = requests.length - 1; i >= 0; i--) {
-    const k = requests[i]!.keys.find(x => MUSIC[x]);
+    const k = requests[i]!.keys.find(available);
     if (k) return k;
   }
   return null;
@@ -158,20 +240,23 @@ function fade(el: HTMLAudioElement, to: number, then?: () => void): void {
   };
   requestAnimationFrame(step);
 }
-function refreshMusic(): void {
-  if (typeof Audio === 'undefined') return;
-  const key = muted || musicVolume <= 0 || !unlocked ? null : wanted();
-  if (current?.key === key) return;
-  if (current) { const old = current.el; fade(old, 0, () => old.pause()); current = null; }
-  if (!key) return;
+function startFile(key: string): Playing {
   const list = MUSIC[key]!;
   const el = new Audio(list[Math.floor(Math.random() * list.length)]!);
   el.loop = true;
   el.volume = 0;
-  current = { key, el };
   el.play().then(() => fade(el, musicVolume)).catch(() => { /* lecture refusée : on réessaiera au prochain changement */ });
+  return { key, setVolume: v => { el.volume = v; }, stop: () => fade(el, 0, () => el.pause()) };
+}
+function refreshMusic(): void {
+  if (typeof Audio === 'undefined') return;
+  const key = muted || musicVolume <= 0 || !unlocked ? null : wanted();
+  if (current?.key === key) return;
+  if (current) { current.stop(); current = null; }
+  if (!key) return;
+  current = isLayered(key) ? startLayers(key, key.slice(8)) : startFile(key);
 }
 function applyMusicVolume(): void {
   if (muted || musicVolume <= 0) { refreshMusic(); return; }
-  if (current) current.el.volume = musicVolume; else refreshMusic();
+  if (current) current.setVolume(musicVolume); else refreshMusic();
 }

@@ -12,7 +12,7 @@ import { APP_VERSION } from '../version';
 import { Hand } from './Hand';
 import { ZoomCard } from './ZoomCard';
 import { statBubbles, type Bubbles } from './bubbles';
-import { playSound, playSounds, requestMusic, soundsFor } from './sound';
+import { playSound, playSounds, requestMusic, setMusicLevel, soundsFor } from './sound';
 import { DiscardViewer, Piles } from './Piles';
 import { cardDesc, cardName, choiceTitle, optionLabel, UNPLAYABLE } from './labels';
 
@@ -180,8 +180,6 @@ export function ChoicePanel({ choice, onPick, onHover }: { choice: PendingChoice
 }
 
 export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, intro, renderEnd, onQuit, animMul = 1, aiMul = 1, bannerMul = 1, initialReveal = false, onOver, remote, bottomSide, onGame, overlay, avatars, arts, attackMotion = attackMotionOn, strongAi = false, music = ['combat'], initialState }: GameScreenProps) {
-  const musicKey = music.join('|');
-  useEffect(() => requestMusic(musicKey.split('|')), [musicKey]);
   /** Joueur de cet écran (sons de victoire / défaite) ; null à deux sur le même écran ou en spectateur. */
   const me: PlayerId | null = remote ? (remote.side === 'A' ? 'B' : 'A') : human.A !== human.B ? (human.A ? 'A' : 'B') : null;
   const artsRef = useRef<Partial<Record<PlayerId, Record<string, string>>>>({});
@@ -190,6 +188,12 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
   // En quittant la partie seulement (pas si une nouvelle partie, ex. revanche, a déjà pris la main).
   useEffect(() => () => clearGameArts(artsRef.current), []);
   const [game, setGame] = useState<GameState>(() => (initialState ? structuredClone(initialState) : createGame(setup)));
+  // Musique : celle du camp du joueur de l'écran, en couches (autant que son niveau) ; à défaut, la musique demandée par l'écran.
+  const musicFaction = game.players[me ?? 'A'].faction;
+  const musicKey = [...(musicFaction === 'neutre' ? [] : [`couches-${musicFaction === 'elfe' ? 'elfes' : musicFaction}`]), ...music].join('|');
+  useEffect(() => requestMusic(musicKey.split('|')), [musicKey]);
+  const musicLvl = me ? game.players[me].level : Math.max(game.players.A.level, game.players.B.level);
+  useEffect(() => setMusicLevel(musicLvl), [musicLvl]);
   useEffect(() => { setZoomState(null); }, [game]); // une carte jouée ou détruite ne reste pas affichée
   // Carte survolée, affichée en grand du côté opposé à la souris (fermée dès que le jeu change).
   const [zoom, setZoomState] = useState<{ id: string; left: boolean; owner?: PlayerId } | null>(null);
@@ -297,7 +301,8 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
       setShown(null);
       // Début du tour suivant (pioche…) : sons après le combat.
       const ts = ev.findIndex((y, k) => k > attacks[attacks.length - 1]! && y.type === 'turnStart');
-      if (ts >= 0) playSounds(soundsFor(ev.slice(ts), me));
+      // Un temps avant la pioche : les derniers bruits du combat ne doivent pas se mélanger avec elle.
+      if (ts >= 0) { const after = soundsFor(ev.slice(ts), me); setTimeout(() => playSounds(after), T * 0.9); }
       const tail = at(ev.length - 1);
       const endB = statBubbles(at(attacks[attacks.length - 1]!), tail, false);
       setBubbles(endB);

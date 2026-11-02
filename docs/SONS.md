@@ -75,6 +75,19 @@ Identifiants : campagnes `empire`, `demons`, `elfes`, `nomades` ; scénarios `d1
 (La Purification), `n1`…`n5` (Les Sables), etc. (champ `id` dans `src/campaign/*.ts`). Ex. `scenario-e4.ogg` pour
 « Le portail des Abysses », `combat-nomades.ogg` pour tous les combats de la campagne des Sables.
 
+### Musique par camp, en 5 couches
+
+Pour une partie, le jeu essaie d'abord `couches-<camp>` : cinq fichiers `<camp>-piste1.ogg` à `<camp>-piste5.ogg`
+(camps `empire`, `elfes`, `demons`, `nomades`). Les cinq pistes jouent en même temps, au même point de la boucle ; on
+n'entend que les pistes de numéro inférieur ou égal au niveau du joueur (1 : calme, 5 : épique). À deux sur le même
+écran, c'est le camp du joueur A et le niveau le plus haut des deux. Sans les cinq fichiers du camp, la musique
+demandée par l'écran (tableau ci-dessus) est jouée à la place.
+
+Chaque fichier contient 1 s de raccord avant et 1 s après la boucle (la boucle se fait au milieu du fichier) : ne pas
+les couper. Le volume de chaque niveau est corrigé dans `src/ui/sound.ts` (`LAYER_NATURAL_DB`). Les musiques actuelles
+sont des maquettes (instruments échantillonnés + voix ElevenLabs au niveau 5 des démons), à remplacer par une
+composition professionnelle en gardant le même découpage.
+
 ## Publier
 
 1. Déposer les fichiers dans les dossiers ci-dessus, avec les bons noms.
