@@ -6,8 +6,8 @@
 |---|---|---|---|---|
 | La Purification — 1. La source souillée | 20 | **100 %** | 7.8 | — |
 | La Purification — 2. Les captifs | 24 | **87 %** | 11.3 | lassitude (13 %) |
-| La Purification — 3. La nuit sans fin | 25 | **50 %** | 8.5 | plus de régiment (29 %), lassitude (21 %) |
-| La Purification — 4. Le portail des Abysses | 28 | **82 %** | 10.9 | lassitude (10 %), plus de régiment (8 %) |
+| La Purification — 3. La nuit sans fin | 25 | **78 %** | 9.3 | lassitude (16 %), plus de régiment (6 %) |
+| La Purification — 4. Le portail des Abysses | 28 | **85 %** | 10.3 | plus de régiment (8 %), lassitude (7 %) |
 
 ## Pools utilisés
 

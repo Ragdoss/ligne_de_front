@@ -14,8 +14,9 @@ const START_POOL = cards('eclaireur_elfe*3', 'lames_aube*2', 'pousse_sylve*2', '
 const DEMONS_SOURCE = cards('cultiste*9', 'chien_infernal*2', 'esclave_guerrier*3', 'acolyte_damne*2', 'effroi_demoniaque*2', 'pacte_sang*2', 'diablotins*5');
 const DEMONS_CAPTIFS = cards('esclave_guerrier*6', 'cultiste*7', 'diablotins*4', 'chien_infernal*4', 'fanatiques*2', 'acolyte_damne*2', 'effroi_demoniaque*2',
   'pacte_survie', 'demon_akantha', 'banquet_infernal');
-const DEMONS_NUIT = cards('chien_infernal*5', 'demon_akantha*2', 'cultiste*6', 'fanatiques*2', 'esclave_guerrier*3', 'effroi_demoniaque*3',
-  'rancon_ames', 'dette_infernale', 'acolyte_damne*2', 'suppot_infernal', 'veilleur_os', 'abime_grandissant');
+// 02/11/2026 : 8 cartes de plus (retour de Nathan : la partie se gagnait par pioche vide adverse au lieu de tenir jusqu'à l'aube).
+const DEMONS_NUIT = cards('chien_infernal*5', 'demon_akantha*2', 'cultiste*9', 'fanatiques*2', 'esclave_guerrier*4', 'effroi_demoniaque*3', 'diablotins*3',
+  'rancon_ames', 'dette_infernale', 'acolyte_damne*3', 'suppot_infernal', 'veilleur_os', 'abime_grandissant');
 const DEMONS_PORTAIL = cards('cultiste*5', 'chien_infernal*4', 'demon_akantha*2', 'fanatiques*2', 'ceremonie_declin', 'gargouille_cendres*2', 'diablotins*3',
   'effroi_demoniaque*2', 'banquet_infernal', 'acolyte_damne*2', 'veilleur_os', 'maitre_chenil_infernal');
 
@@ -87,7 +88,7 @@ export const ELF_SCENARIOS: Record<string, CampaignScenario> = {
   e3: {
     id: 'e3',
     title: 'La Purification — 3. La nuit sans fin',
-    deckRules: { min: 25, text: 'Minimum 25 cartes. Nuit aux tours 3-4, 7-8, 11-12… (Démons +10 ATK), jour le reste du temps (Elfes +15 INI). Tiens jusqu’au début du tour 10. Tu ne perds pas si ta pioche est vide.' },
+    deckRules: { min: 25, text: 'Minimum 25 cartes. Nuit aux tours 3-4, 7-8, 11-12… (Démons +10 ATK), jour le reste du temps (Elfes +15 INI). Tiens jusqu’au début du tour 10 : des cavaliers elfes arrivent en renfort aux tours 3 et 6. Tu ne perds pas si ta pioche est vide.' },
     intro: say(
       'Un rituel démoniaque étouffe le soleil sur la forêt. La nuit revient sans cesse, et avec elle des démons plus forts.',
       [SY, 'Nous ne pouvons pas les vaincre dans le noir. Tenons jusqu’à l’aube véritable.'],
@@ -106,9 +107,11 @@ export const ELF_SCENARIOS: Record<string, CampaignScenario> = {
     winAtTurn: { A: 10 },
     emptyDeckDefeat: { A: false },
     startLevel: { A: 2, B: 2 },
-    defeatLassitude: { A: 60, B: 40 },
+    defeatLassitude: { A: 60, B: 50 },
     noRegimentDefeatFromTurn: { A: 2, B: 4 },
     events: [
+      { turn: 3, pid: 'A', spawn: [{ cardId: 'cavalier_elfe', zone: 'avant', idx: 0 }], dialog: say([LY, 'Des cavaliers ! La garde de Sylvain nous rejoint !']) },
+      { turn: 6, pid: 'A', spawn: [{ cardId: 'cavalier_elfe', zone: 'avant', idx: 3 }], dialog: say([SY, 'Tenez encore. Chaque cavalier compte jusqu’à l’aube.']) },
       { turn: 4, pid: 'B', resource: 1, spawn: [{ cardId: 'chien_infernal', zone: 'avant', idx: 0 }, { cardId: 'chien_infernal', zone: 'avant', idx: 3 }] },
       { turn: 7, pid: 'B', resource: 2, spawn: [{ cardId: 'demon_akantha', zone: 'avant', idx: 2 }], dialog: say(['Ritualiste', 'Que la nuit ne finisse jamais !']) },
     ],
@@ -121,7 +124,7 @@ export const ELF_SCENARIOS: Record<string, CampaignScenario> = {
   e4: {
     id: 'e4',
     title: 'La Purification — 4. Le portail des Abysses',
-    deckRules: { min: 25, text: 'Minimum 25 cartes. Détruis le Portail infernal (150 END, rang arrière) : un Chien Infernal en surgit à chaque tour. Tu ne perds pas si ta pioche est vide.' },
+    deckRules: { min: 25, text: 'Minimum 25 cartes. Détruis le Portail infernal (150 END, rang arrière) : un Chien Infernal en surgit à chaque tour. Tu commences au niveau 3. Tu ne perds pas si ta pioche est vide.' },
     intro: say(
       'Au pied des montagnes, un portail de flammes noires pulse comme un cœur.',
       [LY, 'Il en sort sans arrêt. Des chiens, des choses pires.'],
@@ -138,7 +141,8 @@ export const ELF_SCENARIOS: Record<string, CampaignScenario> = {
       start: { avant: { '1': 'gargouille_cendres', '2': 'chien_infernal' }, arriere: { '1': 'portail_infernal' } } },
     mustSurvive: { B: 'portail_infernal' },
     emptyDeckDefeat: { A: false },
-    startLevel: { A: 2, B: 2 },
+    // 02/11/2026 : le joueur commence niveau 3 (retour de Nathan : la meute de chiens est ingérable sans cela).
+    startLevel: { A: 3, B: 2 },
     defeatLassitude: { A: 60, B: 50 },
     noRegimentDefeatFromTurn: { A: 2, B: NO_LIMIT },
     events: portalSpawns,
