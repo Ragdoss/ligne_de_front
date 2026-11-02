@@ -96,7 +96,7 @@ export function nextNode(c: CampaignSave): string | null {
   return sc.next?.find(n => hasFlags(c, n.if))?.to ?? null;
 }
 /** Fin atteinte (campagne à embranchements) : la première dont la condition est remplie. */
-export function endingOf(c: CampaignSave): { title: string; text: string } {
+export function endingOf(c: CampaignSave): { id?: string; title: string; text: string } {
   const def = campaignDef(c);
   const e = def.endings?.find(x => hasFlags(c, x.if));
   return e ?? { title: def.endTitle, text: def.endText };

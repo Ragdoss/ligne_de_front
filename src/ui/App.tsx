@@ -19,7 +19,14 @@ import { DraftScreen, DRAFT_FIRST_BONUS } from './Draft';
 import { EMOTES } from '../profile/cosmetics';
 import { Avatar } from './avatars';
 import { OnlineLobby, rematchMsg, startFromMsg, type OnlineStart } from './Online';
+import endTroneVide from './assets/endings/trone-vide.webp';
+import endCendres from './assets/endings/cendres.webp';
+import endDeuxPeuples from './assets/endings/deux-peuples.webp';
+import endAubeGrise from './assets/endings/aube-grise.webp';
 import { Rewards } from './Rewards';
+
+/** Illustration de chaque fin de campagne (par id de fin). */
+const ENDING_ART: Record<string, string> = { 'trone-vide': endTroneVide, cendres: endCendres, 'deux-peuples': endDeuxPeuples, 'aube-grise': endAubeGrise };
 import { liveGameStore, ScenarioRulesBubble } from './ScenarioRules';
 import { Tutorial } from './Tutorial';
 import { CampaignMenu, Home, LocalPlay, OptionsScreen, resolveDeck, TopBar, type LocalSetup } from './Screens';
@@ -310,6 +317,7 @@ export function App() {
     content = (
       <div className="camp">
         <TopBar title={endingOf(screen.campaign).title} onBack={home} />
+        {ENDING_ART[endingOf(screen.campaign).id ?? ''] && <img className="camp-ending-art" src={ENDING_ART[endingOf(screen.campaign).id ?? '']} alt={endingOf(screen.campaign).title} />}
         <p className="camp-ending">{endingOf(screen.campaign).text}</p>
         <h2 className="sub">{total ? `${total} carte(s) rejoignent ta collection` : 'Aucune nouvelle carte pour ta collection'}</h2>
         <p className="muted small">Pour chaque carte, ta collection monte au nombre d’exemplaires de ton pool de campagne (3 maximum). Chaque campagne terminée compte : recommence-la en choisissant d’autres cartes pour compléter ta collection.</p>
