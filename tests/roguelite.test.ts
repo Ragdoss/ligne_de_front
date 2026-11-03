@@ -89,6 +89,21 @@ describe('Roguelite : exemplaires', () => {
   });
 });
 
+describe('Roguelite : effets propres à une carte sur un exemplaire', () => {
+  it('Percepteur impérial (exemplaire de run) : l’adversaire défausse 2 cartes', () => {
+    const run = newRun('t7');
+    run.deck.push({ uid: 99, id: 'percepteur_imperial', mods: {} });
+    fight(run, { kind: 'combat', reward: 'or', deck: 'd1' }, 1); // enregistre les exemplaires
+    let s = blankGame();
+    place(s, 'A', 'avant', 0, 'soldat_kragz', { leader: 'lieutenant', leaderOwner: 'A' });
+    s.players.B.hand = [{ uid: 900, cardId: 'recrue_imp' }, { uid: 901, cardId: 'recrue_imp' }, { uid: 902, cardId: 'recrue_imp' }];
+    s.players.A.resource = 5; s.players.A.level = 2;
+    const h = give(s, 'A', 'percepteur_imperial~99');
+    s = act(s, { type: 'play', handUid: h, target: { player: 'A', zone: 'avant', idx: 1 } }).state;
+    expect(s.players.B.hand).toHaveLength(1);
+  });
+});
+
 describe('Roguelite : cartes des Titans et boss', () => {
   it('Écho du Titan : -10 % d’ATK, définitif', () => {
     let s = blankGame();

@@ -2,7 +2,7 @@
 // Les effets qui demandent une décision passent par la file de choix (voir choices.ts).
 
 import { volley } from './combat';
-import { Ctx, addKeyword, card, keywordValue, opponentOf } from './ctx';
+import { Ctx, addKeyword, baseCard, card, keywordValue, opponentOf } from './ctx';
 import type { CardDef, HandCard, PlayerId, SlotRef, Unit } from './types';
 
 // ---------- Coût ----------
@@ -22,7 +22,7 @@ export function cardCost(ctx: Ctx, p: PlayerId, h: HandCard): number {
     const raw = dynamicRawCost(ctx, c, p);
     return raw <= 0 ? 0 : Math.max(0, raw - tacticReduction(ctx, p));
   }
-  let cost = c.cout - (h.discount ?? 0) + (ctx.player(p).costTax?.[c.id] ?? 0); // Interrogatoire : surcoût de toutes les copies
+  let cost = c.cout - (h.discount ?? 0) + (ctx.player(p).costTax?.[baseCard(c.id)] ?? 0); // Interrogatoire : surcoût de toutes les copies
   if (c.types?.includes('Basilic')) {
     for (const u of ctx.units(p)) cost -= (card(u.cardId).basilicCostReduction as number | undefined) ?? 0;
   }
@@ -50,7 +50,7 @@ export function unplayableReason(ctx: Ctx, p: PlayerId, h: HandCard): string | n
   const c = card(h.cardId);
   const pl = ctx.player(p);
   if (c.niveau > pl.level && !h.levelFree) return 'level';
-  if (c.unique && [...ctx.units('A'), ...ctx.units('B')].some(u => u.cardId === c.id || u.leader === c.id)) return 'unique'; // un seul en jeu, tous joueurs confondus
+  if (c.unique && [...ctx.units('A'), ...ctx.units('B')].some(u => baseCard(u.cardId) === baseCard(c.id) || (u.leader && baseCard(u.leader) === baseCard(c.id)))) return 'unique'; // un seul en jeu, tous joueurs confondus
   if (c.dynamicCost && dynamicRawCost(ctx, c, p) <= 0 && !h.freeCopy) return 'noEffect';
   if (cardCost(ctx, p, h) > pl.resource && !(c.costVsPrey !== undefined && ctx.preyOf(p) && (c.costVsPrey as number) <= pl.resource)) return 'resource';
   if (c.requiresOwnEmpireLeaderToCast && !ctx.units(p).some(u => u.types.includes('Empire') && u.leader)) return 'condition';
@@ -274,8 +274,9 @@ function deployRegiment(ctx: Ctx, p: PlayerId, c: CardDef, ref: SlotRef): void {
 }
 
 /** Effets d'arrivée en jeu de la carte `asCard`, appliqués au régiment `u` (rejoués par Légat Varro, Légion de Morvak). */
-export function arrivalEffects(ctx: Ctx, p: PlayerId, u: Unit, asCard: string, sacLevel = 0): void {
-  const c = card(asCard);
+export function arrivalEffects(ctx: Ctx, p: PlayerId, u: Unit, cardKey: string, sacLevel = 0): void {
+  const c = card(cardKey);
+  const asCard = baseCard(cardKey); // effets propres à une carte : par sa carte d'origine (exemplaires du roguelite)
   const q = opponentOf(p);
   // Ralliement X : les alliés voisins regagnent X Moral.
   const rally = keywordValue({ keywords: c.keywords ?? [] } as unknown as Unit, 'Ralliement'); // mot-clé imprimé sur la carte (pas ceux gagnés)
@@ -388,7 +389,7 @@ function nomadArrival(ctx: Ctx, p: PlayerId, u: Unit, asCard: string = u.cardId)
   const q = opponentOf(p);
   const opp = ctx.player(q);
   const note = (key: string, data?: Record<string, unknown>) => ctx.emit({ type: 'effect', key, player: p, cardId: asCard, data });
-  switch (asCard) {
+  switch (baseCard(asCard)) {
     case 'jeune_nomade': {
       if (!opp.hand.length) { note('noTarget'); break; }
       ctx.discardFromHand(q, opp.hand[ctx.randomInt(opp.hand.length)]!.uid, u.cardId);
@@ -654,7 +655,7 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
     case 'oasisCachee': {
       for (let i = 0; i < 2 && !ctx.over; i++) ctx.draw(p, c.id);
       if (ctx.over) break;
-      if (ctx.units(p).some(u => u.cardId === 'caravane_marchande')) { pl.resource += 1; ctx.emit({ type: 'resource', player: p, amount: 1, source: c.id }); }
+      if (ctx.units(p).some(u => baseCard(u.cardId) === 'caravane_marchande')) { pl.resource += 1; ctx.emit({ type: 'resource', player: p, amount: 1, source: c.id }); }
       ctx.queueChoice('handDiscard', p, c.id, { n: 1, sum: 0, thief: null, gainBase: 0 });
       break;
     }
@@ -738,7 +739,7 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
     // --- Roguelite ---
     case 'holdGround': // Lutter contre le mouvement : le prochain glissement n'a pas lieu ; chaque lancer coûte 1 de plus.
       if (ctx.s.scenario) ctx.s.scenario.holdGround = true;
-      pl.costTax = { ...(pl.costTax ?? {}), [c.id]: (pl.costTax?.[c.id] ?? 0) + 1 };
+      pl.costTax = { ...(pl.costTax ?? {}), [baseCard(c.id)]: (pl.costTax?.[baseCard(c.id)] ?? 0) + 1 };
       break;
     case 'titanEcho': { // Écho du Titan : la cible perd définitivement 10 % de son ATK.
       const d = Math.max(1, Math.round(target!.baseAtk * 0.1));

@@ -8,6 +8,8 @@ import type {
 } from './types';
 
 export const opponentOf = (p: PlayerId): PlayerId => (p === 'A' ? 'B' : 'A');
+/** Carte d'origine d'un exemplaire du mode roguelite (« carte~12 » → « carte ») ; les effets propres à une carte s'y rattachent. */
+export const baseCard = (id: string): string => id.split('~')[0]!;
 
 export function card(id: string): CardDef {
   const c = CARDS[id];

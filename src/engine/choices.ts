@@ -1,6 +1,6 @@
 // File des choix en attente : calcul des options quand un choix devient actif, et application du choix.
 
-import { Ctx, card, opponentOf } from './ctx';
+import { Ctx, baseCard, card, opponentOf } from './ctx';
 import { applyOffrande, arrivalEffects, isDemonRegiment } from './play';
 import { CARD_TEXT_FR } from '../i18n/cards.fr';
 import type { ChoiceOption, PendingChoice } from './types';
@@ -356,7 +356,7 @@ export function resolveChoice(ctx: Ctx, index: number): string | null {
       const h = opp.hand.find(x => x.uid === o.handUid);
       if (!h) break;
       if (opp.hand.length <= 3) { ctx.discardFromHand(q, h.uid, c.source); break; }
-      opp.costTax = { ...(opp.costTax ?? {}), [h.cardId]: (opp.costTax?.[h.cardId] ?? 0) + 2 };
+      opp.costTax = { ...(opp.costTax ?? {}), [baseCard(h.cardId)]: (opp.costTax?.[baseCard(h.cardId)] ?? 0) + 2 };
       note('interrogatoire', { cardId: h.cardId });
       break;
     }

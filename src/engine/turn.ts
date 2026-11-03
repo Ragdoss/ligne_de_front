@@ -1,7 +1,7 @@
 // Fin de tour (combat, contrôles de défaite) et début du tour suivant (ressources, effets, pioche).
 
 import { resolveCombat } from './combat';
-import { Ctx, card, opponentOf } from './ctx';
+import { Ctx, baseCard, card, opponentOf } from './ctx';
 import { scenarioTurnStart } from './scenario';
 import type { PlayerId } from './types';
 
@@ -135,7 +135,7 @@ export function startTurn(ctx: Ctx, p: PlayerId): void {
     generators += d.generatesResourceEachTurn ?? 0;
     if (u.leader) generators += (card(u.leader).leaderResourceEachTurn as number | undefined) ?? 0; // Quartier-maître
     const rc = d.resourceIfCaravane as number | undefined; // Caravanier armé
-    if (rc && ctx.units(p).some(x => x.cardId === 'caravane_marchande')) generators += rc;
+    if (rc && ctx.units(p).some(x => baseCard(x.cardId) === 'caravane_marchande')) generators += rc;
     rally = Math.max(rally, d.ralliesBrokenEmpireEachTurn ?? 0);
   }
   if (generators) { pl.resource += generators; ctx.emit({ type: 'resource', player: p, amount: generators, source: 'generator' }); }
@@ -180,7 +180,7 @@ export function startTurn(ctx: Ctx, p: PlayerId): void {
 
   // Régiment isolé : Clerc de la Forêt (génère Soin simple), puis durée de vie.
   const iso = pl.board.isole;
-  if (iso?.cardId === 'clerc_foret') ctx.generate(p, 'soin_simple', 'clerc_foret');
+  if (iso && baseCard(iso.cardId) === 'clerc_foret') ctx.generate(p, 'soin_simple', 'clerc_foret');
   if (iso && iso.vieTours !== null) {
     iso.vieTours -= 1;
     if (iso.vieTours <= 0) {
