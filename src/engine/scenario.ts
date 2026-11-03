@@ -24,6 +24,9 @@ export function applyScenarioStart(ctx: Ctx, sc: ScenarioSetup): void {
     const iso = sc.start?.[p]?.isole;
     if (iso) { const u = ctx.makeUnit(iso, p); u.justDeployed = false; pl.board.isole = u; }
     for (const cardId of sc.startHand?.[p] ?? []) ctx.addToHand(p, cardId, { generated: true });
+    // Roguelite : lassitude gardée du combat précédent ; on commence au niveau correspondant.
+    const lass = sc.startLassitude?.[p];
+    if (lass) { pl.points = lass; ctx.checkLevel(p); pl.resource = Math.max(pl.resource, pl.level + (sc.startResource?.[p] ?? 0)); }
   }
 }
 
@@ -32,6 +35,8 @@ export function scenarioTurnStart(ctx: Ctx, p: PlayerId): void {
   const sc = ctx.s.scenario;
   if (!sc || ctx.over) return;
   moveConvoy(ctx, p);
+  if (ctx.over) return;
+  glissement(ctx, p);
   if (ctx.over) return;
   // Météo : annoncée au début du tour de A quand elle change.
   if (sc.weather && p === 'A') {
@@ -55,6 +60,30 @@ export function scenarioTurnStart(ctx: Ctx, p: PlayerId): void {
     sc.fired.push(key);
     runEvent(ctx, ev);
     if (ctx.over) return;
+  }
+}
+
+/** Titan du Glissement : au début du tour adverse, les régiments de la victime glissent d'une case vers la droite. */
+function glissement(ctx: Ctx, p: PlayerId): void {
+  const g = ctx.s.scenario?.glissement;
+  if (!g) return;
+  const sc = ctx.s.scenario!;
+  const pl = ctx.player(g.victim);
+  if (p === g.victim) {
+    if (!pl.hand.some(h => h.cardId === g.tactic)) ctx.generate(p, g.tactic, 'glissement');
+    return;
+  }
+  if (sc.holdGround) { sc.holdGround = false; ctx.emit({ type: 'effect', key: 'holdGround', player: g.victim, cardId: g.tactic }); return; }
+  ctx.emit({ type: 'effect', key: 'glissement', player: g.victim, cardId: '' });
+  for (const zone of ['avant', 'arriere'] as const) {
+    const row = pl.board[zone];
+    const last = row[row.length - 1];
+    if (last) { ctx.destroy(last, 'effect'); if (ctx.over) return; }
+    for (let i = row.length - 1; i > 0; i--) {
+      const u = row[i - 1];
+      row[i] = u ?? null; row[i - 1] = null;
+      if (u) ctx.emit({ type: 'moved', uid: u.uid, cardId: u.cardId, from: { player: g.victim, zone, idx: i - 1 }, to: { player: g.victim, zone, idx: i } });
+    }
   }
 }
 

@@ -302,6 +302,23 @@ export function attack(ctx: Ctx, a: Unit, target: Unit, mult = 1): boolean {
     type: 'attack', attacker: a.uid, attackerCard: a.cardId, target: target.uid, targetCard: target.cardId,
     atk, arm, damage, moralLoss, end: target.currentEnd, mor: target.currentMor,
   });
+  // Roguelite, Archère du Glissement : Prime, la cible perd définitivement de l'END maximale.
+  const titanEnd = prime ? (ad.primeTitanEnd as number | undefined) : undefined;
+  if (titanEnd) {
+    target.maxEnd = Math.max(1, target.maxEnd - titanEnd);
+    target.currentEnd = Math.min(target.currentEnd, target.maxEnd);
+    ctx.permaDebuff(target.controller, target.cardId, { end: -titanEnd });
+  }
+  // Roguelite, Essence de la réalité : chaque attaque contre elle use définitivement des régiments de son camp
+  // (autant que le niveau de l'attaquant) : -1 ATK, -1 INI, -1 ARM.
+  if (card(target.cardId).essenceDrain) {
+    const pool = ctx.units(target.controller).filter(x => x.uid !== target.uid);
+    for (let i = 0; i < ctx.player(a.controller).level && pool.length; i++) {
+      const v = pool.splice(ctx.randomInt(pool.length), 1)[0]!;
+      v.baseAtk = Math.max(0, v.baseAtk - 1); v.ini = Math.max(0, v.ini - 1); v.baseArm = Math.max(0, v.baseArm - 1);
+      ctx.permaDebuff(target.controller, v.cardId, { atk: -1, ini: -1, arm: -1 });
+    }
+  }
   const dead = target.currentEnd <= 0 || target.currentMor <= 0;
   if (prime && !dead && ad.primeStun) { // Duelliste sylvestre
     target.stunned = true; target.stunnedBy = a.uid;

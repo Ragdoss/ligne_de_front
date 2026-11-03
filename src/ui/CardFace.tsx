@@ -25,7 +25,9 @@ export function setArtChoices(c: Record<string, string>): void { choice = c; }
 /** Cartes qui empruntent l'art d'une autre carte, art alternatif choisi compris (le régiment Palissade suit la tactique du même nom). */
 const ART_SOURCE: Record<string, string> = { palissade_regiment: 'palissade_tactique', eveil_elementaire: 'elem_eveil_regiment' };
 /** Illustration d'une carte, art alternatif choisi compris (undefined si elle n'en a pas encore). */
-export const artOf = (id: string): string | undefined => { const src = ART_SOURCE[id] ?? id; return (choice[src] && ART[choice[src]!]) || ART[src]; };
+/** Exemplaire de run du mode roguelite (« carte~12 ») : même illustration que la carte. */
+const baseId = (id: string) => id.split('~')[0]!;
+export const artOf = (id: string): string | undefined => { const src = ART_SOURCE[baseId(id)] ?? baseId(id); return (choice[src] && ART[choice[src]!]) || ART[src]; };
 // En partie : arts choisis par chaque joueur (null hors partie : on montre les choix du profil).
 type Side = 'A' | 'B';
 let gameArts: Partial<Record<Side, Record<string, string>>> | null = null;
@@ -34,7 +36,7 @@ export function setGameArts(a: Partial<Record<Side, Record<string, string>>> | n
 export function clearGameArts(a: Partial<Record<Side, Record<string, string>>>): void { if (gameArts === a) gameArts = null; }
 /** Art à montrer pour une carte d'un joueur en partie (undefined hors partie). */
 export const artKeyFor = (id: string, owner?: Side): string | undefined => {
-  const src = ART_SOURCE[id] ?? id;
+  const src = ART_SOURCE[baseId(id)] ?? baseId(id);
   return gameArts && owner ? gameArts[owner]?.[src] ?? src : undefined;
 };
 /** Arts choisis valides parmi une liste reçue (en ligne) : seulement des arts existants des cartes données. */
@@ -47,7 +49,7 @@ export function cleanArts(raw: unknown, cards: string[]): Record<string, string>
 }
 
 /** Illustration d'une variante précise (identifiant de carte ou clé « carte.altN »). */
-export const artFile = (key: string): string | undefined => ART[key] ?? (ART_SOURCE[key] ? ART[ART_SOURCE[key]!] : undefined);
+export const artFile = (key: string): string | undefined => ART[key] ?? ART[baseId(key)] ?? (ART_SOURCE[baseId(key)] ? ART[ART_SOURCE[baseId(key)]!] : undefined);
 
 // ---------- Niveau : chiffres romains (par défaut) ou arabes (Options) ----------
 let roman = true;

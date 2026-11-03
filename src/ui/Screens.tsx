@@ -20,7 +20,7 @@ import { activeProfileId, createProfileEntry, deleteProfileEntry, listProfiles, 
 import { mainFaction } from './Decks';
 import { FACTION_LABEL, PLAYABLE_FACTIONS } from './labels';
 
-export type HomeTarget = 'tutorial' | 'puzzles' | 'local' | 'online' | 'draft' | 'campaign' | 'collection' | 'options';
+export type HomeTarget = 'tutorial' | 'puzzles' | 'local' | 'online' | 'draft' | 'campaign' | 'roguelite' | 'collection' | 'options';
 
 export function Home({ profile, go }: { profile: Profile; go: (t: HomeTarget) => void }) {
   const items: [HomeTarget, string, string][] = [
@@ -30,6 +30,7 @@ export function Home({ profile, go }: { profile: Profile; go: (t: HomeTarget) =>
     ['online', 'Jouer en ligne', 'Contre un ami, de navigateur à navigateur (premier jet)'],
     ['draft', 'Draft à 4', 'Contre l’ordinateur ou entre amis en ligne (jusqu’à 4 joueurs), puis tournoi'],
     ['campaign', 'Campagne', 'Les campagnes solo et ta campagne en cours'],
+    ['roguelite', 'Roguelite (prototype)', 'Augustus contre les Titans : une run, des choix, une armée qui s’use'],
     ['collection', 'Ma collection', 'Mes decks, mes cartes, ouverture de paquets'],
     ['options', 'Options', 'Taille de l’interface, vitesse du jeu…'],
   ];

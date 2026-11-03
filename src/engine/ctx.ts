@@ -570,6 +570,15 @@ export class Ctx {
     return { end: gEnd, mor: gMor };
   }
 
+  // ---------- Roguelite ----------
+  /** Malus définitif pour la run sur un exemplaire de carte (cumulé). */
+  permaDebuff(owner: PlayerId, cardId: string, mod: import('./types').RunMod): void {
+    const all = (this.s.runMods ??= {});
+    const cur = (all[cardId] ??= {});
+    for (const [k, v] of Object.entries(mod) as [keyof typeof mod, number][]) cur[k] = (cur[k] ?? 0) + v;
+    this.emit({ type: 'effect', key: 'titanDebuff', player: owner, cardId, data: { ...mod } });
+  }
+
   // ---------- Lassitude et niveaux ----------
   gainLassitude(p: PlayerId, n: number, source: string): void {
     if (n <= 0 || this.over) return;

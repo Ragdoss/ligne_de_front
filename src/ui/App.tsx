@@ -28,6 +28,7 @@ import { Rewards } from './Rewards';
 /** Illustration de chaque fin de campagne (par id de fin). */
 const ENDING_ART: Record<string, string> = { 'trone-vide': endTroneVide, cendres: endCendres, 'deux-peuples': endDeuxPeuples, 'aube-grise': endAubeGrise };
 import { liveGameStore, ScenarioRulesBubble } from './ScenarioRules';
+import { RogueliteScreen } from './Roguelite';
 import { Tutorial } from './Tutorial';
 import { CampaignMenu, Home, LocalPlay, OptionsScreen, resolveDeck, TopBar, type LocalSetup } from './Screens';
 
@@ -54,7 +55,8 @@ type Screen =
   | { kind: 'campReward'; campaign: CampaignSave }
   | { kind: 'campEnd'; campaign: CampaignSave; gained: Record<string, number> }
   | { kind: 'collection'; tab: 'decks' | 'cards' }
-  | { kind: 'options' };
+  | { kind: 'options' }
+  | { kind: 'roguelite' };
 
 function EndBox({ title, text, children, extra }: { title: string; text: string; children: React.ReactNode; extra?: React.ReactNode }) {
   return (
@@ -141,7 +143,9 @@ export function App() {
   let content: React.ReactNode;
 
   if (screen.kind === 'home') {
-    content = <Home profile={profile} go={t => setScreen(t === 'tutorial' ? { kind: 'tutorial', key: Date.now() } : t === 'puzzles' ? { kind: 'puzzles' } : t === 'local' ? { kind: 'local' } : t === 'online' ? { kind: 'online' } : t === 'draft' ? { kind: 'draft' } : t === 'campaign' ? { kind: 'campaignMenu' } : t === 'collection' ? { kind: 'collection', tab: 'decks' } : t === 'options' ? { kind: 'options' } : { kind: 'home' })} />;
+    content = <Home profile={profile} go={t => setScreen(t === 'tutorial' ? { kind: 'tutorial', key: Date.now() } : t === 'puzzles' ? { kind: 'puzzles' } : t === 'local' ? { kind: 'local' } : t === 'online' ? { kind: 'online' } : t === 'draft' ? { kind: 'draft' } : t === 'campaign' ? { kind: 'campaignMenu' } : t === 'roguelite' ? { kind: 'roguelite' } : t === 'collection' ? { kind: 'collection', tab: 'decks' } : t === 'options' ? { kind: 'options' } : { kind: 'home' })} />;
+  } else if (screen.kind === 'roguelite') {
+    content = <RogueliteScreen gameOpts={gameOpts} live={live} onExit={home} />;
   } else if (screen.kind === 'local') {
     content = <LocalPlay profile={profile} onBack={home} goDecks={() => setScreen({ kind: 'collection', tab: 'decks' })} onStart={setup => setScreen({ kind: 'localGame', setup, key: Date.now(), first: setup.first === 'B' ? 'B' : setup.first === 'A' ? 'A' : Math.random() < 0.5 ? 'A' : 'B' })} />;
   } else if (screen.kind === 'localGame') {

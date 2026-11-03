@@ -1,0 +1,347 @@
+// Mode roguelite — prototype de l'acte 1 (03/11/2026). La logique est dans src/roguelite/run.ts.
+import { useState } from 'react';
+import type { GameState } from '../engine/types';
+import {
+  addCard, afterFight, applyCards, chooseOption, closeRun, defeatAt, eligible, EVENT_TEXT, eventChoices, fight, isImproved, isTouched, loadMeta, loadRun,
+  marketOffers, NODES_PER_ACT, newRun, nextNode, offrandesWon, promotions, registerRun, removeCard, resolveEvent, saveMeta, saveRun, variantId, volunteers,
+  LASSITUDE_SHOP, type CardPurpose, type NodeOption, type RunMeta, type RunState, type Step,
+} from '../roguelite/run';
+import { formatEvent } from '../i18n/log.fr';
+import { SCENARIOS } from '../campaign/campaigns';
+import { CardTile } from './CardTile';
+import { GameScreen } from './GameScreen';
+import { showZoom } from './HoverZoom';
+import { cardName, FACTION_LABEL } from './labels';
+import { ScenarioRulesBubble, type LiveGame } from './ScenarioRules';
+import { TopBar } from './Screens';
+
+type GameOpts = { animMul: number; aiMul: number; bannerMul: number; initialReveal: boolean };
+
+const REWARD_LABEL = { or: 'de l’or en plus', essence: 'de l’Essence divine', xp: 'de l’Expérience', offrandes: 'une Offrande', amelioration: 'une amélioration de carte' } as const;
+const PURPOSE_TITLE: Record<CardPurpose, string> = {
+  retirer: 'Retirer une carte de ton deck', ameliorer: 'Améliorer une carte', humain: 'L’entraînement humain : +5 ARM, +2 Moral',
+  elfe: 'L’entraînement elfe : coûte 1 de moins, +10 INI', garde: 'Laisser jusqu’à 2 régiments surveiller le camp (ils quittent ton deck)',
+};
+
+function optionText(o: NodeOption): { icon: string; title: string; text: string } {
+  if (o.kind === 'combat') return { icon: '⚔', title: `Combat : ${SCENARIOS[o.deck]?.B.label ?? 'une armée'}`, text: `Récompense : ${REWARD_LABEL[o.reward]}, de l’or et 2 volontaires.` };
+  if (o.kind === 'miniboss') return { icon: '✦', title: 'Mini-boss : l’Essence de la réalité', text: 'Un adversaire plus fort, une règle spéciale. Or, Essence divine, volontaires, promotion, amélioration.' };
+  if (o.kind === 'event') return { icon: '❖', title: `Événement : ${EVENT_TEXT[o.id].title}`, text: 'Un choix, sans combat.' };
+  if (o.kind === 'marche') return { icon: '⚖', title: 'Marchand', text: '5 offres : cartes, retrait, repos, amélioration.' };
+  return { icon: '☠', title: 'Boss : le Titan du Glissement', text: 'Le Titan de l’acte 1. Le vaincre termine le prototype.' };
+}
+
+/** Panneau d'Augustus : rappel de la faction et de l'état de la run. */
+function ChampionPanel({ run, meta, onDeck }: { run: RunState; meta: RunMeta; onDeck: () => void }) {
+  const lim = defeatAt(run);
+  return (
+    <aside className="rl-champion" aria-label="Champion">
+      <div className="rl-crest">A</div>
+      <div className="rl-champ-body">
+        <b>Augustus, le Dernier Empereur</b>
+        <span className="muted small">Champion de l’{FACTION_LABEL.empire} · Acte {run.act}</span>
+        <div className="rl-lass" title="Lassitude gardée / seuil de défaite de l’acte">
+          <span>Lassitude <b>{run.lassitude}</b> / {lim}</span>
+          <span className="rl-bar"><span style={{ width: `${Math.min(100, (100 * run.lassitude) / lim)}%` }} /></span>
+        </div>
+        <div className="rl-purse">
+          <span className="pill">Or <b>{run.gold}</b></span>
+          <span className="pill">Essence divine <b>{meta.essence}</b>{run.essence ? ` +${run.essence}` : ''}</span>
+          <span className="pill">Expérience <b>{meta.xp}</b>{run.xp ? ` +${run.xp}` : ''}</span>
+          <span className="pill">Offrandes <b>{meta.offrandes}</b></span>
+        </div>
+        <button type="button" onClick={onDeck}>Deck : {run.deck.length} cartes</button>
+      </div>
+    </aside>
+  );
+}
+
+function Progress({ run }: { run: RunState }) {
+  return (
+    <ol className="rl-path" aria-label="Progression de l’acte">
+      {Array.from({ length: NODES_PER_ACT + 1 }, (_, i) => (
+        <li key={i} className={i < run.node ? 'done' : i === run.node ? 'now' : ''}>{i === NODES_PER_ACT ? 'Boss' : i + 1}</li>
+      ))}
+    </ol>
+  );
+}
+
+const modBadge = (run: RunState, id: string) => {
+  const rc = run.deck.find(c => variantId(c) === id);
+  if (!rc) return undefined;
+  if (isTouched(rc)) return <span className="rl-mark touched">Touchée par les Titans</span>;
+  if (isImproved(rc)) return <span className="rl-mark improved">Améliorée</span>;
+  return undefined;
+};
+
+/** Choix de cartes du deck (retirer, améliorer, entraînement). */
+function CardPicker({ run, purpose, n, optional, onDone }: { run: RunState; purpose: CardPurpose; n: number; optional: boolean; onDone: (uids: number[]) => void }) {
+  const list = eligible(run, purpose);
+  const need = Math.min(n, list.length);
+  const [sel, setSel] = useState<number[]>([]);
+  const toggle = (uid: number) => setSel(s => (s.includes(uid) ? s.filter(x => x !== uid) : s.length < n ? [...s, uid] : s));
+  return (
+    <section className="rl-step">
+      <h2 className="sub">{PURPOSE_TITLE[purpose]}</h2>
+      <p className="muted">{n > 1 ? `Choisis jusqu’à ${n} cartes.` : 'Choisis une carte.'}</p>
+      <div className="choices row left">
+        {optional && <button type="button" onClick={() => onDone([])}>Passer</button>}
+        <button type="button" className="primary" disabled={optional ? sel.length === 0 : sel.length < need} onClick={() => { showZoom(null); onDone(sel); }}>Valider ({sel.length})</button>
+      </div>
+      <div className="camp-grid">
+        {list.map(c => (
+          <button type="button" key={c.uid} className={`vn-pick${sel.includes(c.uid) ? ' on' : ''}`} onClick={() => toggle(c.uid)}>
+            <CardTile id={variantId(c)} badge={modBadge(run, variantId(c))} />
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+export function RogueliteScreen({ gameOpts, live, onExit }: { gameOpts: GameOpts; live: LiveGame; onExit: () => void }) {
+  const [meta, setMetaState] = useState<RunMeta>(() => loadMeta());
+  const [run, setRunState] = useState<RunState | null>(() => loadRun());
+  const [mode, setMode] = useState<'home' | 'run' | 'deck' | 'game'>(() => (loadRun() ? 'run' : 'home'));
+  const [gameKey, setGameKey] = useState(0);
+  const [notes, setNotes] = useState<string[]>([]);
+  const setRun = (r: RunState | null) => { if (r) registerRun(r); saveRun(r); setRunState(r); };
+  const setMeta = (m: RunMeta) => { saveMeta(m); setMetaState(m); };
+
+  // ---------- Accueil ----------
+  if (mode === 'home' || !run) {
+    return (
+      <div className="camp rl">
+        <TopBar title="Roguelite — prototype" onBack={onExit} />
+        <p>Tu es l’instrument des Dieux dans leur guerre contre les Titans. Les Titans corrompent la réalité et dressent les armées des Dieux les unes contre les autres.</p>
+        <p className="muted small">Prototype de l’acte 1 : 8 nœuds puis le Titan du Glissement. La lassitude est en partie gardée d’un combat à l’autre ; à {defeatAt({ act: 1 } as RunState)} de lassitude, la run est perdue. Pas encore d’Étendards ni d’achats entre les runs.</p>
+        <div className="rl-purse">
+          <span className="pill">Essence divine <b>{meta.essence}</b></span>
+          <span className="pill">Expérience <b>{meta.xp}</b></span>
+          <span className="pill">Offrandes <b>{meta.offrandes}</b></span>
+          <span className="pill">Runs <b>{meta.runs}</b> · gagnées <b>{meta.wins}</b></span>
+        </div>
+        <h2 className="sub">Champion</h2>
+        <div className="rl-champions">
+          <div className="rl-champ-card on"><div className="rl-crest">A</div><b>Augustus, le Dernier Empereur</b><span className="muted small">Empire</span></div>
+          {(['elfe', 'demons', 'nomades'] as const).map(f => (
+            <div key={f} className="rl-champ-card locked"><div className="rl-crest">?</div><b>{FACTION_LABEL[f]}</b>
+              <span className="muted small">{f === 'elfe' && meta.unlocks.includes('champion:elfe') ? 'Débloqué (bientôt jouable)' : 'À débloquer par un événement'}</span></div>
+          ))}
+        </div>
+        <div className="choices row left">
+          {run && !run.over && <button type="button" className="primary" onClick={() => setMode('run')}>Continuer la run (nœud {run.node + 1})</button>}
+          <button type="button" className={run && !run.over ? '' : 'primary'} onClick={() => { const r = newRun(); setRun(r); setNotes([]); setMode('run'); }}>
+            {run && !run.over ? 'Abandonner et recommencer' : 'Nouvelle run'}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ---------- Deck ----------
+  if (mode === 'deck') {
+    return (
+      <div className="camp rl">
+        <TopBar title={`Deck d’Augustus (${run.deck.length} cartes)`} onBack={() => setMode('run')} />
+        <div className="camp-grid">{run.deck.map(c => <CardTile key={c.uid} id={variantId(c)} badge={modBadge(run, variantId(c))} />)}</div>
+      </div>
+    );
+  }
+
+  // ---------- Combat ----------
+  if (mode === 'game' && run.current && run.current.kind !== 'event' && run.current.kind !== 'marche') {
+    const { sc, setup } = fight(run, run.current, gameKey);
+    const names = { A: 'Augustus', B: sc.B.label };
+    return (
+      <GameScreen
+        key={gameKey}
+        {...gameOpts}
+        setup={setup}
+        music={['combat-campagne', 'combat']}
+        names={names}
+        human={{ A: true, B: false }}
+        title={sc.title}
+        intro={sc.intro}
+        onGame={live.set}
+        overlay={<ScenarioRulesBubble sc={sc} live={live} />}
+        onQuit={() => setMode('run')}
+        renderEnd={(g: GameState, close) => (
+          <div className="overlay" role="dialog" aria-modal="true">
+            <div className="box">
+              <h2>{g.over!.winner === 'A' ? 'Victoire !' : 'Défaite'}</h2>
+              <p>{formatEvent({ type: 'gameOver', winner: g.over!.winner, reason: g.over!.reason }, names) ?? ''}</p>
+              {Object.keys(g.runMods ?? {}).length > 0 && <p className="muted small">Des cartes ont été touchées par les Titans : leurs malus restent pour toute la run.</p>}
+              <div className="choices row">
+                <button type="button" onClick={close}>Voir le plateau</button>
+                <button type="button" className="primary" onClick={() => {
+                  const o = run.current;
+                  const next = afterFight(run, g);
+                  let m = { ...meta, offrandes: meta.offrandes + (g.over!.winner === 'A' ? offrandesWon(o) : 0) };
+                  if (next.over) m = closeRun(m, next);
+                  setMeta(m); setRun(next); setMode('run');
+                }}>Continuer</button>
+              </div>
+            </div>
+          </div>
+        )}
+      />
+    );
+  }
+
+  // ---------- Run ----------
+  const step: Step | undefined = run.steps[0];
+  const doneStep = (r: RunState, extra: string[] = []) => {
+    const next = structuredClone(r);
+    next.steps.shift();
+    setNotes(n => [...n, ...extra]);
+    if (!next.steps.length && !next.over && next.current) { setRun(nextNode(next)); setNotes([]); return; }
+    setRun(next);
+  };
+  let body: React.ReactNode;
+  if (run.over && !step) {
+    body = (
+      <section className="rl-step">
+        <h2 className="sub">{run.over.won ? 'Run gagnée !' : 'Run perdue'}</h2>
+        <p>{run.over.text}</p>
+        <p className="muted">L’Essence divine (+{run.essence}) et l’Expérience (+{run.xp}) gagnées sont gardées pour les prochaines runs.</p>
+        <div className="choices row left"><button type="button" className="primary" onClick={() => { setRun(null); setMode('home'); }}>Retour à l’accueil du mode</button></div>
+      </section>
+    );
+  } else if (step?.kind === 'resume') {
+    body = (
+      <section className="rl-step">
+        <h2 className="sub">{step.title}</h2>
+        {step.lines.map((l, i) => <p key={i}>{l}</p>)}
+        <div className="choices row left"><button type="button" className="primary" onClick={() => doneStep(run)}>Continuer</button></div>
+      </section>
+    );
+  } else if (step?.kind === 'volontaires') {
+    const opts = volunteers(run, step.round);
+    body = (
+      <section className="rl-step">
+        <h2 className="sub">Volontaires ({step.round + 1} / 2) : une carte rejoint ton deck</h2>
+        <div className="camp-grid">
+          {opts.map(id => <button type="button" key={id} className="vn-pick" onClick={() => { showZoom(null); const n = structuredClone(run); addCard(n, id); doneStep(n, [`${cardName(id)} rejoint ton deck.`]); }}><CardTile id={id} /></button>)}
+        </div>
+        <div className="choices row left"><button type="button" onClick={() => doneStep(run)}>Personne cette fois</button></div>
+      </section>
+    );
+  } else if (step?.kind === 'promotion') {
+    const offers = promotions(run);
+    body = (
+      <section className="rl-step">
+        <h2 className="sub">Promotion : une carte de ton deck contre une de niveau supérieur</h2>
+        <div className="rl-promos">
+          {offers.map(o => {
+            const rc = run.deck.find(c => c.uid === o.uid)!;
+            return (
+              <button type="button" key={o.uid} className="promo-pair" onClick={() => { showZoom(null); const n = structuredClone(run); removeCard(n, o.uid); addCard(n, o.to); doneStep(n, [`${cardName(rc.id)} est promu en ${cardName(o.to)}.`]); }}>
+                <CardTile id={variantId(rc)} /><span className="promo-arrow">→</span><CardTile id={o.to} />
+              </button>
+            );
+          })}
+        </div>
+        <div className="choices row left"><button type="button" onClick={() => doneStep(run)}>Personne cette fois</button></div>
+      </section>
+    );
+  } else if (step?.kind === 'cartes') {
+    body = <CardPicker key={`${run.node}-${run.steps.length}`} run={run} purpose={step.purpose} n={step.n} optional={step.optional} onDone={uids => { const n = structuredClone(run); const out = applyCards(n, step.purpose, uids); doneStep(n, out); }} />;
+  } else if (step?.kind === 'evenement') {
+    const ev = EVENT_TEXT[step.id];
+    body = (
+      <section className="rl-step">
+        <h2 className="sub">{ev.title}</h2>
+        <p>{ev.text}</p>
+        <div className="vn-choices rl-choices">
+          {eventChoices(run, meta, step.id, step.second).map(ch => (
+            <button type="button" key={ch.id} className="vn-choice" disabled={!!ch.disabled} title={ch.disabled} onClick={() => {
+              const n = structuredClone(run);
+              const m = structuredClone(meta);
+              n.steps.shift();
+              const out = resolveEvent(n, m, step.id, ch.id);
+              if (out.length) n.steps.unshift({ kind: 'resume', title: ev.title, lines: out });
+              setMeta(m);
+              if (!n.steps.length) { setRun(nextNode(n)); setNotes([]); } else setRun(n);
+            }}>{ch.label}{ch.disabled ? ` (${ch.disabled})` : ''}</button>
+          ))}
+        </div>
+      </section>
+    );
+  } else if (step?.kind === 'marche') {
+    const offers = marketOffers(run);
+    const buy = (i: number) => {
+      const o = offers[i]!;
+      const n = structuredClone(run);
+      n.gold -= o.price;
+      (n.steps[0] as Extract<Step, { kind: 'marche' }>).bought.push(i);
+      if (o.kind === 'carte') { addCard(n, o.cardId!); setNotes(x => [...x, `${cardName(o.cardId!)} rejoint ton deck.`]); }
+      if (o.kind === 'lassitude') { n.lassitude = Math.max(0, n.lassitude - LASSITUDE_SHOP); setNotes(x => [...x, `Lassitude −${LASSITUDE_SHOP}.`]); }
+      if (o.kind === 'retirer') n.steps.unshift({ kind: 'cartes', purpose: 'retirer', n: 1, optional: false });
+      if (o.kind === 'ameliorer') n.steps.unshift({ kind: 'cartes', purpose: 'ameliorer', n: 1, optional: false });
+      setRun(n);
+    };
+    const label = (o: (typeof offers)[number]) => o.kind === 'carte' ? `Acheter ${cardName(o.cardId!)}` : o.kind === 'retirer' ? 'Retirer une carte de ton deck' : o.kind === 'lassitude' ? `Baisser ta lassitude de ${LASSITUDE_SHOP}` : 'Améliorer une carte';
+    body = (
+      <section className="rl-step">
+        <h2 className="sub">Le marchand</h2>
+        <p className="muted">Chaque offre ne s’achète qu’une fois. Tu as {run.gold} or.</p>
+        <div className="rl-market">
+          {offers.map((o, i) => {
+            const done = step.bought.includes(i);
+            return (
+              <div key={i} className={`rl-offer${done ? ' sold' : ''}`}>
+                {o.cardId && <CardTile id={o.cardId} />}
+                <b>{label(o)}</b>
+                <button type="button" disabled={done || run.gold < o.price || (o.kind === 'lassitude' && run.lassitude === 0)} onClick={() => buy(i)}>{done ? 'Acheté' : `${o.price} or`}</button>
+              </div>
+            );
+          })}
+        </div>
+        <div className="choices row left"><button type="button" className="primary" onClick={() => doneStep(run)}>Quitter le marchand</button></div>
+      </section>
+    );
+  } else if (run.current && !step) {
+    body = (
+      <section className="rl-step">
+        <h2 className="sub">{optionText(run.current).title}</h2>
+        <div className="choices row left"><button type="button" className="primary" onClick={() => { setGameKey(Date.now()); setMode('game'); }}>Livrer le combat</button></div>
+      </section>
+    );
+  } else {
+    body = (
+      <section className="rl-step">
+        <h2 className="sub">{run.node === 0 ? 'Ta route commence' : 'Où aller ensuite ?'}</h2>
+        <div className="rl-options">
+          {run.options.map((o, i) => {
+            const t = optionText(o);
+            return (
+              <button type="button" key={i} className={`rl-option ${o.kind}`} onClick={() => {
+                const next = chooseOption(run, meta, i);
+                setRun(next);
+                if (next.current && next.current.kind !== 'event' && next.current.kind !== 'marche') { setGameKey(Date.now()); setMode('game'); }
+              }}>
+                <span className="rl-icon" aria-hidden="true">{t.icon}</span>
+                <b>{t.title}</b>
+                <span className="muted small">{t.text}</span>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+    );
+  }
+  return (
+    <div className="camp rl">
+      <TopBar title={`Roguelite — Acte ${run.act}, nœud ${Math.min(run.node + 1, NODES_PER_ACT + 1)}`} onBack={() => setMode('home')} />
+      <div className="rl-layout">
+        <ChampionPanel run={run} meta={meta} onDeck={() => setMode('deck')} />
+        <div className="rl-main">
+          <Progress run={run} />
+          {notes.length > 0 && <div className="rl-notes">{notes.map((n, i) => <p key={i} className="small">{n}</p>)}</div>}
+          {body}
+        </div>
+      </div>
+    </div>
+  );
+}

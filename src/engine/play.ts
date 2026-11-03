@@ -230,6 +230,13 @@ function deployRegiment(ctx: Ctx, p: PlayerId, c: CardDef, ref: SlotRef): void {
     if (c.sacrificeGainsMor) { u.maxMor += sac.maxMor; u.currentMor += sac.maxMor; }
     if (c.sacrificeGainsKeywords) for (const k of sac.keywords) addKeyword(u, k);
     sacLevel = sac.niveau; sacCard = sac.cardId;
+    // Roguelite, Démon rongé par les Titans : un Leader adverse en jeu perd définitivement une part de ses bonus.
+    const drain = c.titanLeaderDrain as number | undefined;
+    if (drain) {
+      const carriers = ctx.units(opponentOf(p)).filter(x => x.leader && x.leaderOwner === opponentOf(p));
+      const t = carriers[ctx.randomInt(carriers.length)];
+      if (t) ctx.permaDebuff(opponentOf(p), t.leader!, { bonusPct: -drain * sac.niveau });
+    }
     const grant = card(sac.cardId).onSacrificeGrant as { keywords?: string[]; arrivesReady?: boolean } | undefined;
     if (grant) {
       for (const k of grant.keywords ?? []) addKeyword(u, k);
@@ -726,6 +733,17 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
       ctx.mill(q, Math.min(regs.length, (c.millCap as number | undefined) ?? Infinity), c.id);
       pl.discard = pl.discard.filter(id => card(id).cardType !== 'Regiment');
       note('terreBrulee', { count: regs.length });
+      break;
+    }
+    // --- Roguelite ---
+    case 'holdGround': // Lutter contre le mouvement : le prochain glissement n'a pas lieu ; chaque lancer coûte 1 de plus.
+      if (ctx.s.scenario) ctx.s.scenario.holdGround = true;
+      pl.costTax = { ...(pl.costTax ?? {}), [c.id]: (pl.costTax?.[c.id] ?? 0) + 1 };
+      break;
+    case 'titanEcho': { // Écho du Titan : la cible perd définitivement 10 % de son ATK.
+      const d = Math.max(1, Math.round(target!.baseAtk * 0.1));
+      target!.baseAtk = Math.max(0, target!.baseAtk - d);
+      ctx.permaDebuff(target!.controller, target!.cardId, { atk: -d });
       break;
     }
     case 'mirageOasis': addKeyword(target!, 'Mirage 1'); note('mirageOasis', { uid: target!.uid }); break;

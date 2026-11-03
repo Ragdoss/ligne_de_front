@@ -364,6 +364,9 @@ export interface ScenarioRules {
   alarm?: Alarm;
   /** Aide de campagne : ATK des régiments du camp `weak` multipliée par `atk` ; END des régiments vitaux de `helped` multipliée par `vitalEnd`, et `vitalMor` Moral en plus (maximum et départ). */
   ease?: { weak: PlayerId; atk: number; helped: PlayerId; vitalEnd: number; vitalMor: number; vitalArm: number };
+  /** Roguelite, Titan du Glissement : au début de chaque tour de l'adversaire de `victim`, ses régiments glissent d'une case
+   *  vers la droite (ceux qui sortent sont détruits), sauf s'il a joué `tactic` ; `tactic` lui est donnée à chaque tour s'il ne l'a pas en main. */
+  glissement?: { victim: PlayerId; tactic: string };
 }
 export interface ScenarioSetup extends ScenarioRules {
   start?: Partial<Record<PlayerId, { avant?: Record<string, string>; arriere?: Record<string, string>; isole?: string }>>;
@@ -374,6 +377,8 @@ export interface ScenarioSetup extends ScenarioRules {
   startResource?: Partial<Record<PlayerId, number>>;
   /** Cartes piochées en plus au départ (mode Histoire de la campagne). */
   startDraw?: Partial<Record<PlayerId, number>>;
+  /** Roguelite : lassitude de départ (le niveau suit). */
+  startLassitude?: Partial<Record<PlayerId, number>>;
 }
 export interface ScenarioRuntime extends ScenarioRules {
   fired: string[];
@@ -383,7 +388,12 @@ export interface ScenarioRuntime extends ScenarioRules {
   alarmDone?: boolean;
   /** Régiments libérés (Libération). */
   liberated?: number;
+  /** Glissement : la victime a tenu bon pour le prochain glissement. */
+  holdGround?: boolean;
 }
+
+/** Roguelite : malus définitifs infligés pendant la partie à un exemplaire de carte (appliqués à la run après la partie). */
+export interface RunMod { atk?: number; end?: number; arm?: number; ini?: number; mor?: number; cout?: number; bonusPct?: number }
 
 export interface GameState {
   config: GameConfig;
@@ -396,6 +406,8 @@ export interface GameState {
   rng: number;
   pending: PendingChoice[];
   scenario: ScenarioRuntime | null;
+  /** Roguelite : malus définitifs par id de carte (exemplaire), cumulés pendant la partie. */
+  runMods?: Record<string, RunMod>;
   over: { winner: PlayerId; reason: string } | null;
 }
 

@@ -791,3 +791,46 @@ button.pile:not(:disabled):hover .pile-stack > * { outline: 2px solid var(--bras
 .promo-pair { display: flex; align-items: center; gap: 6px; }
 .promo-pair .ccard { width: 150px; }
 .hub-sides { display: grid; gap: 6px; }
+
+/* ---------- Roguelite (prototype, 03/11/2026) ---------- */
+.rl-layout { display: grid; grid-template-columns: minmax(220px, 280px) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 760px) { .rl-layout { grid-template-columns: 1fr; } }
+.rl-champion { display: grid; gap: 8px; background: color-mix(in srgb, var(--paper) 92%, transparent); color: var(--slate-ink); border: 1px solid #14234f40; border-radius: 8px; padding: 12px; position: sticky; top: 8px; }
+.rl-champion b { font-family: 'Cinzel', serif; color: var(--navy); }
+.rl-champ-body { display: grid; gap: 6px; }
+.rl-crest { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; font-family: 'Cinzel', serif; font-size: 1.6rem; color: var(--paper); background: var(--navy); border: 3px solid var(--brass); }
+.rl-lass { display: grid; gap: 4px; font-size: .9rem; }
+.rl-bar { display: block; height: 8px; border-radius: 4px; background: #14234f25; overflow: hidden; }
+.rl-bar > span { display: block; height: 100%; background: linear-gradient(90deg, #c9a227, #b33a2b); }
+.rl-purse { display: flex; flex-wrap: wrap; gap: 4px; }
+.rl-main { display: grid; gap: 12px; min-width: 0; }
+.rl-path { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; padding: 0; margin: 0; }
+.rl-path li { min-width: 34px; padding: 4px 8px; text-align: center; border-radius: 14px; border: 1px solid var(--brass); opacity: .55; font-variant-numeric: tabular-nums; }
+.rl-path li.done { background: var(--brass); color: #1b1b1b; opacity: .9; }
+.rl-path li.now { opacity: 1; outline: 2px solid var(--brass); }
+.rl-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.rl-option { display: grid; gap: 6px; justify-items: start; text-align: left; padding: 14px; border-radius: 8px; border: 1px solid var(--brass); background: #ffffff0d; color: inherit; }
+.rl-option:hover { background: #ffffff1f; }
+.rl-option.miniboss { border-color: #b33a2b; }
+.rl-option.boss { border-color: #b33a2b; border-width: 2px; }
+.rl-icon { font-size: 1.6rem; line-height: 1; }
+.rl-step { display: grid; gap: 8px; }
+.rl-notes { border-left: 3px solid var(--brass); padding-left: 8px; }
+.rl-notes p { margin: 2px 0; }
+.rl-market { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+.rl-offer { display: grid; gap: 6px; align-content: start; padding: 8px; border: 1px solid #ffffff30; border-radius: 8px; }
+.rl-offer.sold { opacity: .45; }
+.rl-promos { display: grid; gap: 12px; }
+.rl-promos .promo-pair { display: grid; grid-template-columns: minmax(0, 160px) auto minmax(0, 160px); align-items: center; gap: 8px; background: none; border: 1px solid #ffffff30; border-radius: 8px; padding: 8px; color: inherit; max-width: 420px; }
+.promo-arrow { font-size: 1.6rem; }
+.rl-mark { font-size: .75rem; padding: 1px 6px; border-radius: 8px; }
+.rl-mark.touched { background: #6b2fa0; color: #fff; }
+.rl-mark.improved { background: #2f7a3a; color: #fff; }
+.rl-champions { display: flex; flex-wrap: wrap; gap: 12px; }
+.rl-champ-card { display: grid; justify-items: center; gap: 4px; width: 170px; padding: 12px; border-radius: 8px; border: 1px solid var(--brass); text-align: center; }
+.rl-champ-card.locked { opacity: .5; }
+.rl-choices { display: grid; gap: 8px; justify-items: start; }
+.rl-champion .pill { background: #14234f14; color: var(--slate-ink); border: 1px solid #14234f40; }
+.rl-champion .pill b { color: var(--navy); }
+.rl-champion .muted { color: #4b5470; opacity: 1; }
+.rl-champion button { background: var(--navy); color: var(--paper); border: 1px solid var(--navy); border-radius: 4px; padding: 6px 10px; }
