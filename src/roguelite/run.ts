@@ -34,7 +34,8 @@ export const PRICES = { carte: 30, carteHaute: 45, retirer: 25, lassitude: 20, a
 export const LASSITUDE_SHOP = 5;
 
 // ---------- Types ----------
-export interface RunCard { uid: number; id: string; mods: RunMod }
+/** Exemplaire de la run : `mods` = améliorations (camp, entraînement, marché…), `curse` = malus des Titans. */
+export interface RunCard { uid: number; id: string; mods: RunMod; curse?: RunMod }
 export type RewardKind = 'or' | 'essence' | 'xp' | 'offrandes' | 'amelioration';
 export type NodeOption =
   | { kind: 'combat'; reward: RewardKind; deck: string }
@@ -115,7 +116,8 @@ const floored = (base: number, delta: number) => Math.max(Math.round(base * 0.25
 export function variantDef(rc: RunCard, upg: Record<string, number> = {}): CardDef {
   const b = CARDS[rc.id]!;
   const d: CardDef = { ...b, id: variantId(rc) };
-  const m = { ...rc.mods };
+  const m: RunMod = { ...rc.mods };
+  for (const [k, v] of Object.entries(rc.curse ?? {}) as [keyof RunMod, number][]) m[k] = (m[k] ?? 0) + v;
   // Améliorations d'Augustus (Expérience), appliquées à chaque combat par-dessus l'exemplaire.
   const add = (k: keyof RunMod, v: number) => { if (v) m[k] = (m[k] ?? 0) + v; };
   const lvl = (id: string) => upg[id] ?? 0;
@@ -145,8 +147,8 @@ export function registerRun(run: RunState): void {
     CARD_TEXT_FR[variantId(rc)] = CARD_TEXT_FR[rc.id] ?? { name: rc.id, desc: '' };
   }
 }
-export const isTouched = (rc: RunCard) => Object.values(rc.mods).some(v => (v ?? 0) < 0);
-export const isImproved = (rc: RunCard) => Object.values(rc.mods).some(v => (v ?? 0) > 0) && !isTouched(rc);
+export const isTouched = (rc: RunCard) => Object.values(rc.curse ?? {}).some(v => (v ?? 0) !== 0);
+export const isImproved = (rc: RunCard) => Object.values(rc.mods).some(v => (v ?? 0) !== 0);
 export const deckIds = (run: RunState) => run.deck.map(variantId);
 
 // ---------- Création ----------
@@ -232,12 +234,12 @@ export function fight(run: RunState, o: NodeOption, seed: string | number): { sc
   registerRun(run);
   const kind = o.kind as 'combat' | 'miniboss' | 'boss';
   const e = enemyDeck(run, (o as { deck: string }).deck);
-  const lim = defeatAt(run);
+  const lim = defeatAt(run), enemyLim = ACT_LASSITUDE[run.act - 1]!; // l'amélioration Lassitude ne vaut que pour le joueur
   const base: CampaignScenario = {
     id: `rl-${kind}`, title: '', deckRules: { min: 0, text: '' }, intro: [], events: [],
     A: { faction: 'empire', label: 'Armée d’Augustus', ai: false },
     B: { faction: e.faction, label: e.label, deckList: e.deck, ai: true },
-    defeatLassitude: { A: lim, B: lim },
+    defeatLassitude: { A: lim, B: enemyLim },
   };
   let sc: CampaignScenario;
   if (kind === 'combat') {
@@ -260,7 +262,8 @@ export function fight(run: RunState, o: NodeOption, seed: string | number): { sc
   const mob = run.upg?.mobilisation_initiale ?? 0;
   setup.scenario = { ...setup.scenario!, startLassitude: { A: run.lassitude }, ...(mob ? { startResource: { A: mob } } : {}),
     ...(kind === 'boss' ? { glissement: { victim: 'A' as const, tactic: 'lutter_mouvement' } } : {}) };
-  if (kind === 'miniboss') setup.first = 'B';
+  // Qui commence : au hasard (reproductible), sauf règle du scénario : l'adversaire au mini-boss, le joueur contre le boss.
+  setup.first = kind === 'miniboss' ? 'B' : kind === 'boss' ? 'A' : (rng(`${run.seed}|${run.act}|${run.node}|first|${seed}`)() < 0.5 ? 'A' : 'B');
   return { sc, setup };
 }
 
@@ -275,7 +278,8 @@ export function afterFight(run: RunState, g: GameState): RunState {
   for (const [cid, mod] of Object.entries(g.runMods ?? {})) {
     const rc = next.deck.find(c => variantId(c) === cid);
     if (!rc) continue;
-    for (const [k, v] of Object.entries(mod) as [keyof RunMod, number][]) rc.mods[k] = (rc.mods[k] ?? 0) + v;
+    rc.curse ??= {};
+    for (const [k, v] of Object.entries(mod) as [keyof RunMod, number][]) rc.curse[k] = (rc.curse[k] ?? 0) + v;
   }
   const end = g.players.A.points;
   if (g.over?.winner !== 'A' && next.revives > 0) {
@@ -357,7 +361,7 @@ export function canImprove(rc: RunCard): boolean {
 }
 export function improve(rc: RunCard): string {
   if (isTouched(rc)) {
-    for (const k of Object.keys(rc.mods) as (keyof RunMod)[]) if ((rc.mods[k] ?? 0) < 0) delete rc.mods[k];
+    delete rc.curse;
     return 'les malus des Titans sont effacés';
   }
   const b = CARDS[rc.id]!;

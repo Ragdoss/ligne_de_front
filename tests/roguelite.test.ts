@@ -59,6 +59,8 @@ describe('Roguelite : lassitude gardée', () => {
     expect(g.players.A.points).toBe(10);
     expect(g.players.A.level).toBe(3);
     expect(g.config.defeatLassitude.A).toBe(16);
+    const up = fight({ ...run, upg: { lassitude: 3 } }, { kind: 'combat', reward: 'or', deck: 'd1' }, 1).setup;
+    expect(up.config!.defeatLassitude).toEqual({ A: 19, B: 16 });
   });
 });
 
@@ -72,9 +74,10 @@ describe('Roguelite : exemplaires', () => {
     expect(l.bonusAtk).toBe(Math.round(CARDS.lieutenant!.bonusAtk! * 0.5));
   });
   it('une amélioration efface d’abord les malus', () => {
-    const rc = { uid: 1, id: 'soldat_kragz', mods: { atk: -3, end: 4 } };
+    const rc: { uid: number; id: string; mods: { end?: number; cout?: number }; curse?: { atk: number } } = { uid: 1, id: 'soldat_kragz', mods: { end: 4, cout: -1 }, curse: { atk: -3 } };
     improve(rc);
-    expect(rc.mods).toEqual({ end: 4 });
+    expect(rc.mods).toEqual({ end: 4, cout: -1 });
+    expect(rc.curse).toBeUndefined();
   });
   it('les malus infligés en partie restent sur l’exemplaire touché', () => {
     const run = { ...newRun('t5'), current: { kind: 'combat', reward: 'or', deck: 'd1' } as const };
@@ -83,7 +86,8 @@ describe('Roguelite : exemplaires', () => {
     g.runMods = { [variantId(target)]: { atk: -2 } };
     g.over = { winner: 'A', reason: 'lassitude' };
     const next = afterFight(run, g);
-    expect(next.deck[0]!.mods.atk).toBe(-2);
+    expect(next.deck[0]!.curse?.atk).toBe(-2);
+    expect(next.deck[0]!.mods.atk).toBeUndefined();
     expect(next.steps[0]!.kind).toBe('resume');
     expect(nextNode(next).node).toBe(1);
   });

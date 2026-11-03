@@ -24,7 +24,7 @@ const PURPOSE_TITLE: Record<CardPurpose, string> = {
 };
 
 function optionText(o: NodeOption): { icon: string; title: string; text: string } {
-  if (o.kind === 'combat') return { icon: '⚔', title: `Combat : ${SCENARIOS[o.deck]?.B.label ?? 'une armée'}`, text: `Récompense : ${REWARD_LABEL[o.reward]}, de l’or et 2 volontaires.` };
+  if (o.kind === 'combat') return { icon: '⚔', title: `Combat : ${SCENARIOS[o.deck]?.B.label ?? 'une armée'}`, text: `Récompenses : de l’or, ${REWARD_LABEL[o.reward]} et 2 volontaires.` };
   if (o.kind === 'miniboss') return { icon: '✦', title: 'Mini-boss : l’Essence de la réalité', text: 'Un adversaire plus fort, une règle spéciale. Or, Essence divine, volontaires, promotion, amélioration.' };
   if (o.kind === 'event') return { icon: '❖', title: `Événement : ${EVENT_TEXT[o.id].title}`, text: 'Un choix, sans combat.' };
   if (o.kind === 'marche') return { icon: '⚖', title: 'Marchand', text: '5 offres : cartes, retrait, repos, amélioration.' };
