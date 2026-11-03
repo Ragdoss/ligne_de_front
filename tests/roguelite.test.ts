@@ -6,7 +6,7 @@ import { attack } from '../src/engine/combat';
 import { CARDS } from '../src/data/cards';
 import { registerTitanCards } from '../src/data/titans';
 import {
-  afterFight, chooseOption, fight, improve, keptLassitude, newMeta, newRun, nextNode, optionsFor, variantDef, variantId, type RunState,
+  buyUpgrade, defeatAt, newMeta as freshMeta, afterFight, chooseOption, fight, improve, keptLassitude, newMeta, newRun, nextNode, optionsFor, variantDef, variantId, type RunState,
 } from '../src/roguelite/run';
 import { act, blankGame, give, place } from './helpers';
 
@@ -139,5 +139,41 @@ describe('Roguelite : cartes des Titans et boss', () => {
     const before = s.players.A.board.avant.findIndex(u => u?.cardId.startsWith('recrue_imp'));
     s = act(s, { type: 'endTurn' }).state;
     expect(s.players.A.board.avant.findIndex(u => u?.cardId.startsWith('recrue_imp'))).toBe(before);
+  });
+});
+
+describe('Roguelite : améliorations entre les runs', () => {
+  it('achat : coût payé, niveau monté, verrou respecté', () => {
+    let m = { ...freshMeta(), essence: 10, xp: 20 };
+    m = buyUpgrade(m, 'lassitude');
+    expect(m.upg.lassitude).toBe(1);
+    expect(m.essence).toBe(7);
+    expect(buyUpgrade(m, 'regeneration')).toBe(m); // à débloquer au camp
+    m = buyUpgrade(m, 'armee_elue');
+    expect(m.xp).toBe(15);
+  });
+  it('Lassitude : seuil +1 par niveau, 20 au plus à l’acte 1', () => {
+    expect(defeatAt({ act: 1, upg: { lassitude: 2 } })).toBe(18);
+    expect(defeatAt({ act: 1, upg: { lassitude: 9 } })).toBe(20);
+  });
+  it('Armée élue, Généralissime, Génie, Imperator s’appliquent aux exemplaires', () => {
+    const b = CARDS.soldat_kragz!;
+    expect(variantDef({ uid: 1, id: 'soldat_kragz', mods: {} }, { armee_elue: 2 }).atk).toBe(b.atk! + Math.round(b.atk! * 0.2));
+    expect(variantDef({ uid: 500, id: 'soldat_kragz', mods: {} }, { armee_elue: 2 }).atk).toBe(b.atk); // carte gagnée en route
+    const l = variantDef({ uid: 2, id: 'lieutenant', mods: {} }, { generalissime: 1, imperator: 1 });
+    expect(l.bonusAtk).toBe(Math.round(CARDS.lieutenant!.bonusAtk! * 1.2));
+    expect(l.cout).toBe(Math.max(0, CARDS.lieutenant!.cout - 1));
+    expect(variantDef({ uid: 3, id: 'ralliement', mods: {} }, { genie: 1 }).cout).toBe(CARDS.ralliement!.cout >= 2 ? CARDS.ralliement!.cout - 1 : CARDS.ralliement!.cout);
+  });
+  it('Incorruptible : une défaite relance le combat à la moitié de la lassitude maximale', () => {
+    const run = { ...newRun('t8', { ...freshMeta(), upg: { incorruptible: 1 } }), current: { kind: 'combat', reward: 'or', deck: 'd1' } as const };
+    const g = createGame(fight(run, run.current, 1).setup);
+    g.over = { winner: 'B', reason: 'lassitude' };
+    const next = afterFight(run, g);
+    expect(next.over).toBeNull();
+    expect(next.revives).toBe(0);
+    expect(next.lassitude).toBe(8);
+    expect(next.relaunch).toBe(true);
+    expect(next.current).toEqual(run.current);
   });
 });

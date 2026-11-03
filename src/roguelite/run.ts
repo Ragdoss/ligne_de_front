@@ -19,6 +19,8 @@ import { keyFor } from '../profile/store';
 // ---------- Constantes ----------
 /** Seuils de défaite par lassitude, par acte (le joueur et ses adversaires de combat). */
 export const ACT_LASSITUDE = [16, 25, 50] as const;
+/** Amélioration « Lassitude » : seuil de défaite au plus 20 / 30 / 60. */
+const LASSITUDE_UPG_CAP = [4, 5, 10] as const;
 export const NODES_PER_ACT = 8;
 /** Part de la lassitude de fin de combat gardée (avant Régénération). */
 export const KEEP_SHARE = 0.5;
@@ -71,9 +73,15 @@ export interface RunState {
   miniBossOffers: number;
   miniBossDone: boolean;
   options: NodeOption[];
+  /** Améliorations achetées entre les runs, figées au début de la run. */
+  upg: Record<string, number>;
+  /** Incorruptible : relances restantes après une défaite. */
+  revives: number;
   current: NodeOption | null;
   steps: Step[];
   over: null | { won: boolean; text: string };
+  /** Incorruptible : le combat en cours est à rejouer après le résumé. */
+  relaunch?: boolean;
 }
 export interface RunMeta {
   essence: number;
@@ -82,6 +90,8 @@ export interface RunMeta {
   /** Offrandes faites à chaque événement (toutes runs confondues). */
   offeredAt: Partial<Record<EventId, number>>;
   unlocks: string[];
+  /** Améliorations achetées (niveau par amélioration). */
+  upg: Record<string, number>;
   runs: number;
   wins: number;
 }
@@ -102,10 +112,26 @@ const BONUSES = ['bonusAtk', 'bonusArm', 'bonusIni', 'bonusMor', 'bonusEnd'] as 
 const floored = (base: number, delta: number) => Math.max(Math.round(base * 0.25), Math.round(base + delta));
 
 /** Définition de carte d'un exemplaire, malus et améliorations compris. */
-export function variantDef(rc: RunCard): CardDef {
+export function variantDef(rc: RunCard, upg: Record<string, number> = {}): CardDef {
   const b = CARDS[rc.id]!;
   const d: CardDef = { ...b, id: variantId(rc) };
-  const m = rc.mods;
+  const m = { ...rc.mods };
+  // Améliorations d'Augustus (Expérience), appliquées à chaque combat par-dessus l'exemplaire.
+  const add = (k: keyof RunMod, v: number) => { if (v) m[k] = (m[k] ?? 0) + v; };
+  const lvl = (id: string) => upg[id] ?? 0;
+  if (b.cardType === 'Regiment') {
+    if (rc.uid <= AUGUSTUS_DECK.length && lvl('armee_elue')) for (const k of STATS) { const v = (b[k] as number | undefined) ?? 0; add(k, Math.round(v * 0.1 * lvl('armee_elue'))); }
+    if (b.types?.includes('Monté') && lvl('magister_equitum')) add('atk', Math.round(((b.atk as number) ?? 0) * 0.2 * lvl('magister_equitum')));
+    if (b.niveau >= 4 && lvl('praefectus')) add('cout', -1);
+  }
+  if (b.cardType === 'Leader') {
+    if (lvl('generalissime')) add('bonusPct', 20 * lvl('generalissime'));
+    if (lvl('imperator')) add('cout', -1);
+  }
+  if (b.cardType === 'Tactique' && lvl('genie')) {
+    const g = lvl('genie');
+    add('cout', -((b.cout >= 2 ? 1 : 0) + (g >= 2 && b.cout === 1 ? 1 : 0) + (g >= 3 && b.cout >= 3 ? 1 : 0)));
+  }
   for (const k of STATS) if (m[k] && typeof b[k] === 'number') (d as unknown as Record<string, number>)[k] = floored(b[k] as number, m[k]!);
   if (m.cout) d.cout = Math.max(0, Math.min(b.cout + 2, b.cout + m.cout));
   if (m.bonusPct) for (const k of BONUSES) { const v = b[k] as number | undefined; if (v) (d as unknown as Record<string, number>)[k] = floored(v, (v * m.bonusPct) / 100); }
@@ -115,7 +141,7 @@ export function variantDef(rc: RunCard): CardDef {
 export function registerRun(run: RunState): void {
   registerTitanCards(CARD_TEXT_FR);
   for (const rc of run.deck) {
-    CARDS[variantId(rc)] = variantDef(rc);
+    CARDS[variantId(rc)] = variantDef(rc, run.upg ?? {});
     CARD_TEXT_FR[variantId(rc)] = CARD_TEXT_FR[rc.id] ?? { name: rc.id, desc: '' };
   }
 }
@@ -127,18 +153,21 @@ export const deckIds = (run: RunState) => run.deck.map(variantId);
 /** Deck de départ d'Augustus : le deck Empire de la campagne 5 (22 cartes). */
 export const AUGUSTUS_DECK: string[] = COURONNE_SCENARIOS.cc1!.A.deckList!.slice();
 
-export function newRun(seed = String(Date.now())): RunState {
+export function newRun(seed = String(Date.now()), meta: RunMeta = newMeta()): RunState {
   const run: RunState = {
     version: 1, id: `run-${seed}`, seed, champion: 'augustus', act: 1, node: 0,
     deck: AUGUSTUS_DECK.map((id, i) => ({ uid: i + 1, id, mods: {} })), nextUid: AUGUSTUS_DECK.length + 1,
     lassitude: 0, gold: 20, essence: 0, xp: 0, eventsSeen: [], eventThisAct: false, miniBossOffers: 0, miniBossDone: false,
-    options: [], current: null, steps: [], over: null,
+    options: [], upg: { ...meta.upg }, revives: meta.upg.incorruptible ?? 0, current: null, steps: [], over: null,
   };
   run.options = optionsFor(run);
   registerRun(run);
   return run;
 }
-export const defeatAt = (run: RunState) => ACT_LASSITUDE[run.act - 1]!;
+export const defeatAt = (run: Pick<RunState, 'act'> & { upg?: Record<string, number> }) =>
+  ACT_LASSITUDE[run.act - 1]! + Math.min(run.upg?.lassitude ?? 0, LASSITUDE_UPG_CAP[run.act - 1]!);
+/** Régénération (en points de pourcentage retirés de la part gardée). */
+export const regenOf = (run: RunState) => 5 * (run.upg?.regeneration ?? 0);
 
 // ---------- Options du nœud suivant ----------
 const REWARDS: RewardKind[] = ['or', 'or', 'essence', 'xp', 'offrandes', 'amelioration'];
@@ -228,7 +257,8 @@ export function fight(run: RunState, o: NodeOption, seed: string | number): { sc
       mustSurvive: { B: 'titan_glissement' }, emptyDeckDefeat: { B: false }, defeatLassitude: { A: lim, B: NEVER } };
   }
   const setup = scenarioGameSetup(sc, deckIds(run), seed, 0, NO_EASE);
-  setup.scenario = { ...setup.scenario!, startLassitude: { A: run.lassitude },
+  const mob = run.upg?.mobilisation_initiale ?? 0;
+  setup.scenario = { ...setup.scenario!, startLassitude: { A: run.lassitude }, ...(mob ? { startResource: { A: mob } } : {}),
     ...(kind === 'boss' ? { glissement: { victim: 'A' as const, tactic: 'lutter_mouvement' } } : {}) };
   if (kind === 'miniboss') setup.first = 'B';
   return { sc, setup };
@@ -248,13 +278,22 @@ export function afterFight(run: RunState, g: GameState): RunState {
     for (const [k, v] of Object.entries(mod) as [keyof RunMod, number][]) rc.mods[k] = (rc.mods[k] ?? 0) + v;
   }
   const end = g.players.A.points;
+  if (g.over?.winner !== 'A' && next.revives > 0) {
+    // Incorruptible : on relance le combat avec la moitié de la lassitude maximale de l'acte (moins avec Parangon).
+    next.revives--;
+    next.lassitude = Math.round(defeatAt(next) * Math.max(0, 0.5 - 0.05 * (next.upg.parangon ?? 0)));
+    next.steps = [{ kind: 'resume', title: 'Incorruptible', lines: [`L’armée d’Augustus refuse la défaite : le combat recommence, à ${next.lassitude} de lassitude. Relances restantes : ${next.revives}.`] }];
+    next.relaunch = true;
+    return next;
+  }
   if (g.over?.winner !== 'A') {
     next.over = { won: false, text: `L’armée d’Augustus est tombée au nœud ${next.node + 1} de l’acte ${next.act}.` };
     next.steps = [];
     return next;
   }
-  const kept = keptLassitude(next.lassitude, end);
-  const lines = [`Lassitude : ${end} en fin de combat, tu en gardes ${kept} (maximum entre la moitié et ton départ à ${next.lassitude}).`];
+  const regen = regenOf(next);
+  const kept = keptLassitude(next.lassitude, end, regen);
+  const lines = [`Lassitude : ${end} en fin de combat, tu en gardes ${kept} (maximum entre ${regen ? `${50 - regen} %` : 'la moitié'} et ton départ à ${next.lassitude}).`];
   next.lassitude = kept;
   const steps: Step[] = [];
   if (o.kind === 'boss') {
@@ -268,15 +307,15 @@ export function afterFight(run: RunState, g: GameState): RunState {
     let gold = 10;
     if (o.reward === 'or') gold += 15;
     if (o.reward === 'essence') { next.essence += 3; lines.push('+3 Essence divine.'); }
-    if (o.reward === 'xp') { next.xp += 2; lines.push('+2 Expérience.'); }
+    next.xp += o.reward === 'xp' ? 3 : 1; lines.push(o.reward === 'xp' ? '+3 Expérience.' : '+1 Expérience.');
     if (o.reward === 'offrandes') lines.push('+1 Offrande.');
     next.gold += gold; lines.unshift(`+${gold} or.`);
     steps.push({ kind: 'volontaires', round: 0 }, { kind: 'volontaires', round: 1 });
     if (o.reward === 'amelioration') steps.push({ kind: 'cartes', purpose: 'ameliorer', n: 1, optional: true });
   } else if (o.kind === 'miniboss') {
     next.miniBossDone = true;
-    next.gold += 25; next.essence += 5;
-    lines.unshift('+25 or, +5 Essence divine.');
+    next.gold += 25; next.essence += 5; next.xp += 3;
+    lines.unshift('+25 or, +5 Essence divine, +3 Expérience.');
     steps.push({ kind: 'volontaires', round: 0 }, { kind: 'volontaires', round: 1 }, { kind: 'promotion' }, { kind: 'cartes', purpose: 'ameliorer', n: 1, optional: true });
   }
   next.steps = [{ kind: 'resume', title: 'Victoire !', lines }, ...steps];
@@ -424,7 +463,7 @@ export function nextNode(run: RunState): RunState {
 }
 
 // ---------- Méta et sauvegarde ----------
-export const newMeta = (): RunMeta => ({ essence: 0, xp: 0, offrandes: 0, offeredAt: {}, unlocks: [], runs: 0, wins: 0 });
+export const newMeta = (): RunMeta => ({ essence: 0, xp: 0, offrandes: 0, offeredAt: {}, unlocks: [], upg: {}, runs: 0, wins: 0 });
 const RUN_KEY = 'ligneDeFront.jeu.roguelite.run.v1';
 const META_KEY = 'ligneDeFront.jeu.roguelite.meta.v1';
 export function loadRun(): RunState | null {
@@ -442,4 +481,48 @@ export function saveMeta(m: RunMeta): void { try { localStorage.setItem(keyFor(M
 /** Fin de run : l'Essence divine et l'Expérience gagnées rejoignent la méta. */
 export function closeRun(meta: RunMeta, run: RunState): RunMeta {
   return { ...meta, essence: meta.essence + run.essence, xp: meta.xp + run.xp, runs: meta.runs + 1, wins: meta.wins + (run.over?.won ? 1 : 0) };
+}
+
+// ---------- Améliorations entre les runs ----------
+export interface Upgrade {
+  id: string;
+  currency: 'essence' | 'xp';
+  name: string;
+  desc: string;
+  max: number;
+  /** Prix du niveau suivant (lvl = niveau déjà acheté). */
+  cost: (lvl: number) => number;
+  /** Déblocage nécessaire (méta), et comment l'obtenir. */
+  unlock?: { key: string; text: string };
+}
+/** Essence divine : améliorations des matchs ; Expérience : améliorations d'Augustus (document, 03/11/2026). */
+export const UPGRADES: Upgrade[] = [
+  { id: 'lassitude', currency: 'essence', name: 'Lassitude', desc: 'Seuil de défaite +1 par niveau (au plus 20 à l’acte 1, 30 à l’acte 2, 60 à l’acte 3).', max: 10, cost: l => 3 + l },
+  { id: 'regeneration', currency: 'essence', name: 'Régénération', desc: 'Après un combat, tu gardes 5 % de lassitude de moins par niveau (jamais sous ton départ).', max: 5, cost: l => 4 + 2 * l,
+    unlock: { key: 'regeneration', text: 'Fais une Offrande au camp abandonné' } },
+  { id: 'mobilisation_initiale', currency: 'essence', name: 'Mobilisation initiale', desc: '+1 ressource au début de chaque combat par niveau.', max: 3, cost: l => [6, 12, 20][l]!,
+    unlock: { key: 'mobilisation_initiale', text: 'Se débloque à un événement de l’acte 3 (pas encore dans le prototype)' } },
+  { id: 'incorruptible', currency: 'essence', name: 'Incorruptible', desc: 'Après une défaite, le combat recommence avec 50 % de la lassitude maximale de l’acte. Une relance par niveau et par run.', max: 3, cost: l => [12, 18, 25][l]! },
+  { id: 'parangon', currency: 'essence', name: 'Parangon', desc: 'Une relance d’Incorruptible part avec 5 % de lassitude de moins par niveau.', max: 5, cost: l => 3 + l },
+  { id: 'armee_elue', currency: 'xp', name: 'Armée élue', desc: 'Les régiments du deck de départ gagnent +10 % à leurs 5 stats par niveau.', max: 5, cost: l => 5 + 3 * l },
+  { id: 'genie', currency: 'xp', name: 'Génie du champ de bataille', desc: 'Niveau 1 : les Tactiques à 2+ coûtent 1 de moins. Niveau 2 : celles à 1 aussi. Niveau 3 : celles à 3+ encore 1 de moins.', max: 3, cost: l => [6, 10, 14][l]! },
+  { id: 'generalissime', currency: 'xp', name: 'Généralissime', desc: 'Les bonus de tes Leaders augmentent de 20 % par niveau.', max: 5, cost: l => 5 + 3 * l },
+  { id: 'imperator', currency: 'xp', name: 'Imperator', desc: 'Tes Leaders coûtent 1 de moins.', max: 1, cost: () => 10 },
+  { id: 'magister_equitum', currency: 'xp', name: 'Magister Equitum', desc: 'Tes régiments Montés gagnent +20 % d’ATK par niveau.', max: 5, cost: l => 4 + 2 * l },
+  { id: 'praefectus', currency: 'xp', name: 'Praefectus Praetorio', desc: 'Tes régiments de niveau 4 et 5 coûtent 1 de moins.', max: 1, cost: () => 10 },
+];
+export const upgradeLevel = (meta: RunMeta, id: string) => meta.upg?.[id] ?? 0;
+/** Pourquoi une amélioration ne s'achète pas (null = achetable). */
+export function cannotBuy(meta: RunMeta, u: Upgrade): string | null {
+  const lvl = upgradeLevel(meta, u.id);
+  if (lvl >= u.max) return 'Niveau maximum';
+  if (u.unlock && !meta.unlocks.includes(u.unlock.key)) return u.unlock.text;
+  if (meta[u.currency] < u.cost(lvl)) return u.currency === 'essence' ? 'Pas assez d’Essence divine' : 'Pas assez d’Expérience';
+  return null;
+}
+export function buyUpgrade(meta: RunMeta, id: string): RunMeta {
+  const u = UPGRADES.find(x => x.id === id)!;
+  if (cannotBuy(meta, u)) return meta;
+  const lvl = upgradeLevel(meta, id);
+  return { ...meta, [u.currency]: meta[u.currency] - u.cost(lvl), upg: { ...meta.upg, [id]: lvl + 1 } };
 }

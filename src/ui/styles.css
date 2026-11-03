@@ -834,3 +834,7 @@ button.pile:not(:disabled):hover .pile-stack > * { outline: 2px solid var(--bras
 .rl-champion .pill b { color: var(--navy); }
 .rl-champion .muted { color: #4b5470; opacity: 1; }
 .rl-champion button { background: var(--navy); color: var(--paper); border: 1px solid var(--navy); border-radius: 4px; padding: 6px 10px; }
+.rl-upgrades { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.rl-upg { display: grid; gap: 6px; align-content: start; justify-items: start; padding: 10px; border: 1px solid #ffffff30; border-radius: 8px; }
+.rl-upg p { margin: 0; }
+.rl-upg.locked { opacity: .6; }

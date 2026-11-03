@@ -3,7 +3,7 @@ import { useState } from 'react';
 import type { GameState } from '../engine/types';
 import {
   addCard, afterFight, applyCards, chooseOption, closeRun, defeatAt, eligible, EVENT_TEXT, eventChoices, fight, isImproved, isTouched, loadMeta, loadRun,
-  marketOffers, NODES_PER_ACT, newRun, nextNode, offrandesWon, promotions, registerRun, removeCard, resolveEvent, saveMeta, saveRun, variantId, volunteers,
+  marketOffers, NODES_PER_ACT, UPGRADES, buyUpgrade, cannotBuy, upgradeLevel, newRun, nextNode, offrandesWon, promotions, registerRun, removeCard, resolveEvent, saveMeta, saveRun, variantId, volunteers,
   LASSITUDE_SHOP, type CardPurpose, type NodeOption, type RunMeta, type RunState, type Step,
 } from '../roguelite/run';
 import { formatEvent } from '../i18n/log.fr';
@@ -19,7 +19,7 @@ type GameOpts = { animMul: number; aiMul: number; bannerMul: number; initialReve
 
 const REWARD_LABEL = { or: 'de l’or en plus', essence: 'de l’Essence divine', xp: 'de l’Expérience', offrandes: 'une Offrande', amelioration: 'une amélioration de carte' } as const;
 const PURPOSE_TITLE: Record<CardPurpose, string> = {
-  retirer: 'Retirer une carte de ton deck', ameliorer: 'Améliorer une carte', humain: 'L’entraînement humain : +5 ARM, +2 Moral',
+  retirer: 'Retirer une carte de ton deck', ameliorer: 'Améliorer une carte : efface d’abord ses malus des Titans ; sinon régiment +10 % ATK, END, ARM et Moral, Leader +20 % à ses bonus, Tactique −1 de coût', humain: 'L’entraînement humain : +5 ARM, +2 Moral',
   elfe: 'L’entraînement elfe : coûte 1 de moins, +10 INI', garde: 'Laisser jusqu’à 2 régiments surveiller le camp (ils quittent ton deck)',
 };
 
@@ -102,11 +102,42 @@ function CardPicker({ run, purpose, n, optional, onDone }: { run: RunState; purp
 export function RogueliteScreen({ gameOpts, live, onExit }: { gameOpts: GameOpts; live: LiveGame; onExit: () => void }) {
   const [meta, setMetaState] = useState<RunMeta>(() => loadMeta());
   const [run, setRunState] = useState<RunState | null>(() => loadRun());
-  const [mode, setMode] = useState<'home' | 'run' | 'deck' | 'game'>(() => (loadRun() ? 'run' : 'home'));
+  const [mode, setMode] = useState<'home' | 'run' | 'deck' | 'game' | 'upgrades'>(() => (loadRun() ? 'run' : 'home'));
   const [gameKey, setGameKey] = useState(0);
   const [notes, setNotes] = useState<string[]>([]);
   const setRun = (r: RunState | null) => { if (r) registerRun(r); saveRun(r); setRunState(r); };
   const setMeta = (m: RunMeta) => { saveMeta(m); setMetaState(m); };
+
+  // ---------- Améliorations ----------
+  if (mode === 'upgrades') {
+    const section = (cur: 'essence' | 'xp', title: string) => (
+      <section className="rl-step">
+        <h2 className="sub">{title} — tu as {meta[cur]}</h2>
+        <div className="rl-upgrades">
+          {UPGRADES.filter(u => u.currency === cur).map(u => {
+            const lvl = upgradeLevel(meta, u.id);
+            const why = cannotBuy(meta, u);
+            const locked = !!u.unlock && !meta.unlocks.includes(u.unlock.key);
+            return (
+              <div key={u.id} className={`rl-upg${locked ? ' locked' : ''}`}>
+                <b>{u.name}</b> <span className="pill">Niveau {lvl} / {u.max}</span>
+                <p className="small">{u.desc}</p>
+                {lvl < u.max && <button type="button" disabled={!!why} title={why ?? undefined} onClick={() => setMeta(buyUpgrade(meta, u.id))}>{locked ? u.unlock!.text : `${u.cost(lvl)} ${cur === 'essence' ? 'Essence' : 'Expérience'}`}</button>}
+              </div>
+            );
+          })}
+        </div>
+      </section>
+    );
+    return (
+      <div className="camp rl">
+        <TopBar title="Améliorations" onBack={() => setMode('home')} />
+        <p className="muted small">Elles s’appliquent à partir de la prochaine run et ne se perdent jamais.</p>
+        {section('essence', 'Essence divine : les matchs')}
+        {section('xp', 'Expérience : Augustus')}
+      </div>
+    );
+  }
 
   // ---------- Accueil ----------
   if (mode === 'home' || !run) {
@@ -114,7 +145,7 @@ export function RogueliteScreen({ gameOpts, live, onExit }: { gameOpts: GameOpts
       <div className="camp rl">
         <TopBar title="Roguelite — prototype" onBack={onExit} />
         <p>Tu es l’instrument des Dieux dans leur guerre contre les Titans. Les Titans corrompent la réalité et dressent les armées des Dieux les unes contre les autres.</p>
-        <p className="muted small">Prototype de l’acte 1 : 8 nœuds puis le Titan du Glissement. La lassitude est en partie gardée d’un combat à l’autre ; à {defeatAt({ act: 1 } as RunState)} de lassitude, la run est perdue. Pas encore d’Étendards ni d’achats entre les runs.</p>
+        <p className="muted small">Prototype de l’acte 1 : 8 nœuds puis le Titan du Glissement. La lassitude est en partie gardée d’un combat à l’autre ; à {defeatAt({ act: 1 } as RunState)} de lassitude, la run est perdue. L’Essence divine et l’Expérience gagnées s’achètent en améliorations entre les runs. Pas encore d’Étendards.</p>
         <div className="rl-purse">
           <span className="pill">Essence divine <b>{meta.essence}</b></span>
           <span className="pill">Expérience <b>{meta.xp}</b></span>
@@ -130,8 +161,9 @@ export function RogueliteScreen({ gameOpts, live, onExit }: { gameOpts: GameOpts
           ))}
         </div>
         <div className="choices row left">
+          <button type="button" onClick={() => setMode('upgrades')}>Améliorations (Essence divine, Expérience)</button>
           {run && !run.over && <button type="button" className="primary" onClick={() => setMode('run')}>Continuer la run (nœud {run.node + 1})</button>}
-          <button type="button" className={run && !run.over ? '' : 'primary'} onClick={() => { const r = newRun(); setRun(r); setNotes([]); setMode('run'); }}>
+          <button type="button" className={run && !run.over ? '' : 'primary'} onClick={() => { const r = newRun(String(Date.now()), meta); setRun(r); setNotes([]); setMode('run'); }}>
             {run && !run.over ? 'Abandonner et recommencer' : 'Nouvelle run'}
           </button>
         </div>
@@ -195,6 +227,7 @@ export function RogueliteScreen({ gameOpts, live, onExit }: { gameOpts: GameOpts
     const next = structuredClone(r);
     next.steps.shift();
     setNotes(n => [...n, ...extra]);
+    if (next.relaunch && !next.steps.length) { next.relaunch = false; setRun(next); return; } // Incorruptible : on rejoue le combat
     if (!next.steps.length && !next.over && next.current) { setRun(nextNode(next)); setNotes([]); return; }
     setRun(next);
   };
