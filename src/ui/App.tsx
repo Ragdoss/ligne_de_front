@@ -84,6 +84,14 @@ function screenMusic(kind: Screen['kind']): string[] {
   return ['menu'];
 }
 
+/** Campagne 5 (La Couronne de cendres) : pendant les trois scénarios d'une branche, la musique du camp allié visité
+ *  (ce4–ce6 : elfes, cn4–cn6 : nomades, cd4–cd6 : démons) à la place de celle de l'Empire. */
+const BRANCH_MUSIC: Record<string, string> = { e: 'elfes', n: 'nomades', d: 'demons' };
+function branchMusic(campaignId: string, scenarioId: string): string[] {
+  const m = campaignId === 'couronne' ? /^c([end])\d$/.exec(scenarioId) : null;
+  return m ? [BRANCH_MUSIC[m[1]!]!] : [];
+}
+
 export function App() {
   const [screen, setScreen] = useState<Screen>({ kind: 'home' });
   useEffect(() => { showZoom(null); }, [screen.kind]); // l'agrandissement ne survit pas à un changement d'écran
@@ -261,7 +269,7 @@ export function App() {
         key={screen.key}
         {...gameOpts}
         setup={scenarioGameSetup(sc, screen.deck, screen.key, bonusFor(c, sc.id), easeFor(sc.id, difficultyOf(c)))}
-        music={[`scenario-${sc.id}`, `combat-${c.id}`, 'combat-campagne', 'combat']}
+        music={[`scenario-${sc.id}`, ...branchMusic(c.id, sc.id), `combat-${c.id}`, 'combat-campagne', 'combat']}
         names={names}
         human={{ A: !AUTOPILOT, B: false }}
         fast={AUTOPILOT}

@@ -84,6 +84,7 @@ toujours.
 
 - **Musique des camps** : en partie, le jeu joue la musique du camp du joueur de l'écran à la place du `combat` générique :
   `empire`, `elfes`, `demons`, `nomades` (cinq pistes chacun). À deux sur le même écran : camp du joueur A, niveau le plus haut.
+- **Campagne 5 (La Couronne de cendres)** : pendant les trois scénarios d'une branche (`ce4`–`ce6`, `cn4`–`cn6`, `cd4`–`cd6`), on joue la musique du camp visité (`elfes`, `nomades`, `demons`) à la place de celle de l'Empire. Un `scenario-<id>` précis reste prioritaire.
 - **Morceaux précis** : `scenario-<id>` (ex. `scenario-cc8-piste1…3` : dernier combat de la campagne 5, qui commence au
   niveau 3, donc trois pistes pour les niveaux 3, 4 et 5), `puzzle` (énigmes, une piste), `menu` (menus, une piste).
 - Chaque fichier contient 1 s de raccord avant et 1 s après la boucle (la boucle se fait au milieu) : ne pas les couper.
