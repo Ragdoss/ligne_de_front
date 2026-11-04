@@ -146,6 +146,13 @@ describe('Roguelite : cartes des Titans et boss', () => {
   });
 });
 
+describe('Roguelite : Moral total', () => {
+  it('l’Essence de la réalité et le Titan du Glissement ne comptent pas dans le Moral total', () => {
+    expect(CARDS.essence_realite!.excludeFromMoralTotal).toBe(true);
+    expect(CARDS.titan_glissement!.excludeFromMoralTotal).toBe(true);
+  });
+});
+
 describe('Roguelite : améliorations entre les runs', () => {
   it('achat : coût payé, niveau monté, verrou respecté', () => {
     let m = { ...freshMeta(), essence: 10, xp: 20 };

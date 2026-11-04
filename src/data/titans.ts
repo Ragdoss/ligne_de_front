@@ -25,7 +25,7 @@ export const TITAN_CARDS: Record<string, CardDef> = {
   // Boss de l'acte 1 : le Titan du Glissement et la tactique pour lui résister.
   titan_glissement: {
     id: 'titan_glissement', cardType: 'Regiment', faction: 'neutre', niveau: 5, cout: 0, slotType: 'arriere', types: ['Titan'],
-    atk: 5, end: 75, arm: 5, ini: 20, mor: 20, keywords: [],
+    atk: 5, end: 75, arm: 5, ini: 20, mor: 20, keywords: [], excludeFromMoralTotal: true,
   },
   lutter_mouvement: { id: 'lutter_mouvement', cardType: 'Tactique', faction: 'neutre', niveau: 1, cout: 0, targetRule: 'none', effect: 'holdGround' },
 } as unknown as Record<string, CardDef>;
@@ -35,7 +35,7 @@ export const TITAN_TEXT_FR: Record<string, { name: string; desc: string }> = {
   titan_archere: { name: 'Archère du Glissement', desc: 'Prime : la cible perd définitivement 5 END maximum.' },
   titan_echo: { name: 'Écho du Titan', desc: 'Un régiment adverse perd définitivement 10 % de son ATK.' },
   essence_realite: { name: 'Essence de la réalité', desc: 'Chaque fois qu’elle est attaquée, des régiments de son camp au hasard (autant que le niveau de l’attaquant) perdent définitivement 1 ATK, 1 INI et 1 ARM. Elle ne compte pas dans le Moral total.' },
-  titan_glissement: { name: 'Titan du Glissement', desc: 'Au début de chaque tour du Titan, tes régiments glissent d’une case vers la droite ; ceux qui sortent du terrain sont détruits.' },
+  titan_glissement: { name: 'Titan du Glissement', desc: 'Au début de chaque tour du Titan, tes régiments glissent d’une case vers la droite ; ceux qui sortent du terrain sont détruits. Il ne compte pas dans le Moral total.' },
   lutter_mouvement: { name: 'Lutter contre le mouvement', desc: 'Au prochain tour du Titan, tes régiments ne glissent pas. Coûte 1 de plus à chaque fois que tu la joues.' },
 };
 
