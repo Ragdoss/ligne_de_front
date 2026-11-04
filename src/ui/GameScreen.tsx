@@ -190,7 +190,9 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
   const [game, setGame] = useState<GameState>(() => (initialState ? structuredClone(initialState) : createGame(setup)));
   // Musique : celle du camp du joueur de l'écran, en couches (autant que son niveau) ; à défaut, la musique demandée par l'écran.
   const musicFaction = game.players[me ?? 'A'].faction;
-  const musicKey = [...(musicFaction === 'neutre' ? [] : [`couches-${musicFaction === 'elfe' ? 'elfes' : musicFaction}`]), ...music].join('|');
+  // Les morceaux précis demandés par l'écran passent d'abord ; la musique du camp prend la place du « combat » générique.
+  const campMusic = musicFaction === 'neutre' ? [] : [musicFaction === 'elfe' ? 'elfes' : musicFaction];
+  const musicKey = (music.includes('combat') ? music.flatMap(k => (k === 'combat' ? [...campMusic, k] : [k])) : [...music, ...campMusic]).join('|');
   useEffect(() => requestMusic(musicKey.split('|')), [musicKey]);
   const musicLvl = me ? game.players[me].level : Math.max(game.players.A.level, game.players.B.level);
   useEffect(() => setMusicLevel(musicLvl), [musicLvl]);

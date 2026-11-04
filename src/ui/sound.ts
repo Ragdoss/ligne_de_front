@@ -120,8 +120,7 @@ export function soundsFor(events: GameEvent[], me: PlayerId | null): string[][] 
 // ---------- Musique ----------
 // Chaque écran demande une musique (liste de candidats, du plus précis au plus général) ; la dernière demande active gagne.
 // Changement de morceau en fondu ; un morceau boucle.
-// Un candidat « couches-<camp> » est une musique en 5 couches (<camp>-piste1…5.ogg, voir docs/SONS.md) : on joue autant
-// de couches que le niveau du joueur (setMusicLevel).
+// Un candidat peut aussi être un morceau en couches (<nom>-piste1…5.ogg, voir docs/SONS.md).
 interface Request { id: number; keys: string[] }
 interface Playing { key: string; setVolume: (v: number) => void; stop: () => void }
 let requests: Request[] = [];
@@ -146,18 +145,30 @@ function scheduleRefresh(): void {
 }
 
 // ---- Musique par couches (WebAudio) ----
-// Chaque fichier contient 1 s de raccord avant et après la boucle : la boucle se fait au milieu du fichier, sans accroc.
+// Un morceau <nom> en couches = <nom>-piste1.ogg … <nom>-piste5.ogg (au moins une) : les pistes jouent ensemble, au même
+// point de la boucle, et on n'entend que les premières, selon le niveau du joueur (setMusicLevel). Un morceau d'une seule
+// piste (menu, énigmes) joue toujours. Chaque fichier contient 1 s de raccord avant et après la boucle : elle se fait au
+// milieu du fichier, sans accroc.
 const LAYERS = 5, LAYER_PAD = 1;
-/** Niveau sonore naturel (dB) de la musique cumulée à chaque niveau, et niveau visé : les niveaux bas ne sont pas trop faibles. */
-const LAYER_NATURAL_DB: Record<string, number[]> = {
-  empire: [-28.8, -25.8, -22.6, -20.8, -18.0], elfes: [-28.6, -25.1, -22.6, -20.9, -18.1],
-  demons: [-29.3, -25.2, -23.3, -20.9, -18.0], nomades: [-30.1, -27.4, -24.8, -23.7, -19.1],
-};
+interface LayerInfo {
+  /** Niveau du joueur auquel la première piste commence (le dernier combat de la campagne 5 démarre au niveau 3). */
+  first?: number;
+  /** Niveau sonore naturel (dB) de la musique cumulée, piste par piste ; sert à corriger le volume de chaque niveau. */
+  natural: number[];
+  /** Niveau visé (dB) pour chaque niveau du joueur 1 à 5 (ou une seule valeur). */
+  target?: number[];
+}
 const LAYER_TARGET_DB = [-26, -24.5, -23, -21.5, -19];
-const layerNames = (name: string) => Array.from({ length: LAYERS }, (_, i) => `${name}-piste${i + 1}`);
-const hasLayers = (name: string) => layerNames(name).every(n => MUSIC[n]);
-const isLayered = (key: string) => key.startsWith('couches-');
-const available = (key: string) => (isLayered(key) ? hasLayers(key.slice(8)) : !!MUSIC[key]);
+const LAYER_INFO: Record<string, LayerInfo> = {
+  empire: { natural: [-28.8, -25.8, -22.6, -20.8, -18.0] }, elfes: { natural: [-28.6, -25.1, -22.6, -20.9, -18.1] },
+  demons: { natural: [-29.3, -25.2, -23.3, -20.9, -18.0] }, nomades: { natural: [-30.1, -27.4, -24.8, -23.7, -19.1] },
+  'scenario-cc8': { first: 3, natural: [-23.3, -20.4, -18.8], target: [-23, -21.5, -19] },
+  puzzle: { natural: [-18.0], target: [-27] },
+  menu: { natural: [-18.0], target: [-30] },
+};
+const layerNames = (name: string) => Array.from({ length: LAYERS }, (_, i) => `${name}-piste${i + 1}`).filter((n, i, all) => all.slice(0, i + 1).every(x => MUSIC[x]));
+const layerCount = (name: string) => layerNames(name).length;
+const available = (key: string) => !!MUSIC[key] || layerCount(key) > 0;
 
 let musicLevel = 1;
 let layerCtx: AudioContext | null = null;
@@ -165,7 +176,7 @@ const layerBuffers = new Map<string, Promise<AudioBuffer[]>>();
 let layerGains: GainNode[] = [];
 let layerName = '';
 
-/** Niveau du joueur (1 à 5) : nombre de couches jouées. */
+/** Niveau du joueur (1 à 5) : nombre de pistes jouées. */
 export function setMusicLevel(level: number): void {
   const l = Math.max(1, Math.min(LAYERS, Math.round(level) || 1));
   if (l === musicLevel) return;
@@ -174,9 +185,13 @@ export function setMusicLevel(level: number): void {
 }
 function applyLayerGains(seconds: number): void {
   if (!layerCtx || !layerGains.length) return;
-  const nat = LAYER_NATURAL_DB[layerName]?.[musicLevel - 1] ?? LAYER_TARGET_DB[musicLevel - 1]!;
-  const comp = 10 ** ((LAYER_TARGET_DB[musicLevel - 1]! - nat) / 20);
-  layerGains.forEach((g, i) => g.gain.setTargetAtTime(i < musicLevel ? comp : 0, layerCtx!.currentTime, seconds / 3));
+  const n = layerGains.length, first = LAYER_INFO[layerName]?.first ?? 1;
+  const count = n === 1 ? 1 : Math.max(1, Math.min(n, musicLevel - first + 1));
+  const lvl = Math.min(LAYERS, first + count - 1);
+  const info = LAYER_INFO[layerName];
+  const target = info?.target ? (info.target.length === 1 ? info.target[0]! : info.target[count - 1] ?? info.target[info.target.length - 1]!) : LAYER_TARGET_DB[lvl - 1]!;
+  const comp = info ? 10 ** ((target - (info.natural[count - 1] ?? info.natural[info.natural.length - 1]!)) / 20) : 1;
+  layerGains.forEach((g, i) => g.gain.setTargetAtTime(i < count ? comp : 0, layerCtx!.currentTime, seconds / 3));
 }
 function loadLayers(ctx: AudioContext, name: string): Promise<AudioBuffer[]> {
   let p = layerBuffers.get(name);
@@ -187,7 +202,8 @@ function loadLayers(ctx: AudioContext, name: string): Promise<AudioBuffer[]> {
   }
   return p;
 }
-function startLayers(key: string, name: string): Playing {
+function startLayers(key: string): Playing {
+  const name = key;
   const Ctor = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
   layerCtx ??= new Ctor();
   const ctx = layerCtx;
@@ -254,7 +270,7 @@ function refreshMusic(): void {
   if (current?.key === key) return;
   if (current) { current.stop(); current = null; }
   if (!key) return;
-  current = isLayered(key) ? startLayers(key, key.slice(8)) : startFile(key);
+  current = MUSIC[key] ? startFile(key) : startLayers(key);
 }
 function applyMusicVolume(): void {
   if (muted || musicVolume <= 0) { refreshMusic(); return; }
