@@ -180,9 +180,8 @@ export function RogueliteScreen({ gameOpts, live, onExit }: { gameOpts: GameOpts
               <span className="muted small">À débloquer par un événement</span></div>
           ))}
         </div>
-        <p className="small">Champion désigné : {CHAMPIONS.filter(c => !c.unlock || meta.unlocks.includes(c.unlock)).map(c => (
-          <button key={c.id} type="button" className={`rl-desig${(meta.designated ?? 'augustus') === c.id ? ' on' : ''}`} onClick={() => setMeta({ ...meta, designated: c.id })}>{shortName(c.id)}</button>
-        ))} <span className="muted">— jouer ce champion rapporte +1 Expérience à chaque combat gagné.</span></p>
+        <p className="small">Champion désigné : <span className="rl-desig on">{shortName(meta.designated ?? 'augustus')}</span>
+          <span className="muted"> — le jouer rapporte +1 Expérience à chaque combat gagné. Un nouveau champion est désigné au hasard après chaque run.</span></p>
         <div className="choices row left">
           <button type="button" onClick={() => setMode('upgrades')}>Améliorations (Essence divine, Expérience)</button>
           {run && !run.over && <button type="button" className="primary" onClick={() => setMode('run')}>Continuer la run (nœud {run.node + 1})</button>}

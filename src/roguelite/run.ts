@@ -576,7 +576,14 @@ export function loadMeta(): RunMeta {
 export function saveMeta(m: RunMeta): void { try { localStorage.setItem(keyFor(META_KEY), JSON.stringify(m)); } catch { /* rien */ } }
 /** Fin de run : l'Essence divine gagnée rejoint la méta (l'Expérience y est versée à la fin de chaque combat, voir xpWon). */
 export function closeRun(meta: RunMeta, run: RunState): RunMeta {
-  return { ...meta, essence: meta.essence + run.essence, runs: meta.runs + 1, wins: meta.wins + (run.over?.won ? 1 : 0) };
+  return { ...meta, essence: meta.essence + run.essence, runs: meta.runs + 1, wins: meta.wins + (run.over?.won ? 1 : 0), designated: nextDesignated(meta, run) };
+}
+/** Après chaque run, le champion désigné est tiré au hasard parmi les champions débloqués, en évitant celui qu'on vient
+ *  de jouer quand c'est possible : le joueur est poussé à alterner (05/11/2026). */
+export function nextDesignated(meta: RunMeta, run: RunState): ChampionId {
+  const open = CHAMPIONS.filter(c => !c.unlock || meta.unlocks.includes(c.unlock)).map(c => c.id);
+  const pool = open.length > 1 ? open.filter(c => c !== run.champion) : open;
+  return pickOne(rng(`${run.seed}|designated`), pool);
 }
 
 // ---------- Améliorations entre les runs ----------

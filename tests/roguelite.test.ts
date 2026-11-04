@@ -6,7 +6,7 @@ import { attack } from '../src/engine/combat';
 import { CARDS } from '../src/data/cards';
 import { registerTitanCards } from '../src/data/titans';
 import {
-  buyUpgrade, miniBossFor, closeRun, xpWon, defeatAt, newMeta as freshMeta, afterFight, chooseOption, fight, improve, keptLassitude, newMeta, newRun, nextNode, optionsFor, variantDef, variantId, type RunState,
+  buyUpgrade, nextDesignated, miniBossFor, closeRun, xpWon, defeatAt, newMeta as freshMeta, afterFight, chooseOption, fight, improve, keptLassitude, newMeta, newRun, nextNode, optionsFor, variantDef, variantId, type RunState,
 } from '../src/roguelite/run';
 import { act, blankGame, give, place } from './helpers';
 
@@ -323,5 +323,16 @@ describe('Roguelite : mini-boss de la Fracture', () => {
     const free = s.players.A.board.avant.findIndex(u => !u);
     s = act(s, { type: 'play', handUid: 991, target: { player: 'A', zone: 'avant', idx: free } }).state;
     expect(s.runMods?.recrue_imp).toBeUndefined();
+  });
+});
+
+describe('Roguelite : champion désigné', () => {
+  it('tiré au hasard après une run, sans reprendre celui qu’on vient de jouer quand c’est possible', () => {
+    const solo = freshMeta();
+    expect(nextDesignated(solo, newRun('d1'))).toBe('augustus');
+    const both = { ...freshMeta(), unlocks: ['champion:elfe'] };
+    expect(nextDesignated(both, newRun('d2', both, 'augustus'))).toBe('eldrin');
+    expect(nextDesignated(both, newRun('d3', both, 'eldrin'))).toBe('augustus');
+    expect(closeRun(both, { ...newRun('d4', both, 'eldrin'), over: { won: true, text: '' } }).designated).toBe('augustus');
   });
 });
