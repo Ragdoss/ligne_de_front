@@ -3,7 +3,7 @@ import { useState } from 'react';
 import type { GameState } from '../engine/types';
 import {
   addCard, afterFight, applyCards, chooseOption, closeRun, defeatAt, eligible, EVENT_TEXT, eventChoices, fight, isImproved, isTouched, loadMeta, loadRun,
-  marketOffers, NODES_PER_ACT, etendardOf, UPGRADES, buyUpgrade, cannotBuy, upgradeLevel, newRun, nextNode, offrandesWon, promotions, registerRun, removeCard, resolveEvent, saveMeta, saveRun, variantId, volunteers,
+  marketOffers, newMeta, NODES_PER_ACT, etendardOf, UPGRADES, buyUpgrade, cannotBuy, upgradeLevel, newRun, nextNode, offrandesWon, promotions, registerRun, removeCard, resolveEvent, saveMeta, saveRun, variantId, volunteers,
   LASSITUDE_SHOP, type CardPurpose, type NodeOption, type RunMeta, type RunState, type Step,
 } from '../roguelite/run';
 import { formatEvent } from '../i18n/log.fr';
@@ -111,6 +111,7 @@ export function RogueliteScreen({ gameOpts, live, onExit }: { gameOpts: GameOpts
   const [mode, setMode] = useState<'home' | 'run' | 'deck' | 'game' | 'upgrades'>(() => (loadRun() ? 'run' : 'home'));
   const [gameKey, setGameKey] = useState(0);
   const [notes, setNotes] = useState<string[]>([]);
+  const [confirmReset, setConfirmReset] = useState(false);
   const setRun = (r: RunState | null) => { if (r) registerRun(r); saveRun(r); setRunState(r); };
   const setMeta = (m: RunMeta) => { saveMeta(m); setMetaState(m); };
 
@@ -172,6 +173,15 @@ export function RogueliteScreen({ gameOpts, live, onExit }: { gameOpts: GameOpts
           <button type="button" className={run && !run.over ? '' : 'primary'} onClick={() => { const r = newRun(String(Date.now()), meta); setRun(r); setNotes([]); setMode('run'); }}>
             {run && !run.over ? 'Abandonner et recommencer' : 'Nouvelle run'}
           </button>
+        </div>
+        <div className="rl-reset">
+          {!confirmReset
+            ? <button type="button" onClick={() => setConfirmReset(true)}>Tout réinitialiser</button>
+            : <>
+                <span className="small">Effacer la run en cours, l’Essence divine, l’Expérience, les Offrandes, les améliorations et les déblocages du mode ?</span>
+                <button type="button" className="danger" onClick={() => { setRun(null); setMeta(newMeta()); setNotes([]); setConfirmReset(false); }}>Oui, tout effacer</button>
+                <button type="button" onClick={() => setConfirmReset(false)}>Annuler</button>
+              </>}
         </div>
       </div>
     );
