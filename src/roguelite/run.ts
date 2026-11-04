@@ -356,8 +356,8 @@ export function afterFight(run: RunState, g: GameState): RunState {
     if (o.reward === 'or') gold += 30; // 04/11 : peu d'or par combat, beaucoup avec l'icône Or
     if (o.reward === 'essence') { next.essence += 3; lines.push('+3 Essence divine.'); }
     // Expérience : +2 avec l'icône ; +1 de base à chaque combat, seulement si l'on joue le champion désigné.
-    const xp = (o.reward === 'xp' ? 2 : 0) + (next.designated ? 1 : 0);
-    if (xp) { next.xp += xp; lines.push(`+${xp} Expérience${next.designated ? ' (dont 1 pour le champion désigné)' : ''}.`); }
+    if (o.reward === 'xp') { next.xp += 2; lines.push('+2 Expérience.'); }
+    if (next.designated) { next.xp += 1; lines.push('+1 Expérience car tu joues le champion désigné.'); }
     if (o.reward === 'offrandes') lines.push('+1 Offrande.');
     next.gold += gold; lines.unshift(`+${gold} or.`);
     steps.push({ kind: 'volontaires', round: 0 }, { kind: 'volontaires', round: 1 });
