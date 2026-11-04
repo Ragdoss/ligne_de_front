@@ -88,6 +88,8 @@ export interface RunState {
   champion: ChampionId;
   /** Nombre de cartes du deck de départ (Armée élue : uid ≤ baseCount). */
   baseCount?: number;
+  /** Le champion joué est le champion désigné : +1 Expérience à chaque combat gagné. */
+  designated?: boolean;
   act: number;
   /** Nœuds terminés dans l'acte (0 à 8 ; 8 = place au boss). */
   node: number;
@@ -124,6 +126,8 @@ export interface RunMeta {
   unlocks: string[];
   /** Améliorations achetées (niveau par amélioration). */
   upg: Record<string, number>;
+  /** Champion désigné : seul lui gagne l'Expérience de base de chaque combat. */
+  designated?: ChampionId;
   runs: number;
   wins: number;
 }
@@ -192,7 +196,7 @@ export const AUGUSTUS_DECK: string[] = COURONNE_SCENARIOS.cc1!.A.deckList!.slice
 export function newRun(seed = String(Date.now()), meta: RunMeta = newMeta(), champion: ChampionId = 'augustus'): RunState {
   const deck = championOf(champion).deck();
   const run: RunState = {
-    version: 1, id: `run-${seed}`, seed, champion, baseCount: deck.length, act: 1, node: 0,
+    version: 1, id: `run-${seed}`, seed, champion, baseCount: deck.length, designated: (meta.designated ?? 'augustus') === champion, act: 1, node: 0,
     deck: deck.map((id, i) => ({ uid: i + 1, id, mods: {} })), nextUid: deck.length + 1,
     lassitude: 0, gold: 20, essence: 0, xp: 0, eventsSeen: [], eventThisAct: false, miniBossOffers: 0, miniBossDone: false,
     options: [], upg: runUpgrades(meta, champion), etendards: [], revives: meta.upg.incorruptible ?? 0, current: null, steps: [], over: null,
@@ -351,7 +355,9 @@ export function afterFight(run: RunState, g: GameState): RunState {
     let gold = 5;
     if (o.reward === 'or') gold += 30; // 04/11 : peu d'or par combat, beaucoup avec l'icône Or
     if (o.reward === 'essence') { next.essence += 3; lines.push('+3 Essence divine.'); }
-    next.xp += o.reward === 'xp' ? 3 : 1; lines.push(o.reward === 'xp' ? '+3 Expérience.' : '+1 Expérience.');
+    // Expérience : +2 avec l'icône ; +1 de base à chaque combat, seulement si l'on joue le champion désigné.
+    const xp = (o.reward === 'xp' ? 2 : 0) + (next.designated ? 1 : 0);
+    if (xp) { next.xp += xp; lines.push(`+${xp} Expérience${next.designated ? ' (dont 1 pour le champion désigné)' : ''}.`); }
     if (o.reward === 'offrandes') lines.push('+1 Offrande.');
     next.gold += gold; lines.unshift(`+${gold} or.`);
     steps.push({ kind: 'volontaires', round: 0 }, { kind: 'volontaires', round: 1 });

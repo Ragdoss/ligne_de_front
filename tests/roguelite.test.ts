@@ -264,7 +264,11 @@ describe('Roguelite : Expérience', () => {
     const g = createGame(fight(run, run.current, 1).setup);
     g.over = { winner: 'A', reason: 'lassitude' };
     const next = afterFight(run, g);
-    expect(xpWon(run, next)).toBe(3);
+    expect(xpWon(run, next)).toBe(3); // Augustus est le champion désigné par défaut : 2 (icône) + 1
+    const other = { ...newRun('x2', freshMeta(), 'eldrin'), current: { kind: 'combat', reward: 'or', deck: 'd1' } as const };
+    const g2 = createGame(fight(other, other.current, 1).setup);
+    g2.over = { winner: 'A', reason: 'lassitude' };
+    expect(xpWon(other, afterFight(other, g2))).toBe(0); // Eldrin n'est pas désigné
     expect(closeRun({ ...freshMeta(), xp: 3 }, { ...next, over: { won: false, text: '' } }).xp).toBe(3);
   });
 });

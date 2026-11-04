@@ -846,3 +846,5 @@ button.pile:not(:disabled):hover .pile-stack > * { outline: 2px solid var(--bras
 .rl-reset .danger { background: #8e2b22; color: #fff; border-color: #8e2b22; }
 button.rl-champ-card { background: none; color: inherit; cursor: pointer; }
 .rl-champ-card.on { outline: 3px solid var(--brass-bright); background: #ffffff12; }
+.rl-desig { margin: 0 4px; padding: 2px 10px; border-radius: 12px; border: 1px solid var(--brass); background: none; color: inherit; }
+.rl-desig.on { background: var(--brass); color: #1b1b1b; }
