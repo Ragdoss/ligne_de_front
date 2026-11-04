@@ -179,6 +179,24 @@ export function ChoicePanel({ choice, onPick, onHover }: { choice: PendingChoice
   );
 }
 
+/** « Météo » du scénario, affichée dans la ligne de front : jour/nuit, tempête, Fracture (roguelite). */
+function weatherLabel(g: GameState): { text: string; cls: string } | null {
+  const sc = g.scenario;
+  if (!sc) return null;
+  const fr = sc.fracture;
+  if (fr) {
+    const mine = g.active === fr.victim;
+    const odd = g.turn % 2 === 1; // tours impairs de la victime : fracturés
+    const next = mine ? odd : !odd;
+    return mine ? { text: odd ? 'Tour fracturé' : 'Tour stable', cls: odd ? 'fracture' : 'stable' }
+      : { text: `Prochain tour : ${next ? 'fracturé' : 'stable'}`, cls: next ? 'fracture' : 'stable' };
+  }
+  const w = new Ctx(g).weather();
+  if (!sc.weather) return null;
+  if (sc.weather.kind === 'tempete') return w === 'tempete' ? { text: 'Tempête de sable', cls: 'tempete' } : { text: 'Ciel dégagé', cls: 'jour' };
+  return w === 'nuit' ? { text: 'Nuit — Démons +10 ATK', cls: 'nuit' } : { text: 'Jour — Elfes +15 INI', cls: 'jour' };
+}
+
 export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, intro, renderEnd, onQuit, animMul = 1, aiMul = 1, bannerMul = 1, initialReveal = false, onOver, remote, bottomSide, onGame, overlay, avatars, arts, attackMotion = attackMotionOn, strongAi = false, music = ['combat'], initialState }: GameScreenProps) {
   /** Joueur de cet écran (sons de victoire / défaite) ; null à deux sur le même écran ou en spectateur. */
   const me: PlayerId | null = remote ? (remote.side === 'A' ? 'B' : 'A') : human.A !== human.B ? (human.A ? 'A' : 'B') : null;
@@ -447,7 +465,7 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
         <Board game={view} player={top} bottom={false} isTarget={isTarget} isFirstPicked={r => sameSlot(sel?.first, r)} onSlot={onSlot} highlight={highlight} faded={faded} preview={preview?.units} onHover={setZoom} bubbles={bubbles}
           left={<Piles pl={view.players[top]} p={top} onOpenDiscard={() => setDiscardOf(top)} onHover={setZoom} />} isoExtra={<MoralTotal game={view} p={top} />} />
       </section>
-      <div className="frontline">ligne de front<span className="version-mark" aria-hidden="true">v {APP_VERSION}</span></div>
+      <div className="frontline">ligne de front{(() => { const w = weatherLabel(view); return w && <span className={`fl-weather ${w.cls}`}>{w.text}</span>; })()}<span className="version-mark" aria-hidden="true">v {APP_VERSION}</span></div>
       <section className="side side-bottom">
         <Board game={view} player={bottom} bottom isTarget={isTarget} isFirstPicked={r => sameSlot(sel?.first, r)} onSlot={onSlot} highlight={highlight} faded={faded} preview={preview?.units} onHover={setZoom} bubbles={bubbles}
           left={<Piles pl={view.players[bottom]} p={bottom} onOpenDiscard={() => setDiscardOf(bottom)} onHover={setZoom} />} isoExtra={<MoralTotal game={view} p={bottom} />} />
