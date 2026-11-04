@@ -3,7 +3,7 @@ import { useState } from 'react';
 import type { GameState } from '../engine/types';
 import {
   addCard, afterFight, applyCards, chooseOption, closeRun, defeatAt, eligible, EVENT_TEXT, eventChoices, fight, isImproved, isTouched, loadMeta, loadRun,
-  marketOffers, CHAMPIONS, championOf, shortName, upgradesFor, type ChampionId, newMeta, NODES_PER_ACT, etendardOf, buyUpgrade, cannotBuy, upgradeLevel, newRun, nextNode, offrandesWon, promotions, registerRun, removeCard, resolveEvent, saveMeta, saveRun, variantId, volunteers,
+  marketOffers, xpWon, CHAMPIONS, championOf, shortName, upgradesFor, type ChampionId, newMeta, NODES_PER_ACT, etendardOf, buyUpgrade, cannotBuy, upgradeLevel, newRun, nextNode, offrandesWon, promotions, registerRun, removeCard, resolveEvent, saveMeta, saveRun, variantId, volunteers,
   LASSITUDE_SHOP, type CardPurpose, type NodeOption, type RunMeta, type RunState, type Step,
 } from '../roguelite/run';
 import { formatEvent } from '../i18n/log.fr';
@@ -47,7 +47,7 @@ function ChampionPanel({ run, meta, onDeck }: { run: RunState; meta: RunMeta; on
         <div className="rl-purse">
           <span className="pill">Or <b>{run.gold}</b></span>
           <span className="pill">Essence divine <b>{meta.essence}</b>{run.essence ? ` +${run.essence}` : ''}</span>
-          <span className="pill">Expérience <b>{meta.xp}</b>{run.xp ? ` +${run.xp}` : ''}</span>
+          <span className="pill" title="Réserve commune à tous les champions, versée à la fin de chaque combat">Expérience <b>{meta.xp}</b>{run.xp ? ` (dont ${run.xp} cette run)` : ''}</span>
           <span className="pill">Offrandes <b>{meta.offrandes}</b></span>
         </div>
         {(run.etendards ?? []).length > 0 && (
@@ -239,7 +239,7 @@ export function RogueliteScreen({ gameOpts, live, onExit }: { gameOpts: GameOpts
                 <button type="button" className="primary" onClick={() => {
                   const o = run.current;
                   const next = afterFight(run, g);
-                  let m = { ...meta, offrandes: meta.offrandes + (g.over!.winner === 'A' ? offrandesWon(o) : 0) };
+                  let m = { ...meta, offrandes: meta.offrandes + (g.over!.winner === 'A' ? offrandesWon(o) : 0), xp: meta.xp + xpWon(run, next) };
                   if (next.over) m = closeRun(m, next);
                   setMeta(m); setRun(next); setMode('run');
                 }}>Continuer</button>
@@ -267,7 +267,7 @@ export function RogueliteScreen({ gameOpts, live, onExit }: { gameOpts: GameOpts
       <section className="rl-step">
         <h2 className="sub">{run.over.won ? 'Run gagnée !' : 'Run perdue'}</h2>
         <p>{run.over.text}</p>
-        <p className="muted">L’Essence divine (+{run.essence}) et l’Expérience (+{run.xp}) gagnées sont gardées pour les prochaines runs.</p>
+        <p className="muted">L’Essence divine (+{run.essence}) est gardée pour les prochaines runs ; l’Expérience (+{run.xp}) a été versée à la fin de chaque combat.</p>
         <div className="choices row left"><button type="button" className="primary" onClick={() => { setRun(null); setMode('home'); }}>Retour à l’accueil du mode</button></div>
       </section>
     );

@@ -53,7 +53,7 @@ export type ChampionId = 'augustus' | 'eldrin';
 export interface Champion { id: ChampionId; name: string; faction: Faction; crest: string; deck: () => string[]; unlock?: string }
 export const CHAMPIONS: Champion[] = [
   { id: 'augustus', name: 'Augustus, le Dernier Empereur', faction: 'empire', crest: 'A', deck: () => COURONNE_SCENARIOS.cc1!.A.deckList!.slice() },
-  // Débloqué par 6 Offrandes à l'entraînement ; deck de départ de la campagne Elfe (04/11/2026).
+  // Débloqué par 3 Offrandes à l'entraînement ; deck de départ de la campagne Elfe (04/11/2026).
   { id: 'eldrin', name: 'Eldrin, le premier Bourgeon', faction: 'elfe', crest: 'E', deck: () => ELF_SCENARIOS.e1!.A.deckList!.slice(), unlock: 'champion:elfe' },
 ];
 export const championOf = (id: ChampionId | undefined) => CHAMPIONS.find(c => c.id === (id ?? 'augustus'))!;
@@ -367,6 +367,8 @@ export function afterFight(run: RunState, g: GameState): RunState {
   next.steps = [{ kind: 'resume', title: 'Victoire !', lines }, ...steps];
   return next;
 }
+/** Expérience gagnée par un combat (réserve commune à tous les champions, versée tout de suite, 04/11/2026). */
+export const xpWon = (before: RunState, after: RunState) => Math.max(0, after.xp - before.xp);
 /** Offrandes gagnées par ce nœud (versées à la méta par l'écran). */
 export const offrandesWon = (o: NodeOption | null) => (o?.kind === 'combat' && o.reward === 'offrandes' ? 1 : 0);
 
@@ -468,6 +470,8 @@ export function marketOffers(run: RunState): MarketOffer[] {
 
 // ---------- Événements ----------
 export interface EventChoice { id: string; label: string; disabled?: string }
+/** Offrandes à faire à l'entraînement pour débloquer le premier champion (04/11/2026 : 3 au lieu de 6). */
+export const CHAMPION_OFFERINGS = 3;
 export const EVENT_TEXT: Record<EventId, { title: string; text: string }> = {
   camp: { title: 'Le camp abandonné', text: 'Une armée a monté un camp ici, mais aucune trace de ce qui a pu lui arriver.' },
   entrainement: { title: 'L’entraînement', text: 'Un régiment coalisé d’Elfes et d’Humains s’entraîne ; les meneurs de chaque peuple proposent de vous aider.' },
@@ -487,7 +491,7 @@ export function eventChoices(run: RunState, meta: RunMeta, id: EventId, second =
   ];
   if (!second) {
     out.push({ id: 'offrande', label: 'Faire une Offrande et faire un 2e choix', disabled: off >= 6 ? 'Déjà 6 Offrandes faites ici' : noOffer });
-    if (off >= 6 && !meta.unlocks.includes('champion:elfe')) out.push({ id: 'champion', label: 'Débloquer Eldrin, le premier Bourgeon (champion Elfe)' });
+    if (off >= CHAMPION_OFFERINGS && !meta.unlocks.includes('champion:elfe')) out.push({ id: 'champion', label: 'Débloquer Eldrin, le premier Bourgeon (champion Elfe)' });
   }
   void run;
   return out;
@@ -545,9 +549,9 @@ export function loadMeta(): RunMeta {
   return newMeta();
 }
 export function saveMeta(m: RunMeta): void { try { localStorage.setItem(keyFor(META_KEY), JSON.stringify(m)); } catch { /* rien */ } }
-/** Fin de run : l'Essence divine et l'Expérience gagnées rejoignent la méta. */
+/** Fin de run : l'Essence divine gagnée rejoint la méta (l'Expérience y est versée à la fin de chaque combat, voir xpWon). */
 export function closeRun(meta: RunMeta, run: RunState): RunMeta {
-  return { ...meta, essence: meta.essence + run.essence, xp: meta.xp + run.xp, runs: meta.runs + 1, wins: meta.wins + (run.over?.won ? 1 : 0) };
+  return { ...meta, essence: meta.essence + run.essence, runs: meta.runs + 1, wins: meta.wins + (run.over?.won ? 1 : 0) };
 }
 
 // ---------- Améliorations entre les runs ----------

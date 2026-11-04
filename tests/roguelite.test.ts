@@ -6,7 +6,7 @@ import { attack } from '../src/engine/combat';
 import { CARDS } from '../src/data/cards';
 import { registerTitanCards } from '../src/data/titans';
 import {
-  buyUpgrade, defeatAt, newMeta as freshMeta, afterFight, chooseOption, fight, improve, keptLassitude, newMeta, newRun, nextNode, optionsFor, variantDef, variantId, type RunState,
+  buyUpgrade, closeRun, xpWon, defeatAt, newMeta as freshMeta, afterFight, chooseOption, fight, improve, keptLassitude, newMeta, newRun, nextNode, optionsFor, variantDef, variantId, type RunState,
 } from '../src/roguelite/run';
 import { act, blankGame, give, place } from './helpers';
 
@@ -255,5 +255,16 @@ describe('Roguelite : Eldrin, le premier Bourgeon', () => {
     const before = other.currentEnd;
     ctx.destroy(prey, 'end');
     expect(other.currentEnd).toBe(before - 10);
+  });
+});
+
+describe('Roguelite : Expérience', () => {
+  it('versée à la fin de chaque combat gagné, pas en fin de run', () => {
+    const run = { ...newRun('x1'), current: { kind: 'combat', reward: 'xp', deck: 'd1' } as const };
+    const g = createGame(fight(run, run.current, 1).setup);
+    g.over = { winner: 'A', reason: 'lassitude' };
+    const next = afterFight(run, g);
+    expect(xpWon(run, next)).toBe(3);
+    expect(closeRun({ ...freshMeta(), xp: 3 }, { ...next, over: { won: false, text: '' } }).xp).toBe(3);
   });
 });
