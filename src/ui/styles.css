@@ -838,3 +838,7 @@ button.pile:not(:disabled):hover .pile-stack > * { outline: 2px solid var(--bras
 .rl-upg { display: grid; gap: 6px; align-content: start; justify-items: start; padding: 10px; border: 1px solid #ffffff30; border-radius: 8px; }
 .rl-upg p { margin: 0; }
 .rl-upg.locked { opacity: .6; }
+.rl-etendards { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.rl-etd { font-size: .8rem; padding: 2px 8px; border-radius: 10px; background: var(--navy); color: var(--paper); }
+.rl-etd.risky { background: #6b2fa0; }
+.rl-option.risky { border-color: #6b2fa0; }

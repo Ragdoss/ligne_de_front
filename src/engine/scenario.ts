@@ -24,6 +24,7 @@ export function applyScenarioStart(ctx: Ctx, sc: ScenarioSetup): void {
     const iso = sc.start?.[p]?.isole;
     if (iso) { const u = ctx.makeUnit(iso, p); u.justDeployed = false; pl.board.isole = u; }
     for (const cardId of sc.startHand?.[p] ?? []) ctx.addToHand(p, cardId, { generated: true });
+    if (sc.leaderSeal?.[p]) pl.leaderSeal = true;
     // Roguelite : lassitude gardée du combat précédent ; on commence au niveau correspondant.
     const lass = sc.startLassitude?.[p];
     if (lass) { pl.points = lass; ctx.checkLevel(p); pl.resource = Math.max(pl.resource, pl.level + (sc.startResource?.[p] ?? 0)); }

@@ -30,7 +30,19 @@ const ACT1_DECKS = ['d1', 'd2', 'e1', 'e2', 'n1', 'n2', 's1', 'cd4'];
 const MINIBOSS_DECKS = ['d3', 's2', 'cn5'];
 const BOSS_DECKS = ['e2', 's2', 'n3'];
 
-export const PRICES = { carte: 30, carteHaute: 45, retirer: 25, lassitude: 20, ameliorer: 35 } as const;
+export const PRICES = { carte: 30, carteHaute: 45, retirer: 25, lassitude: 20, ameliorer: 35, etendard: 60 } as const;
+
+// ---------- Étendards (reliques de la run) ----------
+export interface Etendard { id: string; name: string; desc: string; risky?: boolean }
+/** Premiers Étendards (document, 04/11/2026) : les neutres et celui de l'Empire ; ceux des autres champions viendront avec eux. */
+export const ETENDARDS: Etendard[] = [
+  { id: 'tambour', name: 'Tambour de guerre', desc: '+1 ressource au premier tour de chaque combat.' },
+  { id: 'dechire', name: 'Étendard déchiré', desc: 'Tes régiments ont +1 Moral.' },
+  { id: 'etat_major', name: 'Carte d’état-major', desc: 'Main de départ : 1 carte de plus.' },
+  { id: 'sceau', name: 'Sceau impérial', desc: 'Empire. Le premier Leader que tu joues à chaque tour coûte 1 de moins.' },
+  { id: 'lame', name: 'Lame maudite', desc: '+5 ATK à tous tes régiments, mais +1 lassitude à chaque fin de ton tour.', risky: true },
+];
+export const etendardOf = (id: string) => ETENDARDS.find(e => e.id === id)!;
 export const LASSITUDE_SHOP = 5;
 
 // ---------- Types ----------
@@ -52,8 +64,9 @@ export type Step =
   | { kind: 'promotion' }
   | { kind: 'cartes'; purpose: CardPurpose; n: number; optional: boolean }
   | { kind: 'evenement'; id: EventId; second?: boolean }
-  | { kind: 'marche'; bought: number[] };
-export interface MarketOffer { kind: 'carte' | 'retirer' | 'lassitude' | 'ameliorer'; cardId?: string; price: number }
+  | { kind: 'marche'; bought: number[] }
+  | { kind: 'etendard'; choices: string[] };
+export interface MarketOffer { kind: 'carte' | 'retirer' | 'lassitude' | 'ameliorer' | 'etendard'; cardId?: string; etendard?: string; price: number }
 export interface RunState {
   version: 1;
   id: string;
@@ -76,6 +89,8 @@ export interface RunState {
   options: NodeOption[];
   /** Améliorations achetées entre les runs, figées au début de la run. */
   upg: Record<string, number>;
+  /** Étendards gagnés pendant la run. */
+  etendards: string[];
   /** Incorruptible : relances restantes après une défaite. */
   revives: number;
   current: NodeOption | null;
@@ -122,6 +137,8 @@ export function variantDef(rc: RunCard, upg: Record<string, number> = {}): CardD
   const add = (k: keyof RunMod, v: number) => { if (v) m[k] = (m[k] ?? 0) + v; };
   const lvl = (id: string) => upg[id] ?? 0;
   if (b.cardType === 'Regiment') {
+    if (lvl('etd:dechire')) add('mor', 1);
+    if (lvl('etd:lame')) add('atk', 5);
     if (rc.uid <= AUGUSTUS_DECK.length && lvl('armee_elue')) for (const k of STATS) { const v = (b[k] as number | undefined) ?? 0; add(k, Math.round(v * 0.1 * lvl('armee_elue'))); }
     if (b.types?.includes('Monté') && lvl('magister_equitum')) add('atk', Math.round(((b.atk as number) ?? 0) * 0.2 * lvl('magister_equitum')));
     if (b.niveau >= 4 && lvl('praefectus')) add('cout', -1);
@@ -143,7 +160,7 @@ export function variantDef(rc: RunCard, upg: Record<string, number> = {}): CardD
 export function registerRun(run: RunState): void {
   registerTitanCards(CARD_TEXT_FR);
   for (const rc of run.deck) {
-    CARDS[variantId(rc)] = variantDef(rc, run.upg ?? {});
+    CARDS[variantId(rc)] = variantDef(rc, { ...(run.upg ?? {}), ...Object.fromEntries((run.etendards ?? []).map(e => [`etd:${e}`, 1])) });
     CARD_TEXT_FR[variantId(rc)] = CARD_TEXT_FR[rc.id] ?? { name: rc.id, desc: '' };
   }
 }
@@ -160,7 +177,7 @@ export function newRun(seed = String(Date.now()), meta: RunMeta = newMeta()): Ru
     version: 1, id: `run-${seed}`, seed, champion: 'augustus', act: 1, node: 0,
     deck: AUGUSTUS_DECK.map((id, i) => ({ uid: i + 1, id, mods: {} })), nextUid: AUGUSTUS_DECK.length + 1,
     lassitude: 0, gold: 20, essence: 0, xp: 0, eventsSeen: [], eventThisAct: false, miniBossOffers: 0, miniBossDone: false,
-    options: [], upg: { ...meta.upg }, revives: meta.upg.incorruptible ?? 0, current: null, steps: [], over: null,
+    options: [], upg: { ...meta.upg }, etendards: [], revives: meta.upg.incorruptible ?? 0, current: null, steps: [], over: null,
   };
   run.options = optionsFor(run);
   registerRun(run);
@@ -259,8 +276,11 @@ export function fight(run: RunState, o: NodeOption, seed: string | number): { sc
       mustSurvive: { B: 'titan_glissement' }, emptyDeckDefeat: { B: false }, defeatLassitude: { A: lim, B: NEVER } };
   }
   const setup = scenarioGameSetup(sc, deckIds(run), seed, 0, NO_EASE);
-  const mob = run.upg?.mobilisation_initiale ?? 0;
+  const has = (e: string) => (run.etendards ?? []).includes(e);
+  const mob = (run.upg?.mobilisation_initiale ?? 0) + (has('tambour') ? 1 : 0);
+  if (has('lame')) setup.config = { ...setup.config, endTurnLassitude: { A: 1, B: 0 } };
   setup.scenario = { ...setup.scenario!, startLassitude: { A: run.lassitude }, ...(mob ? { startResource: { A: mob } } : {}),
+    ...(has('etat_major') ? { startDraw: { A: 1 } } : {}), ...(has('sceau') ? { leaderSeal: { A: true } } : {}),
     ...(kind === 'boss' ? { glissement: { victim: 'A' as const, tactic: 'lutter_mouvement' } } : {}) };
   // Qui commence : au hasard (reproductible), sauf règle du scénario : l'adversaire au mini-boss, le joueur contre le boss.
   setup.first = kind === 'miniboss' ? 'B' : kind === 'boss' ? 'A' : (rng(`${run.seed}|${run.act}|${run.node}|first|${seed}`)() < 0.5 ? 'A' : 'B');
@@ -308,8 +328,8 @@ export function afterFight(run: RunState, g: GameState): RunState {
     return next;
   }
   if (o.kind === 'combat') {
-    let gold = 10;
-    if (o.reward === 'or') gold += 15;
+    let gold = 5;
+    if (o.reward === 'or') gold += 30; // 04/11 : peu d'or par combat, beaucoup avec l'icône Or
     if (o.reward === 'essence') { next.essence += 3; lines.push('+3 Essence divine.'); }
     next.xp += o.reward === 'xp' ? 3 : 1; lines.push(o.reward === 'xp' ? '+3 Expérience.' : '+1 Expérience.');
     if (o.reward === 'offrandes') lines.push('+1 Offrande.');
@@ -320,6 +340,8 @@ export function afterFight(run: RunState, g: GameState): RunState {
     next.miniBossDone = true;
     next.gold += 25; next.essence += 5; next.xp += 3;
     lines.unshift('+25 or, +5 Essence divine, +3 Expérience.');
+    const etd = etendardChoices(next, 3);
+    if (etd.length) steps.push({ kind: 'etendard', choices: etd });
     steps.push({ kind: 'volontaires', round: 0 }, { kind: 'volontaires', round: 1 }, { kind: 'promotion' }, { kind: 'cartes', purpose: 'ameliorer', n: 1, optional: true });
   }
   next.steps = [{ kind: 'resume', title: 'Victoire !', lines }, ...steps];
@@ -399,6 +421,15 @@ export function eligible(run: RunState, purpose: CardPurpose): RunCard[] {
   });
 }
 
+/** Étendards proposés (pas déjà possédés), tirage reproductible. */
+export function etendardChoices(run: RunState, n: number): string[] {
+  const r = rng(`${run.seed}|${run.act}|${run.node}|etendard`);
+  const left = ETENDARDS.map(e => e.id).filter(e => !(run.etendards ?? []).includes(e));
+  const out: string[] = [];
+  while (out.length < n && left.length) out.push(left.splice(Math.floor(r() * left.length), 1)[0]!);
+  return out;
+}
+
 // ---------- Marché ----------
 /** 5 offres tirées parmi : une carte, retirer une carte, baisser la lassitude, améliorer une carte (répétitions possibles). */
 export function marketOffers(run: RunState): MarketOffer[] {
@@ -407,6 +438,7 @@ export function marketOffers(run: RunState): MarketOffer[] {
   const out: MarketOffer[] = [];
   for (let i = 0; i < 5; i++) {
     const k = pickOne(r, ['carte', 'carte', 'retirer', 'lassitude', 'ameliorer'] as const);
+    if (i === 4 && !out.some(o => o.kind === 'etendard') && r() < 0.5) { const e = etendardChoices(run, 1)[0]; if (e) { out.push({ kind: 'etendard', etendard: e, price: PRICES.etendard }); continue; } }
     if (k === 'carte') { const id = vol[i % vol.length]!; out.push({ kind: 'carte', cardId: id, price: CARDS[id]!.niveau >= 3 ? PRICES.carteHaute : PRICES.carte }); }
     else out.push({ kind: k, price: PRICES[k] });
   }

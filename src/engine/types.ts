@@ -231,6 +231,9 @@ export interface PlayerState {
   dryadAcc?: number;
   /** Interrogatoire : surcoût de certaines cartes de ce joueur, pour toute la partie (cardId → +coût). */
   costTax?: Record<string, number>;
+  /** Roguelite, Sceau impérial : le premier Leader de chaque tour coûte 1 de moins (tour où il a servi). */
+  leaderSeal?: boolean;
+  leaderSealTurn?: number;
   /** Ressources perdues au début de son prochain tour (Rançonnement, Bourse de guerre). */
   resourcePenalty?: number;
   /** Avantage décisif : nombre d'exemplaires joués pour le combat de ce tour (repère de tour). */
@@ -377,6 +380,8 @@ export interface ScenarioSetup extends ScenarioRules {
   startResource?: Partial<Record<PlayerId, number>>;
   /** Cartes piochées en plus au départ (mode Histoire de la campagne). */
   startDraw?: Partial<Record<PlayerId, number>>;
+  /** Roguelite, Sceau impérial. */
+  leaderSeal?: Partial<Record<PlayerId, boolean>>;
   /** Roguelite : lassitude de départ (le niveau suit). */
   startLassitude?: Partial<Record<PlayerId, number>>;
 }

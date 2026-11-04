@@ -29,6 +29,7 @@ export function cardCost(ctx: Ctx, p: PlayerId, h: HandCard): number {
   if (c.elementalDiscount && ctx.controlsElemental(p)) cost -= c.elementalDiscount;
   if (c.cardType === 'Tactique') cost -= tacticReduction(ctx, p);
   if (c.cardType === 'Leader') for (const u of ctx.units(p)) cost -= (card(u.cardId).leaderCostReduction as number | undefined) ?? 0; // Le Commandant
+  if (c.cardType === 'Leader' && ctx.player(p).leaderSeal && ctx.player(p).leaderSealTurn !== ctx.s.turn) cost -= 1; // Sceau impérial (roguelite)
   return Math.max(0, cost);
 }
 
@@ -165,6 +166,7 @@ export function playCard(ctx: Ctx, p: PlayerId, handUid: number, target?: SlotRe
   const cost = targetedCost(ctx, p, h, target);
   if (cost > pl.resource) return 'resource';
   pl.resource -= cost;
+  if (c.cardType === 'Leader' && pl.leaderSeal && pl.leaderSealTurn !== ctx.s.turn) pl.leaderSealTurn = ctx.s.turn;
   pl.hand.splice(hIdx, 1);
   ctx.emit({ type: 'cardPlayed', player: p, cardId: c.id, cost });
 

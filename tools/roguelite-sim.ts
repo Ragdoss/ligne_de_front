@@ -41,6 +41,7 @@ for (let k = 0; k < N; k++) {
     while (run.steps.length && !run.over) {
       const st = run.steps.shift()!;
       if (st.kind === 'volontaires') addCard(run, volunteers(run, st.round)[0]!);
+      if (st.kind === 'etendard') run.etendards.push(st.choices[0]!);
       if (st.kind === 'promotion') { const p = promotions(run)[0]; if (p) { removeCard(run, p.uid); addCard(run, p.to); } }
       if (st.kind === 'cartes') applyCards(run, st.purpose, eligible(run, st.purpose).slice(0, st.purpose === 'garde' ? 0 : st.n).map(c => c.uid));
       if (st.kind === 'evenement') { const ch = eventChoices(run, meta, st.id, st.second).find(c => !c.disabled)!; resolveEvent(run, meta, st.id, ch.id); }

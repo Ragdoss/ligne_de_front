@@ -188,3 +188,40 @@ describe('Roguelite : améliorations entre les runs', () => {
     expect(next.current).toEqual(run.current);
   });
 });
+
+describe('Roguelite : Étendards', () => {
+  it('Tambour, Carte d’état-major, Sceau, Lame maudite, Étendard déchiré', () => {
+    const run = { ...newRun('t9'), etendards: ['tambour', 'etat_major', 'sceau', 'lame', 'dechire'] };
+    const o = { kind: 'combat', reward: 'or', deck: 'd1' } as const;
+    const plain = createGame(fight({ ...run, etendards: [] }, o, 5).setup);
+    const g = createGame(fight(run, o, 5).setup);
+    expect(g.players.A.resource).toBe(plain.players.A.resource + 1);
+    expect(g.players.A.hand.length).toBe(plain.players.A.hand.length + 1);
+    expect(g.players.A.leaderSeal).toBe(true);
+    expect(g.config.endTurnLassitude.A).toBe(1);
+    const rc = run.deck.find(c => CARDS[c.id]!.cardType === 'Regiment')!;
+    const d = CARDS[variantId(rc)]!;
+    expect(d.atk).toBe(CARDS[rc.id]!.atk! + 5);
+    expect(d.mor).toBe(CARDS[rc.id]!.mor! + 1);
+  });
+  it('Sceau impérial : le premier Leader du tour coûte 1 de moins', () => {
+    let s = blankGame();
+    s.players.A.leaderSeal = true;
+    place(s, 'A', 'avant', 0, 'soldat_kragz');
+    place(s, 'A', 'avant', 1, 'soldat_kragz');
+    s.players.A.level = 3; s.players.A.resource = 10;
+    const cost = CARDS.capitaine_garde!.cout;
+    const h1 = give(s, 'A', 'capitaine_garde'), h2 = give(s, 'A', 'capitaine_garde');
+    s = act(s, { type: 'play', handUid: h1, target: { player: 'A', zone: 'avant', idx: 0 } }).state;
+    expect(s.players.A.resource).toBe(10 - Math.max(0, cost - 1));
+    s = act(s, { type: 'play', handUid: h2, target: { player: 'A', zone: 'avant', idx: 1 } }).state;
+    expect(s.players.A.resource).toBe(10 - Math.max(0, cost - 1) - cost);
+  });
+  it('le mini-boss offre un Étendard', () => {
+    const run = { ...newRun('t10'), current: { kind: 'miniboss', deck: 'd3' } as const };
+    const g = createGame(fight(run, run.current, 1).setup);
+    g.over = { winner: 'A', reason: 'lassitude' };
+    const next = afterFight(run, g);
+    expect(next.steps.some(x => x.kind === 'etendard')).toBe(true);
+  });
+});

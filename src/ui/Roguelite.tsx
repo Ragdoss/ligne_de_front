@@ -3,7 +3,7 @@ import { useState } from 'react';
 import type { GameState } from '../engine/types';
 import {
   addCard, afterFight, applyCards, chooseOption, closeRun, defeatAt, eligible, EVENT_TEXT, eventChoices, fight, isImproved, isTouched, loadMeta, loadRun,
-  marketOffers, NODES_PER_ACT, UPGRADES, buyUpgrade, cannotBuy, upgradeLevel, newRun, nextNode, offrandesWon, promotions, registerRun, removeCard, resolveEvent, saveMeta, saveRun, variantId, volunteers,
+  marketOffers, NODES_PER_ACT, etendardOf, UPGRADES, buyUpgrade, cannotBuy, upgradeLevel, newRun, nextNode, offrandesWon, promotions, registerRun, removeCard, resolveEvent, saveMeta, saveRun, variantId, volunteers,
   LASSITUDE_SHOP, type CardPurpose, type NodeOption, type RunMeta, type RunState, type Step,
 } from '../roguelite/run';
 import { formatEvent } from '../i18n/log.fr';
@@ -25,9 +25,9 @@ const PURPOSE_TITLE: Record<CardPurpose, string> = {
 
 function optionText(o: NodeOption): { icon: string; title: string; text: string } {
   if (o.kind === 'combat') return { icon: '⚔', title: `Combat : ${SCENARIOS[o.deck]?.B.label ?? 'une armée'}`, text: `Récompenses : de l’or, ${REWARD_LABEL[o.reward]} et 2 volontaires.` };
-  if (o.kind === 'miniboss') return { icon: '✦', title: 'Mini-boss : l’Essence de la réalité', text: 'Un adversaire plus fort, une règle spéciale. Or, Essence divine, volontaires, promotion, amélioration.' };
+  if (o.kind === 'miniboss') return { icon: '✦', title: 'Mini-boss : l’Essence de la réalité', text: 'Un adversaire plus fort, une règle spéciale. Récompenses : un Étendard, de l’or, de l’Essence divine, des volontaires, une promotion et une amélioration.' };
   if (o.kind === 'event') return { icon: '❖', title: `Événement : ${EVENT_TEXT[o.id].title}`, text: 'Un choix, sans combat.' };
-  if (o.kind === 'marche') return { icon: '⚖', title: 'Marchand', text: '5 offres : cartes, retrait, repos, amélioration.' };
+  if (o.kind === 'marche') return { icon: '⚖', title: 'Marchand', text: '5 offres : cartes, retrait, repos, amélioration, parfois un Étendard.' };
   return { icon: '☠', title: 'Boss : le Titan du Glissement', text: 'Le Titan de l’acte 1. Le vaincre termine le prototype.' };
 }
 
@@ -50,6 +50,12 @@ function ChampionPanel({ run, meta, onDeck }: { run: RunState; meta: RunMeta; on
           <span className="pill">Expérience <b>{meta.xp}</b>{run.xp ? ` +${run.xp}` : ''}</span>
           <span className="pill">Offrandes <b>{meta.offrandes}</b></span>
         </div>
+        {(run.etendards ?? []).length > 0 && (
+          <div className="rl-etendards">
+            <span className="muted small">Étendards</span>
+            {run.etendards.map(e => <span key={e} className={`rl-etd${etendardOf(e).risky ? ' risky' : ''}`} title={etendardOf(e).desc}>{etendardOf(e).name}</span>)}
+          </div>
+        )}
         <button type="button" onClick={onDeck}>Deck : {run.deck.length} cartes</button>
       </div>
     </aside>
@@ -260,6 +266,23 @@ export function RogueliteScreen({ gameOpts, live, onExit }: { gameOpts: GameOpts
         <div className="choices row left"><button type="button" onClick={() => doneStep(run)}>Personne cette fois</button></div>
       </section>
     );
+  } else if (step?.kind === 'etendard') {
+    body = (
+      <section className="rl-step">
+        <h2 className="sub">Un Étendard rejoint l’armée d’Augustus</h2>
+        <p className="muted">Son effet dure toute la run.</p>
+        <div className="rl-options">
+          {step.choices.map(id => {
+            const e = etendardOf(id);
+            return (
+              <button type="button" key={id} className={`rl-option${e.risky ? ' risky' : ''}`} onClick={() => { const n = structuredClone(run); n.etendards = [...(n.etendards ?? []), id]; doneStep(n, [`Étendard : ${e.name}.`]); }}>
+                <span className="rl-icon" aria-hidden="true">⚑</span><b>{e.name}</b><span className="small">{e.desc}</span>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+    );
   } else if (step?.kind === 'promotion') {
     const offers = promotions(run);
     body = (
@@ -308,13 +331,14 @@ export function RogueliteScreen({ gameOpts, live, onExit }: { gameOpts: GameOpts
       const n = structuredClone(run);
       n.gold -= o.price;
       (n.steps[0] as Extract<Step, { kind: 'marche' }>).bought.push(i);
+      if (o.kind === 'etendard') { n.etendards = [...(n.etendards ?? []), o.etendard!]; setNotes(x => [...x, `Étendard : ${etendardOf(o.etendard!).name}.`]); }
       if (o.kind === 'carte') { addCard(n, o.cardId!); setNotes(x => [...x, `${cardName(o.cardId!)} rejoint ton deck.`]); }
       if (o.kind === 'lassitude') { n.lassitude = Math.max(0, n.lassitude - LASSITUDE_SHOP); setNotes(x => [...x, `Lassitude −${LASSITUDE_SHOP}.`]); }
       if (o.kind === 'retirer') n.steps.unshift({ kind: 'cartes', purpose: 'retirer', n: 1, optional: false });
       if (o.kind === 'ameliorer') n.steps.unshift({ kind: 'cartes', purpose: 'ameliorer', n: 1, optional: false });
       setRun(n);
     };
-    const label = (o: (typeof offers)[number]) => o.kind === 'carte' ? `Acheter ${cardName(o.cardId!)}` : o.kind === 'retirer' ? 'Retirer une carte de ton deck' : o.kind === 'lassitude' ? `Baisser ta lassitude de ${LASSITUDE_SHOP}` : 'Améliorer une carte';
+    const label = (o: (typeof offers)[number]) => o.kind === 'carte' ? `Acheter ${cardName(o.cardId!)}` : o.kind === 'retirer' ? 'Retirer une carte de ton deck' : o.kind === 'lassitude' ? `Baisser ta lassitude de ${LASSITUDE_SHOP}` : o.kind === 'etendard' ? `Étendard : ${etendardOf(o.etendard!).name} — ${etendardOf(o.etendard!).desc}` : 'Améliorer une carte';
     body = (
       <section className="rl-step">
         <h2 className="sub">Le marchand</h2>
