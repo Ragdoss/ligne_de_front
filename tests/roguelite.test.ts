@@ -280,7 +280,7 @@ describe('Roguelite : mini-boss des Fragments de réalité', () => {
     const a = miniBossFor({ ...run, node: 3 }), b = miniBossFor({ ...run, node: 5 });
     expect(a).toEqual(b);
     const seen = new Set(Array.from({ length: 20 }, (_, k) => (miniBossFor(newRun(`f${k}`)) as { boss: string }).boss));
-    expect(seen).toEqual(new Set(['essence', 'fragments']));
+    expect(seen).toEqual(new Set(['essence', 'fragments', 'fracture']));
   });
   it('un Fragment au départ, un de plus au tour adverse, 2 au plus', () => {
     const run = newRun('f2');
@@ -300,5 +300,28 @@ describe('Roguelite : mini-boss des Fragments de réalité', () => {
     const killer = place(s, 'A', 'avant', 0, 'soldat_kragz');
     for (let k = 0; k < 3; k++) { const f = place(s, 'B', 'avant', 1, 'fragment_realite'); ctx.destroy(f, 'end', killer); }
     expect(s.runMods?.soldat_kragz).toEqual({ atk: -3, arm: -3, ini: -3, frag: 3, mor: -1 });
+  });
+});
+
+describe('Roguelite : mini-boss de la Fracture', () => {
+  it('tour fracturé (1er, 3e…) : -10 % définitif au régiment déployé, +1 lassitude adverse ; tour stable : rien', () => {
+    const run = newRun('fr1');
+    let s = createGame({ ...fight(run, { kind: 'miniboss', boss: 'fracture', deck: 'd3' }, 2).setup, first: 'A' });
+    s.config.noRegimentDefeatFromTurn = { A: 99, B: 99 };
+    const rc = run.deck.find(c => c.id === 'soldat_kragz')!;
+    const vid = variantId(rc);
+    s.players.A.hand = [{ uid: 990, cardId: vid }]; s.players.A.resource = 9; s.players.A.level = 2;
+    const lassB = s.players.B.points;
+    s = act(s, { type: 'play', handUid: 990, target: { player: 'A', zone: 'avant', idx: 0 } }).state;
+    const b = CARDS.soldat_kragz!;
+    expect(s.runMods?.[vid]?.atk).toBe(-Math.round(b.atk! * 0.1));
+    expect(s.players.B.points).toBe(lassB + 1);
+    s = act(s, { type: 'endTurn' }).state;
+    while (s.active !== 'A' || s.pending.length) s = act(s, s.pending.length ? { type: 'choose', option: 0 } : { type: 'endTurn' }).state;
+    expect(s.turn).toBe(2);
+    s.players.A.hand = [{ uid: 991, cardId: 'recrue_imp' }]; s.players.A.resource = 9;
+    const free = s.players.A.board.avant.findIndex(u => !u);
+    s = act(s, { type: 'play', handUid: 991, target: { player: 'A', zone: 'avant', idx: free } }).state;
+    expect(s.runMods?.recrue_imp).toBeUndefined();
   });
 });

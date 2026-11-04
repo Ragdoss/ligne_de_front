@@ -584,6 +584,10 @@ export class Ctx {
   }
 
   // ---------- Roguelite ----------
+  /** Fracture : le tour en cours de `p` est-il un tour fracturé (ses tours impairs) ? */
+  fractured(p: PlayerId): boolean {
+    return this.s.scenario?.fracture?.victim === p && this.s.active === p && this.s.turn % 2 === 1;
+  }
   /** Malus définitif pour la run sur un exemplaire de carte (cumulé). */
   permaDebuff(owner: PlayerId, cardId: string, mod: import('./types').RunMod): void {
     const all = (this.s.runMods ??= {});

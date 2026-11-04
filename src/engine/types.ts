@@ -379,6 +379,9 @@ export interface ScenarioRules {
   glissement?: { victim: PlayerId; tactic: string };
   /** Roguelite, mini-boss des Fragments : au début de chaque tour de `pid`, s'il a moins de `max` `cardId`, un apparaît au hasard. */
   fragments?: { pid: PlayerId; cardId: string; max: number };
+  /** Roguelite, mini-boss de la Fracture : un tour sur deux de `victim` (ses tours impairs), chaque régiment qu'il déploie perd
+   *  définitivement 10 % de ses stats, et son adversaire gagne 1 lassitude. */
+  fracture?: { victim: PlayerId };
 }
 export interface ScenarioSetup extends ScenarioRules {
   start?: Partial<Record<PlayerId, { avant?: Record<string, string>; arriere?: Record<string, string>; isole?: string }>>;

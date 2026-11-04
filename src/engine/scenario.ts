@@ -44,6 +44,7 @@ export function scenarioTurnStart(ctx: Ctx, p: PlayerId): void {
   glissement(ctx, p);
   if (ctx.over) return;
   if (sc.fragments?.pid === p) spawnFragments(ctx);
+  if (sc.fracture?.victim === p) ctx.emit({ type: 'effect', key: ctx.fractured(p) ? 'fracture' : 'stable', player: p, cardId: '' });
   // Flèche de chasse : sans Proie désignée, le régiment adverse au Moral le plus bas devient la Proie.
   if (ctx.player(p).huntArrow) {
     const foes = ctx.units(p === 'A' ? 'B' : 'A').filter(u => ctx.slotOf(u.uid)?.zone !== 'isole');

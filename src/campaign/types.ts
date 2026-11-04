@@ -56,6 +56,8 @@ export interface CampaignScenario {
   /** Ces régiments ne peuvent pas être sacrifiés. */
   noSacrifice?: string[];
   weather?: Weather;
+  /** Roguelite : mini-boss de la Fracture (affichage de l'état du tour dans la bulle des règles). */
+  fracture?: boolean;
   alarm?: Alarm;
   // ----- Campagnes à embranchements -----
   /** Scénarios suivants : le premier dont la condition est remplie (aucun = fin de la campagne). */

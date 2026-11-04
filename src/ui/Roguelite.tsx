@@ -25,7 +25,7 @@ const PURPOSE_TITLE: Record<CardPurpose, string> = {
 
 function optionText(o: NodeOption): { icon: string; title: string; text: string } {
   if (o.kind === 'combat') return { icon: '⚔', title: `Combat : ${SCENARIOS[o.deck]?.B.label ?? 'une armée'}`, text: `Récompenses : de l’or, ${REWARD_LABEL[o.reward]} et 2 volontaires.` };
-  if (o.kind === 'miniboss') return { icon: '✦', title: o.boss === 'fragments' ? 'Mini-boss : les Fragments de réalité' : 'Mini-boss : l’Essence de la réalité', text: 'Un adversaire plus fort, une règle spéciale. Récompenses : un Étendard, de l’or, de l’Essence divine, des volontaires, une promotion et une amélioration.' };
+  if (o.kind === 'miniboss') return { icon: '✦', title: o.boss === 'fragments' ? 'Mini-boss : les Fragments de réalité' : o.boss === 'fracture' ? 'Mini-boss : la Fracture de la réalité' : 'Mini-boss : l’Essence de la réalité', text: 'Un adversaire plus fort, une règle spéciale. Récompenses : un Étendard, de l’or, de l’Essence divine, des volontaires, une promotion et une amélioration.' };
   if (o.kind === 'event') return { icon: '❖', title: `Événement : ${EVENT_TEXT[o.id].title}`, text: 'Un choix, sans combat.' };
   if (o.kind === 'marche') return { icon: '⚖', title: 'Marchand', text: '5 offres : cartes, retrait, repos, amélioration, parfois un Étendard.' };
   return { icon: '☠', title: 'Boss : le Titan du Glissement', text: 'Le Titan de l’acte 1. Le vaincre termine le prototype.' };

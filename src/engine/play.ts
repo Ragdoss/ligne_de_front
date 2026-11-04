@@ -222,6 +222,14 @@ function onTacticPlayed(ctx: Ctx, p: PlayerId): void {
 function deployRegiment(ctx: Ctx, p: PlayerId, c: CardDef, ref: SlotRef): void {
   const pl = ctx.player(p);
   const u = ctx.makeUnit(c.id, p);
+  // Fracture (roguelite) : un tour sur deux, le régiment déployé perd définitivement 10 % de ses stats ; l'adversaire gagne 1 lassitude.
+  if (ctx.fractured(p)) {
+    const cut = (v: number) => Math.round(v * 0.1);
+    const d = { atk: -cut(u.baseAtk), end: -cut(u.maxEnd), arm: -cut(u.baseArm), ini: -cut(u.ini), mor: -cut(u.maxMor) };
+    u.baseAtk += d.atk; u.maxEnd += d.end; u.currentEnd = u.maxEnd; u.baseArm += d.arm; u.ini += d.ini; u.maxMor += d.mor; u.currentMor = u.maxMor;
+    ctx.permaDebuff(p, c.id, Object.fromEntries(Object.entries(d).filter(([, v]) => v)));
+    ctx.gainLassitude(opponentOf(p), 1, 'fracture');
+  }
   if (c.readyIfTacticThisTurn && (pl.tacticsThisTurn ?? 0) > 0) u.arrivesReady = true; // Chevaucheurs du mirage
   const min = c.sacrificeMinLevel as number | undefined;
   let sacLevel = 0, sacCard: string | null = null;

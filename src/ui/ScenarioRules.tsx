@@ -125,7 +125,8 @@ export function ScenarioRulesBubble({ sc, live }: { sc: CampaignScenario; live: 
   const turn = game?.turn ?? 1;
   const w = sc.weather;
   const on = w ? turn >= w.first && (turn - w.first) % w.every < w.duration : false;
-  const now = !w ? null : w.kind === 'tempete' ? (on ? 'Tempête de sable en ce moment' : 'Pas de tempête ce tour-ci') : on ? 'Il fait nuit (Démons +10 ATK)' : 'Il fait jour (Elfes +15 INI)';
+  const fr = sc.fracture ? (game && game.active === 'A' ? (turn % 2 === 1 ? 'Tour fracturé : chaque régiment que tu déploies perd définitivement 10 % de ses stats (+1 lassitude adverse)' : 'Tour stable : tes déploiements sont sans risque') : (turn % 2 === 1 ? 'Ton prochain tour sera stable' : 'Ton prochain tour sera fracturé')) : null;
+  const now = fr ?? (!w ? null : w.kind === 'tempete' ? (on ? 'Tempête de sable en ce moment' : 'Pas de tempête ce tour-ci') : on ? 'Il fait nuit (Démons +10 ATK)' : 'Il fait jour (Elfes +15 INI)');
   return (
     <aside className={`tuto sr${folded ? ' folded' : ''}`} aria-label="Règles du scénario">
       <header>
