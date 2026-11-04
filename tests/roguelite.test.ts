@@ -6,7 +6,7 @@ import { attack } from '../src/engine/combat';
 import { CARDS } from '../src/data/cards';
 import { registerTitanCards } from '../src/data/titans';
 import {
-  buyUpgrade, closeRun, xpWon, defeatAt, newMeta as freshMeta, afterFight, chooseOption, fight, improve, keptLassitude, newMeta, newRun, nextNode, optionsFor, variantDef, variantId, type RunState,
+  buyUpgrade, miniBossFor, closeRun, xpWon, defeatAt, newMeta as freshMeta, afterFight, chooseOption, fight, improve, keptLassitude, newMeta, newRun, nextNode, optionsFor, variantDef, variantId, type RunState,
 } from '../src/roguelite/run';
 import { act, blankGame, give, place } from './helpers';
 
@@ -270,5 +270,35 @@ describe('Roguelite : Expérience', () => {
     g2.over = { winner: 'A', reason: 'lassitude' };
     expect(xpWon(other, afterFight(other, g2))).toBe(0); // Eldrin n'est pas désigné
     expect(closeRun({ ...freshMeta(), xp: 3 }, { ...next, over: { won: false, text: '' } }).xp).toBe(3);
+  });
+});
+
+describe('Roguelite : mini-boss des Fragments de réalité', () => {
+  const frag = (run: RunState) => ({ kind: 'miniboss', boss: 'fragments', deck: 'd3' } as const);
+  it('le même mini-boss pendant tout l’acte', () => {
+    const run = newRun('f1');
+    const a = miniBossFor({ ...run, node: 3 }), b = miniBossFor({ ...run, node: 5 });
+    expect(a).toEqual(b);
+    const seen = new Set(Array.from({ length: 20 }, (_, k) => (miniBossFor(newRun(`f${k}`)) as { boss: string }).boss));
+    expect(seen).toEqual(new Set(['essence', 'fragments']));
+  });
+  it('un Fragment au départ, un de plus au tour adverse, 2 au plus', () => {
+    const run = newRun('f2');
+    let s = createGame(fight(run, frag(run), 4).setup);
+    const count = () => new Ctx(s).units('B').filter(u => u.cardId === 'fragment_realite').length;
+    const setup = fight(run, frag(run), 4).setup;
+    s = createGame({ ...setup, first: 'A' });
+    expect(count()).toBe(1);
+    place(s, 'A', 'avant', 0, 'soldat_kragz');
+    s = act(s, { type: 'endTurn' }).state; // début du tour adverse : un deuxième Fragment
+    expect(count()).toBe(2);
+  });
+  it('le destructeur perd 1 ATK, 1 ARM, 1 INI ; 1 Moral à la 3e fois', () => {
+    const s = blankGame();
+    const ctx = new Ctx(s);
+    registerTitanCards();
+    const killer = place(s, 'A', 'avant', 0, 'soldat_kragz');
+    for (let k = 0; k < 3; k++) { const f = place(s, 'B', 'avant', 1, 'fragment_realite'); ctx.destroy(f, 'end', killer); }
+    expect(s.runMods?.soldat_kragz).toEqual({ atk: -3, arm: -3, ini: -3, frag: 3, mor: -1 });
   });
 });

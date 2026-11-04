@@ -794,6 +794,17 @@ export class Ctx {
       if (lv) { this.emit({ type: 'effect', key: 'seigneureChasse', player: opponentOf(p), cardId: 'seigneure_chasse', data: { target: u.cardId } }); this.gainLassitude(p, lv, 'seigneure_chasse'); if (this.over) return; }
     }
     this.emit({ type: 'destroyed', player: p, uid: u.uid, cardId: u.cardId, cause, lassitude: minion ? 0 : u.niveau });
+    // Roguelite, Fragment de réalité : le régiment qui le détruit perd définitivement 1 ATK, 1 ARM, 1 INI ;
+    // à la 3e fois pour cet exemplaire (sur toute la run), 1 Moral en plus.
+    if (card(u.cardId).fragmentCurse && killer && killer.controller !== p) {
+      killer.baseAtk = Math.max(0, killer.baseAtk - 1); killer.baseArm = Math.max(0, killer.baseArm - 1); killer.ini = Math.max(0, killer.ini - 1);
+      this.permaDebuff(killer.controller, killer.cardId, { atk: -1, arm: -1, ini: -1, frag: 1 });
+      const hits = ((card(killer.cardId).fragHits as number | undefined) ?? 0) + (this.s.runMods?.[killer.cardId]?.frag ?? 0);
+      if (hits === 3) {
+        killer.maxMor = Math.max(1, killer.maxMor - 1); killer.currentMor = Math.min(killer.currentMor, killer.maxMor);
+        this.permaDebuff(killer.controller, killer.cardId, { mor: -1 });
+      }
+    }
     if (!minion) this.gainLassitude(p, u.niveau, 'destroyed');
     if (u.prey && !this.over) this.onPreyDestroyed(u, killer, u.brokenMorale && !minion);
     if (!u.isToken) this.discard(u.borrowed?.owner ?? u.owner ?? p, u.cardId); // un régiment volé retourne dans la défausse de son propriétaire

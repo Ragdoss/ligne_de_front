@@ -65,10 +65,12 @@ export interface RunCard { uid: number; id: string; mods: RunMod; curse?: RunMod
 export type RewardKind = 'or' | 'essence' | 'xp' | 'offrandes' | 'amelioration';
 export type NodeOption =
   | { kind: 'combat'; reward: RewardKind; deck: string }
-  | { kind: 'miniboss'; deck: string }
+  | { kind: 'miniboss'; deck: string; boss?: MiniBossId }
   | { kind: 'event'; id: EventId }
   | { kind: 'marche' }
   | { kind: 'boss'; deck: string };
+/** Mini-boss de l'acte 1 : l'Essence de la réalité ou les Fragments de réalité (le même pendant tout l'acte). */
+export type MiniBossId = 'essence' | 'fragments';
 export type EventId = 'camp' | 'entrainement';
 export type CardPurpose = 'retirer' | 'ameliorer' | 'humain' | 'elfe' | 'garde';
 /** Étapes à résoudre avant de choisir le nœud suivant. */
@@ -174,6 +176,7 @@ export function variantDef(rc: RunCard, upg: Record<string, number> = {}): CardD
   }
   for (const k of STATS) if (m[k] && typeof b[k] === 'number') (d as unknown as Record<string, number>)[k] = floored(b[k] as number, m[k]!);
   if (m.cout) d.cout = Math.max(0, Math.min(b.cout + 2, b.cout + m.cout));
+  if (rc.curse?.frag) (d as unknown as Record<string, number>).fragHits = rc.curse.frag;
   if (m.bonusPct) for (const k of BONUSES) { const v = b[k] as number | undefined; if (v) (d as unknown as Record<string, number>)[k] = floored(v, (v * m.bonusPct) / 100); }
   return d;
 }
@@ -214,6 +217,12 @@ export const regenOf = (run: RunState) => 5 * (run.upg?.regeneration ?? 0);
 const REWARDS: RewardKind[] = ['or', 'or', 'essence', 'xp', 'offrandes', 'amelioration'];
 const EVENTS: EventId[] = ['camp', 'entrainement'];
 
+/** Le mini-boss de l'acte : tiré une fois pour l'acte (même mini-boss, même deck à chaque proposition). */
+export function miniBossFor(run: RunState): NodeOption {
+  const r = rng(`${run.seed}|${run.act}|miniboss`);
+  const boss = pickOne(r, ['essence', 'fragments'] as const);
+  return { kind: 'miniboss', boss, deck: pickOne(r, MINIBOSS_DECKS) };
+}
 /** Options proposées pour le nœud suivant (déterministes pour une run donnée). */
 export function optionsFor(run: RunState): NodeOption[] {
   const n = run.node + 1;
@@ -223,8 +232,8 @@ export function optionsFor(run: RunState): NodeOption[] {
   const out: NodeOption[] = [];
   // Mini-boss : proposé à partir du 4e nœud tant qu'il n'est pas fait ; la 3e fois, il est la seule option.
   if (!run.miniBossDone && n >= 4) {
-    if (run.miniBossOffers >= 2) return [{ kind: 'miniboss', deck: pickOne(r, MINIBOSS_DECKS) }];
-    out.push({ kind: 'miniboss', deck: pickOne(r, MINIBOSS_DECKS) });
+    if (run.miniBossOffers >= 2) return [miniBossFor(run)];
+    out.push(miniBossFor(run));
   }
   if (n === 7) { // le marchand, toujours ; parfois un autre choix
     out.unshift({ kind: 'marche' });
@@ -284,6 +293,10 @@ export function fight(run: RunState, o: NodeOption, seed: string | number): { sc
   if (kind === 'combat') {
     sc = { ...base, title: `Acte ${run.act} — Combat`, deckRules: { min: 0, text: `Bats l’adversaire avant d’atteindre ${lim} de lassitude. Tu commences à ${run.lassitude}.` },
       intro: [{ who: '', text: `Une armée trompée par les Titans te barre la route : ${e.label}.` }] };
+  } else if (kind === 'miniboss' && (o as { boss?: MiniBossId }).boss === 'fragments') {
+    sc = { ...base, title: `Acte ${run.act} — Mini-boss : les Fragments de réalité`,
+      deckRules: { min: 0, text: 'Au début de chaque tour adverse, s’il a moins de 2 Fragments de réalité, un nouveau apparaît au hasard. Le régiment qui détruit un Fragment perd définitivement 1 ATK, 1 ARM et 1 INI (et 1 Moral à la 3e fois). Les victoires habituelles restent possibles.' },
+      intro: [{ who: '', text: 'La réalité se fissure autour de vous : des éclats de monde flottent sur le champ de bataille, et chacun que l’on brise laisse une trace.' }] };
   } else if (kind === 'miniboss') {
     sc = { ...base, title: `Acte ${run.act} — Mini-boss : l’Essence de la réalité`,
       deckRules: { min: 0, text: 'Ton Essence de la réalité (arrière) use définitivement tes régiments chaque fois qu’elle est attaquée. L’adversaire commence.' },
@@ -305,9 +318,10 @@ export function fight(run: RunState, o: NodeOption, seed: string | number): { sc
     ...(has('etat_major') ? { startDraw: { A: 1 } } : {}), ...(has('sceau') ? { leaderSeal: { A: true } } : {}),
     ...(has('fleche') ? { huntArrow: { A: true } } : {}), ...(has('chasseur') ? { preyKillEnd: { A: 10 } } : {}),
     ...(run.upg?.inepuisable ? { tacticDrawEvery: { A: run.upg.inepuisable >= 2 ? 2 : 3 } } : {}),
-    ...(kind === 'boss' ? { glissement: { victim: 'A' as const, tactic: 'lutter_mouvement' } } : {}) };
+    ...(kind === 'boss' ? { glissement: { victim: 'A' as const, tactic: 'lutter_mouvement' } } : {}),
+    ...(kind === 'miniboss' && (o as { boss?: MiniBossId }).boss === 'fragments' ? { fragments: { pid: 'B' as const, cardId: 'fragment_realite', max: 2 } } : {}) };
   // Qui commence : au hasard (reproductible), sauf règle du scénario : l'adversaire au mini-boss, le joueur contre le boss.
-  setup.first = kind === 'miniboss' ? 'B' : kind === 'boss' ? 'A' : (rng(`${run.seed}|${run.act}|${run.node}|first|${seed}`)() < 0.5 ? 'A' : 'B');
+  setup.first = kind === 'miniboss' && (o as { boss?: MiniBossId }).boss !== 'fragments' ? 'B' : kind === 'boss' ? 'A' : (rng(`${run.seed}|${run.act}|${run.node}|first|${seed}`)() < 0.5 ? 'A' : 'B');
   return { sc, setup };
 }
 

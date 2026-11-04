@@ -27,6 +27,11 @@ export const TITAN_CARDS: Record<string, CardDef> = {
     id: 'titan_glissement', cardType: 'Regiment', faction: 'neutre', niveau: 5, cout: 0, slotType: 'arriere', types: ['Titan'],
     atk: 5, end: 75, arm: 5, ini: 20, mor: 20, keywords: [], excludeFromMoralTotal: true,
   },
+  // Second mini-boss de l'acte 1 (Nathan, 04/11/2026).
+  fragment_realite: {
+    id: 'fragment_realite', cardType: 'Regiment', faction: 'neutre', niveau: 2, cout: 0, slotTypes: ['avant', 'arriere'], types: ['Essence'],
+    atk: 0, end: 1, arm: 0, ini: 0, mor: 4, keywords: [], fragmentCurse: true,
+  },
   lutter_mouvement: { id: 'lutter_mouvement', cardType: 'Tactique', faction: 'neutre', niveau: 1, cout: 0, targetRule: 'none', effect: 'holdGround' },
 } as unknown as Record<string, CardDef>;
 
@@ -36,6 +41,7 @@ export const TITAN_TEXT_FR: Record<string, { name: string; desc: string }> = {
   titan_echo: { name: 'Écho du Titan', desc: 'Un régiment adverse perd définitivement 10 % de son ATK.' },
   essence_realite: { name: 'Essence de la réalité', desc: 'Chaque fois qu’elle est attaquée, des régiments de son camp au hasard (autant que le niveau de l’attaquant) perdent définitivement 1 ATK, 1 INI et 1 ARM. Elle ne compte pas dans le Moral total.' },
   titan_glissement: { name: 'Titan du Glissement', desc: 'Au début de chaque tour du Titan, tes régiments glissent d’une case vers la droite ; ceux qui sortent du terrain sont détruits. Il ne compte pas dans le Moral total.' },
+  fragment_realite: { name: 'Fragment de réalité', desc: 'Le régiment qui le détruit perd définitivement 1 ATK, 1 ARM et 1 INI ; à la 3e fois pour ce régiment, 1 Moral en plus.' },
   lutter_mouvement: { name: 'Lutter contre le mouvement', desc: 'Au prochain tour du Titan, tes régiments ne glissent pas. Coûte 1 de plus à chaque fois que tu la joues.' },
 };
 

@@ -377,6 +377,8 @@ export interface ScenarioRules {
   /** Roguelite, Titan du Glissement : au début de chaque tour de l'adversaire de `victim`, ses régiments glissent d'une case
    *  vers la droite (ceux qui sortent sont détruits), sauf s'il a joué `tactic` ; `tactic` lui est donnée à chaque tour s'il ne l'a pas en main. */
   glissement?: { victim: PlayerId; tactic: string };
+  /** Roguelite, mini-boss des Fragments : au début de chaque tour de `pid`, s'il a moins de `max` `cardId`, un apparaît au hasard. */
+  fragments?: { pid: PlayerId; cardId: string; max: number };
 }
 export interface ScenarioSetup extends ScenarioRules {
   start?: Partial<Record<PlayerId, { avant?: Record<string, string>; arriere?: Record<string, string>; isole?: string }>>;
@@ -409,7 +411,7 @@ export interface ScenarioRuntime extends ScenarioRules {
 }
 
 /** Roguelite : malus définitifs infligés pendant la partie à un exemplaire de carte (appliqués à la run après la partie). */
-export interface RunMod { atk?: number; end?: number; arm?: number; ini?: number; mor?: number; cout?: number; bonusPct?: number }
+export interface RunMod { atk?: number; end?: number; arm?: number; ini?: number; mor?: number; cout?: number; bonusPct?: number; /** Fragments de réalité détruits par cet exemplaire. */ frag?: number }
 
 export interface GameState {
   config: GameConfig;

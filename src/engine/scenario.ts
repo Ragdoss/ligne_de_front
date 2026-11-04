@@ -32,6 +32,7 @@ export function applyScenarioStart(ctx: Ctx, sc: ScenarioSetup): void {
     const lass = sc.startLassitude?.[p];
     if (lass) { pl.points = lass; ctx.checkLevel(p); pl.resource = Math.max(pl.resource, pl.level + (sc.startResource?.[p] ?? 0)); }
   }
+  if (sc.fragments) spawnFragments(ctx); // Fragments de réalité : le premier est déjà là
 }
 
 /** Début du tour de `p` : avancée du convoi, puis événements prévus pour ce tour et ce joueur. */
@@ -42,6 +43,7 @@ export function scenarioTurnStart(ctx: Ctx, p: PlayerId): void {
   if (ctx.over) return;
   glissement(ctx, p);
   if (ctx.over) return;
+  if (sc.fragments?.pid === p) spawnFragments(ctx);
   // Flèche de chasse : sans Proie désignée, le régiment adverse au Moral le plus bas devient la Proie.
   if (ctx.player(p).huntArrow) {
     const foes = ctx.units(p === 'A' ? 'B' : 'A').filter(u => ctx.slotOf(u.uid)?.zone !== 'isole');
@@ -70,6 +72,22 @@ export function scenarioTurnStart(ctx: Ctx, p: PlayerId): void {
     runEvent(ctx, ev);
     if (ctx.over) return;
   }
+}
+
+/** Fragments de réalité : complète jusqu'au maximum, un par tour, sur une case libre au hasard. */
+export function spawnFragments(ctx: Ctx): void {
+  const f = ctx.s.scenario?.fragments;
+  if (!f) return;
+  const pl = ctx.player(f.pid);
+  if (ctx.units(f.pid).filter(u => u.cardId === f.cardId).length >= f.max) return;
+  const free: { zone: 'avant' | 'arriere'; idx: number }[] = [];
+  for (const zone of ['avant', 'arriere'] as const) pl.board[zone].forEach((u, idx) => { if (!u) free.push({ zone, idx }); });
+  if (!free.length) return;
+  const at = free[ctx.randomInt(free.length)]!;
+  const u = ctx.makeUnit(f.cardId, f.pid, true);
+  u.justDeployed = false;
+  pl.board[at.zone][at.idx] = u;
+  ctx.emit({ type: 'effect', key: 'fragment', player: f.pid, cardId: f.cardId, data: { zone: at.zone, idx: at.idx } });
 }
 
 /** Titan du Glissement : au début du tour adverse, les régiments de la victime glissent d'une case vers la droite. */
