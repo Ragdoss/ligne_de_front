@@ -121,16 +121,18 @@ export function soundsFor(events: GameEvent[], me: PlayerId | null): string[][] 
 // Chaque écran demande une musique (liste de candidats, du plus précis au plus général) ; la dernière demande active gagne.
 // Changement de morceau en fondu ; un morceau boucle.
 // Un candidat peut aussi être un morceau en couches (<nom>-piste1…5.ogg, voir docs/SONS.md).
-interface Request { id: number; keys: string[] }
+interface Request { id: number; keys: string[]; priority: number }
 interface Playing { key: string; setVolume: (v: number) => void; stop: () => void }
 let requests: Request[] = [];
 let nextId = 1;
 let current: Playing | null = null;
 const FADE_MS = 900;
 
-/** Demande une musique ; renvoie de quoi retirer la demande. */
-export function requestMusic(keys: string[]): () => void {
-  const r = { id: nextId++, keys: keys.map(k => k.toLowerCase()) };
+/** Demande une musique ; renvoie de quoi retirer la demande. À priorité égale, la plus récente gagne ; une partie demande
+ *  avec une priorité plus haute que l'écran qui la contient (dont la demande arrive après la sienne : les effets des
+ *  composants enfants s'exécutent avant ceux des parents). */
+export function requestMusic(keys: string[], priority = 0): () => void {
+  const r = { id: nextId++, keys: keys.map(k => k.toLowerCase()), priority };
   requests.push(r);
   scheduleRefresh();
   return () => { requests = requests.filter(x => x.id !== r.id); scheduleRefresh(); };
@@ -241,8 +243,9 @@ function startLayers(key: string): Playing {
 }
 
 function wanted(): string | null {
-  for (let i = requests.length - 1; i >= 0; i--) {
-    const k = requests[i]!.keys.find(available);
+  const order = requests.map((r, i) => ({ r, i })).sort((a, b) => b.r.priority - a.r.priority || b.i - a.i);
+  for (const { r } of order) {
+    const k = r.keys.find(available);
     if (k) return k;
   }
   return null;
