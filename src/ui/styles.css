@@ -844,3 +844,5 @@ button.pile:not(:disabled):hover .pile-stack > * { outline: 2px solid var(--bras
 .rl-option.risky { border-color: #6b2fa0; }
 .rl-reset { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 24px; padding-top: 12px; border-top: 1px solid #ffffff20; }
 .rl-reset .danger { background: #8e2b22; color: #fff; border-color: #8e2b22; }
+button.rl-champ-card { background: none; color: inherit; cursor: pointer; }
+.rl-champ-card.on { outline: 3px solid var(--brass-bright); background: #ffffff12; }

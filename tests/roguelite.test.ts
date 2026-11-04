@@ -225,3 +225,35 @@ describe('Roguelite : Étendards', () => {
     expect(next.steps.some(x => x.kind === 'etendard')).toBe(true);
   });
 });
+
+describe('Roguelite : Eldrin, le premier Bourgeon', () => {
+  it('deck elfe, volontaires elfes ou neutres, Étendards elfes', () => {
+    const run = newRun('e1', freshMeta(), 'eldrin');
+    expect(run.champion).toBe('eldrin');
+    expect(run.deck.every(c => ['elfe', 'neutre'].includes(CARDS[c.id]!.faction))).toBe(true);
+    const { setup } = fight(run, { kind: 'combat', reward: 'or', deck: 'd1' }, 1);
+    expect(setup.A.faction).toBe('elfe');
+  });
+  it('améliorations d’Expérience propres à chaque champion', () => {
+    let m = { ...freshMeta(), xp: 50 };
+    m = buyUpgrade(m, 'armee_elue', 'eldrin');
+    expect(m.upg['eldrin:armee_elue']).toBe(1);
+    expect(m.upg['augustus:armee_elue']).toBeUndefined();
+    expect(buyUpgrade(m, 'imperator', 'eldrin').upg['eldrin:imperator']).toBe(1); // pas proposée à Eldrin dans l'écran
+    m = buyUpgrade(buyUpgrade(m, 'fontaine', 'eldrin'), 'inepuisable', 'eldrin');
+    const run = newRun('e2', m, 'eldrin');
+    expect(run.upg).toMatchObject({ armee_elue: 1, fontaine: 1, inepuisable: 1 });
+    expect(nextNode({ ...run, lassitude: 5 }).lassitude).toBe(4);
+    expect(createGame(fight(run, { kind: 'combat', reward: 'or', deck: 'd1' }, 1).setup).players.A.tacticDrawEvery).toBe(3);
+  });
+  it('Bannière du chasseur insatiable : Proie détruite → un régiment adverse perd 10 END', () => {
+    const s = blankGame();
+    const ctx = new Ctx(s);
+    s.players.A.preyKillEnd = 10;
+    const prey = place(s, 'B', 'avant', 0, 'recrue_imp', { prey: 'A' });
+    const other = place(s, 'B', 'avant', 1, 'soldat_kragz');
+    const before = other.currentEnd;
+    ctx.destroy(prey, 'end');
+    expect(other.currentEnd).toBe(before - 10);
+  });
+});

@@ -13,6 +13,7 @@ import type { GameSetup } from '../engine/game';
 import { CAMPAIGN_EASE, scenarioGameSetup } from '../campaign/campaign';
 import { SCENARIOS } from '../campaign/campaigns';
 import { COURONNE_SCENARIOS } from '../campaign/couronne';
+import { ELF_SCENARIOS } from '../campaign/elfes';
 import type { CampaignScenario } from '../campaign/types';
 import { keyFor } from '../profile/store';
 
@@ -33,17 +34,30 @@ const BOSS_DECKS = ['e2', 's2', 'n3'];
 export const PRICES = { carte: 30, carteHaute: 45, retirer: 25, lassitude: 20, ameliorer: 35, etendard: 60 } as const;
 
 // ---------- Étendards (reliques de la run) ----------
-export interface Etendard { id: string; name: string; desc: string; risky?: boolean }
+export interface Etendard { id: string; name: string; desc: string; risky?: boolean; champion?: ChampionId }
 /** Premiers Étendards (document, 04/11/2026) : les neutres et celui de l'Empire ; ceux des autres champions viendront avec eux. */
 export const ETENDARDS: Etendard[] = [
   { id: 'tambour', name: 'Tambour de guerre', desc: '+1 ressource au premier tour de chaque combat.' },
   { id: 'dechire', name: 'Étendard déchiré', desc: 'Tes régiments ont +1 Moral.' },
   { id: 'etat_major', name: 'Carte d’état-major', desc: 'Main de départ : 1 carte de plus.' },
-  { id: 'sceau', name: 'Sceau impérial', desc: 'Empire. Le premier Leader que tu joues à chaque tour coûte 1 de moins.' },
+  { id: 'sceau', name: 'Sceau impérial', desc: 'Empire. Le premier Leader que tu joues à chaque tour coûte 1 de moins.', champion: 'augustus' },
+  { id: 'fleche', name: 'Flèche de chasse', desc: 'Elfes. Au début de chacun de tes tours, s’il n’y a pas de Proie, le régiment adverse au Moral le plus bas devient la Proie.', champion: 'eldrin' },
+  { id: 'chasseur', name: 'Bannière du chasseur insatiable', desc: 'Elfes. Quand une Proie est détruite, un régiment adverse au hasard perd 10 END.', champion: 'eldrin' },
   { id: 'lame', name: 'Lame maudite', desc: '+5 ATK à tous tes régiments, mais +1 lassitude à chaque fin de ton tour.', risky: true },
 ];
 export const etendardOf = (id: string) => ETENDARDS.find(e => e.id === id)!;
 export const LASSITUDE_SHOP = 5;
+
+// ---------- Champions ----------
+export type ChampionId = 'augustus' | 'eldrin';
+export interface Champion { id: ChampionId; name: string; faction: Faction; crest: string; deck: () => string[]; unlock?: string }
+export const CHAMPIONS: Champion[] = [
+  { id: 'augustus', name: 'Augustus, le Dernier Empereur', faction: 'empire', crest: 'A', deck: () => COURONNE_SCENARIOS.cc1!.A.deckList!.slice() },
+  // Débloqué par 6 Offrandes à l'entraînement ; deck de départ de la campagne Elfe (04/11/2026).
+  { id: 'eldrin', name: 'Eldrin, le premier Bourgeon', faction: 'elfe', crest: 'E', deck: () => ELF_SCENARIOS.e1!.A.deckList!.slice(), unlock: 'champion:elfe' },
+];
+export const championOf = (id: ChampionId | undefined) => CHAMPIONS.find(c => c.id === (id ?? 'augustus'))!;
+export const shortName = (id: ChampionId | undefined) => championOf(id).name.split(',')[0]!;
 
 // ---------- Types ----------
 /** Exemplaire de la run : `mods` = améliorations (camp, entraînement, marché…), `curse` = malus des Titans. */
@@ -71,7 +85,9 @@ export interface RunState {
   version: 1;
   id: string;
   seed: string;
-  champion: 'augustus';
+  champion: ChampionId;
+  /** Nombre de cartes du deck de départ (Armée élue : uid ≤ baseCount). */
+  baseCount?: number;
   act: number;
   /** Nœuds terminés dans l'acte (0 à 8 ; 8 = place au boss). */
   node: number;
@@ -139,7 +155,8 @@ export function variantDef(rc: RunCard, upg: Record<string, number> = {}): CardD
   if (b.cardType === 'Regiment') {
     if (lvl('etd:dechire')) add('mor', 1);
     if (lvl('etd:lame')) add('atk', 5);
-    if (rc.uid <= AUGUSTUS_DECK.length && lvl('armee_elue')) for (const k of STATS) { const v = (b[k] as number | undefined) ?? 0; add(k, Math.round(v * 0.1 * lvl('armee_elue'))); }
+    if (rc.uid <= (upg._base ?? AUGUSTUS_DECK.length) && lvl('armee_elue')) for (const k of STATS) { const v = (b[k] as number | undefined) ?? 0; add(k, Math.round(v * 0.1 * lvl('armee_elue'))); }
+    if (b.types?.includes('Élémentaux') && lvl('protecteur_foret')) { const p = 0.1 * lvl('protecteur_foret'); add('end', Math.round(((b.end as number) ?? 0) * p)); add('mor', Math.round(((b.mor as number) ?? 0) * p)); }
     if (b.types?.includes('Monté') && lvl('magister_equitum')) add('atk', Math.round(((b.atk as number) ?? 0) * 0.2 * lvl('magister_equitum')));
     if (b.niveau >= 4 && lvl('praefectus')) add('cout', -1);
   }
@@ -160,7 +177,7 @@ export function variantDef(rc: RunCard, upg: Record<string, number> = {}): CardD
 export function registerRun(run: RunState): void {
   registerTitanCards(CARD_TEXT_FR);
   for (const rc of run.deck) {
-    CARDS[variantId(rc)] = variantDef(rc, { ...(run.upg ?? {}), ...Object.fromEntries((run.etendards ?? []).map(e => [`etd:${e}`, 1])) });
+    CARDS[variantId(rc)] = variantDef(rc, { ...(run.upg ?? {}), _base: run.baseCount ?? AUGUSTUS_DECK.length, ...Object.fromEntries((run.etendards ?? []).map(e => [`etd:${e}`, 1])) });
     CARD_TEXT_FR[variantId(rc)] = CARD_TEXT_FR[rc.id] ?? { name: rc.id, desc: '' };
   }
 }
@@ -172,12 +189,13 @@ export const deckIds = (run: RunState) => run.deck.map(variantId);
 /** Deck de départ d'Augustus : le deck Empire de la campagne 5 (22 cartes). */
 export const AUGUSTUS_DECK: string[] = COURONNE_SCENARIOS.cc1!.A.deckList!.slice();
 
-export function newRun(seed = String(Date.now()), meta: RunMeta = newMeta()): RunState {
+export function newRun(seed = String(Date.now()), meta: RunMeta = newMeta(), champion: ChampionId = 'augustus'): RunState {
+  const deck = championOf(champion).deck();
   const run: RunState = {
-    version: 1, id: `run-${seed}`, seed, champion: 'augustus', act: 1, node: 0,
-    deck: AUGUSTUS_DECK.map((id, i) => ({ uid: i + 1, id, mods: {} })), nextUid: AUGUSTUS_DECK.length + 1,
+    version: 1, id: `run-${seed}`, seed, champion, baseCount: deck.length, act: 1, node: 0,
+    deck: deck.map((id, i) => ({ uid: i + 1, id, mods: {} })), nextUid: deck.length + 1,
     lassitude: 0, gold: 20, essence: 0, xp: 0, eventsSeen: [], eventThisAct: false, miniBossOffers: 0, miniBossDone: false,
-    options: [], upg: { ...meta.upg }, etendards: [], revives: meta.upg.incorruptible ?? 0, current: null, steps: [], over: null,
+    options: [], upg: runUpgrades(meta, champion), etendards: [], revives: meta.upg.incorruptible ?? 0, current: null, steps: [], over: null,
   };
   run.options = optionsFor(run);
   registerRun(run);
@@ -254,7 +272,7 @@ export function fight(run: RunState, o: NodeOption, seed: string | number): { sc
   const lim = defeatAt(run), enemyLim = ACT_LASSITUDE[run.act - 1]!; // l'amélioration Lassitude ne vaut que pour le joueur
   const base: CampaignScenario = {
     id: `rl-${kind}`, title: '', deckRules: { min: 0, text: '' }, intro: [], events: [],
-    A: { faction: 'empire', label: 'Armée d’Augustus', ai: false },
+    A: { faction: championOf(run.champion).faction, label: `Armée d’${shortName(run.champion)}`, ai: false },
     B: { faction: e.faction, label: e.label, deckList: e.deck, ai: true },
     defeatLassitude: { A: lim, B: enemyLim },
   };
@@ -281,6 +299,8 @@ export function fight(run: RunState, o: NodeOption, seed: string | number): { sc
   if (has('lame')) setup.config = { ...setup.config, endTurnLassitude: { A: 1, B: 0 } };
   setup.scenario = { ...setup.scenario!, startLassitude: { A: run.lassitude }, ...(mob ? { startResource: { A: mob } } : {}),
     ...(has('etat_major') ? { startDraw: { A: 1 } } : {}), ...(has('sceau') ? { leaderSeal: { A: true } } : {}),
+    ...(has('fleche') ? { huntArrow: { A: true } } : {}), ...(has('chasseur') ? { preyKillEnd: { A: 10 } } : {}),
+    ...(run.upg?.inepuisable ? { tacticDrawEvery: { A: run.upg.inepuisable >= 2 ? 2 : 3 } } : {}),
     ...(kind === 'boss' ? { glissement: { victim: 'A' as const, tactic: 'lutter_mouvement' } } : {}) };
   // Qui commence : au hasard (reproductible), sauf règle du scénario : l'adversaire au mini-boss, le joueur contre le boss.
   setup.first = kind === 'miniboss' ? 'B' : kind === 'boss' ? 'A' : (rng(`${run.seed}|${run.act}|${run.node}|first|${seed}`)() < 0.5 ? 'A' : 'B');
@@ -306,12 +326,12 @@ export function afterFight(run: RunState, g: GameState): RunState {
     // Incorruptible : on relance le combat avec la moitié de la lassitude maximale de l'acte (moins avec Parangon).
     next.revives--;
     next.lassitude = Math.round(defeatAt(next) * Math.max(0, 0.5 - 0.05 * (next.upg.parangon ?? 0)));
-    next.steps = [{ kind: 'resume', title: 'Incorruptible', lines: [`L’armée d’Augustus refuse la défaite : le combat recommence, à ${next.lassitude} de lassitude. Relances restantes : ${next.revives}.`] }];
+    next.steps = [{ kind: 'resume', title: 'Incorruptible', lines: [`L’armée d’${shortName(next.champion)} refuse la défaite : le combat recommence, à ${next.lassitude} de lassitude. Relances restantes : ${next.revives}.`] }];
     next.relaunch = true;
     return next;
   }
   if (g.over?.winner !== 'A') {
-    next.over = { won: false, text: `L’armée d’Augustus est tombée au nœud ${next.node + 1} de l’acte ${next.act}.` };
+    next.over = { won: false, text: `L’armée d’${shortName(next.champion)} est tombée au nœud ${next.node + 1} de l’acte ${next.act}.` };
     next.steps = [];
     return next;
   }
@@ -351,11 +371,12 @@ export function afterFight(run: RunState, g: GameState): RunState {
 export const offrandesWon = (o: NodeOption | null) => (o?.kind === 'combat' && o.reward === 'offrandes' ? 1 : 0);
 
 // ---------- Étapes ----------
-const inEmpire = (id: string) => ['empire', 'neutre'].includes(CARDS[id]!.faction) || ((CARDS[id]!.factions as string[] | undefined) ?? []).includes('empire');
+const inFaction = (f: Faction) => (id: string) => ['neutre', f].includes(CARDS[id]!.faction) || ((CARDS[id]!.factions as string[] | undefined) ?? []).includes(f);
 /** Volontaires : 3 cartes Empire ou neutres, niveau 3 au plus à l'acte 1. */
 export function volunteers(run: RunState, round: number): string[] {
   const r = rng(`${run.seed}|${run.act}|${run.node}|vol|${round}`);
-  const pool = COLLECTIBLE.filter(id => inEmpire(id) && CARDS[id]!.niveau <= run.act + 2);
+  const ok = inFaction(championOf(run.champion).faction);
+  const pool = COLLECTIBLE.filter(id => ok(id) && CARDS[id]!.niveau <= run.act + 2);
   const out: string[] = [];
   while (out.length < 3 && pool.length) out.push(pool.splice(Math.floor(r() * pool.length), 1)[0]!);
   return out;
@@ -368,7 +389,7 @@ export function promotions(run: RunState): { uid: number; to: string }[] {
   for (let k = 0; k < 20 && out.length < 3 && from.length; k++) {
     const c = from.splice(Math.floor(r() * from.length), 1)[0]!;
     const b = CARDS[c.id]!;
-    const targets = COLLECTIBLE.filter(id => inEmpire(id) && CARDS[id]!.cardType === b.cardType && CARDS[id]!.niveau > b.niveau && CARDS[id]!.niveau <= b.niveau + 2);
+    const targets = COLLECTIBLE.filter(id => inFaction(championOf(run.champion).faction)(id) && CARDS[id]!.cardType === b.cardType && CARDS[id]!.niveau > b.niveau && CARDS[id]!.niveau <= b.niveau + 2);
     if (targets.length) out.push({ uid: c.uid, to: pickOne(r, targets) });
   }
   return out;
@@ -424,7 +445,7 @@ export function eligible(run: RunState, purpose: CardPurpose): RunCard[] {
 /** Étendards proposés (pas déjà possédés), tirage reproductible. */
 export function etendardChoices(run: RunState, n: number): string[] {
   const r = rng(`${run.seed}|${run.act}|${run.node}|etendard`);
-  const left = ETENDARDS.map(e => e.id).filter(e => !(run.etendards ?? []).includes(e));
+  const left = ETENDARDS.filter(e => !e.champion || e.champion === (run.champion ?? 'augustus')).map(e => e.id).filter(e => !(run.etendards ?? []).includes(e));
   const out: string[] = [];
   while (out.length < n && left.length) out.push(left.splice(Math.floor(r() * left.length), 1)[0]!);
   return out;
@@ -466,7 +487,7 @@ export function eventChoices(run: RunState, meta: RunMeta, id: EventId, second =
   ];
   if (!second) {
     out.push({ id: 'offrande', label: 'Faire une Offrande et faire un 2e choix', disabled: off >= 6 ? 'Déjà 6 Offrandes faites ici' : noOffer });
-    if (off >= 6 && !meta.unlocks.includes('champion:elfe')) out.push({ id: 'champion', label: 'Débloquer le champion Elfe' });
+    if (off >= 6 && !meta.unlocks.includes('champion:elfe')) out.push({ id: 'champion', label: 'Débloquer Eldrin, le premier Bourgeon (champion Elfe)' });
   }
   void run;
   return out;
@@ -483,7 +504,7 @@ export function resolveEvent(run: RunState, meta: RunMeta, id: EventId, choice: 
   const n = 1 + Math.floor(off / 3);
   if (choice === 'humain' || choice === 'elfe') { run.steps.unshift({ kind: 'cartes', purpose: choice, n, optional: false }); return []; }
   if (choice === 'offrande') { meta.offrandes--; meta.offeredAt.entrainement = off + 1; run.steps.unshift({ kind: 'evenement', id, second: true }); return ['Ton Offrande est acceptée : tu peux faire un 2e choix.']; }
-  if (choice === 'champion') { meta.unlocks.push('champion:elfe'); return ['Le champion Elfe est débloqué.']; }
+  if (choice === 'champion') { meta.unlocks.push('champion:elfe'); return ['Eldrin, le premier Bourgeon, rejoint les champions des Dieux.']; }
   return [];
 }
 
@@ -492,6 +513,8 @@ export function resolveEvent(run: RunState, meta: RunMeta, id: EventId, choice: 
 export function nextNode(run: RunState): RunState {
   const next = structuredClone(run);
   next.node++;
+  // Fontaine d'immortalité (Eldrin) : à chaque nœud, avant tout le reste, −1 lassitude par niveau.
+  if (next.upg?.fontaine) next.lassitude = Math.max(0, next.lassitude - next.upg.fontaine);
   next.current = null;
   next.steps = [];
   next.options = optionsFor(next);
@@ -510,7 +533,15 @@ export function saveRun(run: RunState | null): void {
   try { if (run) localStorage.setItem(keyFor(RUN_KEY), JSON.stringify(run)); else localStorage.removeItem(keyFor(RUN_KEY)); } catch { /* stockage indisponible */ }
 }
 export function loadMeta(): RunMeta {
-  try { const raw = localStorage.getItem(keyFor(META_KEY)); if (raw) return { ...newMeta(), ...(JSON.parse(raw) as RunMeta) }; } catch { /* rien */ }
+  try {
+    const raw = localStorage.getItem(keyFor(META_KEY));
+    if (raw) {
+      const m = { ...newMeta(), ...(JSON.parse(raw) as RunMeta) };
+      // Avant Eldrin (04/11/2026), les améliorations d'Expérience étaient celles d'Augustus, sans préfixe.
+      for (const u of UPGRADES) if (u.currency === 'xp' && m.upg[u.id] !== undefined) { m.upg[`augustus:${u.id}`] = m.upg[u.id]!; delete m.upg[u.id]; }
+      return m;
+    }
+  } catch { /* rien */ }
   return newMeta();
 }
 export function saveMeta(m: RunMeta): void { try { localStorage.setItem(keyFor(META_KEY), JSON.stringify(m)); } catch { /* rien */ } }
@@ -528,6 +559,8 @@ export interface Upgrade {
   max: number;
   /** Prix du niveau suivant (lvl = niveau déjà acheté). */
   cost: (lvl: number) => number;
+  /** Améliorations d'Expérience : champions concernés (aucun = tous). */
+  champions?: ChampionId[];
   /** Déblocage nécessaire (méta), et comment l'obtenir. */
   unlock?: { key: string; text: string };
 }
@@ -543,22 +576,37 @@ export const UPGRADES: Upgrade[] = [
   { id: 'armee_elue', currency: 'xp', name: 'Armée élue', desc: 'Les régiments du deck de départ gagnent +10 % à leurs 5 stats par niveau.', max: 5, cost: l => 5 + 3 * l },
   { id: 'genie', currency: 'xp', name: 'Génie du champ de bataille', desc: 'Niveau 1 : les Tactiques à 2+ coûtent 1 de moins. Niveau 2 : celles à 1 aussi. Niveau 3 : celles à 3+ encore 1 de moins.', max: 3, cost: l => [6, 10, 14][l]! },
   { id: 'generalissime', currency: 'xp', name: 'Généralissime', desc: 'Les bonus de tes Leaders augmentent de 20 % par niveau.', max: 5, cost: l => 5 + 3 * l },
-  { id: 'imperator', currency: 'xp', name: 'Imperator', desc: 'Tes Leaders coûtent 1 de moins.', max: 1, cost: () => 10 },
-  { id: 'magister_equitum', currency: 'xp', name: 'Magister Equitum', desc: 'Tes régiments Montés gagnent +20 % d’ATK par niveau.', max: 5, cost: l => 4 + 2 * l },
-  { id: 'praefectus', currency: 'xp', name: 'Praefectus Praetorio', desc: 'Tes régiments de niveau 4 et 5 coûtent 1 de moins.', max: 1, cost: () => 10 },
+  { id: 'imperator', champions: ['augustus'], currency: 'xp', name: 'Imperator', desc: 'Tes Leaders coûtent 1 de moins.', max: 1, cost: () => 10 },
+  { id: 'magister_equitum', champions: ['augustus'], currency: 'xp', name: 'Magister Equitum', desc: 'Tes régiments Montés gagnent +20 % d’ATK par niveau.', max: 5, cost: l => 4 + 2 * l },
+  { id: 'praefectus', champions: ['augustus'], currency: 'xp', name: 'Praefectus Praetorio', desc: 'Tes régiments de niveau 4 et 5 coûtent 1 de moins.', max: 1, cost: () => 10 },
+  { id: 'inepuisable', champions: ['eldrin'], currency: 'xp', name: 'Inépuisable', desc: 'Niveau 1 : toutes les 3 Tactiques jouées, pioche une carte. Niveau 2 : toutes les 2.', max: 2, cost: l => [8, 14][l]! },
+  { id: 'protecteur_foret', champions: ['eldrin'], currency: 'xp', name: 'Protecteur de la forêt', desc: 'Tes régiments Élémentaux gagnent +10 % d’END et de Moral par niveau.', max: 5, cost: l => 4 + 2 * l },
+  { id: 'fontaine', champions: ['eldrin'], currency: 'xp', name: 'Fontaine d’immortalité', desc: 'À chaque nœud, avant tout le reste, −1 lassitude par niveau.', max: 5, cost: l => 6 + 3 * l },
 ];
-export const upgradeLevel = (meta: RunMeta, id: string) => meta.upg?.[id] ?? 0;
+/** Clé d'enregistrement : les améliorations d'Expérience sont propres à chaque champion. */
+export const upgradeKey = (u: Upgrade, champ: ChampionId) => (u.currency === 'xp' ? `${champ}:${u.id}` : u.id);
+export const upgradeLevel = (meta: RunMeta, u: Upgrade | string, champ: ChampionId = 'augustus') => {
+  const up = typeof u === 'string' ? UPGRADES.find(x => x.id === u)! : u;
+  return meta.upg?.[upgradeKey(up, champ)] ?? 0;
+};
+export const upgradesFor = (champ: ChampionId) => UPGRADES.filter(u => u.currency === 'essence' || !u.champions || u.champions.includes(champ));
+/** Niveaux d'amélioration valables pour une run de ce champion (clés sans préfixe). */
+export function runUpgrades(meta: RunMeta, champ: ChampionId): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const u of upgradesFor(champ)) { const l = upgradeLevel(meta, u, champ); if (l) out[u.id] = l; }
+  return out;
+}
 /** Pourquoi une amélioration ne s'achète pas (null = achetable). */
-export function cannotBuy(meta: RunMeta, u: Upgrade): string | null {
-  const lvl = upgradeLevel(meta, u.id);
+export function cannotBuy(meta: RunMeta, u: Upgrade, champ: ChampionId = 'augustus'): string | null {
+  const lvl = upgradeLevel(meta, u, champ);
   if (lvl >= u.max) return 'Niveau maximum';
   if (u.unlock && !meta.unlocks.includes(u.unlock.key)) return u.unlock.text;
   if (meta[u.currency] < u.cost(lvl)) return u.currency === 'essence' ? 'Pas assez d’Essence divine' : 'Pas assez d’Expérience';
   return null;
 }
-export function buyUpgrade(meta: RunMeta, id: string): RunMeta {
+export function buyUpgrade(meta: RunMeta, id: string, champ: ChampionId = 'augustus'): RunMeta {
   const u = UPGRADES.find(x => x.id === id)!;
-  if (cannotBuy(meta, u)) return meta;
-  const lvl = upgradeLevel(meta, id);
-  return { ...meta, [u.currency]: meta[u.currency] - u.cost(lvl), upg: { ...meta.upg, [id]: lvl + 1 } };
+  if (cannotBuy(meta, u, champ)) return meta;
+  const lvl = upgradeLevel(meta, u, champ);
+  return { ...meta, [u.currency]: meta[u.currency] - u.cost(lvl), upg: { ...meta.upg, [upgradeKey(u, champ)]: lvl + 1 } };
 }

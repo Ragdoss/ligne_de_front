@@ -3,7 +3,7 @@ import { useState } from 'react';
 import type { GameState } from '../engine/types';
 import {
   addCard, afterFight, applyCards, chooseOption, closeRun, defeatAt, eligible, EVENT_TEXT, eventChoices, fight, isImproved, isTouched, loadMeta, loadRun,
-  marketOffers, newMeta, NODES_PER_ACT, etendardOf, UPGRADES, buyUpgrade, cannotBuy, upgradeLevel, newRun, nextNode, offrandesWon, promotions, registerRun, removeCard, resolveEvent, saveMeta, saveRun, variantId, volunteers,
+  marketOffers, CHAMPIONS, championOf, shortName, upgradesFor, type ChampionId, newMeta, NODES_PER_ACT, etendardOf, buyUpgrade, cannotBuy, upgradeLevel, newRun, nextNode, offrandesWon, promotions, registerRun, removeCard, resolveEvent, saveMeta, saveRun, variantId, volunteers,
   LASSITUDE_SHOP, type CardPurpose, type NodeOption, type RunMeta, type RunState, type Step,
 } from '../roguelite/run';
 import { formatEvent } from '../i18n/log.fr';
@@ -36,10 +36,10 @@ function ChampionPanel({ run, meta, onDeck }: { run: RunState; meta: RunMeta; on
   const lim = defeatAt(run);
   return (
     <aside className="rl-champion" aria-label="Champion">
-      <div className="rl-crest">A</div>
+      <div className="rl-crest">{championOf(run.champion).crest}</div>
       <div className="rl-champ-body">
-        <b>Augustus, le Dernier Empereur</b>
-        <span className="muted small">Champion de l’{FACTION_LABEL.empire} · Acte {run.act}</span>
+        <b>{championOf(run.champion).name}</b>
+        <span className="muted small">Champion : {FACTION_LABEL[championOf(run.champion).faction]} · Acte {run.act}</span>
         <div className="rl-lass" title="Lassitude gardée / seuil de défaite de l’acte">
           <span>Lassitude <b>{run.lassitude}</b> / {lim}</span>
           <span className="rl-bar"><span style={{ width: `${Math.min(100, (100 * run.lassitude) / lim)}%` }} /></span>
@@ -112,6 +112,8 @@ export function RogueliteScreen({ gameOpts, live, onExit }: { gameOpts: GameOpts
   const [gameKey, setGameKey] = useState(0);
   const [notes, setNotes] = useState<string[]>([]);
   const [confirmReset, setConfirmReset] = useState(false);
+  const [champ, setChamp] = useState<ChampionId>(() => loadRun()?.champion ?? 'augustus');
+  const [upChamp, setUpChamp] = useState<ChampionId>(champ);
   const setRun = (r: RunState | null) => { if (r) registerRun(r); saveRun(r); setRunState(r); };
   const setMeta = (m: RunMeta) => { saveMeta(m); setMetaState(m); };
 
@@ -121,15 +123,15 @@ export function RogueliteScreen({ gameOpts, live, onExit }: { gameOpts: GameOpts
       <section className="rl-step">
         <h2 className="sub">{title} — tu as {meta[cur]}</h2>
         <div className="rl-upgrades">
-          {UPGRADES.filter(u => u.currency === cur).map(u => {
-            const lvl = upgradeLevel(meta, u.id);
-            const why = cannotBuy(meta, u);
+          {upgradesFor(upChamp).filter(u => u.currency === cur).map(u => {
+            const lvl = upgradeLevel(meta, u, upChamp);
+            const why = cannotBuy(meta, u, upChamp);
             const locked = !!u.unlock && !meta.unlocks.includes(u.unlock.key);
             return (
               <div key={u.id} className={`rl-upg${locked ? ' locked' : ''}`}>
                 <b>{u.name}</b> <span className="pill">Niveau {lvl} / {u.max}</span>
                 <p className="small">{u.desc}</p>
-                {lvl < u.max && <button type="button" disabled={!!why} title={why ?? undefined} onClick={() => setMeta(buyUpgrade(meta, u.id))}>{locked ? u.unlock!.text : `${u.cost(lvl)} ${cur === 'essence' ? 'Essence' : 'Expérience'}`}</button>}
+                {lvl < u.max && <button type="button" disabled={!!why} title={why ?? undefined} onClick={() => setMeta(buyUpgrade(meta, u.id, upChamp))}>{locked ? u.unlock!.text : `${u.cost(lvl)} ${cur === 'essence' ? 'Essence' : 'Expérience'}`}</button>}
               </div>
             );
           })}
@@ -141,7 +143,10 @@ export function RogueliteScreen({ gameOpts, live, onExit }: { gameOpts: GameOpts
         <TopBar title="Améliorations" onBack={() => setMode('home')} />
         <p className="muted small">Elles s’appliquent à partir de la prochaine run et ne se perdent jamais.</p>
         {section('essence', 'Essence divine : les matchs')}
-        {section('xp', 'Expérience : Augustus')}
+        <div className="hand-sort">Champion :{CHAMPIONS.filter(c => !c.unlock || meta.unlocks.includes(c.unlock)).map(c => (
+          <button key={c.id} type="button" className={upChamp === c.id ? 'on' : ''} onClick={() => setUpChamp(c.id)}>{shortName(c.id)}</button>
+        ))}</div>
+        {section('xp', `Expérience : ${shortName(upChamp)}`)}
       </div>
     );
   }
@@ -161,16 +166,24 @@ export function RogueliteScreen({ gameOpts, live, onExit }: { gameOpts: GameOpts
         </div>
         <h2 className="sub">Champion</h2>
         <div className="rl-champions">
-          <div className="rl-champ-card on"><div className="rl-crest">A</div><b>Augustus, le Dernier Empereur</b><span className="muted small">Empire</span></div>
-          {(['elfe', 'demons', 'nomades'] as const).map(f => (
+          {CHAMPIONS.map(c => {
+            const open = !c.unlock || meta.unlocks.includes(c.unlock);
+            return (
+              <button type="button" key={c.id} disabled={!open} className={`rl-champ-card${champ === c.id ? ' on' : ''}${open ? '' : ' locked'}`} onClick={() => { setChamp(c.id); setUpChamp(c.id); }}>
+                <div className="rl-crest">{open ? c.crest : '?'}</div><b>{c.name}</b>
+                <span className="muted small">{FACTION_LABEL[c.faction]}{open ? '' : ' · à débloquer par un événement'}</span>
+              </button>
+            );
+          })}
+          {(['demons', 'nomades'] as const).map(f => (
             <div key={f} className="rl-champ-card locked"><div className="rl-crest">?</div><b>{FACTION_LABEL[f]}</b>
-              <span className="muted small">{f === 'elfe' && meta.unlocks.includes('champion:elfe') ? 'Débloqué (bientôt jouable)' : 'À débloquer par un événement'}</span></div>
+              <span className="muted small">À débloquer par un événement</span></div>
           ))}
         </div>
         <div className="choices row left">
           <button type="button" onClick={() => setMode('upgrades')}>Améliorations (Essence divine, Expérience)</button>
           {run && !run.over && <button type="button" className="primary" onClick={() => setMode('run')}>Continuer la run (nœud {run.node + 1})</button>}
-          <button type="button" className={run && !run.over ? '' : 'primary'} onClick={() => { const r = newRun(String(Date.now()), meta); setRun(r); setNotes([]); setMode('run'); }}>
+          <button type="button" className={run && !run.over ? '' : 'primary'} onClick={() => { const r = newRun(String(Date.now()), meta, champ); setRun(r); setNotes([]); setMode('run'); }}>
             {run && !run.over ? 'Abandonner et recommencer' : 'Nouvelle run'}
           </button>
         </div>
@@ -182,6 +195,7 @@ export function RogueliteScreen({ gameOpts, live, onExit }: { gameOpts: GameOpts
                 <button type="button" className="danger" onClick={() => { setRun(null); setMeta(newMeta()); setNotes([]); setConfirmReset(false); }}>Oui, tout effacer</button>
                 <button type="button" onClick={() => setConfirmReset(false)}>Annuler</button>
               </>}
+          {!meta.unlocks.includes('champion:elfe') && <button type="button" onClick={() => setMeta({ ...meta, unlocks: [...meta.unlocks, 'champion:elfe'] })}>Débloquer Eldrin (test)</button>}
         </div>
       </div>
     );
@@ -191,7 +205,7 @@ export function RogueliteScreen({ gameOpts, live, onExit }: { gameOpts: GameOpts
   if (mode === 'deck') {
     return (
       <div className="camp rl">
-        <TopBar title={`Deck d’Augustus (${run.deck.length} cartes)`} onBack={() => setMode('run')} />
+        <TopBar title={`Deck d’${shortName(run.champion)} (${run.deck.length} cartes)`} onBack={() => setMode('run')} />
         <div className="camp-grid">{run.deck.map(c => <CardTile key={c.uid} id={variantId(c)} badge={modBadge(run, variantId(c))} />)}</div>
       </div>
     );
@@ -200,7 +214,7 @@ export function RogueliteScreen({ gameOpts, live, onExit }: { gameOpts: GameOpts
   // ---------- Combat ----------
   if (mode === 'game' && run.current && run.current.kind !== 'event' && run.current.kind !== 'marche') {
     const { sc, setup } = fight(run, run.current, gameKey);
-    const names = { A: 'Augustus', B: sc.B.label };
+    const names = { A: shortName(run.champion), B: sc.B.label };
     return (
       <GameScreen
         key={gameKey}
@@ -279,7 +293,7 @@ export function RogueliteScreen({ gameOpts, live, onExit }: { gameOpts: GameOpts
   } else if (step?.kind === 'etendard') {
     body = (
       <section className="rl-step">
-        <h2 className="sub">Un Étendard rejoint l’armée d’Augustus</h2>
+        <h2 className="sub">Un Étendard rejoint l’armée d’{shortName(run.champion)}</h2>
         <p className="muted">Son effet dure toute la run.</p>
         <div className="rl-options">
           {step.choices.map(id => {

@@ -234,6 +234,13 @@ export interface PlayerState {
   /** Roguelite, Sceau impérial : le premier Leader de chaque tour coûte 1 de moins (tour où il a servi). */
   leaderSeal?: boolean;
   leaderSealTurn?: number;
+  /** Roguelite, Inépuisable : une carte piochée toutes les N Tactiques jouées (compteur). */
+  tacticDrawEvery?: number;
+  tacticCount?: number;
+  /** Roguelite, Flèche de chasse : sans Proie, le régiment adverse au Moral le plus bas le devient (début de tour). */
+  huntArrow?: boolean;
+  /** Roguelite, Bannière du chasseur insatiable : Proie détruite → un régiment adverse au hasard perd N END. */
+  preyKillEnd?: number;
   /** Ressources perdues au début de son prochain tour (Rançonnement, Bourse de guerre). */
   resourcePenalty?: number;
   /** Avantage décisif : nombre d'exemplaires joués pour le combat de ce tour (repère de tour). */
@@ -382,6 +389,10 @@ export interface ScenarioSetup extends ScenarioRules {
   startDraw?: Partial<Record<PlayerId, number>>;
   /** Roguelite, Sceau impérial. */
   leaderSeal?: Partial<Record<PlayerId, boolean>>;
+  /** Roguelite : Inépuisable, Flèche de chasse, Bannière du chasseur insatiable. */
+  tacticDrawEvery?: Partial<Record<PlayerId, number>>;
+  huntArrow?: Partial<Record<PlayerId, boolean>>;
+  preyKillEnd?: Partial<Record<PlayerId, number>>;
   /** Roguelite : lassitude de départ (le niveau suit). */
   startLassitude?: Partial<Record<PlayerId, number>>;
 }

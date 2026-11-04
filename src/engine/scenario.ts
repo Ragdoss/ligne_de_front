@@ -25,6 +25,9 @@ export function applyScenarioStart(ctx: Ctx, sc: ScenarioSetup): void {
     if (iso) { const u = ctx.makeUnit(iso, p); u.justDeployed = false; pl.board.isole = u; }
     for (const cardId of sc.startHand?.[p] ?? []) ctx.addToHand(p, cardId, { generated: true });
     if (sc.leaderSeal?.[p]) pl.leaderSeal = true;
+    if (sc.tacticDrawEvery?.[p]) pl.tacticDrawEvery = sc.tacticDrawEvery[p];
+    if (sc.huntArrow?.[p]) pl.huntArrow = true;
+    if (sc.preyKillEnd?.[p]) pl.preyKillEnd = sc.preyKillEnd[p];
     // Roguelite : lassitude gardée du combat précédent ; on commence au niveau correspondant.
     const lass = sc.startLassitude?.[p];
     if (lass) { pl.points = lass; ctx.checkLevel(p); pl.resource = Math.max(pl.resource, pl.level + (sc.startResource?.[p] ?? 0)); }
@@ -39,6 +42,11 @@ export function scenarioTurnStart(ctx: Ctx, p: PlayerId): void {
   if (ctx.over) return;
   glissement(ctx, p);
   if (ctx.over) return;
+  // Flèche de chasse : sans Proie désignée, le régiment adverse au Moral le plus bas devient la Proie.
+  if (ctx.player(p).huntArrow) {
+    const foes = ctx.units(p === 'A' ? 'B' : 'A').filter(u => ctx.slotOf(u.uid)?.zone !== 'isole');
+    if (foes.length && !foes.some(u => u.prey === p)) ctx.setPrey(p, foes.reduce((a, b) => (b.currentMor < a.currentMor ? b : a)), 'fleche_chasse');
+  }
   // Météo : annoncée au début du tour de A quand elle change.
   if (sc.weather && p === 'A') {
     const now = ctx.weather(), before = ctx.s.turn > 1 ? ctx.weather(ctx.s.turn - 1) : null;

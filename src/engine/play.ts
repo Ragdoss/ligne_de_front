@@ -175,6 +175,8 @@ export function playCard(ctx: Ctx, p: PlayerId, handUid: number, target?: SlotRe
   else {
     if (!h.generated) ctx.discard(p, c.id, true);
     pl.tacticsThisTurn = (pl.tacticsThisTurn ?? 0) + 1;
+    // Inépuisable (roguelite) : une carte piochée toutes les N Tactiques.
+    if (pl.tacticDrawEvery) { pl.tacticCount = (pl.tacticCount ?? 0) + 1; if (pl.tacticCount % pl.tacticDrawEvery === 0) ctx.draw(p, 'inepuisable'); }
     // Formation en Carré adverse : ses régiments ciblés gagnent de l'Armure avant la résolution.
     const guard = ctx.player(opponentOf(p)).squareGuard;
     if (guard) for (const ref of [target, target2]) {

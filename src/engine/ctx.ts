@@ -465,6 +465,17 @@ export class Ctx {
     // Chasseresse damnée : chaque Proie détruite retire de la lassitude à son chasseur.
     const less = this.units(hunter).reduce((n, x) => n + (x.brokenMorale ? 0 : ((card(x.cardId).preyDeathLassitudeLoss as number | undefined) ?? 0)), 0);
     if (less) this.loseLassitude(hunter, less, 'chasseresse_damnee');
+    // Bannière du chasseur insatiable (roguelite) : un régiment adverse au hasard perd de l'END.
+    const bite = this.player(hunter).preyKillEnd;
+    if (bite) {
+      const pool = this.units(victim).filter(x => x.uid !== u.uid && this.isAlive(x));
+      const t = pool[this.randomInt(pool.length)];
+      if (t) {
+        t.currentEnd = Math.max(0, t.currentEnd - bite);
+        this.emit({ type: 'effect', key: 'chasseurInsatiable', player: hunter, cardId: t.cardId, data: { uid: t.uid, damage: bite } });
+        if (t.currentEnd <= 0) { this.destroy(t, 'end'); if (this.over) return; }
+      }
+    }
     // Druide Ancien : le porteur qui détruit la Proie regagne de l'END et du Moral.
     if (killer && killer.controller === hunter && killer.leader && this.isAlive(killer)) {
       const d = card(killer.leader);
