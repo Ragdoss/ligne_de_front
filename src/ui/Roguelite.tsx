@@ -3,7 +3,7 @@ import { useState } from 'react';
 import type { GameState } from '../engine/types';
 import {
   addCard, afterFight, applyCards, chooseOption, closeRun, defeatAt, eligible, EVENT_TEXT, eventChoices, fight, isImproved, isTouched, loadMeta, loadRun,
-  marketOffers, xpWon, CHAMPIONS, championOf, shortName, upgradesFor, type ChampionId, newMeta, NODES_PER_ACT, etendardOf, buyUpgrade, cannotBuy, upgradeLevel, newRun, nextNode, offrandesWon, promotions, registerRun, removeCard, resolveEvent, saveMeta, saveRun, variantId, volunteers,
+  marketOffers, xpWon, CHAMPIONS, championOf, shortName, upgradesFor, type ChampionId, newMeta, NODES_PER_ACT, etendardOf, UPGRADES, buyUpgrade, cannotBuy, upgradeLevel, newRun, nextNode, offrandesWon, promotions, registerRun, removeCard, resolveEvent, saveMeta, saveRun, variantId, volunteers,
   LASSITUDE_SHOP, type CardPurpose, type NodeOption, type RunMeta, type RunState, type Step,
 } from '../roguelite/run';
 import { formatEvent } from '../i18n/log.fr';
@@ -121,7 +121,7 @@ export function RogueliteScreen({ gameOpts, live, onExit }: { gameOpts: GameOpts
   if (mode === 'upgrades') {
     const section = (cur: 'essence' | 'xp', title: string) => (
       <section className="rl-step">
-        <h2 className="sub">{title} — tu as {meta[cur]}</h2>
+        <h2 className="sub">{title}</h2>
         <div className="rl-upgrades">
           {upgradesFor(upChamp).filter(u => u.currency === cur).map(u => {
             const lvl = upgradeLevel(meta, u, upChamp);
@@ -142,11 +142,11 @@ export function RogueliteScreen({ gameOpts, live, onExit }: { gameOpts: GameOpts
       <div className="camp rl">
         <TopBar title="Améliorations" onBack={() => setMode('home')} />
         <p className="muted small">Elles s’appliquent à partir de la prochaine run et ne se perdent jamais.</p>
-        {section('essence', 'Essence divine : les matchs')}
+        {section('essence', `Bénédictions divines (Essence divine : ${meta.essence})`)}
         <div className="hand-sort">Champion :{CHAMPIONS.filter(c => !c.unlock || meta.unlocks.includes(c.unlock)).map(c => (
           <button key={c.id} type="button" className={upChamp === c.id ? 'on' : ''} onClick={() => setUpChamp(c.id)}>{shortName(c.id)}</button>
         ))}</div>
-        {section('xp', `Expérience : ${shortName(upChamp)}`)}
+        {section('xp', `Améliorations de ${shortName(upChamp)} (Expérience : ${meta.xp})`)}
       </div>
     );
   }
@@ -351,11 +351,14 @@ export function RogueliteScreen({ gameOpts, live, onExit }: { gameOpts: GameOpts
       </section>
     );
   } else if (step?.kind === 'marche') {
-    const offers = marketOffers(run);
+    const offers = marketOffers(run, meta, step.gold0 ?? run.gold);
     const buy = (i: number) => {
       const o = offers[i]!;
       const n = structuredClone(run);
-      n.gold -= o.price;
+      if (o.kind === 'benediction') {
+        setMeta({ ...meta, offrandes: meta.offrandes - o.price, unlocks: [...meta.unlocks, o.benediction!] });
+        setNotes(x => [...x, `Bénédiction débloquée : ${UPGRADES.find(u => u.id === o.benediction)!.name} (à acheter avec l’Essence divine entre les runs).`]);
+      } else n.gold -= o.price;
       (n.steps[0] as Extract<Step, { kind: 'marche' }>).bought.push(i);
       if (o.kind === 'etendard') { n.etendards = [...(n.etendards ?? []), o.etendard!]; setNotes(x => [...x, `Étendard : ${etendardOf(o.etendard!).name}.`]); }
       if (o.kind === 'carte') { addCard(n, o.cardId!); setNotes(x => [...x, `${cardName(o.cardId!)} rejoint ton deck.`]); }
@@ -364,7 +367,7 @@ export function RogueliteScreen({ gameOpts, live, onExit }: { gameOpts: GameOpts
       if (o.kind === 'ameliorer') n.steps.unshift({ kind: 'cartes', purpose: 'ameliorer', n: 1, optional: false });
       setRun(n);
     };
-    const label = (o: (typeof offers)[number]) => o.kind === 'carte' ? `Acheter ${cardName(o.cardId!)}` : o.kind === 'retirer' ? 'Retirer une carte de ton deck' : o.kind === 'lassitude' ? `Baisser ta lassitude de ${LASSITUDE_SHOP}` : o.kind === 'etendard' ? `Étendard : ${etendardOf(o.etendard!).name} — ${etendardOf(o.etendard!).desc}` : 'Améliorer une carte';
+    const label = (o: (typeof offers)[number]) => o.kind === 'carte' ? `Acheter ${cardName(o.cardId!)}` : o.kind === 'retirer' ? 'Retirer une carte de ton deck' : o.kind === 'lassitude' ? `Baisser ta lassitude de ${LASSITUDE_SHOP}` : o.kind === 'etendard' ? `Étendard : ${etendardOf(o.etendard!).name} — ${etendardOf(o.etendard!).desc}` : o.kind === 'benediction' ? `Débloquer la bénédiction « ${UPGRADES.find(u => u.id === o.benediction)!.name} » : ${UPGRADES.find(u => u.id === o.benediction)!.desc}` : 'Améliorer une carte';
     body = (
       <section className="rl-step">
         <h2 className="sub">Le marchand</h2>
@@ -376,7 +379,7 @@ export function RogueliteScreen({ gameOpts, live, onExit }: { gameOpts: GameOpts
               <div key={i} className={`rl-offer${done ? ' sold' : ''}`}>
                 {o.cardId && <CardTile id={o.cardId} />}
                 <b>{label(o)}</b>
-                <button type="button" disabled={done || run.gold < o.price || (o.kind === 'lassitude' && run.lassitude === 0)} onClick={() => buy(i)}>{done ? 'Acheté' : `${o.price} or`}</button>
+                <button type="button" disabled={done || (o.kind === 'benediction' ? meta.offrandes < o.price || meta.unlocks.includes(o.benediction!) : run.gold < o.price) || (o.kind === 'lassitude' && run.lassitude === 0)} onClick={() => buy(i)}>{done ? 'Acheté' : o.kind === 'benediction' ? `${o.price} Offrandes` : `${o.price} or`}</button>
               </div>
             );
           })}

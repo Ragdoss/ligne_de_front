@@ -24,7 +24,7 @@ export const ACT_LASSITUDE = [16, 25, 50] as const;
 const LASSITUDE_UPG_CAP = [4, 5, 10] as const;
 export const NODES_PER_ACT = 8;
 /** Part de la lassitude de fin de combat gardée (avant Régénération). */
-export const KEEP_SHARE = 0.5;
+export const KEEP_SHARE = 0.75; // 05/11/2026 : 75 % (au lieu de 50 %)
 const NEVER = 999;
 /** Decks adverses de l'acte 1 : les premiers scénarios des campagnes, déjà réglés contre des decks de départ. */
 const ACT1_DECKS = ['d1', 'd2', 'e1', 'e2', 'n1', 'n2', 's1', 'cd4'];
@@ -80,9 +80,9 @@ export type Step =
   | { kind: 'promotion' }
   | { kind: 'cartes'; purpose: CardPurpose; n: number; optional: boolean }
   | { kind: 'evenement'; id: EventId; second?: boolean }
-  | { kind: 'marche'; bought: number[] }
+  | { kind: 'marche'; bought: number[]; /** Or à l'arrivée au marchand (chance d'une bénédiction). */ gold0?: number }
   | { kind: 'etendard'; choices: string[] };
-export interface MarketOffer { kind: 'carte' | 'retirer' | 'lassitude' | 'ameliorer' | 'etendard'; cardId?: string; etendard?: string; price: number }
+export interface MarketOffer { kind: 'carte' | 'retirer' | 'lassitude' | 'ameliorer' | 'etendard' | 'benediction'; cardId?: string; etendard?: string; benediction?: string; /** En or, ou en Offrandes pour une bénédiction. */ price: number }
 export interface RunState {
   version: 1;
   id: string;
@@ -201,7 +201,7 @@ export function newRun(seed = String(Date.now()), meta: RunMeta = newMeta(), cha
   const run: RunState = {
     version: 1, id: `run-${seed}`, seed, champion, baseCount: deck.length, designated: (meta.designated ?? 'augustus') === champion, act: 1, node: 0,
     deck: deck.map((id, i) => ({ uid: i + 1, id, mods: {} })), nextUid: deck.length + 1,
-    lassitude: 0, gold: 20, essence: 0, xp: 0, eventsSeen: [], eventThisAct: false, miniBossOffers: 0, miniBossDone: false,
+    lassitude: 0, gold: 20 + 50 * (meta.upg.coffre ?? 0), essence: 0, xp: 0, eventsSeen: [], eventThisAct: false, miniBossOffers: 0, miniBossDone: false,
     options: [], upg: runUpgrades(meta, champion), etendards: [], revives: meta.upg.incorruptible ?? 0, current: null, steps: [], over: null,
   };
   run.options = optionsFor(run);
@@ -258,7 +258,7 @@ export function chooseOption(run: RunState, meta: RunMeta, i: number): RunState 
   if (next.options.some(x => x.kind === 'miniboss')) next.miniBossOffers++;
   next.current = o;
   if (o.kind === 'event') { next.eventsSeen.push(o.id); next.eventThisAct = true; next.steps = [{ kind: 'evenement', id: o.id }]; }
-  if (o.kind === 'marche') next.steps = [{ kind: 'marche', bought: [] }];
+  if (o.kind === 'marche') next.steps = [{ kind: 'marche', bought: [], gold0: next.gold }];
   void meta;
   return next;
 }
@@ -314,6 +314,8 @@ export function fight(run: RunState, o: NodeOption, seed: string | number): { sc
       B: { ...base.B, start: { arriere: { '0': 'titan_glissement' } } },
       mustSurvive: { B: 'titan_glissement' }, emptyDeckDefeat: { B: false }, defeatLassitude: { A: lim, B: NEVER } };
   }
+  const mf = run.upg?.mobilisation_finale ?? 0;
+  if (mf) sc.levelThresholds = { A: [0, 4, 9, 16, 25, 50].map((t, i) => (i === 0 ? 0 : t - Math.min(mf, i + 1))) };
   const setup = scenarioGameSetup(sc, deckIds(run), seed, 0, NO_EASE);
   const has = (e: string) => (run.etendards ?? []).includes(e);
   const mob = (run.upg?.mobilisation_initiale ?? 0) + (has('tambour') ? 1 : 0);
@@ -360,7 +362,7 @@ export function afterFight(run: RunState, g: GameState): RunState {
   }
   const regen = regenOf(next);
   const kept = keptLassitude(next.lassitude, end, regen);
-  const lines = [`Lassitude : ${end} en fin de combat, tu en gardes ${kept} (maximum entre ${regen ? `${50 - regen} %` : 'la moitié'} et ton départ à ${next.lassitude}).`];
+  const lines = [`Lassitude : ${end} en fin de combat, tu en gardes ${kept} (maximum entre ${Math.round(KEEP_SHARE * 100) - regen} % et ton départ à ${next.lassitude}).`];
   next.lassitude = kept;
   const steps: Step[] = [];
   if (o.kind === 'boss') {
@@ -378,13 +380,15 @@ export function afterFight(run: RunState, g: GameState): RunState {
     if (o.reward === 'xp') { next.xp += 2; lines.push('+2 Expérience.'); }
     if (next.designated) { next.xp += 1; lines.push('+1 Expérience car tu joues le champion désigné.'); }
     if (o.reward === 'offrandes') lines.push('+1 Offrande.');
+    gold = Math.round(gold * (1 + (next.upg?.interet ?? 0) / 3)); // Intérêt
     next.gold += gold; lines.unshift(`+${gold} or.`);
     steps.push({ kind: 'volontaires', round: 0 }, { kind: 'volontaires', round: 1 });
     if (o.reward === 'amelioration') steps.push({ kind: 'cartes', purpose: 'ameliorer', n: 1, optional: true });
   } else if (o.kind === 'miniboss') {
     next.miniBossDone = true;
-    next.gold += 25; next.essence += 5; next.xp += 3;
-    lines.unshift('+25 or, +5 Essence divine, +3 Expérience.');
+    const gold = Math.round(25 * (1 + (next.upg?.interet ?? 0) / 3));
+    next.gold += gold; next.essence += 5; next.xp += 3;
+    lines.unshift(`+${gold} or, +5 Essence divine, +3 Expérience.`);
     const etd = etendardChoices(next, 3);
     if (etd.length) steps.push({ kind: 'etendard', choices: etd });
     steps.push({ kind: 'volontaires', round: 0 }, { kind: 'volontaires', round: 1 }, { kind: 'promotion' }, { kind: 'cartes', purpose: 'ameliorer', n: 1, optional: true });
@@ -480,7 +484,10 @@ export function etendardChoices(run: RunState, n: number): string[] {
 
 // ---------- Marché ----------
 /** 5 offres tirées parmi : une carte, retirer une carte, baisser la lassitude, améliorer une carte (répétitions possibles). */
-export function marketOffers(run: RunState): MarketOffer[] {
+export const BENEDICTION_PRICE = 2;
+/** Chance qu'une bénédiction à débloquer soit en vente : faible, plus forte avec beaucoup d'or. */
+export const benedictionChance = (gold: number) => Math.min(0.6, 0.05 + gold / 300);
+export function marketOffers(run: RunState, meta?: RunMeta, gold0 = run.gold): MarketOffer[] {
   const r = rng(`${run.seed}|${run.act}|${run.node}|marche`);
   const vol = volunteers({ ...run, node: run.node + 100 }, 0).concat(volunteers({ ...run, node: run.node + 100 }, 1));
   const out: MarketOffer[] = [];
@@ -490,6 +497,9 @@ export function marketOffers(run: RunState): MarketOffer[] {
     if (k === 'carte') { const id = vol[i % vol.length]!; out.push({ kind: 'carte', cardId: id, price: CARDS[id]!.niveau >= 3 ? PRICES.carteHaute : PRICES.carte }); }
     else out.push({ kind: k, price: PRICES[k] });
   }
+  // Bénédictions Intérêt et Coffre plein : à débloquer ici, contre des Offrandes.
+  const locked = ['interet', 'coffre'].filter(b => !meta?.unlocks.includes(b));
+  if (meta && locked.length && r() < benedictionChance(gold0)) out.push({ kind: 'benediction', benediction: pickOne(r, locked), price: BENEDICTION_PRICE });
   return out;
 }
 
@@ -603,12 +613,19 @@ export interface Upgrade {
 /** Essence divine : améliorations des matchs ; Expérience : améliorations d'Augustus (document, 03/11/2026). */
 export const UPGRADES: Upgrade[] = [
   { id: 'lassitude', currency: 'essence', name: 'Lassitude', desc: 'Seuil de défaite +1 par niveau (au plus 20 à l’acte 1, 30 à l’acte 2, 60 à l’acte 3).', max: 10, cost: l => 3 + l },
-  { id: 'regeneration', currency: 'essence', name: 'Régénération', desc: 'Après un combat, tu gardes 5 % de lassitude de moins par niveau (jamais sous ton départ).', max: 5, cost: l => 4 + 2 * l,
+  { id: 'regeneration', currency: 'essence', name: 'Régénération', desc: 'Après un combat, tu gardes 5 % de lassitude de moins par niveau (jamais sous ton départ).', max: 10, cost: l => 4 + 2 * l,
     unlock: { key: 'regeneration', text: 'Fais une Offrande au camp abandonné' } },
   { id: 'mobilisation_initiale', currency: 'essence', name: 'Mobilisation initiale', desc: '+1 ressource au début de chaque combat par niveau.', max: 3, cost: l => [6, 12, 20][l]!,
     unlock: { key: 'mobilisation_initiale', text: 'Se débloque à un événement de l’acte 3 (pas encore dans le prototype)' } },
-  { id: 'incorruptible', currency: 'essence', name: 'Incorruptible', desc: 'Après une défaite, le combat recommence avec 50 % de la lassitude maximale de l’acte. Une relance par niveau et par run.', max: 3, cost: l => [12, 18, 25][l]! },
-  { id: 'parangon', currency: 'essence', name: 'Parangon', desc: 'Une relance d’Incorruptible part avec 5 % de lassitude de moins par niveau.', max: 5, cost: l => 3 + l },
+  { id: 'incorruptible', currency: 'essence', name: 'Incorruptible', desc: 'Après une défaite, le combat recommence avec 50 % de la lassitude maximale de l’acte. Une relance par niveau et par run.', max: 3, cost: l => [12, 18, 25][l]!,
+    unlock: { key: 'incorruptible', text: 'Se débloque par un événement (à venir)' } },
+  { id: 'parangon', currency: 'essence', name: 'Parangon', desc: 'Une relance d’Incorruptible part avec 5 % de lassitude de moins par niveau.', max: 5, cost: l => 3 + l,
+    unlock: { key: 'parangon', text: 'Se débloque par un événement (à venir)' } },
+  { id: 'mobilisation_finale', currency: 'essence', name: 'Mobilisation finale !', desc: 'Crée un 6e niveau (6 ressources par tour) à 50 de lassitude. Chaque niveau de bénédiction avance d’1 point de lassitude les niveaux à partir du sien : le 1er les niveaux 2 à 6, le 2e les niveaux 2 à 6 encore, le 3e les niveaux 3 à 6, etc.', max: 5, cost: l => [6, 9, 13, 18, 24][l]! },
+  { id: 'interet', currency: 'essence', name: 'Intérêt', desc: 'Tes gains d’or augmentent de 33 % par niveau (+100 % au niveau 3).', max: 3, cost: l => [8, 12, 16][l]!,
+    unlock: { key: 'interet', text: 'Se débloque au marchand (contre des Offrandes)' } },
+  { id: 'coffre', currency: 'essence', name: 'Coffre plein', desc: 'Tu commences la run avec 50 or de plus par niveau.', max: 4, cost: l => 5 + 3 * l,
+    unlock: { key: 'coffre', text: 'Se débloque au marchand (contre des Offrandes)' } },
   { id: 'armee_elue', currency: 'xp', name: 'Armée élue', desc: 'Les régiments du deck de départ gagnent +10 % à leurs 5 stats par niveau.', max: 5, cost: l => 5 + 3 * l },
   { id: 'genie', currency: 'xp', name: 'Génie du champ de bataille', desc: 'Niveau 1 : les Tactiques à 2+ coûtent 1 de moins. Niveau 2 : celles à 1 aussi. Niveau 3 : celles à 3+ encore 1 de moins.', max: 3, cost: l => [6, 10, 14][l]! },
   { id: 'generalissime', currency: 'xp', name: 'Généralissime', desc: 'Les bonus de tes Leaders augmentent de 20 % par niveau.', max: 5, cost: l => 5 + 3 * l },

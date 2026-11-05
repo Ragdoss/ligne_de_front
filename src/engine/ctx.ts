@@ -636,7 +636,7 @@ export class Ctx {
     for (let i = 1; i < thr.length; i++) if (pl.points >= thr[i]!) lvl = i + 1;
     const wasBelow4 = pl.level < 4;
     if (lvl > pl.level) {
-      pl.level = Math.min(5, lvl);
+      pl.level = Math.min(thr.length, lvl); // 5 niveaux, 6 avec Mobilisation finale (roguelite)
       this.emit({ type: 'levelUp', player: p, level: pl.level });
     }
     if (wasBelow4 && pl.level >= 4 && pl.reserve.length) {

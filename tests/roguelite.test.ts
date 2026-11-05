@@ -6,7 +6,7 @@ import { attack } from '../src/engine/combat';
 import { CARDS } from '../src/data/cards';
 import { registerTitanCards } from '../src/data/titans';
 import {
-  buyUpgrade, nextDesignated, miniBossFor, closeRun, xpWon, defeatAt, newMeta as freshMeta, afterFight, chooseOption, fight, improve, keptLassitude, newMeta, newRun, nextNode, optionsFor, variantDef, variantId, type RunState,
+  buyUpgrade, marketOffers, nextDesignated, miniBossFor, closeRun, xpWon, defeatAt, newMeta as freshMeta, afterFight, chooseOption, fight, improve, keptLassitude, newMeta, newRun, nextNode, optionsFor, variantDef, variantId, type RunState,
 } from '../src/roguelite/run';
 import { act, blankGame, give, place } from './helpers';
 
@@ -48,9 +48,11 @@ describe('Roguelite : structure d’un acte', () => {
 
 describe('Roguelite : lassitude gardée', () => {
   it('exemples du document', () => {
-    expect(keptLassitude(6, 14)).toBe(7);
-    expect(keptLassitude(16, 24)).toBe(16);
-    expect(keptLassitude(8, 20, 15)).toBe(8);
+    // 05/11/2026 : on garde 75 % (au lieu de 50 %).
+    expect(keptLassitude(6, 14)).toBe(11);
+    expect(keptLassitude(16, 24)).toBe(18);
+    expect(keptLassitude(8, 20, 15)).toBe(12);
+    expect(keptLassitude(8, 20, 50)).toBe(8);
   });
   it('le combat commence avec la lassitude gardée et le niveau qui va avec', () => {
     const run: RunState = { ...newRun('t4'), lassitude: 10 };
@@ -334,5 +336,30 @@ describe('Roguelite : champion désigné', () => {
     expect(nextDesignated(both, newRun('d2', both, 'augustus'))).toBe('eldrin');
     expect(nextDesignated(both, newRun('d3', both, 'eldrin'))).toBe('augustus');
     expect(closeRun(both, { ...newRun('d4', both, 'eldrin'), over: { won: true, text: '' } }).designated).toBe('augustus');
+  });
+});
+
+describe('Roguelite : bénédictions du 05/11', () => {
+  it('Mobilisation finale : 6e niveau à 50, seuils avancés', () => {
+    const run = { ...newRun('b1'), upg: { mobilisation_finale: 2 } };
+    const g = createGame(fight(run, { kind: 'combat', reward: 'or', deck: 'd1' }, 1).setup);
+    expect(g.config.levelThresholds.A).toEqual([0, 2, 7, 14, 23, 48]);
+  });
+  it('Coffre plein et Intérêt', () => {
+    const m = { ...freshMeta(), upg: { coffre: 2, interet: 3 } };
+    const run = { ...newRun('b2', m), current: { kind: 'combat', reward: 'or', deck: 'd1' } as const };
+    expect(run.gold).toBe(120);
+    const g = createGame(fight(run, run.current, 1).setup);
+    g.over = { winner: 'A', reason: 'lassitude' };
+    expect(afterFight(run, g).gold).toBe(120 + 70);
+  });
+  it('Incorruptible et Parangon : à débloquer ; Intérêt et Coffre plein en vente au marchand contre des Offrandes', () => {
+    const m = { ...freshMeta(), essence: 99 };
+    expect(buyUpgrade(m, 'incorruptible')).toBe(m);
+    expect(buyUpgrade(m, 'parangon')).toBe(m);
+    let seen = 0;
+    for (let k = 0; k < 40; k++) seen += marketOffers({ ...newRun(`mk${k}`), node: 6 }, freshMeta(), 300).filter(o => o.kind === 'benediction').length;
+    expect(seen).toBeGreaterThan(0);
+    expect(marketOffers(newRun('mk'), { ...freshMeta(), unlocks: ['interet', 'coffre'] }, 300).some(o => o.kind === 'benediction')).toBe(false);
   });
 });
