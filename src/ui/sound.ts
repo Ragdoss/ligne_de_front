@@ -39,6 +39,16 @@ if (typeof window !== 'undefined') {
   window.addEventListener('keydown', unlock);
   // Clic sur un bouton de l'interface (son « clic », s'il existe).
   window.addEventListener('click', e => { if ((e.target as HTMLElement | null)?.closest?.('button:not(:disabled)')) playSound('clic'); }, true);
+  // Survol d'une zone cliquable à la souris (jamais au toucher) : un petit clac discret, une seule fois par élément.
+  const HOVERABLE = 'button:not(:disabled), [role="button"]:not([aria-disabled="true"]), a[href], select:not(:disabled), summary';
+  let hovered: Element | null = null;
+  window.addEventListener('pointerover', e => {
+    if (e.pointerType !== 'mouse') return;
+    const el = (e.target as HTMLElement | null)?.closest?.(HOVERABLE) ?? null;
+    if (el === hovered) return;
+    hovered = el;
+    if (el) playSound('survol', 0.45);
+  }, true);
 }
 
 // ---------- Effets sonores ----------

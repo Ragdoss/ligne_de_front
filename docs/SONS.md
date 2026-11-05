@@ -26,6 +26,7 @@ Pour chaque événement, le jeu essaie les noms dans l'ordre et joue le premier 
 | Fichier | Quand |
 |---|---|
 | `clic` | clic sur un bouton de l'interface |
+| `survol` | la souris passe sur une zone cliquable (bouton, carte…) : un petit clac discret, joué à bas volume, jamais au toucher |
 | `test` | relâcher le réglage de volume des effets dans les Options (sinon `clic`) |
 | `deploiement` | un régiment est posé (carte jouée, ou jeton / régiment créé par un effet) |
 | `tactique` | une Tactique est jouée |
