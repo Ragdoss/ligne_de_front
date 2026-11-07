@@ -69,9 +69,9 @@ export type NodeOption =
   | { kind: 'miniboss'; deck: string; boss?: MiniBossId }
   | { kind: 'event'; id: EventId }
   | { kind: 'marche' }
-  | { kind: 'boss'; deck: string };
+  | { kind: 'boss'; deck: string; titan?: 'glissement' | 'fracture' };
 /** Mini-boss de l'acte 1 : l'Essence de la réalité ou les Fragments de réalité (le même pendant tout l'acte). */
-export type MiniBossId = 'essence' | 'fragments' | 'fracture';
+export type MiniBossId = 'essence' | 'fragments' | 'fracture' | 'convergence';
 export type EventId = 'camp' | 'entrainement';
 export type CardPurpose = 'retirer' | 'ameliorer' | 'humain' | 'elfe' | 'garde';
 /** Étapes à résoudre avant de choisir le nœud suivant. */
@@ -221,6 +221,8 @@ const EVENTS: EventId[] = ['camp', 'entrainement'];
 /** Le mini-boss de l'acte : tiré une fois pour l'acte (même mini-boss, même deck à chaque proposition). */
 export function miniBossFor(run: RunState): NodeOption {
   const r = rng(`${run.seed}|${run.act}|miniboss`);
+  // Acte 2 : la Convergence (les trois mini-boss de l'acte 1 à la fois) ; deux autres viendront.
+  if (run.act >= 2) return { kind: 'miniboss', boss: 'convergence', deck: `a2:${pickOne(r, ACT2_DECKS).key}` };
   const boss = pickOne(r, ['essence', 'fragments', 'fracture'] as const);
   return { kind: 'miniboss', boss, deck: pickOne(r, MINIBOSS_DECKS) };
 }
@@ -229,7 +231,7 @@ export function optionsFor(run: RunState): NodeOption[] {
   const n = run.node + 1;
   const r = rng(`${run.seed}|${run.act}|${n}|options`);
   const combat = (): NodeOption => ({ kind: 'combat', reward: pickOne(r, REWARDS), deck: run.act >= 2 && ACT2_DECKS.length ? `a2:${pickOne(r, ACT2_DECKS).key}` : pickOne(r, ACT1_DECKS) });
-  if (n > NODES_PER_ACT) return [{ kind: 'boss', deck: pickOne(r, BOSS_DECKS) }];
+  if (n > NODES_PER_ACT) return [run.act >= 2 ? { kind: 'boss', titan: 'fracture', deck: `a2:${pickOne(r, ACT2_DECKS).key}` } : { kind: 'boss', titan: 'glissement', deck: pickOne(r, BOSS_DECKS) }];
   const out: NodeOption[] = [];
   // Mini-boss : proposé à partir du 4e nœud tant qu'il n'est pas fait ; la 3e fois, il est la seule option.
   if (!run.miniBossDone && n >= 4) {
@@ -306,12 +308,23 @@ export function fight(run: RunState, o: NodeOption, seed: string | number): { sc
     sc = { ...base, title: `Acte ${run.act} — Mini-boss : la Fracture de la réalité`, fracture: true,
       deckRules: { min: 0, text: 'Un de tes tours sur deux est fracturé (le premier, le troisième…) : chaque régiment que tu y déploies perd définitivement 10 % de ses stats, mais l’adversaire gagne 1 lassitude. Les autres tours sont stables.' },
       intro: [{ who: '', text: 'La réalité se déchire puis se recoud, au rythme d’un souffle immense. Chaque fois qu’elle se fend, ce qui passe à travers en sort diminué.' }] };
+  } else if (kind === 'miniboss' && (o as { boss?: MiniBossId }).boss === 'convergence') {
+    sc = { ...base, title: `Acte ${run.act} — Mini-boss : la Convergence`, fracture: true,
+      deckRules: { min: 0, text: 'Les trois épreuves de l’acte 1 à la fois. Ton Essence de la réalité (arrière) use tes régiments quand elle est attaquée ; des Fragments de réalité apparaissent chez l’adversaire (2 au plus) ; un de tes tours sur deux est fracturé. L’adversaire commence.' },
+      intro: [{ who: '', text: 'Tout ce que les Titans ont déjà tenté se produit en même temps : la réalité se fend, s’effrite et se dérobe sous vos pas.' }],
+      A: { ...base.A, start: { arriere: { '1': 'essence_realite' } } } };
   } else if (kind === 'miniboss') {
     sc = { ...base, title: `Acte ${run.act} — Mini-boss : l’Essence de la réalité`,
       deckRules: { min: 0, text: 'Ton Essence de la réalité (arrière) use définitivement tes régiments chaque fois qu’elle est attaquée. L’adversaire commence.' },
       intro: [{ who: '', text: 'Un Titan est proche : vous sentez l’essence même de la réalité en train d’être modifiée.' }],
       A: { ...base.A, start: { arriere: { '1': 'essence_realite' } } },
       B: { ...base.B, start: { avant: { '1': 'mercenaire_stagiaire', '2': 'mercenaire_stagiaire' } } } };
+  } else if (run.act >= 2) {
+    sc = { ...base, title: `Acte ${run.act} — Boss : le Titan de la Fracture`,
+      deckRules: { min: 0, text: 'Détruis le Titan de la Fracture (arrière 2). À sa chute, le terrain se scinde en deux terrains de 3 avant / 2 arrière qui ne communiquent plus (ton régiment en arrière 2 est détruit), et deux Titans apparaissent, un sur chaque terrain. Détruis-les tous les deux pour gagner.' },
+      intro: [{ who: '', text: 'Une ligne de lumière traverse le champ de bataille. Le Titan qui la tient attend que vous la franchissiez.' }],
+      B: { ...base.B, start: { arriere: { '1': 'titan_fracture' } } },
+      emptyDeckDefeat: { B: false }, defeatLassitude: { A: lim, B: NEVER }, noRegimentDefeatFromTurn: { B: NEVER } };
   } else {
     sc = { ...base, title: `Acte ${run.act} — Boss : le Titan du Glissement`, layout: { avant: 6, arriere: 5 },
       deckRules: { min: 0, text: 'Détruis le Titan du Glissement. Au début de chacun de ses tours, tes régiments glissent d’une case vers la droite ; ceux qui sortent sont détruits. « Lutter contre le mouvement » t’en protège pour un tour.' },
@@ -319,6 +332,7 @@ export function fight(run: RunState, o: NodeOption, seed: string | number): { sc
       B: { ...base.B, start: { arriere: { '0': 'titan_glissement' } } },
       mustSurvive: { B: 'titan_glissement' }, emptyDeckDefeat: { B: false }, defeatLassitude: { A: lim, B: NEVER } };
   }
+  const mb: MiniBossId = (o as { boss?: MiniBossId }).boss ?? 'essence';
   const mf = run.upg?.mobilisation_finale ?? 0;
   if (mf) sc.levelThresholds = { A: [0, 4, 9, 16, 25, 50].map((t, i) => (i === 0 ? 0 : t - Math.min(mf, i + 1))) };
   const setup = scenarioGameSetup(sc, deckIds(run), seed, 0, NO_EASE);
@@ -331,11 +345,12 @@ export function fight(run: RunState, o: NodeOption, seed: string | number): { sc
     ...(has('etat_major') ? { startDraw: { A: 1 } } : {}), ...(has('sceau') ? { leaderSeal: { A: true } } : {}),
     ...(has('fleche') ? { huntArrow: { A: true } } : {}), ...(has('chasseur') ? { preyKillEnd: { A: 10 } } : {}),
     ...(run.upg?.inepuisable ? { tacticDrawEvery: { A: run.upg.inepuisable >= 2 ? 2 : 3 } } : {}),
-    ...(kind === 'boss' ? { glissement: { victim: 'A' as const, tactic: 'lutter_mouvement' } } : {}),
-    ...(kind === 'miniboss' && (o as { boss?: MiniBossId }).boss === 'fragments' ? { fragments: { pid: 'B' as const, cardId: 'fragment_realite', max: 2 } } : {}),
-    ...(kind === 'miniboss' && (o as { boss?: MiniBossId }).boss === 'fracture' ? { fracture: { victim: 'A' as const } } : {}) };
+    ...(kind === 'boss' && run.act < 2 ? { glissement: { victim: 'A' as const, tactic: 'lutter_mouvement' } } : {}),
+    ...(kind === 'boss' && run.act >= 2 ? { fractureBoss: { pid: 'B' as const, titan: 'titan_fracture', shards: ['titan_eclat_vif', 'titan_eclat_massif'] } } : {}),
+    ...(kind === 'miniboss' && ['fragments', 'convergence'].includes(mb) ? { fragments: { pid: 'B' as const, cardId: 'fragment_realite', max: 2 } } : {}),
+    ...(kind === 'miniboss' && ['fracture', 'convergence'].includes(mb) ? { fracture: { victim: 'A' as const } } : {}) };
   // Qui commence : au hasard (reproductible), sauf règle du scénario : l'adversaire au mini-boss, le joueur contre le boss.
-  setup.first = kind === 'miniboss' && ((o as { boss?: MiniBossId }).boss ?? 'essence') === 'essence' ? 'B' : kind === 'boss' ? 'A' : (rng(`${run.seed}|${run.act}|${run.node}|first|${seed}`)() < 0.5 ? 'A' : 'B');
+  setup.first = kind === 'miniboss' && ['essence', 'convergence'].includes(mb) ? 'B' : kind === 'boss' ? 'A' : (rng(`${run.seed}|${run.act}|${run.node}|first|${seed}`)() < 0.5 ? 'A' : 'B');
   return { sc, setup };
 }
 
@@ -374,9 +389,17 @@ export function afterFight(run: RunState, g: GameState): RunState {
   const steps: Step[] = [];
   if (o.kind === 'boss') {
     next.xp += 10; next.essence += 5;
-    next.over = { won: true, text: 'Le Titan du Glissement s’effondre. L’acte 1 est gagné : c’est la fin du prototype.' };
     lines.push('+10 Expérience, +5 Essence divine.');
-    next.steps = [{ kind: 'resume', title: 'Le Titan est vaincu !', lines }];
+    if (next.act >= 2) {
+      next.over = { won: true, text: 'Les Titans de la Fracture sont tombés. L’acte 2 est gagné : c’est la fin du prototype.' };
+      next.steps = [{ kind: 'resume', title: 'Les Titans sont vaincus !', lines }];
+      return next;
+    }
+    // Acte suivant : la run continue avec la même lassitude.
+    next.act++; next.node = 0; next.miniBossDone = false; next.miniBossOffers = 0; next.eventThisAct = false; next.current = null;
+    next.options = optionsFor(next);
+    lines.push(`L’acte ${next.act} commence : tu gardes ta lassitude (${next.lassitude}), et tu perdras désormais à ${defeatAt(next)}.`);
+    next.steps = [{ kind: 'resume', title: 'Le Titan du Glissement s’effondre !', lines }, { kind: 'volontaires', round: 0 }, { kind: 'volontaires', round: 1 }];
     return next;
   }
   if (o.kind === 'combat') {

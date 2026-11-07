@@ -127,8 +127,11 @@ export function Board({ game, player, bottom, isTarget, isFirstPicked, onSlot, h
       </div>
     );
   };
-  const front = <div className="row front">{b.avant.map((u, i) => slot('avant', i, u))}</div>;
-  const back = <div className="row back">{b.arriere.map((u, i) => slot('arriere', i, u))}</div>;
+  // Terrain scindé (Titan de la Fracture) : un mur sépare les deux terrains de 3 avant / 2 arrière.
+  const split = !!game.config.split;
+  const withWall = (zone: 'avant' | 'arriere', row: (Unit | null)[], at: number) => row.flatMap((u, i) => (split && i === at ? [<div key={`wall-${zone}`} className={`wall ${zone}`} aria-hidden="true" />, slot(zone, i, u)] : [slot(zone, i, u)]));
+  const front = <div className="row front">{withWall('avant', b.avant, 3)}</div>;
+  const back = <div className="row back">{withWall('arriere', b.arriere, 2)}</div>;
   return (
     <div className={`board ${bottom ? 'bottom' : 'top'}`}>
       {left}

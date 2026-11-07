@@ -854,3 +854,7 @@ button.rl-champ-card { background: none; color: inherit; cursor: pointer; }
 .fl-weather.tempete { background: #9a6a2f; color: #fff3df; }
 .fl-weather.fracture { background: #6b2fa0; color: #fff; }
 .fl-weather.stable { background: #2f7a3a; color: #fff; }
+/* Terrain scindé (roguelite, Titan de la Fracture) : mur entre les deux terrains. */
+.row .wall.avant { flex: 0 0 18px; align-self: stretch; background: repeating-linear-gradient(180deg, #6b2fa0 0 6px, transparent 6px 10px); border-radius: 4px; opacity: .8; }
+.row .wall.arriere { flex: 0 0 calc(var(--slot-w) + 18px + 6px); align-self: stretch; background: linear-gradient(90deg, transparent calc(50% - 9px), #6b2fa0aa calc(50% - 9px), #6b2fa0aa calc(50% + 9px), transparent calc(50% + 9px)); }
+@media (max-width: 560px) { .row .wall.arriere { flex-basis: calc(var(--slot-w) + 18px + 4px); } }

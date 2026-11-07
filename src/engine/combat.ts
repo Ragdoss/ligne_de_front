@@ -21,7 +21,9 @@ function lowestMoral(list: (Unit | null | undefined)[]): Unit | null {
 export function pickTarget(ctx: Ctx, a: Unit, p: PlayerId, zone: Zone, idx: number): Unit | null {
   const opp = ctx.player(opponentOf(p)).board;
   const distance = ctx.hasDistance(a);
-  const all = [...opp.avant, ...opp.arriere];
+  // Terrain scindé (Titan de la Fracture) : on ne frappe que sur son propre terrain.
+  const here = (z: 'avant' | 'arriere', i: number) => ctx.sameSeg({ zone, idx }, { zone: z, idx: i });
+  const all = [...opp.avant.map((u, i) => (here('avant', i) ? u : null)), ...opp.arriere.map((u, i) => (here('arriere', i) ? u : null))];
   if (distance) {
     // Marque du chasseur : les régiments à Distance de ce joueur attaquent le régiment marqué.
     const marked = all.find(u => u && u.markedBy === p);
@@ -42,7 +44,7 @@ export function pickTarget(ctx: Ctx, a: Unit, p: PlayerId, zone: Zone, idx: numb
     const exposed = all.find(u => u && u.exposedTo === p); // Visez les faibles (rangée arrière, ou la Proie)
     if (exposed) return exposed;
     if (card(a.cardId).attacksPreyInFront && !a.brokenMorale) { // Cavalier Elfe : charge la Proie si elle est en première ligne
-      const prey = opp.avant.find(u => u && u.prey === p);
+      const prey = opp.avant.find((u, i) => u && u.prey === p && here('avant', i));
       if (prey) return prey;
     }
     return opp.avant[idx] ?? lowestMoral(ctx.adjBack(idx).map(k => opp.arriere[k]));

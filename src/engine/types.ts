@@ -309,6 +309,8 @@ export interface PendingChoice {
 /** Réglages de partie (valeurs par défaut = règles standard ; les scénarios les modifient). */
 export interface GameConfig {
   layout: { avant: number; arriere: number };
+  /** Roguelite, Titan de la Fracture : terrain coupé en deux terrains de 3 avant / 2 arrière qui ne communiquent pas. */
+  split?: boolean;
   levelThresholds: Record<PlayerId, number[]>;
   defeatLassitude: Record<PlayerId, number>;
   moralCheck: boolean;
@@ -382,6 +384,8 @@ export interface ScenarioRules {
   /** Roguelite, mini-boss de la Fracture : un tour sur deux de `victim` (ses tours impairs), chaque régiment qu'il déploie perd
    *  définitivement 10 % de ses stats, et son adversaire gagne 1 lassitude. */
   fracture?: { victim: PlayerId };
+  /** Roguelite, boss de l'acte 2 : `titan` détruit → le terrain se scinde et `shards` apparaissent ; victoire quand ils sont tous détruits. */
+  fractureBoss?: { pid: PlayerId; titan: string; shards: string[] };
 }
 export interface ScenarioSetup extends ScenarioRules {
   start?: Partial<Record<PlayerId, { avant?: Record<string, string>; arriere?: Record<string, string>; isole?: string }>>;
@@ -459,7 +463,7 @@ export type GameEvent =
   | { type: 'returnedToHand'; player: PlayerId; cardId: string }
   | { type: 'moved'; uid: number; cardId: string; from: SlotRef; to: SlotRef }
   | { type: 'leaderDestroyed'; uid: number; cardId: string; leaderId: string }
-  | { type: 'left'; player: PlayerId; uid: number; cardId: string; reason: 'lifespan' }
+  | { type: 'left'; player: PlayerId; uid: number; cardId: string; reason: 'lifespan' | 'titan' }
   | { type: 'effect'; key: string; player: PlayerId; cardId: string; data?: Record<string, unknown> }
   | { type: 'choice'; player: PlayerId; kind: ChoiceKind }
   | { type: 'discarded'; player: PlayerId; cardId: string; source: string }

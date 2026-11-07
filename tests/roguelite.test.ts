@@ -377,3 +377,48 @@ describe('Roguelite : adversaires de l’acte 2', () => {
     expect(l2).toBeGreaterThanOrEqual(3);
   });
 });
+
+describe('Roguelite : acte 2', () => {
+  it('le Titan du Glissement vaincu ouvre l’acte 2 avec la même lassitude', () => {
+    const run = { ...newRun('ac2'), node: 8, lassitude: 9, current: { kind: 'boss', titan: 'glissement', deck: 'e2' } as const };
+    const g = createGame(fight(run, run.current, 1).setup);
+    g.over = { winner: 'A', reason: 'vitalDestroyed' };
+    g.players.A.points = 12;
+    const next = afterFight(run, g);
+    expect(next.over).toBeNull();
+    expect(next.act).toBe(2);
+    expect(next.node).toBe(0);
+    expect(next.lassitude).toBe(9); // max(75 % de 12, 9)
+    expect(next.options.length).toBeGreaterThan(0);
+    expect(miniBossFor({ ...next, node: 3 })).toMatchObject({ kind: 'miniboss', boss: 'convergence' });
+    expect(optionsFor({ ...next, node: 8 })[0]).toMatchObject({ kind: 'boss', titan: 'fracture' });
+  });
+  it('Titan de la Fracture : le terrain se scinde, deux Titans apparaissent, leur chute donne la victoire', () => {
+    const run = { ...newRun('fb'), act: 2, node: 8 };
+    const o = optionsFor(run)[0]!;
+    let s = createGame({ ...fight(run, o, 1).setup, first: 'A' });
+    const ctx = new Ctx(s);
+    const titan = s.players.B.board.arriere[1]!;
+    expect(titan.cardId).toBe('titan_fracture');
+    place(s, 'A', 'arriere', 1, 'archer_imp');
+    place(s, 'A', 'avant', 3, 'soldat_kragz');
+    ctx.destroy(titan, 'end');
+    expect(s.config.split).toBe(true);
+    expect(s.players.A.board.avant).toHaveLength(6);
+    expect(s.players.A.board.arriere).toHaveLength(4);
+    expect(s.players.A.board.arriere.every(u => !u || !u.cardId.startsWith('archer_imp'))).toBe(true); // détruit
+    expect(s.players.A.board.avant[5]?.cardId).toMatch(/^soldat_kragz/); // l'ancienne avant 4 devient la 3e case du terrain de droite
+    const shards = ctx.units('B').filter(u => u.cardId.startsWith('titan_eclat'));
+    expect(shards).toHaveLength(2);
+    expect(ctx.segOf('avant', ctx.slotOf(shards[0]!.uid)!.idx)).not.toBe(ctx.segOf('avant', ctx.slotOf(shards[1]!.uid)!.idx));
+    // Géométrie : pas de voisinage à travers le mur.
+    expect(ctx.adjBack(2)).toEqual([1]);
+    expect(ctx.adjBack(3)).toEqual([2]);
+    expect(ctx.adjFront(1)).toEqual([1, 2]);
+    expect(ctx.adjFront(2)).toEqual([3, 4]);
+    ctx.destroy(shards[0]!, 'end');
+    expect(s.over).toBeNull();
+    ctx.destroy(shards[1]!, 'end');
+    expect(s.over).toEqual({ winner: 'A', reason: 'titans' });
+  });
+});

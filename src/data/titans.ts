@@ -32,6 +32,19 @@ export const TITAN_CARDS: Record<string, CardDef> = {
     id: 'fragment_realite', cardType: 'Regiment', faction: 'neutre', niveau: 2, cout: 0, slotTypes: ['avant', 'arriere'], types: ['Essence'],
     atk: 0, end: 1, arm: 0, ini: 0, mor: 4, keywords: [], fragmentCurse: true,
   },
+  // Boss de l'acte 2 (Nathan, 07/11/2026) : le Titan de la Fracture, puis ses deux éclats.
+  titan_fracture: {
+    id: 'titan_fracture', cardType: 'Regiment', faction: 'neutre', niveau: 5, cout: 0, slotType: 'arriere', types: ['Titan'],
+    atk: 10, end: 60, arm: 10, ini: 30, mor: 10, keywords: [], excludeFromMoralTotal: true,
+  },
+  titan_eclat_vif: {
+    id: 'titan_eclat_vif', cardType: 'Regiment', faction: 'neutre', niveau: 5, cout: 0, slotTypes: ['avant', 'arriere'], types: ['Titan'],
+    atk: 30, end: 60, arm: 10, ini: 60, mor: 10, keywords: [], excludeFromMoralTotal: true,
+  },
+  titan_eclat_massif: {
+    id: 'titan_eclat_massif', cardType: 'Regiment', faction: 'neutre', niveau: 5, cout: 0, slotTypes: ['avant', 'arriere'], types: ['Titan'],
+    atk: 10, end: 120, arm: 20, ini: 30, mor: 20, keywords: [], excludeFromMoralTotal: true,
+  },
   lutter_mouvement: { id: 'lutter_mouvement', cardType: 'Tactique', faction: 'neutre', niveau: 1, cout: 0, targetRule: 'none', effect: 'holdGround' },
 } as unknown as Record<string, CardDef>;
 
@@ -42,6 +55,9 @@ export const TITAN_TEXT_FR: Record<string, { name: string; desc: string }> = {
   essence_realite: { name: 'Essence de la réalité', desc: 'Chaque fois qu’elle est attaquée, des régiments de son camp au hasard (autant que le niveau de l’attaquant) perdent définitivement 1 ATK, 1 INI et 1 ARM. Elle ne compte pas dans le Moral total.' },
   titan_glissement: { name: 'Titan du Glissement', desc: 'Au début de chaque tour du Titan, tes régiments glissent d’une case vers la droite ; ceux qui sortent du terrain sont détruits. Il ne compte pas dans le Moral total.' },
   fragment_realite: { name: 'Fragment de réalité', desc: 'Le régiment qui le détruit perd définitivement 1 ATK, 1 ARM et 1 INI ; à la 3e fois pour ce régiment, 1 Moral en plus.' },
+  titan_fracture: { name: 'Titan de la Fracture', desc: 'Quand il est détruit, le terrain se scinde en deux terrains de 3 avant / 2 arrière qui ne communiquent plus, et deux nouveaux Titans apparaissent. Il ne compte pas dans le Moral total.' },
+  titan_eclat_vif: { name: 'Éclat vif de la Fracture', desc: 'Un des deux Titans nés de la Fracture. Il ne compte pas dans le Moral total.' },
+  titan_eclat_massif: { name: 'Éclat massif de la Fracture', desc: 'Un des deux Titans nés de la Fracture. Il ne compte pas dans le Moral total.' },
   lutter_mouvement: { name: 'Lutter contre le mouvement', desc: 'Au prochain tour du Titan, tes régiments ne glissent pas. Coûte 1 de plus à chaque fois que tu la joues.' },
 };
 

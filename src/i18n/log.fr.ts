@@ -11,6 +11,7 @@ const REASONS: Record<string, string> = {
   noRegiment: "n'a plus aucun régiment (isolé exclu) en fin de tour",
   emptyDeck: 'doit piocher mais sa pioche est vide',
   vitalDestroyed: 'a perdu son régiment vital',
+  titans: 'a perdu ses Titans',
   convoyArrived: 'n\'a pas pu arrêter le convoi',
   survived: 'n\'a pas réussi à l\'emporter à temps',
 };
@@ -59,10 +60,12 @@ export function formatEvent(e: GameEvent, names: Record<PlayerId, string> = { A:
     case 'returnedToHand': return `${cardName(e.cardId)} retourne dans la main de ${n(e.player)}.`;
     case 'moved': return `${cardName(e.cardId)} est déplacé de ${zoneFr(e.from)} vers ${zoneFr(e.to)}.`;
     case 'leaderDestroyed': return `${cardName(e.leaderId)}, à la tête de ${cardName(e.cardId)}, est éliminé.`;
-    case 'left': return `${cardName(e.cardId)} quitte le plateau (fin de durée de vie).`;
+    case 'left': return e.reason === 'titan' ? `${cardName(e.cardId)} est balayé par l’arrivée d’un Titan.` : `${cardName(e.cardId)} quitte le plateau (fin de durée de vie).`;
     case 'effect': {
       const special: Record<string, string> = {
         convoyHalt: 'Le convoi marque une halte : il n’avance pas ce tour-ci.',
+        boardSplit: 'Le Titan de la Fracture se brise : le champ de bataille se scinde en deux terrains qui ne communiquent plus !',
+        titanShard: `${cardName(e.cardId)} surgit des débris de la Fracture.`,
         convoyArrived: 'Le convoi quitte le terrain : il a traversé le col !',
         halteConvoi: `${n(e.player)} ordonne une halte au convoi et pioche une carte.`,
         choiceEmpty: `${cardName(e.cardId)} : rien à choisir, l’effet est sans conséquence.`,

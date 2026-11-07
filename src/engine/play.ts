@@ -135,6 +135,8 @@ export function validFirstTarget(ctx: Ctx, p: PlayerId, c: CardDef, ref: SlotRef
 
 export function validSecondTarget(ctx: Ctx, c: CardDef, first: SlotRef, ref: SlotRef): boolean {
   if (ref.zone === 'isole') return false;
+  // Terrain scindé : un déplacement ne passe pas d'un terrain à l'autre.
+  if ((c.targetRule === 'ennemi-puis-case-vide' || c.targetRule === 'elfe-allie-puis-case') && !ctx.sameSeg(first, ref)) return false;
   if (c.targetRule === 'ennemi-puis-case-vide') return ref.player === first.player && !ctx.unitAt(ref);
   if (c.targetRule === 'elfe-allie-puis-case') return ref.player === first.player && !(ref.zone === first.zone && ref.idx === first.idx);
   if (c.targetRule === 'allie-avec-leader-puis-allie' || c.targetRule === 'allie-avec-leader-puis-empire') {

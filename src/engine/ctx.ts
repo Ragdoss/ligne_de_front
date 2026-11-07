@@ -124,13 +124,55 @@ export class Ctx {
     return ref ? this.unitAt(ref) : null;
   }
   isAlive(u: Unit): boolean { return this.slotOf(u.uid) !== null; }
+  /** Terrain scindé (Titan de la Fracture) : terrain (0 ou 1) d'une case ; 0 partout sinon. */
+  segOf(zone: 'avant' | 'arriere' | 'isole', idx: number): number {
+    if (!this.s.config.split || zone === 'isole') return 0;
+    return zone === 'avant' ? (idx < 3 ? 0 : 1) : (idx < 2 ? 0 : 1);
+  }
   adjBack(i: number): number[] {
+    if (this.s.config.split) { const s = this.segOf('avant', i), l = i - 3 * s; return [l - 1, l].filter(k => k >= 0 && k < 2).map(k => k + 2 * s); }
     const n = this.s.config.layout.arriere;
     return [i - 1, i].filter(k => k >= 0 && k < n);
   }
   adjFront(k: number): number[] {
+    if (this.s.config.split) { const s = this.segOf('arriere', k), l = k - 2 * s; return [l, l + 1].filter(i => i >= 0 && i < 3).map(i => i + 3 * s); }
     const n = this.s.config.layout.avant;
     return [k, k + 1].filter(i => i >= 0 && i < n);
+  }
+  /** Les deux cases sont-elles sur le même terrain ? */
+  sameSeg(a: { zone: 'avant' | 'arriere' | 'isole'; idx: number }, b: { zone: 'avant' | 'arriere' | 'isole'; idx: number }): boolean {
+    return !this.s.config.split || a.zone === 'isole' || b.zone === 'isole' || this.segOf(a.zone, a.idx) === this.segOf(b.zone, b.idx);
+  }
+  /** Titan de la Fracture détruit : le terrain se scinde en deux terrains de 3 avant / 2 arrière ; la case arrière centrale
+   *  disparaît (le régiment qui l'occupait est détruit), deux nouveaux Titans apparaissent en avant centrale de chaque terrain. */
+  splitBoard(shards: string[], pid: PlayerId): void {
+    if (this.s.config.split) return;
+    for (const q of ['A', 'B'] as PlayerId[]) {
+      const mid = this.player(q).board.arriere[1];
+      if (mid) { this.destroy(mid, 'effect'); if (this.over) return; }
+    }
+    for (const q of ['A', 'B'] as PlayerId[]) {
+      const b = this.player(q).board;
+      const [a0, a1, a2, a3] = b.avant, [r0, , r2] = b.arriere;
+      b.avant = [a0 ?? null, a1 ?? null, null, null, a2 ?? null, a3 ?? null];
+      b.arriere = [r0 ?? null, null, null, r2 ?? null];
+    }
+    this.s.config.layout = { avant: 6, arriere: 4 };
+    this.s.config.split = true;
+    this.emit({ type: 'effect', key: 'boardSplit', player: pid, cardId: '' });
+    const order = this.randomInt(2) ? [shards[1]!, shards[0]!] : [shards[0]!, shards[1]!];
+    order.forEach((id, s) => {
+      const b = this.player(pid).board;
+      const center = 1 + 3 * s;
+      let at: { zone: 'avant' | 'arriere'; idx: number } | null = !b.avant[center] ? { zone: 'avant', idx: center } : null;
+      if (!at) for (const idx of [3 * s, 3 * s + 2]) if (!b.avant[idx]) { at = { zone: 'avant', idx }; break; }
+      if (!at) for (const idx of [2 * s, 2 * s + 1]) if (!b.arriere[idx]) { at = { zone: 'arriere', idx }; break; }
+      if (!at) { const occ = b.avant[center]!; this.setAt(this.slotOf(occ.uid)!, null); this.emit({ type: 'left', player: pid, uid: occ.uid, cardId: occ.cardId, reason: 'titan' }); at = { zone: 'avant', idx: center }; }
+      const u = this.makeUnit(id, pid, true);
+      u.justDeployed = false;
+      b[at.zone][at.idx] = u;
+      this.emit({ type: 'effect', key: 'titanShard', player: pid, cardId: id, data: { ...at } });
+    });
   }
   allSlots(p: PlayerId): SlotRef[] {
     const L = this.s.config.layout;
@@ -145,7 +187,8 @@ export class Ctx {
   neighbors(ref: SlotRef): Unit[] {
     if (ref.zone === 'isole') return [];
     const b = this.player(ref.player).board;
-    const out: (Unit | null | undefined)[] = [b[ref.zone][ref.idx - 1], b[ref.zone][ref.idx + 1]];
+    const side = (i: number) => (this.sameSeg(ref, { zone: ref.zone, idx: i }) ? b[ref.zone as 'avant' | 'arriere'][i] : null);
+    const out: (Unit | null | undefined)[] = [side(ref.idx - 1), side(ref.idx + 1)];
     if (ref.zone === 'avant') for (const k of this.adjBack(ref.idx)) out.push(b.arriere[k]);
     else for (const i of this.adjFront(ref.idx)) out.push(b.avant[i]);
     return out.filter((u): u is Unit => !!u);
@@ -154,7 +197,7 @@ export class Ctx {
   rowNeighbors(ref: SlotRef): Unit[] {
     if (ref.zone === 'isole') return [];
     const row = this.player(ref.player).board[ref.zone];
-    return [row[ref.idx - 1], row[ref.idx + 1]].filter((u): u is Unit => !!u);
+    return [ref.idx - 1, ref.idx + 1].filter(i => this.sameSeg(ref, { zone: ref.zone, idx: i })).map(i => row[i]).filter((u): u is Unit => !!u);
   }
   /** Deux régiments distincts de `p` : l'un du type `a`, l'autre du type `b` (Communion, Alliance). */
   hasPair(p: PlayerId, a: string, b: string): boolean {
@@ -823,6 +866,12 @@ export class Ctx {
     if (u.leader && card(u.leader).recoversDemonOnCarrierDeath) this.queueChoice('recoverDemon', p, u.leader);
     const vital = this.s.config.mustSurvive[p];
     if (vital && vital === u.cardId) this.endGame(opponentOf(p), 'vitalDestroyed');
+    // Titan de la Fracture (roguelite) : sa chute scinde le terrain ; la chute des deux nouveaux Titans donne la victoire.
+    const fb = this.s.scenario?.fractureBoss;
+    if (fb && fb.pid === p && !this.over) {
+      if (u.cardId === fb.titan) this.splitBoard(fb.shards, p);
+      else if (fb.shards.includes(u.cardId) && this.s.config.split && !this.units(p).some(x => fb.shards.includes(x.cardId))) this.endGame(opponentOf(p), 'titans');
+    }
     // Alarme de scénario : la première perte de `pid` donne l'alarme (renforts au début de son prochain tour).
     const sc = this.s.scenario;
     if (sc?.alarm && sc.alarm.pid === p && !sc.alarmRaised && !this.s.over) {
