@@ -14,6 +14,7 @@ import { CAMPAIGN_EASE, scenarioGameSetup } from '../campaign/campaign';
 import { SCENARIOS } from '../campaign/campaigns';
 import { COURONNE_SCENARIOS } from '../campaign/couronne';
 import { ELF_SCENARIOS } from '../campaign/elfes';
+import { ACT2_DECKS } from './act2decks';
 import type { CampaignScenario } from '../campaign/types';
 import { keyFor } from '../profile/store';
 
@@ -227,7 +228,7 @@ export function miniBossFor(run: RunState): NodeOption {
 export function optionsFor(run: RunState): NodeOption[] {
   const n = run.node + 1;
   const r = rng(`${run.seed}|${run.act}|${n}|options`);
-  const combat = (): NodeOption => ({ kind: 'combat', reward: pickOne(r, REWARDS), deck: pickOne(r, ACT1_DECKS) });
+  const combat = (): NodeOption => ({ kind: 'combat', reward: pickOne(r, REWARDS), deck: run.act >= 2 && ACT2_DECKS.length ? `a2:${pickOne(r, ACT2_DECKS).key}` : pickOne(r, ACT1_DECKS) });
   if (n > NODES_PER_ACT) return [{ kind: 'boss', deck: pickOne(r, BOSS_DECKS) }];
   const out: NodeOption[] = [];
   // Mini-boss : proposé à partir du 4e nœud tant qu'il n'est pas fait ; la 3e fois, il est la seule option.
@@ -268,14 +269,18 @@ const NO_EASE = { ...CAMPAIGN_EASE, startResource: 0, lassitudeMul: 1, vitalEnd:
 const TITAN_OF: Partial<Record<Faction, string>> = { demons: 'titan_demon_ronge', elfe: 'titan_archere' };
 
 /** Deck adverse : celui du scénario, avec des cartes touchées par les Titans à la place de deux cartes. */
-function enemyDeck(run: RunState, scId: string): { faction: Faction; deck: string[]; label: string } {
-  const sc = SCENARIOS[scId]!;
+function enemyDeck(run: RunState, scId: string): { faction: Faction; deck: string[]; label: string; act2?: boolean } {
   const r = rng(`${run.seed}|${run.act}|${run.node}|deck`);
-  const deck = sc.B.deckList!.slice();
-  const add = [TITAN_OF[sc.B.faction], 'titan_echo'].filter(Boolean) as string[];
+  // Acte 2 : decks optimisés pour commencer au niveau 2 (un par faction, un par paire de factions).
+  const a2 = scId.startsWith('a2:') ? ACT2_DECKS.find(d => d.key === scId.slice(3)) : undefined;
+  const faction = a2 ? a2.factions[0]! : SCENARIOS[scId]!.B.faction;
+  const deck = a2 ? a2.cards.slice() : SCENARIOS[scId]!.B.deckList!.slice();
+  const add = [...(a2 ? a2.factions : [faction]).map(f => TITAN_OF[f]), 'titan_echo'].filter(Boolean) as string[];
   for (const t of add) deck.splice(Math.floor(r() * deck.length), 1, t);
-  return { faction: sc.B.faction, deck, label: sc.B.label };
+  return { faction, deck, label: a2 ? a2.label : SCENARIOS[scId]!.B.label, act2: !!a2 };
 }
+/** Nom de l'armée adverse d'une option de combat. */
+export const enemyLabel = (deckKey: string) => deckKey.startsWith('a2:') ? ACT2_DECKS.find(d => d.key === deckKey.slice(3))?.label ?? 'une armée' : SCENARIOS[deckKey]?.B.label ?? 'une armée';
 
 /** Le combat d'un nœud, sous la forme d'un scénario (règles affichées dans la bulle) et de la partie du moteur. */
 export function fight(run: RunState, o: NodeOption, seed: string | number): { sc: CampaignScenario; setup: GameSetup } {
@@ -317,6 +322,8 @@ export function fight(run: RunState, o: NodeOption, seed: string | number): { sc
   const mf = run.upg?.mobilisation_finale ?? 0;
   if (mf) sc.levelThresholds = { A: [0, 4, 9, 16, 25, 50].map((t, i) => (i === 0 ? 0 : t - Math.min(mf, i + 1))) };
   const setup = scenarioGameSetup(sc, deckIds(run), seed, 0, NO_EASE);
+  // Acte 2 : l'adversaire commence au niveau 2, avec 3 régiments de niveau 2 en main (au lieu de 3 de niveau 1).
+  if (e.act2) { setup.B = { ...setup.B, startRegimentLevel: 2 }; setup.scenario = { ...setup.scenario!, startLevel: { ...(setup.scenario?.startLevel ?? {}), B: 2 } }; }
   const has = (e: string) => (run.etendards ?? []).includes(e);
   const mob = (run.upg?.mobilisation_initiale ?? 0) + (has('tambour') ? 1 : 0);
   if (has('lame')) setup.config = { ...setup.config, endTurnLassitude: { A: 1, B: 0 } };

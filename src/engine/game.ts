@@ -26,7 +26,8 @@ export function defaultConfig(over: Partial<GameConfig> = {}): GameConfig {
   };
 }
 
-export interface PlayerSetup { faction: Faction; deck: string[] }
+/** `startRegimentLevel` : niveau des 3 régiments garantis dans la main de départ (1 par défaut ; 2 pour les adversaires de l'acte 2 du roguelite). */
+export interface PlayerSetup { faction: Faction; deck: string[]; startRegimentLevel?: number }
 export interface GameSetup {
   seed: string | number;
   A: PlayerSetup;
@@ -48,7 +49,8 @@ function newPlayer(ctx: Ctx, id: PlayerId, setup: PlayerSetup): PlayerState {
     board: { avant: Array(L.avant).fill(null), arriere: Array(L.arriere).fill(null), isole: null },
   };
   // Main de départ : 3 régiments de niveau 1 garantis, puis complétée jusqu'à la taille de départ.
-  const isLvl1Regiment = (c: string) => card(c).cardType === 'Regiment' && card(c).niveau === 1;
+  const startLvl = setup.startRegimentLevel ?? 1;
+  const isLvl1Regiment = (c: string) => card(c).cardType === 'Regiment' && card(c).niveau === startLvl;
   for (let i = 0, got = 0; i < pl.deck.length && got < Math.min(3, ctx.s.config.startingHand);) {
     if (isLvl1Regiment(pl.deck[i]!)) { pl.hand.push({ uid: ctx.uid(), cardId: pl.deck.splice(i, 1)[0]! }); got++; }
     else i++;

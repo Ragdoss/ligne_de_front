@@ -363,3 +363,17 @@ describe('Roguelite : bénédictions du 05/11', () => {
     expect(marketOffers(newRun('mk'), { ...freshMeta(), unlocks: ['interet', 'coffre'] }, 300).some(o => o.kind === 'benediction')).toBe(false);
   });
 });
+
+describe('Roguelite : adversaires de l’acte 2', () => {
+  it('niveau 2 au départ, 3 régiments de niveau 2 en main, défaite à 25', async () => {
+    const { ACT2_DECKS } = await import('../src/roguelite/act2decks');
+    const d = ACT2_DECKS[0]!;
+    const run = { ...newRun('a2'), act: 2 };
+    const { setup } = fight(run, { kind: 'combat', reward: 'or', deck: `a2:${d.key}` }, 3);
+    const g = createGame(setup);
+    expect(g.players.B.level).toBe(2);
+    expect(g.config.defeatLassitude.B).toBe(25);
+    const l2 = g.players.B.hand.filter(h => CARDS[h.cardId]!.cardType === 'Regiment' && CARDS[h.cardId]!.niveau === 2).length;
+    expect(l2).toBeGreaterThanOrEqual(3);
+  });
+});

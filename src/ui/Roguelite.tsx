@@ -3,7 +3,7 @@ import { useState } from 'react';
 import type { GameState } from '../engine/types';
 import {
   addCard, afterFight, applyCards, chooseOption, closeRun, defeatAt, eligible, EVENT_TEXT, eventChoices, fight, isImproved, isTouched, loadMeta, loadRun,
-  marketOffers, xpWon, CHAMPIONS, championOf, shortName, upgradesFor, type ChampionId, newMeta, NODES_PER_ACT, etendardOf, UPGRADES, buyUpgrade, cannotBuy, upgradeLevel, newRun, nextNode, offrandesWon, promotions, registerRun, removeCard, resolveEvent, saveMeta, saveRun, variantId, volunteers,
+  marketOffers, enemyLabel, xpWon, CHAMPIONS, championOf, shortName, upgradesFor, type ChampionId, newMeta, NODES_PER_ACT, etendardOf, UPGRADES, buyUpgrade, cannotBuy, upgradeLevel, newRun, nextNode, offrandesWon, promotions, registerRun, removeCard, resolveEvent, saveMeta, saveRun, variantId, volunteers,
   LASSITUDE_SHOP, type CardPurpose, type NodeOption, type RunMeta, type RunState, type Step,
 } from '../roguelite/run';
 import { formatEvent } from '../i18n/log.fr';
@@ -24,7 +24,7 @@ const PURPOSE_TITLE: Record<CardPurpose, string> = {
 };
 
 function optionText(o: NodeOption): { icon: string; title: string; text: string } {
-  if (o.kind === 'combat') return { icon: '⚔', title: `Combat : ${SCENARIOS[o.deck]?.B.label ?? 'une armée'}`, text: `Récompenses : de l’or, ${REWARD_LABEL[o.reward]} et 2 volontaires.` };
+  if (o.kind === 'combat') return { icon: '⚔', title: `Combat : ${enemyLabel(o.deck)}`, text: `Récompenses : de l’or, ${REWARD_LABEL[o.reward]} et 2 volontaires.` };
   if (o.kind === 'miniboss') return { icon: '✦', title: o.boss === 'fragments' ? 'Mini-boss : les Fragments de réalité' : o.boss === 'fracture' ? 'Mini-boss : la Fracture de la réalité' : 'Mini-boss : l’Essence de la réalité', text: 'Un adversaire plus fort, une règle spéciale. Récompenses : un Étendard, de l’or, de l’Essence divine, des volontaires, une promotion et une amélioration.' };
   if (o.kind === 'event') return { icon: '❖', title: `Événement : ${EVENT_TEXT[o.id].title}`, text: 'Un choix, sans combat.' };
   if (o.kind === 'marche') return { icon: '⚖', title: 'Marchand', text: '5 offres : cartes, retrait, repos, amélioration, parfois un Étendard.' };
