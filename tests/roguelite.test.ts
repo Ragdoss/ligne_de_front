@@ -422,3 +422,15 @@ describe('Roguelite : acte 2', () => {
     expect(s.over).toEqual({ winner: 'A', reason: 'titans' });
   });
 });
+
+describe('Roguelite : Fragments Minions', () => {
+  it('détruire un Fragment ne donne pas de lassitude à l’adversaire', () => {
+    registerTitanCards();
+    const s = blankGame();
+    const ctx = new Ctx(s);
+    const f = place(s, 'B', 'avant', 1, 'fragment_realite');
+    const before = s.players.B.points;
+    ctx.destroy(f, 'end', place(s, 'A', 'avant', 1, 'soldat_kragz'));
+    expect(s.players.B.points).toBe(before);
+  });
+});

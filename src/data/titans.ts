@@ -30,7 +30,7 @@ export const TITAN_CARDS: Record<string, CardDef> = {
   // Second mini-boss de l'acte 1 (Nathan, 04/11/2026).
   fragment_realite: {
     id: 'fragment_realite', cardType: 'Regiment', faction: 'neutre', niveau: 2, cout: 0, slotTypes: ['avant', 'arriere'], types: ['Essence'],
-    atk: 0, end: 1, arm: 0, ini: 0, mor: 4, keywords: [], fragmentCurse: true,
+    atk: 0, end: 1, arm: 0, ini: 0, mor: 4, keywords: ['Minions'], fragmentCurse: true, // Minions (10/11/2026) : sa destruction ne donne pas de lassitude
   },
   // Boss de l'acte 2 (Nathan, 07/11/2026) : le Titan de la Fracture, puis ses deux éclats.
   titan_fracture: {
