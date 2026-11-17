@@ -58,7 +58,7 @@ const PORTRAITS: Record<string, string> = {
   'Cavalier des dunes': nomadesPillard,
 };
 /** Personnages de la campagne 5 sans portrait pour l'instant (Nathan les dessine) : emplacement vide. */
-const NO_PORTRAIT = new Set(['Archidémon des Origines']);
+const NO_PORTRAIT = new Set(['Émissaire du démon des origines']);
 const portraitOf = (who: string) => PORTRAITS[who] ?? soldat;
 
 /** Placement : 1er à gauche, 2e à droite, 3e à droite (en retrait), 4e à gauche (en retrait)… */

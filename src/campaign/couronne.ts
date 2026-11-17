@@ -19,7 +19,7 @@ const SYL = 'Sylvain';
 const LYRA = 'Éclaireuse Lyra';
 const ZAHRA = 'Cheikha Zahra';
 const ALM = 'Al-Mansur';
-const ARCHI = 'Archidémon des Origines';
+const ARCHI = 'Émissaire du démon des origines';
 const FORT = 'Forteresse';
 const ACO = 'Acolyte';
 
