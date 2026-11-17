@@ -25,7 +25,20 @@ export const ACT_LASSITUDE = [16, 25, 50] as const;
 const LASSITUDE_UPG_CAP = [4, 5, 10] as const;
 export const NODES_PER_ACT = 8;
 /** Part de la lassitude de fin de combat gardée (avant Régénération). */
-export const KEEP_SHARE = 0.75; // 05/11/2026 : 75 % (au lieu de 50 %)
+/**
+ * Règle de la lassitude gardée (17/11/2026, essai) :
+ * - 'niveau' (règle d'origine) : la lassitude gardée est le départ de la jauge du combat ; le niveau de départ suit.
+ * - 'seuil' : le joueur commence chaque combat à 0 de lassitude, niveau 1 ; la lassitude gardée (l'épuisement de l'armée)
+ *   abaisse d'autant son seuil de défaite. Aide : +1 ressource au premier tour par tranche de 8 d'épuisement.
+ */
+export let LASSITUDE_RULE: 'niveau' | 'seuil' = 'niveau';
+export const setLassitudeRule = (r: 'niveau' | 'seuil') => { LASSITUDE_RULE = r; };
+export let FATIGUE_AID_STEP = 8;
+/** Seuil de défaite du joueur pour le prochain combat (règle 'seuil' : abaissé par l'épuisement). */
+export const fightDefeatAt = (run: RunState) => (LASSITUDE_RULE === 'seuil' ? Math.max(1, defeatAt(run) - run.lassitude) : defeatAt(run));
+export let KEEP_SHARE = 0.75;
+/** Réglages d'essai (simulation). */
+export const setRuleParams = (p: { aidStep?: number; keep?: number }) => { if (p.aidStep) FATIGUE_AID_STEP = p.aidStep; if (p.keep) KEEP_SHARE = p.keep; }; // 05/11/2026 : 75 % (au lieu de 50 %)
 const NEVER = 999;
 /** Decks adverses de l'acte 1 : les premiers scénarios des campagnes, déjà réglés contre des decks de départ. */
 const ACT1_DECKS = ['d1', 'd2', 'e1', 'e2', 'n1', 'n2', 's1', 'cd4'];
@@ -289,7 +302,7 @@ export function fight(run: RunState, o: NodeOption, seed: string | number): { sc
   registerRun(run);
   const kind = o.kind as 'combat' | 'miniboss' | 'boss';
   const e = enemyDeck(run, (o as { deck: string }).deck);
-  const lim = defeatAt(run), enemyLim = ACT_LASSITUDE[run.act - 1]!; // l'amélioration Lassitude ne vaut que pour le joueur
+  const lim = fightDefeatAt(run), enemyLim = ACT_LASSITUDE[run.act - 1]!; // l'amélioration Lassitude ne vaut que pour le joueur
   const base: CampaignScenario = {
     id: `rl-${kind}`, title: '', deckRules: { min: 0, text: '' }, intro: [], events: [],
     A: { faction: championOf(run.champion).faction, label: `Armée d’${shortName(run.champion)}`, ai: false },
@@ -298,7 +311,7 @@ export function fight(run: RunState, o: NodeOption, seed: string | number): { sc
   };
   let sc: CampaignScenario;
   if (kind === 'combat') {
-    sc = { ...base, title: `Acte ${run.act} — Combat`, deckRules: { min: 0, text: `Bats l’adversaire avant d’atteindre ${lim} de lassitude. Tu commences à ${run.lassitude}.` },
+    sc = { ...base, title: `Acte ${run.act} — Combat`, deckRules: { min: 0, text: LASSITUDE_RULE === 'seuil' ? `Bats l’adversaire avant d’atteindre ${lim} de lassitude (${defeatAt(run)} moins l’épuisement de ton armée, ${run.lassitude}). Tu commences niveau 1.` : `Bats l’adversaire avant d’atteindre ${lim} de lassitude. Tu commences à ${run.lassitude}.` },
       intro: [{ who: '', text: `Une armée trompée par les Titans te barre la route : ${e.label}.` }] };
   } else if (kind === 'miniboss' && (o as { boss?: MiniBossId }).boss === 'fragments') {
     sc = { ...base, title: `Acte ${run.act} — Mini-boss : les Fragments de réalité`,
@@ -339,9 +352,10 @@ export function fight(run: RunState, o: NodeOption, seed: string | number): { sc
   // Acte 2 : l'adversaire commence au niveau 2, avec 3 régiments de niveau 2 en main (au lieu de 3 de niveau 1).
   if (e.act2) { setup.B = { ...setup.B, startRegimentLevel: 2 }; setup.scenario = { ...setup.scenario!, startLevel: { ...(setup.scenario?.startLevel ?? {}), B: 2 } }; }
   const has = (e: string) => (run.etendards ?? []).includes(e);
-  const mob = (run.upg?.mobilisation_initiale ?? 0) + (has('tambour') ? 1 : 0);
+  const seuil = LASSITUDE_RULE === 'seuil';
+  const mob = (run.upg?.mobilisation_initiale ?? 0) + (has('tambour') ? 1 : 0) + (seuil ? Math.floor(run.lassitude / FATIGUE_AID_STEP) : 0);
   if (has('lame')) setup.config = { ...setup.config, endTurnLassitude: { A: 1, B: 0 } };
-  setup.scenario = { ...setup.scenario!, startLassitude: { A: run.lassitude }, ...(mob ? { startResource: { A: mob } } : {}),
+  setup.scenario = { ...setup.scenario!, startLassitude: { A: seuil ? 0 : run.lassitude }, ...(mob ? { startResource: { A: mob } } : {}),
     ...(has('etat_major') ? { startDraw: { A: 1 } } : {}), ...(has('sceau') ? { leaderSeal: { A: true } } : {}),
     ...(has('fleche') ? { huntArrow: { A: true } } : {}), ...(has('chasseur') ? { preyKillEnd: { A: 10 } } : {}),
     ...(run.upg?.inepuisable ? { tacticDrawEvery: { A: run.upg.inepuisable >= 2 ? 2 : 3 } } : {}),
@@ -368,7 +382,8 @@ export function afterFight(run: RunState, g: GameState): RunState {
     rc.curse ??= {};
     for (const [k, v] of Object.entries(mod) as [keyof RunMod, number][]) rc.curse[k] = (rc.curse[k] ?? 0) + v;
   }
-  const end = g.players.A.points;
+  // Lassitude de fin, épuisement compris (règle 'seuil' : la partie a commencé à 0).
+  const end = g.players.A.points + (LASSITUDE_RULE === 'seuil' ? run.lassitude : 0);
   if (g.over?.winner !== 'A' && next.revives > 0) {
     // Incorruptible : on relance le combat avec la moitié de la lassitude maximale de l'acte (moins avec Parangon).
     next.revives--;

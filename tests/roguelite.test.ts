@@ -6,7 +6,7 @@ import { attack } from '../src/engine/combat';
 import { CARDS } from '../src/data/cards';
 import { registerTitanCards } from '../src/data/titans';
 import {
-  buyUpgrade, marketOffers, nextDesignated, miniBossFor, closeRun, xpWon, defeatAt, newMeta as freshMeta, afterFight, chooseOption, fight, improve, keptLassitude, newMeta, newRun, nextNode, optionsFor, variantDef, variantId, type RunState,
+  buyUpgrade, setLassitudeRule, marketOffers, nextDesignated, miniBossFor, closeRun, xpWon, defeatAt, newMeta as freshMeta, afterFight, chooseOption, fight, improve, keptLassitude, newMeta, newRun, nextNode, optionsFor, variantDef, variantId, type RunState,
 } from '../src/roguelite/run';
 import { act, blankGame, give, place } from './helpers';
 
@@ -54,15 +54,30 @@ describe('Roguelite : lassitude gardée', () => {
     expect(keptLassitude(8, 20, 15)).toBe(12);
     expect(keptLassitude(8, 20, 50)).toBe(8);
   });
-  it('le combat commence avec la lassitude gardée et le niveau qui va avec', () => {
+  it('règle « niveau » : le combat commence avec la lassitude gardée et le niveau qui va avec', () => {
+    setLassitudeRule('niveau');
     const run: RunState = { ...newRun('t4'), lassitude: 10 };
-    const { setup } = fight(run, { kind: 'combat', reward: 'or', deck: 'd1' }, 1);
-    const g = createGame(setup);
+    const g = createGame(fight(run, { kind: 'combat', reward: 'or', deck: 'd1' }, 1).setup);
     expect(g.players.A.points).toBe(10);
     expect(g.players.A.level).toBe(3);
     expect(g.config.defeatLassitude.A).toBe(16);
     const up = fight({ ...run, upg: { lassitude: 3 } }, { kind: 'combat', reward: 'or', deck: 'd1' }, 1).setup;
     expect(up.config!.defeatLassitude).toEqual({ A: 19, B: 16 });
+  });
+  it('règle « seuil » : niveau 1, seuil abaissé par l’épuisement, +1 ressource par tranche de 8', () => {
+    setLassitudeRule('seuil');
+    const run: RunState = { ...newRun('t4b'), lassitude: 10 };
+    const plain = createGame(fight({ ...run, lassitude: 0 }, { kind: 'combat', reward: 'or', deck: 'd1' }, 1).setup);
+    const g = createGame(fight(run, { kind: 'combat', reward: 'or', deck: 'd1' }, 1).setup);
+    expect(g.players.A.points).toBe(0);
+    expect(g.players.A.level).toBe(1);
+    expect(g.config.defeatLassitude).toEqual({ A: 6, B: 16 });
+    expect(g.players.A.resource).toBe(plain.players.A.resource + 1);
+    // Après le combat : épuisement = max(départ, 75 % de (épuisement + lassitude du combat)).
+    const cur = { ...run, current: { kind: 'combat', reward: 'or', deck: 'd1' } as const };
+    g.over = { winner: 'A', reason: 'lassitude' }; g.players.A.points = 4;
+    expect(afterFight(cur, g).lassitude).toBe(11);
+    setLassitudeRule('niveau');
   });
 });
 
@@ -383,7 +398,7 @@ describe('Roguelite : acte 2', () => {
     const run = { ...newRun('ac2'), node: 8, lassitude: 9, current: { kind: 'boss', titan: 'glissement', deck: 'e2' } as const };
     const g = createGame(fight(run, run.current, 1).setup);
     g.over = { winner: 'A', reason: 'vitalDestroyed' };
-    g.players.A.points = 12;
+    g.players.A.points = 3; // lassitude du combat (règle « seuil ») : 9 + 3 = 12
     const next = afterFight(run, g);
     expect(next.over).toBeNull();
     expect(next.act).toBe(2);

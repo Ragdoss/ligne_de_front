@@ -3,7 +3,7 @@ import { useState } from 'react';
 import type { GameState } from '../engine/types';
 import {
   addCard, afterFight, applyCards, chooseOption, closeRun, defeatAt, eligible, EVENT_TEXT, eventChoices, fight, isImproved, isTouched, loadMeta, loadRun,
-  marketOffers, enemyLabel, xpWon, CHAMPIONS, championOf, shortName, upgradesFor, type ChampionId, newMeta, NODES_PER_ACT, etendardOf, UPGRADES, buyUpgrade, cannotBuy, upgradeLevel, newRun, nextNode, offrandesWon, promotions, registerRun, removeCard, resolveEvent, saveMeta, saveRun, variantId, volunteers,
+  marketOffers, LASSITUDE_RULE, fightDefeatAt, FATIGUE_AID_STEP, enemyLabel, xpWon, CHAMPIONS, championOf, shortName, upgradesFor, type ChampionId, newMeta, NODES_PER_ACT, etendardOf, UPGRADES, buyUpgrade, cannotBuy, upgradeLevel, newRun, nextNode, offrandesWon, promotions, registerRun, removeCard, resolveEvent, saveMeta, saveRun, variantId, volunteers,
   LASSITUDE_SHOP, type CardPurpose, type NodeOption, type RunMeta, type RunState, type Step,
 } from '../roguelite/run';
 import { formatEvent } from '../i18n/log.fr';
@@ -42,8 +42,9 @@ function ChampionPanel({ run, meta, onDeck }: { run: RunState; meta: RunMeta; on
         <b>{championOf(run.champion).name}</b>
         <span className="muted small">Champion : {FACTION_LABEL[championOf(run.champion).faction]} · Acte {run.act}</span>
         <div className="rl-lass" title="Lassitude gardée / seuil de défaite de l’acte">
-          <span>Lassitude <b>{run.lassitude}</b> / {lim}</span>
+          <span>{LASSITUDE_RULE === 'seuil' ? 'Épuisement de l’armée' : 'Lassitude'} <b>{run.lassitude}</b> / {lim}</span>
           <span className="rl-bar"><span style={{ width: `${Math.min(100, (100 * run.lassitude) / lim)}%` }} /></span>
+          {LASSITUDE_RULE === 'seuil' && <span className="small">Prochain combat : tu commences niveau 1 et tu perds à <b>{fightDefeatAt(run)}</b> de lassitude{run.lassitude >= FATIGUE_AID_STEP ? ` (+${Math.floor(run.lassitude / FATIGUE_AID_STEP)} ressource au départ)` : ''}.</span>}
         </div>
         <div className="rl-purse">
           <span className="pill">Or <b>{run.gold}</b></span>
