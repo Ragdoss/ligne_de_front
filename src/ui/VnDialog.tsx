@@ -10,6 +10,7 @@ import empireArbaletrier from './assets/portraits/empire/4.webp';
 import empireCapitaine from './assets/portraits/empire/capitaine.webp';
 import empireMaximilien from './assets/portraits/empire/maximilien.webp';
 import empireOctavia from './assets/portraits/empire/octavia.webp';
+import nomadesAlMansur from './assets/portraits/nomades/almansur.webp';
 import empireSergent from './assets/portraits/empire/sergent.webp';
 import empireGeneral from './assets/portraits/empire/general.webp';
 import empireLegat from './assets/portraits/empire/legat.webp';
@@ -39,6 +40,7 @@ const PORTRAITS: Record<string, string> = {
   'Capitaine de la garde': empireCapitaine,
   'Maximilien': empireMaximilien,
   'Impératrice Octavia': empireOctavia,
+  'Al-Mansur': nomadesAlMansur,
   'Capacocha': demonsCapacocha,
   'Général impérial': empireGeneral,
   // Royaumes elfiques
@@ -54,7 +56,7 @@ const PORTRAITS: Record<string, string> = {
   'Cavalier des dunes': nomadesPillard,
 };
 /** Personnages de la campagne 5 sans portrait pour l'instant (Nathan les dessine) : emplacement vide. */
-const NO_PORTRAIT = new Set(['Al-Mansur', 'Archidémon des Origines', 'Forteresse']);
+const NO_PORTRAIT = new Set(['Archidémon des Origines', 'Forteresse']);
 const portraitOf = (who: string) => PORTRAITS[who] ?? soldat;
 
 /** Placement : 1er à gauche, 2e à droite, 3e à droite (en retrait), 4e à gauche (en retrait)… */
