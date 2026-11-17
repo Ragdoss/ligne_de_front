@@ -223,7 +223,7 @@ export function RogueliteScreen({ gameOpts, live, onExit }: { gameOpts: GameOpts
         key={gameKey}
         {...gameOpts}
         setup={setup}
-        music={['combat-campagne', 'combat']}
+        music={run.current.kind === 'combat' ? ['combat-campagne', 'combat'] : ['roguelite-boss', 'combat-campagne', 'combat']}
         names={names}
         human={{ A: true, B: false }}
         title={sc.title}

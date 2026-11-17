@@ -175,6 +175,7 @@ const LAYER_INFO: Record<string, LayerInfo> = {
   empire: { natural: [-28.8, -25.8, -22.6, -20.8, -18.0] }, elfes: { natural: [-28.6, -25.1, -22.6, -20.9, -18.1] },
   demons: { natural: [-29.3, -25.2, -23.3, -20.9, -18.0] }, nomades: { natural: [-30.1, -27.4, -24.8, -23.7, -19.1] },
   'scenario-cc8': { first: 3, natural: [-23.3, -20.4, -18.8], target: [-23, -21.5, -19] },
+  'roguelite-boss': { natural: [-24.5, -22.3, -21.0, -20.2, -18.0], target: [-24, -22.5, -21.5, -20.5, -19] },
   puzzle: { natural: [-18.0], target: [-27] },
   menu: { natural: [-18.0], target: [-30] },
 };
