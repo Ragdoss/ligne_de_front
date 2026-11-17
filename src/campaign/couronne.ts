@@ -74,7 +74,7 @@ const LEGION_EGAREE = cards('soldat_kragz*3', 'lancier_emp*3', 'recrue_imp*4', '
 const ALLY_GIFTS: { if: FlagCond; reward: Reward }[] = [
   { if: ELFES, reward: { gifts: cards('lyra', 'archer_bois*2', 'eclaireur_elfe'), lines: { gifts: { who: SYL, text: 'Lyra et mes archers marcheront à tes côtés, Prince. La forêt n’oublie pas qui l’a défendue.' } } } },
   { if: NOMADES, reward: { gifts: cards('al_mansur', 'chamelier*2', 'jeune_nomade'), lines: { gifts: { who: ZAHRA, text: 'Al-Mansur et ses cavaliers sont à toi. Ne nous fais pas regretter d’avoir choisi un roi.' } } } },
-  { if: DEMONS, reward: { gifts: cards('archidemon_origines', 'cultiste*2', 'sorciere_pacte'), lines: { gifts: { who: ARCHI, text: 'Je marcherai avec toi, petit prince. Le Cercle se souvient d’un temps où Morvak rampait à nos pieds.' } } } },
+  { if: DEMONS, reward: { gifts: cards('archidemon_origines', 'cultiste*2', 'sorciere_pacte'), lines: { gifts: { who: ARCHI, text: 'Je marcherai avec toi, petit prince, au nom de mon maître. Le Cercle se souvient d’un temps où Morvak rampait à ses pieds.' } } } },
 ];
 
 export const COURONNE_SCENARIOS: Record<string, CampaignScenario> = {
@@ -178,7 +178,7 @@ export const COURONNE_SCENARIOS: Record<string, CampaignScenario> = {
         ] },
       ...when(ELFES, { who: LYRA, text: 'Alors suis-moi. Les sources de la forêt sont noires depuis des semaines : Morvak y a laissé sa marque.' }),
       ...when(NOMADES, { who: ALM, text: 'Alors en selle. Morvak paie ses mercenaires avec l’or du trésor impérial, et cet or traverse notre désert.' }),
-      ...when(DEMONS, { who: ARCHI, text: 'Un choix courageux, ou désespéré. Les deux me conviennent.' }),
+      ...when(DEMONS, { who: ARCHI, text: 'Un choix courageux, ou désespéré. Mon maître apprécie les deux.' }),
     ],
     A: { faction: 'empire', label: 'Le conseil des frontières', ai: false, start: { avant: { '0': 'eclaireur_elfe', '3': 'jeune_nomade' }, arriere: { '1': 'sorciere_pacte' } } },
     B: { faction: 'demons', label: 'Assassins du culte', deckList: ASSASSINS, ai: true, start: { avant: { '1': 'cultiste', '2': 'chien_infernal' } } },
@@ -338,7 +338,7 @@ export const COURONNE_SCENARIOS: Record<string, CampaignScenario> = {
     ),
     victoryDialog: say(
       'Les chasseurs elfes se replient. Un archer blessé crache au sol en passant.',
-      [ARCHI, 'Tu as hésité à frapper. C’est touchant. Morvak, lui, n’hésitera pas.'],
+      [ARCHI, 'Tu as hésité à frapper. C’est touchant. Morvak, lui, n’hésitera pas. Mon maître te le rappelle.'],
       [ACO, 'Le culte prépare un rituel dans les catacombes. S’il s’achève, le dragon noir s’éveillera.'],
     ),
     A: { faction: 'empire', label: 'L’armée du prince', ai: false },
@@ -375,11 +375,11 @@ export const COURONNE_SCENARIOS: Record<string, CampaignScenario> = {
     deckRules: { min: 25, text: 'Minimum 25 cartes. Détruis le Dragon Infernal (rang avant adverse) pour gagner.' },
     intro: say(
       'Le dragon noir né des œufs volés s’arrache aux fondations de la capitale. Ses écailles fument encore.',
-      [ARCHI, 'Morvak l’a fait naître. Moi, je peux le faire mourir. Mais c’est ton armée qui devra frapper.'],
+      [ARCHI, 'Morvak l’a fait naître. Mon maître peut le faire mourir, mais c’est ton armée qui devra frapper.'],
     ),
     victoryDialog: say(
       'Le dragon s’effondre dans un fracas de pierre et de flammes.',
-      [ARCHI, 'Voilà. La capitale est à ta portée. N’oublie pas qui t’y a conduit.'],
+      [ARCHI, 'Voilà. La capitale est à ta portée. N’oublie pas qui t’y a conduit : mon maître, par ma voix.'],
       [MAX, 'Je n’oublie rien. C’est bien ce qui m’inquiète.'],
     ),
     A: { faction: 'empire', label: 'L’armée du prince', ai: false },
@@ -401,7 +401,7 @@ export const COURONNE_SCENARIOS: Record<string, CampaignScenario> = {
       ),
       ...when(ELFES, { who: SYL, text: 'Mes racines fissureront la pierre. Donne-moi du temps.' }),
       ...when(NOMADES, { who: ALM, text: 'Mes cavaliers frapperont dès qu’une brèche s’ouvrira.' }),
-      ...when(DEMONS, { who: ARCHI, text: 'Ces portes m’ont repoussé il y a mille ans. Pas cette fois.' }),
+      ...when(DEMONS, { who: ARCHI, text: 'Ces portes ont repoussé mon maître il y a mille ans. Pas cette fois.' }),
       ...when({ all: ['varro:sauve'] }, { who: VARRO, text: 'Je connais une poterne. Laissez-moi trois tours.' }),
     ],
     victoryDialog: say(
@@ -442,7 +442,7 @@ export const COURONNE_SCENARIOS: Record<string, CampaignScenario> = {
         { who: OCT, text: 'Je n’ai plus la force de porter cette couronne. Elle est à toi, si tu la veux.' }),
       ...when({ none: ['octavia:remede'] },
         { who: '', text: 'Octavia s’éteint dans les bras de son fils, libérée trop tard. La couronne roule au pied du trône.' }),
-      ...when(DEMONS, { who: ARCHI, text: 'Ramasse-la, petit prince. Le Cercle a tenu parole. Le trône a tenu la sienne.' }),
+      ...when(DEMONS, { who: ARCHI, text: 'Ramasse-la, petit prince. Mon maître a tenu parole. Le trône a tenu la sienne.' }),
       { who: MAX, text: 'La couronne est là, à mes pieds. Tous me regardent.',
         choices: [
           { label: 'Prendre la couronne', set: ['fin:couronne'] },
@@ -574,7 +574,7 @@ export const COURONNE: CampaignDef = {
     cn5: say([ZAHRA, 'Les puits sont nos temples. Morvak le sait.'], [CAP, 'On parle d’un sanctuaire où l’eau guérit l’esprit. Peut-être un remède pour l’Impératrice.']),
     cn6: say([ALM, 'Après la tempête, la capitale. Tes murailles sont bien hautes pour des gens qui ont peur du sable.']),
     cd4: say([ARCHI, 'Tu dors mal, petit prince. C’est le soufre. On s’y fait.'], [CAP, 'Les hommes murmurent, Altesse. Ils n’aiment pas nos nouveaux alliés.']),
-    cd5: say([ARCHI, 'Morvak était mon novice. Le plus doué. Le plus avide.'], [CAP, 'On parle d’un sanctuaire où l’eau guérit l’esprit. Peut-être un remède pour l’Impératrice.']),
+    cd5: say([ARCHI, 'Morvak fut le novice de mon maître. Le plus doué. Le plus avide.'], [CAP, 'On parle d’un sanctuaire où l’eau guérit l’esprit. Peut-être un remède pour l’Impératrice.']),
     cd6: say([ARCHI, 'Le dragon est l’enfant de Morvak. Tuer l’enfant pour atteindre le père : c’est ainsi que se gagnent les guerres.'], [MAX, 'C’est ainsi qu’on les perd aussi.']),
     cc7: [
       ...say([CAP, 'Demain, les portes. Après-demain, peut-être, le trône.']),
