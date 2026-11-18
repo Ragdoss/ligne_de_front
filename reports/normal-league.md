@@ -63,3 +63,56 @@ empire                13      21      42      29      13      42      33      33
 
 premier joueur gagne 52 %
 ```
+
+## Équilibrage 13 (Nomades) : decks Nomades réoptimisés
+
+Les 4 decks Nomades réoptimisés avec les nouvelles valeurs ; les paires sans Nomades sont reprises du tournoi de base (elles ne contiennent aucune carte modifiée).
+
+```
+1080 parties
+empire-demons     67 % (216) V-lassitude 50%, V-noRegiment 17%, D-lassitude 15%, D-noRegiment 10%, D-emptyDeck 8%
+empire-elfe       58 % (216) V-noRegiment 33%, V-lassitude 25%, D-noRegiment 21%, D-emptyDeck 11%, D-lassitude 10%
+elfe-demons       56 % (216) V-lassitude 30%, V-noRegiment 25%, D-lassitude 19%, D-emptyDeck 15%, D-noRegiment 10%, V-emptyDeck 0%
+nomades           55 % (216) V-emptyDeck 45%, D-lassitude 19%, D-noRegiment 16%, D-emptyDeck 11%, V-noRegiment 10%
+elfe              52 % (216) V-lassitude 33%, D-emptyDeck 19%, D-lassitude 18%, V-noRegiment 18%, D-noRegiment 10%, V-emptyDeck 1%
+elfe-nomades      51 % (216) V-emptyDeck 38%, D-noRegiment 21%, D-lassitude 16%, V-noRegiment 12%, D-emptyDeck 12%, V-lassitude 0%
+demons            49 % (216) V-lassitude 30%, D-lassitude 19%, V-noRegiment 19%, D-emptyDeck 19%, D-noRegiment 13%
+demons-nomades    42 % (216) V-emptyDeck 32%, D-lassitude 23%, D-noRegiment 23%, D-emptyDeck 12%, V-noRegiment 7%, V-lassitude 2%
+empire-nomades    38 % (216) V-emptyDeck 26%, D-lassitude 23%, D-noRegiment 20%, D-emptyDeck 19%, V-noRegiment 7%, V-lassitude 5%
+empire            32 % (216) D-lassitude 38%, V-lassitude 25%, D-emptyDeck 18%, D-noRegiment 12%, V-noRegiment 7%, V-emptyDeck 0%
+
+matrice (ligne bat colonne, %)
+                 empire- empire- elfe-de nomades    elfe elfe-no  demons demons- empire-  empire
+empire-demons          —      50      54      54      50      54      75      83      92      88
+empire-elfe           50       —      54      42      50      46      67      83      46      88
+elfe-demons           46      46       —      63      46      63      54      71      54      58
+nomades               46      58      38       —      58      63      54      50      79      50
+elfe                  50      50      54      42       —      50      50      50      54      71
+elfe-nomades          46      54      38      38      50       —      58      46      63      67
+demons                25      33      46      46      50      42       —      58      71      67
+demons-nomades        17      17      29      50      50      54      42       —      67      54
+empire-nomades         8      54      46      21      46      38      29      33       —      67
+empire                13      13      42      50      29      33      33      46      33       —
+
+premier joueur gagne 45 %
+```
+
+Retenus pour le menu : les nouveaux decks Nomades (55 % au lieu de 44 %) et Empire + Nomades (38 % au lieu de 34 %) ; Elfes + Nomades et Démons + Nomades gardent leur deck précédent (56 % et 49 %, contre 51 % et 42 % pour les réoptimisés : reports/normal-*-nomades-eq13.json).
+
+## Deck d’essai Basilics + main adverse (decks/nomades-basilics-main.json), équilibrage 13
+
+```
+240 parties
+empire-demons     88 % (24) V-lassitude 58%, V-noRegiment 29%, D-noRegiment 13%
+empire            83 % (24) V-lassitude 63%, V-noRegiment 21%, D-emptyDeck 8%, D-noRegiment 4%, D-lassitude 4%
+elfe              83 % (24) V-lassitude 54%, V-noRegiment 29%, D-emptyDeck 13%, D-noRegiment 4%
+demons            79 % (24) V-lassitude 54%, V-noRegiment 25%, D-emptyDeck 13%, D-noRegiment 8%
+elfe-demons       79 % (24) V-lassitude 42%, V-noRegiment 38%, D-emptyDeck 21%
+demons-nomades    79 % (24) V-emptyDeck 46%, V-lassitude 17%, V-noRegiment 17%, D-noRegiment 13%, D-emptyDeck 8%
+elfe-nomades      71 % (24) V-emptyDeck 54%, V-lassitude 13%, D-noRegiment 13%, D-lassitude 13%, V-noRegiment 4%, D-emptyDeck 4%
+nomades           67 % (24) V-emptyDeck 50%, V-noRegiment 17%, D-emptyDeck 17%, D-lassitude 13%, D-noRegiment 4%
+empire-elfe       54 % (24) V-noRegiment 46%, D-noRegiment 42%, V-lassitude 8%, D-emptyDeck 4%
+empire-nomades    50 % (24) D-noRegiment 33%, V-emptyDeck 21%, V-lassitude 17%, D-emptyDeck 17%, V-noRegiment 13%
+nomades-basilics  27 % (240) D-lassitude 33%, D-noRegiment 24%, D-emptyDeck 17%, V-noRegiment 13%, V-emptyDeck 10%, V-lassitude 3%
+
+```
