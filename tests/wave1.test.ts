@@ -281,6 +281,14 @@ describe('Vague 1 : cross-faction et neutres', () => {
     new Ctx(s).loseMoral(u, 99);
     expect(u.currentMor).toBe(2);
   });
+  it('Inquisiteur sur un régiment brisé à 1 Moral : il ne descend plus', () => {
+    let s = blankGame(); s.players.A.level = 3; s.players.A.resource = 5;
+    place(s, 'A', 'avant', 0, 'chien_infernal', { currentMor: 1, brokenMorale: true });
+    s = act(s, { type: 'play', handUid: give(s, 'A', 'inquisiteur_dechu'), target: slot('A', 'avant', 0) }).state;
+    const u = s.players.A.board.avant[0]!;
+    expect(new Ctx(s).loseMoral(u, 3)).toBe(0);
+    expect(u.currentMor).toBe(1);
+  });
   it('Dryade corrompue : les soins font aussi baisser la lassitude (reliquat conservé)', () => {
     let s = blankGame(); s.players.A.resource = 5; s.players.A.points = 10;
     place(s, 'A', 'arriere', 0, 'dryade_corrompue');

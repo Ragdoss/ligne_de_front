@@ -578,9 +578,10 @@ export class Ctx {
     const before = u.currentMor;
     let after = Math.max(0, before - amount);
     const floor = card(u.cardId).moralFloorWithLeader;
-    if (u.leader && floor && before >= floor) after = Math.max(floor, after);
+    // « Ne peut pas descendre sous N » : déjà sous N (régiment brisé à 1 Moral…), il ne perd plus rien.
+    if (u.leader && floor) after = Math.max(Math.min(floor, before), after);
     const lf = u.leader ? card(u.leader).leaderMoralFloor as number | undefined : undefined; // Inquisiteur déchu
-    if (lf && before >= lf) after = Math.max(lf, after);
+    if (lf) after = Math.max(Math.min(lf, before), after);
     u.currentMor = after;
     return before - after;
   }
