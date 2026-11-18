@@ -454,7 +454,11 @@ export function GameScreen({ setup, names, human, flip, fast, aiFilter, title, i
         <div className="actions">
           {weather && <span className={`weather ${weather}`}>{WEATHER_LABEL[weather]}</span>}
           {!watch && !remote && (!human.A || !human.B) && <button type="button" onClick={() => setRevealAI(v => !v)}>{revealAI ? 'Cacher' : 'Révéler'} la main de l’ordinateur</button>}
-          <button type="button" onClick={onQuit}>Quitter la partie</button>
+          {/* Partie finie, résultat refermé pour regarder le plateau : on revient au résultat (Continuer, récompenses…)
+              au lieu de quitter sans les appliquer. */}
+          {game.over && overClosed
+            ? <button type="button" className="primary" onClick={() => setOverClosed(false)}>Terminer la partie ▸</button>
+            : <button type="button" onClick={onQuit}>Quitter la partie</button>}
         </div>
       </header>
 
