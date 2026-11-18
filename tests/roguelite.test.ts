@@ -1,7 +1,7 @@
 // Prototype roguelite : structure d'un acte, lassitude gardée, exemplaires abîmés ou améliorés, règles des Titans.
 import { describe, expect, it } from 'vitest';
 import { Ctx } from '../src/engine/ctx';
-import { createGame } from '../src/engine/game';
+import { applyAction, createGame } from '../src/engine/game';
 import { attack } from '../src/engine/combat';
 import { CARDS } from '../src/data/cards';
 import { registerTitanCards } from '../src/data/titans';
@@ -78,6 +78,30 @@ describe('Roguelite : lassitude gardée', () => {
     g.over = { winner: 'A', reason: 'lassitude' }; g.players.A.points = 4;
     expect(afterFight(cur, g).lassitude).toBe(11);
     setLassitudeRule('niveau');
+  });
+});
+
+describe('Roguelite : renfort adverse selon l’avance de niveau', () => {
+  const o = { kind: 'combat', reward: 'or', deck: 'd1' } as const;
+  const helper = (lass: number) => {
+    const g = createGame(fight({ ...newRun('t-ahead'), lassitude: lass }, o, 1).setup);
+    return [...g.players.B.board.avant, ...g.players.B.board.arriere].filter(Boolean).map(u => `${u!.cardId}:${u!.keywords.includes('Minions')}`);
+  };
+  it('aucun renfort sans avance, puis Sentinelle, Mercenaires, Vétérans (Minions)', () => {
+    expect(helper(0)).toEqual([]);
+    expect(helper(4)).toEqual(['sentinelle_route:true']);
+    expect(helper(9)).toEqual(['mercenaires:true']);
+    expect(helper(16)).toEqual(['veterans_louer:true']);
+    expect(helper(30)).toEqual(['veterans_louer:true']);
+  });
+  it('le second joueur ne gagne que 1 ressource à son premier tour', () => {
+    const setup = fight({ ...newRun('t-res'), lassitude: 9 }, o, 1).setup;
+    const g = createGame({ ...setup, first: 'B' });
+    const before = g.players.A.resource;
+    expect(g.players.A.level).toBe(3);
+    const r = applyAction(g, { type: 'endTurn' });
+    if (!r.ok) throw new Error(r.error);
+    expect(r.state.players.A.resource).toBe(before + 1);
   });
 });
 

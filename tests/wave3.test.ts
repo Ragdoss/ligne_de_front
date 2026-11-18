@@ -189,6 +189,7 @@ describe('Vague 3 — Nomades et bi-factions', () => {
     expect(s.players.B.resourcePenalty).toBe(2);
     const lvl = s.players.B.level;
     s.players.B.resource = 0;
+    s.turn = 2; // pas le premier tour du second joueur (il ne gagnerait que 1)
     s = act(s, { type: 'endTurn' }).state;
     expect(s.players.B.resource).toBe(lvl - 2);
   });

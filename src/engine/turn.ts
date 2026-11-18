@@ -63,8 +63,10 @@ export function startTurn(ctx: Ctx, p: PlayerId): void {
   }
 
   // Ressource : niveau + reliquat du tour précédent.
+  // Premier tour du second joueur : il ne gagne que 1, quel que soit son niveau (évite les départs à 6 ressources).
   const leftover = pl.resource;
-  pl.resource = pl.level + leftover;
+  const firstTurnOfSecond = ctx.s.turn === 1 && p !== (ctx.s.first ?? 'A');
+  pl.resource = (firstTurnOfSecond ? 1 : pl.level) + leftover;
   if (pl.resourcePenalty) { // Rançonnement, Bourse de guerre
     const lost = Math.min(pl.resource, pl.resourcePenalty);
     pl.resource -= lost; pl.resourcePenalty = 0;

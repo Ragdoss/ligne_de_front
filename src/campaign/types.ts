@@ -45,7 +45,7 @@ export interface CampaignScenario {
   moralCheckLassitude?: number;
   moralCheckLostResource?: Partial<Record<PlayerId, { base: number; level3: number }>>;
   endTurnLassitude?: Partial<Record<PlayerId, number>>;
-  startOverrides?: Record<string, { mor?: number }>;
+  startOverrides?: Record<string, { mor?: number; minion?: boolean }>;
   convoy?: { cardId: string; pid: PlayerId; firstTurn: number; every: number };
   events: ScenarioEvent[];
   reward?: Reward;

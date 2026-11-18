@@ -18,6 +18,7 @@ export function applyScenarioStart(ctx: Ctx, sc: ScenarioSetup): void {
         u.justDeployed = false;
         const ov = sc.startOverrides?.[cardId];
         if (ov?.mor !== undefined) { u.maxMor = ov.mor; u.currentMor = ov.mor; }
+        if (ov?.minion && !u.keywords.includes('Minions')) u.keywords.push('Minions');
         pl.board[zone][Number(idx)] = u;
       }
     }

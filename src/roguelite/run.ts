@@ -9,7 +9,7 @@ import { registerTitanCards } from '../data/titans';
 import { CARD_TEXT_FR } from '../i18n/cards.fr';
 import { nextRandom, seedFrom } from '../engine/rng';
 import type { CardDef, Faction, GameState, RunMod } from '../engine/types';
-import type { GameSetup } from '../engine/game';
+import { DEFAULT_LEVEL_THRESHOLDS, type GameSetup } from '../engine/game';
 import { CAMPAIGN_EASE, scenarioGameSetup } from '../campaign/campaign';
 import { SCENARIOS } from '../campaign/campaigns';
 import { COURONNE_SCENARIOS } from '../campaign/couronne';
@@ -36,6 +36,10 @@ export const setLassitudeRule = (r: 'niveau' | 'seuil') => { LASSITUDE_RULE = r;
 export let FATIGUE_AID_STEP = 8;
 /** Seuil de défaite du joueur pour le prochain combat (règle 'seuil' : abaissé par l'épuisement). */
 export const fightDefeatAt = (run: RunState) => (LASSITUDE_RULE === 'seuil' ? Math.max(1, defeatAt(run) - run.lassitude) : defeatAt(run));
+/** Renfort de l'adversaire selon les niveaux d'avance du joueur au départ (1, 2, 3 et plus). */
+export const AHEAD_HELP = ['sentinelle_route', 'mercenaires', 'veterans_louer'];
+/** Niveau de départ correspondant à une lassitude. */
+export const startLevelOf = (points: number, thr: number[]) => { let l = 1; for (let i = 1; i < thr.length; i++) if (points >= thr[i]!) l = i + 1; return l; };
 export let KEEP_SHARE = 0.75;
 /** Réglages d'essai (simulation). */
 export const setRuleParams = (p: { aidStep?: number; keep?: number }) => { if (p.aidStep) FATIGUE_AID_STEP = p.aidStep; if (p.keep) KEEP_SHARE = p.keep; }; // 05/11/2026 : 75 % (au lieu de 50 %)
@@ -363,6 +367,21 @@ export function fight(run: RunState, o: NodeOption, seed: string | number): { sc
     ...(kind === 'boss' && run.act >= 2 ? { fractureBoss: { pid: 'B' as const, titan: 'titan_fracture', shards: ['titan_eclat_vif', 'titan_eclat_massif'] } } : {}),
     ...(kind === 'miniboss' && ['fragments', 'convergence'].includes(mb) ? { fragments: { pid: 'B' as const, cardId: 'fragment_realite', max: 2 } } : {}),
     ...(kind === 'miniboss' && ['fracture', 'convergence'].includes(mb) ? { fracture: { victim: 'A' as const } } : {}) };
+  // Niveaux d'avance du joueur (règle « niveau ») : l'adversaire reçoit un renfort neutre (Minions) dès le départ.
+  const ahead = startLevelOf(run.lassitude, sc.levelThresholds?.A ?? DEFAULT_LEVEL_THRESHOLDS) - (e.act2 ? 2 : 1);
+  const help = LASSITUDE_RULE === 'niveau' ? AHEAD_HELP[Math.min(ahead, AHEAD_HELP.length) - 1] : undefined;
+  if (help) {
+    const zone = CARDS[help]!.slotType === 'arriere' ? 'arriere' : 'avant';
+    const start = structuredClone(setup.scenario!.start ?? {});
+    const row = (start.B ??= {})[zone] ??= {};
+    const taken = new Set(Object.keys(row).map(Number));
+    const order = zone === 'avant' ? [2, 1, 3, 0, 4] : [1, 2, 0, 3];
+    const slot = order.find(i => !taken.has(i));
+    if (slot !== undefined) {
+      row[String(slot)] = help;
+      setup.scenario = { ...setup.scenario!, start, startOverrides: { ...(setup.scenario!.startOverrides ?? {}), [help]: { minion: true } } };
+    }
+  }
   // Qui commence : au hasard (reproductible), sauf règle du scénario : l'adversaire au mini-boss, le joueur contre le boss.
   setup.first = kind === 'miniboss' && ['essence', 'convergence'].includes(mb) ? 'B' : kind === 'boss' ? 'A' : (rng(`${run.seed}|${run.act}|${run.node}|first|${seed}`)() < 0.5 ? 'A' : 'B');
   return { sc, setup };
