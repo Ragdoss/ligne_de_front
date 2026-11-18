@@ -11,6 +11,7 @@ import { CAMPAIGNS } from '../campaign/campaigns';
 import type { CampaignDef } from '../campaign/types';
 import { CHAMPION_POOLS, pickChampion, TEST_DECKS } from '../data/champions';
 import { OPTIMIZED_DECKS } from '../data/optimized';
+import { NORMAL_DECKS } from '../data/optimizedNormal';
 import { DEMO_DECKS } from '../data/decks';
 import type { Faction } from '../engine/types';
 import { checkDeck, DEFAULT_OPTIONS, newProfile, profileCode, profileFromCode, resetEverything, saveProfile, sortedDecks, type Options, type Profile } from '../profile/profile';
@@ -79,6 +80,10 @@ export function resolveDeck(profile: Profile, key: string): { cards: string[]; f
     const t = TEST_DECKS[key.slice(5)]!;
     return { cards: t.cards, faction: t.faction, label: t.label };
   }
+  if (key.startsWith('best:')) {
+    const o = NORMAL_DECKS.find(x => x.id === key.slice(5))!;
+    return { cards: o.cards, faction: o.faction, label: o.label };
+  }
   if (key.startsWith('opt:')) {
     const o = OPTIMIZED_DECKS.find(x => x.id === key.slice(4))!;
     return { cards: o.cards, faction: o.faction, label: o.label };
@@ -101,6 +106,7 @@ export function DeckSelect({ profile, value, onChange, label, human }: { profile
         {mine.length > 0 && <optgroup label="Mes decks">{mine.map(d => <option key={d.id} value={`my:${d.id}`}>{d.fav ? '★ ' : ''}{d.name} ({d.cards.length} cartes)</option>)}</optgroup>}
         {demoAllowed && <optgroup label="Decks de démonstration">{PLAYABLE_FACTIONS.map(f => <option key={f} value={`demo:${f}`}>{FACTION_LABEL[f]}</option>)}</optgroup>}
         {demoAllowed && <optgroup label="Meilleurs decks du tournoi (champions)">{PLAYABLE_FACTIONS.filter(f => CHAMPION_POOLS[f]?.length).map(f => <option key={f} value={`champ:${f}`}>Champion {FACTION_LABEL[f]} ({CHAMPION_POOLS[f]!.length} decks, un au hasard)</option>)}</optgroup>}
+        {demoAllowed && NORMAL_DECKS.length > 0 && <optgroup label="Decks les plus puissants (IA forte, 18/11)">{NORMAL_DECKS.map(o => <option key={o.id} value={`best:${o.id}`}>{o.label}</option>)}</optgroup>}
         {demoAllowed && <optgroup label="Decks optimisés (IA forte, 25/10)">{OPTIMIZED_DECKS.map(o => <option key={o.id} value={`opt:${o.id}`}>{o.label}</option>)}</optgroup>}
         {demoAllowed && <optgroup label="Decks de test">{Object.entries(TEST_DECKS).map(([k, t]) => <option key={k} value={`test:${k}`}>{t.label} ({t.cards.length} cartes)</option>)}</optgroup>}
       </select>
