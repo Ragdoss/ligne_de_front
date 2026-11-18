@@ -6,7 +6,9 @@
 // pour tous les decks d'une génération ; les survivants rejouent à chaque génération et leurs résultats s'additionnent.
 // Population de départ : le deck déjà retenu pour la clé, les decks optimisés de la faction (ou un croisement de ceux des deux factions pour un binôme).
 // Usage : npx tsx tools/normal-evolve.ts <clés, ex. empire,elfe+demons> [générations=6] [parties=24]
-import { writeFileSync } from 'node:fs';
+// Variables d'environnement : NE_OPP=normal (adversaires : les 10 decks de src/data/optimizedNormal.ts au lieu des 12 du 25/10),
+// NE_BAN=id,id… (cartes interdites), NE_TAG=x (résultat dans reports/normal-<clé>-x.json), NE_SEED=deck.json (deck de départ en plus).
+import { readFileSync, writeFileSync } from 'node:fs';
 import { chooseActionV3, STRONG_AI } from '../src/ai/heuristic';
 import { CARDS } from '../src/data/cards';
 import { OPTIMIZED_DECKS } from '../src/data/optimized';
@@ -20,6 +22,10 @@ const KEYS = (process.argv[2] ?? 'empire').split(',');
 const GENS = Number(process.argv[3] ?? 6);
 const N = Number(process.argv[4] ?? 24);
 const KEEP = 5, MUT = 6, CROSS = 3, MIN_EACH = 10;
+const BAN = new Set((process.env.NE_BAN ?? '').split(',').filter(Boolean));
+const TAG = process.env.NE_TAG ? `-${process.env.NE_TAG}` : '';
+const OPPS: { faction: Faction; cards: string[]; id?: string }[] = process.env.NE_OPP === 'normal' ? NORMAL_DECKS : OPTIMIZED_DECKS;
+const EXTRA_SEED = process.env.NE_SEED ? (JSON.parse(readFileSync(process.env.NE_SEED, 'utf8')) as { cards: string[] }).cards : null;
 
 let rs = seedFrom(`normal-${KEYS.join('-')}`);
 const rnd = () => { const r = nextRandom(rs); rs = r.state; return r.value; };
@@ -28,7 +34,7 @@ const shuffle = <T,>(xs: T[]) => { const a = xs.slice(); for (let i = a.length -
 
 const factionsOf = (key: string) => key.split('+') as Faction[];
 const of = (id: string, f: Faction) => CARDS[id]!.faction === f || ((CARDS[id]!.factions as string[] | undefined) ?? []).includes(f);
-const inKey = (id: string, fs: Faction[]) => CARDS[id]!.faction === 'neutre' || fs.some(f => of(id, f));
+const inKey = (id: string, fs: Faction[]) => !BAN.has(id) && (CARDS[id]!.faction === 'neutre' || fs.some(f => of(id, f)));
 const low = (id: string) => CARDS[id]!.niveau <= 3;
 const maxOf = (_id: string) => 3; // Unique : un seul en jeu à la fois, mais jusqu'à 3 exemplaires dans le deck
 const count = (d: string[], id: string) => d.filter(x => x === id).length;
@@ -70,7 +76,7 @@ function cross(pool: string[], fs: Faction[], a: string[], b: string[]): string[
 }
 
 /** Une partie, IA forte des deux côtés : true si le deck évalué (joueur `side`) gagne. */
-function play(deck: string[], f: Faction, opp: (typeof OPTIMIZED_DECKS)[number], seed: string, side: 'A' | 'B'): boolean {
+function play(deck: string[], f: Faction, opp: (typeof OPPS)[number], seed: string, side: 'A' | 'B'): boolean {
   const me = { faction: f, deck }, them = { faction: opp.faction, deck: opp.cards };
   let s: GameState = createGame({ seed, first: 'A', A: side === 'A' ? me : them, B: side === 'A' ? them : me });
   for (let k = 0; k < 5000 && !s.over && s.turn <= 80; k++) {
@@ -92,6 +98,8 @@ for (const key of KEYS) {
   // Le deck déjà retenu pour cette clé (src/data/optimizedNormal.ts) fait partie du départ.
   const prev = NORMAL_DECKS.find(d => d.id === key.replace('+', '-'));
   if (prev && valid(prev.cards, fs)) start.push(prev.cards.slice().sort());
+  else if (prev) start.push(cross(pool, fs, prev.cards, prev.cards));
+  if (EXTRA_SEED) start.push(valid(EXTRA_SEED, fs) ? EXTRA_SEED.slice().sort() : cross(pool, fs, EXTRA_SEED, EXTRA_SEED));
   if (fs.length === 1) for (const d of seeds) start.push(valid(d, fs) ? d.slice().sort() : cross(pool, fs, d, d));
   const A = seeds.filter((_, i) => OPTIMIZED_DECKS.filter(o => fs.includes(o.faction))[i]!.faction === fs[0]);
   const B = seeds.filter((_, i) => OPTIMIZED_DECKS.filter(o => fs.includes(o.faction))[i]!.faction === fs[fs.length - 1]);
@@ -110,14 +118,14 @@ for (const key of KEYS) {
     for (const d of pop) {
       const f = mainFaction(d.deck, fs);
       for (let g = 0; g < N; g++) {
-        const opp = OPTIMIZED_DECKS[g % OPTIMIZED_DECKS.length]!;
-        if (play(d.deck, f, opp, `${key}-${gen}-${g}`, Math.floor(g / OPTIMIZED_DECKS.length) % 2 ? 'B' : 'A')) d.wins++;
+        const opp = OPPS[g % OPPS.length]!;
+        if (play(d.deck, f, opp, `${key}-${gen}-${g}`, Math.floor(g / OPPS.length) % 2 ? 'B' : 'A')) d.wins++;
         d.games++;
       }
     }
     pop.sort((a, b) => b.wins / b.games - a.wins / a.games);
     const top = pop.slice(0, 3);
     console.log(`${key} génération ${gen + 1}/${GENS} : meilleur ${Math.round((100 * top[0]!.wins) / top[0]!.games)} % (${top[0]!.games} parties), top 3 ${top.map(x => Math.round((100 * x.wins) / x.games)).join('/')} % — ${Math.round((Date.now() - t0) / 1000)} s`);
-    writeFileSync(`reports/normal-${key.replace('+', '-')}.json`, JSON.stringify({ key, faction: mainFaction(top[0]!.deck, fs), generation: gen + 1, best: top.map(x => ({ deck: x.deck, rate: x.wins / x.games, games: x.games })) }, null, 1) + '\n');
+    writeFileSync(`reports/normal-${key.replace('+', '-')}${TAG}.json`, JSON.stringify({ key, opp: process.env.NE_OPP === 'normal' ? 'normal' : '25/10', ban: [...BAN], faction: mainFaction(top[0]!.deck, fs), generation: gen + 1, best: top.map(x => ({ deck: x.deck, rate: x.wins / x.games, games: x.games })) }, null, 1) + '\n');
   }
 }
