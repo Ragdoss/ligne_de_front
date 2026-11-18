@@ -116,3 +116,31 @@ empire-nomades    50 % (24) D-noRegiment 33%, V-emptyDeck 21%, V-lassitude 17%, 
 nomades-basilics  27 % (240) D-lassitude 33%, D-noRegiment 24%, D-emptyDeck 17%, V-noRegiment 13%, V-emptyDeck 10%, V-lassitude 3%
 
 ```
+
+## Seconde passe (18/11 au soir) : tournoi final, anciens et nouveaux decks côte à côte
+
+Nouvelle passe pour les 6 decks sans Nomades (Uniques jusqu’à 3 exemplaires, adversaires : les decks du mode normal), suffixe -v2 ; deck défausse optimisé depuis celui de Nathan (decks/nomades-defausse-optimise.json). 17 decks, 12 parties par paire.
+
+```
+1632 parties
+empire-demons     64 % (192) V-lassitude 52%, D-lassitude 18%, D-noRegiment 15%, V-noRegiment 11%, D-emptyDeck 4%, V-emptyDeck 1%
+demons-v2         62 % (192) V-lassitude 41%, D-lassitude 27%, V-noRegiment 21%, D-noRegiment 7%, D-emptyDeck 4%
+elfe              59 % (192) V-lassitude 40%, D-lassitude 21%, V-noRegiment 19%, D-emptyDeck 11%, D-noRegiment 9%, V-emptyDeck 1%
+elfe-demons       57 % (192) V-lassitude 31%, V-noRegiment 26%, D-lassitude 22%, D-emptyDeck 12%, D-noRegiment 8%
+demons-nomades    54 % (192) V-emptyDeck 41%, D-noRegiment 22%, D-lassitude 19%, V-noRegiment 10%, D-emptyDeck 5%, V-lassitude 3%
+empire-v2         53 % (192) V-lassitude 43%, D-lassitude 24%, D-emptyDeck 15%, V-noRegiment 9%, D-noRegiment 8%
+elfe-v2           53 % (192) V-lassitude 36%, D-lassitude 31%, V-noRegiment 16%, D-emptyDeck 9%, D-noRegiment 7%
+empire-demons-v2  53 % (192) V-lassitude 42%, D-lassitude 27%, D-noRegiment 14%, V-noRegiment 11%, D-emptyDeck 7%
+elfe-demons-v2    52 % (192) D-lassitude 31%, V-lassitude 29%, V-noRegiment 23%, D-emptyDeck 9%, D-noRegiment 8%
+nomades           50 % (192) V-emptyDeck 34%, D-lassitude 23%, D-noRegiment 19%, V-noRegiment 15%, D-emptyDeck 8%, V-lassitude 1%
+empire-elfe       50 % (192) D-noRegiment 29%, V-lassitude 26%, V-noRegiment 24%, D-lassitude 13%, D-emptyDeck 8%
+elfe-nomades      49 % (192) V-emptyDeck 37%, D-noRegiment 22%, D-lassitude 21%, V-noRegiment 13%, D-emptyDeck 7%
+demons            45 % (192) D-lassitude 27%, V-lassitude 26%, V-noRegiment 19%, D-noRegiment 18%, D-emptyDeck 10%
+empire-elfe-v2    45 % (192) D-lassitude 27%, V-lassitude 26%, D-noRegiment 20%, V-noRegiment 19%, D-emptyDeck 8%
+empire-nomades    38 % (192) D-lassitude 29%, V-emptyDeck 26%, D-noRegiment 22%, D-emptyDeck 11%, V-noRegiment 6%, V-lassitude 6%
+empire            35 % (192) D-lassitude 44%, V-lassitude 29%, D-emptyDeck 11%, D-noRegiment 10%, V-noRegiment 6%, V-emptyDeck 1%
+defausse-opt      32 % (192) D-noRegiment 31%, D-lassitude 29%, V-noRegiment 20%, V-emptyDeck 8%, D-emptyDeck 8%, V-lassitude 4%
+
+```
+
+Retenus : Empire v2 (35 → 53 %) et Démons v2 (45 → 62 %). Les 4 autres gardent leur deck (Elfes 59 contre 53, Empire + Démons 64 contre 53, Elfes + Démons 57 contre 52, Empire + Elfes 50 contre 45).
