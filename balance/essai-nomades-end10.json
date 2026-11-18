@@ -1,0 +1,57 @@
+{
+ "_note": "essai : +10 END aux régiments Nomades de niveau 1 à 3 (hors régiments temporaires et Saboteur)",
+ "jeune_nomade": {
+  "end": 30
+ },
+ "frondeur_nomade": {
+  "end": 30
+ },
+ "charmeur_basilics": {
+  "end": 30
+ },
+ "basilics_oasis": {
+  "end": 50
+ },
+ "chasseur_reliques": {
+  "end": 40
+ },
+ "marchand_ombres": {
+  "end": 50
+ },
+ "eleveur_basilics": {
+  "end": 40
+ },
+ "cavaliers_dunes": {
+  "end": 40
+ },
+ "voleurs_provisions": {
+  "end": 30
+ },
+ "colporteur": {
+  "end": 30
+ },
+ "danseurs_sable": {
+  "end": 35
+ },
+ "razzieurs_dunes": {
+  "end": 40
+ },
+ "chamelier": {
+  "end": 35
+ },
+ "eclaireuse_sables": {
+  "end": 30
+ },
+ "caravanier_arme": {
+  "end": 55
+ },
+ "chapardeuse": {
+  "end": 35
+ },
+ "basilics_rodeur": {
+  "end": 45
+ },
+ "dresseuse_basilics": {
+  "end": 40
+ }
+}
