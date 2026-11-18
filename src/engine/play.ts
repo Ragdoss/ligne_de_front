@@ -5,6 +5,9 @@ import { volley } from './combat';
 import { Ctx, addKeyword, baseCard, card, keywordValue, opponentOf } from './ctx';
 import type { CardDef, HandCard, PlayerId, SlotRef, Unit } from './types';
 
+/** Régiment Basilic (Reine des Basilics). */
+export const isBasilicRegiment = (id: string): boolean => card(id).cardType === 'Regiment' && !!card(id).types?.includes('Basilic');
+
 // ---------- Coût ----------
 export function tacticReduction(ctx: Ctx, p: PlayerId): number {
   return ctx.units(p).reduce((n, u) => n + (u.leader ? card(u.leader).tacticCostReduction ?? 0 : 0)
@@ -172,7 +175,7 @@ export function playCard(ctx: Ctx, p: PlayerId, handUid: number, target?: SlotRe
   pl.hand.splice(hIdx, 1);
   ctx.emit({ type: 'cardPlayed', player: p, cardId: c.id, cost });
 
-  if (c.cardType === 'Regiment') deployRegiment(ctx, p, c, target!);
+  if (c.cardType === 'Regiment') deployRegiment(ctx, p, c, target!, h.minion);
   else if (c.cardType === 'Leader') attachLeader(ctx, p, c, ctx.unitAt(target!)!);
   else {
     if (!h.generated) ctx.discard(p, c.id, true);
@@ -221,9 +224,10 @@ function onTacticPlayed(ctx: Ctx, p: PlayerId): void {
   }
 }
 
-function deployRegiment(ctx: Ctx, p: PlayerId, c: CardDef, ref: SlotRef): void {
+function deployRegiment(ctx: Ctx, p: PlayerId, c: CardDef, ref: SlotRef, minion = false): void {
   const pl = ctx.player(p);
   const u = ctx.makeUnit(c.id, p);
+  if (minion) addKeyword(u, 'Minions'); // Basilic repris par la Reine des Basilics
   // Fracture (roguelite) : un tour sur deux, le régiment déployé perd définitivement 10 % de ses stats ; l'adversaire gagne 1 lassitude.
   if (ctx.fractured(p)) {
     const cut = (v: number) => Math.round(v * 0.1);
@@ -461,16 +465,10 @@ function nomadArrival(ctx: Ctx, p: PlayerId, u: Unit, asCard: string = u.cardId)
     }
     case 'marchand_ombres': ctx.queueChoice('shadow', p, u.cardId); break;
     case 'caravane_marchande': ctx.queueChoice('caravane', p, u.cardId, { uid: u.uid }); break;
-    case 'reine_basilics': {
-      const pl = ctx.player(p);
-      const ids = pl.discard.filter(id => card(id).cardType === 'Regiment' && card(id).types?.includes('Basilic'));
-      if (!ids.length) { note('noTarget'); break; }
-      const best = ids.sort((a, b) => card(b).niveau - card(a).niveau)[0]!;
-      pl.discard.splice(pl.discard.indexOf(best), 1);
-      ctx.addToHand(p, best);
-      ctx.emit({ type: 'returnedToHand', player: p, cardId: best });
+    case 'reine_basilics': // Équilibrage 13 : autant de Basilics de la défausse qu'on veut, avec Minions et coût −1.
+      if (!ctx.player(p).discard.some(isBasilicRegiment)) { note('noTarget'); break; }
+      ctx.queueChoice('reineBasilics', p, u.cardId);
       break;
-    }
     case 'basilics_desert': {
       const n = opp.discard.filter(id => card(id).cardType === 'Regiment').length;
       if (!n) { note('noTarget'); break; }

@@ -64,6 +64,7 @@ export function choiceTitle(c: PendingChoice): string {
     case 'mirageMorts': return 'Mirage des morts : choisis une Tactique Nomade de ta défausse à rejouer gratuitement ce tour-ci';
     case 'interrogatoire': return 'Interrogatoire : main adverse révélée, choisis une carte';
     case 'necropole': return `Basilic de la nécropole : choisis un régiment Nomade de ta défausse dont l’arrivée est rejouée (encore ${c.data.left})`;
+    case 'reineBasilics': return 'Reine des Basilics : reprends en main autant de Basilics de ta défausse que tu veux (ils gagnent Minions et coûtent 1 de moins)';
   }
 }
 

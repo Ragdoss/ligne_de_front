@@ -1,15 +1,16 @@
 // Decks du mode normal contre l'ordinateur (18/11/2026) : un par faction et un par binôme de factions (10 en tout),
 // optimisés pour l'IA forte (celle du mode « contre l'ordinateur »), aux règles normales (45 cartes : 30 de niveau 1-3,
-// 15 de niveau 4-5, au moins 4 régiments de niveau 1, 3 exemplaires au plus, 1 pour les cartes uniques).
+// 15 de niveau 4-5, au moins 4 régiments de niveau 1, 3 exemplaires au plus — Unique limite le jeu, pas le deck).
 // Un binôme garde au moins 10 cartes de chacune de ses deux factions (sinon il redevient un deck d'une seule faction).
 // Évaluation : chaque deck joue contre les 12 decks optimisés du 25/10 (les deux côtés commencent tour à tour), mêmes parties
 // pour tous les decks d'une génération ; les survivants rejouent à chaque génération et leurs résultats s'additionnent.
-// Population de départ : les decks optimisés de la faction (ou un croisement de ceux des deux factions pour un binôme).
+// Population de départ : le deck déjà retenu pour la clé, les decks optimisés de la faction (ou un croisement de ceux des deux factions pour un binôme).
 // Usage : npx tsx tools/normal-evolve.ts <clés, ex. empire,elfe+demons> [générations=6] [parties=24]
 import { writeFileSync } from 'node:fs';
 import { chooseActionV3, STRONG_AI } from '../src/ai/heuristic';
 import { CARDS } from '../src/data/cards';
 import { OPTIMIZED_DECKS } from '../src/data/optimized';
+import { NORMAL_DECKS } from '../src/data/optimizedNormal';
 import { applyAction, createGame } from '../src/engine/game';
 import { nextRandom, seedFrom } from '../src/engine/rng';
 import type { Faction, GameState } from '../src/engine/types';
@@ -29,7 +30,7 @@ const factionsOf = (key: string) => key.split('+') as Faction[];
 const of = (id: string, f: Faction) => CARDS[id]!.faction === f || ((CARDS[id]!.factions as string[] | undefined) ?? []).includes(f);
 const inKey = (id: string, fs: Faction[]) => CARDS[id]!.faction === 'neutre' || fs.some(f => of(id, f));
 const low = (id: string) => CARDS[id]!.niveau <= 3;
-const maxOf = (id: string) => (CARDS[id]!.unique ? 1 : 3);
+const maxOf = (_id: string) => 3; // Unique : un seul en jeu à la fois, mais jusqu'à 3 exemplaires dans le deck
 const count = (d: string[], id: string) => d.filter(x => x === id).length;
 const lvl1Regs = (d: string[]) => d.filter(id => CARDS[id]!.cardType === 'Regiment' && CARDS[id]!.niveau === 1).length;
 function valid(d: string[], fs: Faction[]): boolean {
@@ -88,6 +89,9 @@ for (const key of KEYS) {
   const seeds = OPTIMIZED_DECKS.filter(o => fs.includes(o.faction)).map(o => o.cards.filter(id => inKey(id, fs)));
   // Départ : decks optimisés (mono) ou croisements des decks des deux factions (binôme), complétés au besoin.
   const start: string[][] = [];
+  // Le deck déjà retenu pour cette clé (src/data/optimizedNormal.ts) fait partie du départ.
+  const prev = NORMAL_DECKS.find(d => d.id === key.replace('+', '-'));
+  if (prev && valid(prev.cards, fs)) start.push(prev.cards.slice().sort());
   if (fs.length === 1) for (const d of seeds) start.push(valid(d, fs) ? d.slice().sort() : cross(pool, fs, d, d));
   const A = seeds.filter((_, i) => OPTIMIZED_DECKS.filter(o => fs.includes(o.faction))[i]!.faction === fs[0]);
   const B = seeds.filter((_, i) => OPTIMIZED_DECKS.filter(o => fs.includes(o.faction))[i]!.faction === fs[fs.length - 1]);

@@ -193,6 +193,8 @@ export interface HandCard {
   ephemeral?: boolean;
   /** Copie gratuite d'Archéotacticiens : coût 0, détruite à la fin du tour de son propriétaire. */
   freeCopy?: boolean;
+  /** Reine des Basilics : le régiment arrive en jeu avec Minions. */
+  minion?: boolean;
 }
 
 export interface Board {
@@ -277,7 +279,8 @@ export type ChoiceKind =
   | 'recupTactic'       // Récupérateur : Tactique de sa défausse à reprendre
   | 'mirageMorts'       // Mirage des morts : Tactique Nomade de sa défausse à rejouer
   | 'interrogatoire'    // Interrogatoire : carte de la main adverse à taxer (ou défausser)
-  | 'necropole';        // Basilic de la nécropole : régiment Nomade de sa défausse dont l'arrivée est rejouée
+  | 'necropole'         // Basilic de la nécropole : régiment Nomade de sa défausse dont l'arrivée est rejouée
+  | 'reineBasilics';    // Reine des Basilics : Basilics de sa défausse à reprendre en main (autant qu'on veut)
 
 export interface ChoiceOption {
   cardId?: string;

@@ -1,7 +1,7 @@
 // File des choix en attente : calcul des options quand un choix devient actif, et application du choix.
 
 import { Ctx, baseCard, card, opponentOf } from './ctx';
-import { applyOffrande, arrivalEffects, isDemonRegiment } from './play';
+import { applyOffrande, arrivalEffects, isBasilicRegiment, isDemonRegiment } from './play';
 import { CARD_TEXT_FR } from '../i18n/cards.fr';
 import type { ChoiceOption, PendingChoice } from './types';
 
@@ -113,6 +113,10 @@ function computeOptions(ctx: Ctx, c: PendingChoice): ChoiceOption[] {
       const chosen = String(c.data.chosen ?? '').split(',');
       return unique(pl.discard.filter(id => card(id).cardType === 'Regiment' && card(id).types?.includes('Nomade') && id !== 'basilic_necropole' && !chosen.includes(id)))
         .map(cardId => ({ cardId, label: `Rejouer l’arrivée de ${cardName(cardId)}` }));
+    }
+    case 'reineBasilics': {
+      const ids = unique(pl.discard.filter(isBasilicRegiment));
+      return ids.length ? [...ids.map(cardId => ({ cardId, label: `Reprendre ${cardName(cardId)} (Minions, coût −1)` })), { skip: true, label: 'Terminer' }] : [];
     }
   }
 }
@@ -367,6 +371,14 @@ export function resolveChoice(ctx: Ctx, index: number): string | null {
       arrivalEffects(ctx, p, u, o.cardId!);
       const left = Number(c.data.left) - 1;
       if (left > 0 && !ctx.over) ctx.s.pending.unshift({ ...c, options: null, data: { ...c.data, left, chosen: `${c.data.chosen ?? ''},${o.cardId}` } });
+      break;
+    }
+    case 'reineBasilics': {
+      if (o.skip) break;
+      removeFrom(pl.discard, o.cardId!);
+      ctx.addToHand(p, o.cardId!, { minion: true, discount: 1 });
+      ctx.emit({ type: 'returnedToHand', player: p, cardId: o.cardId! });
+      if (!ctx.over && pl.discard.some(isBasilicRegiment)) ctx.s.pending.unshift({ ...c, options: null });
       break;
     }
     case 'ransomDesert': {

@@ -441,7 +441,7 @@ const BASE_TEXT_FR: Record<string, { name: string; desc: string }> = {
   },
   "reine_basilics": {
     "name": "Reine des Basilics",
-    "desc": "À son arrivée, reprends en main le Basilic de plus haut niveau de ta défausse."
+    "desc": "À son arrivée, reprends en main autant de régiments Basilic de ta défausse que tu veux : ils gagnent Minions et coûtent 1 de moins."
   },
   "tempete_sable": {
     "name": "Tempête de Sable",
