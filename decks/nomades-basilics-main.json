@@ -1,0 +1,16 @@
+{
+ "id": "nomades-basilics",
+ "faction": "nomades",
+ "_note": "Deck d'essai de l'équilibrage 13 : Basilics et main adverse, sans usure (fait à la main le 18/11/2026).",
+ "cards": [
+  "jeune_nomade", "jeune_nomade", "jeune_nomade", "chapardeuse", "chapardeuse", "chamelier",
+  "ranconnement", "ranconnement", "ranconnement", "basilics_rodeur", "basilics_rodeur", "basilics_rodeur",
+  "charmeur_basilics", "charmeur_basilics", "marchand_ombres", "marchand_ombres", "marchand_ombres",
+  "frappez_ravitaillement", "frappez_ravitaillement", "frappez_ravitaillement", "eleveur_basilics", "eleveur_basilics",
+  "basilics_oasis", "basilics_oasis", "marche_noir", "marche_noir", "marche_noir", "dresseuse_basilics",
+  "interrogatoire", "interrogatoire",
+  "basilics_desert", "basilics_desert", "basilics_desert", "basilic_necropole", "basilic_necropole",
+  "reine_basilics", "reine_basilics", "cheikh_dunes", "cheikh_dunes", "cheikh_dunes",
+  "volez_ravitaillement", "volez_ravitaillement", "emir_dunes", "al_mansur", "choc_et_effroi"
+ ]
+}
