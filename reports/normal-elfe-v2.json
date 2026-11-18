@@ -3,7 +3,7 @@
  "opp": "normal",
  "ban": [],
  "faction": "elfe",
- "generation": 4,
+ "generation": 6,
  "best": [
   {
    "deck": [
@@ -53,38 +53,39 @@
     "treant_millenaire",
     "vif_argent"
    ],
-   "rate": 0.7083333333333334,
-   "games": 24
+   "rate": 0.6111111111111112,
+   "games": 72
   },
   {
    "deck": [
-    "banniere_dechiree",
+    "ancien_canopee",
+    "ancien_canopee",
+    "benediction_sylve",
     "bourgeonnement",
-    "cavalier_elfe",
+    "bourgeonnement",
+    "changement_tectonique",
+    "changement_tectonique",
     "changement_tectonique",
     "chant_traque",
     "chant_traque",
     "danseuses_lames",
-    "druide_ancien",
-    "dryades_guerisseuses",
-    "eclaireur_elfe",
+    "danseuses_lames",
     "eclaireur_elfe",
     "elem_feu",
     "elem_feu",
     "elem_terre",
     "elem_terre",
-    "eveil_elementaire",
-    "floraison",
     "fructification",
-    "gardienne_lumiere",
-    "gardienne_lumiere",
+    "fructification",
+    "gardien_crepuscule",
+    "gardien_crepuscule",
+    "ingenieurs_siege",
+    "lyra",
     "maitre_embuscades",
     "maitre_embuscades",
     "maitre_embuscades",
-    "marque_chasseur",
+    "palissade_tactique",
     "pousse_sylve",
-    "pousse_sylve",
-    "pretresse_saisons",
     "racines_immobilisantes",
     "rangers",
     "repositionnement",
@@ -94,18 +95,17 @@
     "seigneure_chasse",
     "sentinelle_chene",
     "sentinelle_chene",
-    "sylvain",
-    "sylvain",
     "traqueuse_sylvestre",
-    "treant_millenaire",
+    "traqueuse_sylvestre",
     "treant_millenaire",
     "veilleuse_sources",
     "veilleuse_sources",
     "vif_argent",
-    "visez_faibles"
+    "visez_faibles",
+    "vivres_campagne"
    ],
-   "rate": 0.6666666666666666,
-   "games": 24
+   "rate": 0.6041666666666666,
+   "games": 48
   },
   {
    "deck": [
@@ -155,8 +155,8 @@
     "vif_argent",
     "visez_faibles"
    ],
-   "rate": 0.6145833333333334,
-   "games": 96
+   "rate": 0.5902777777777778,
+   "games": 144
   }
  ]
 }
