@@ -1,3 +1,6 @@
 {"a":"defausse-opt","b":"empire","g":0,"first":"defausse-opt","winner":"empire","reason":"lassitude","turn":13}
 {"a":"defausse-opt","b":"empire","g":1,"first":"empire","winner":"empire","reason":"noRegiment","turn":9}
 {"a":"defausse-opt","b":"empire","g":2,"first":"defausse-opt","winner":"empire","reason":"noRegiment","turn":5}
+{"a":"defausse-opt","b":"empire","g":3,"first":"empire","winner":"empire","reason":"lassitude","turn":14}
+{"a":"defausse-opt","b":"empire","g":4,"first":"defausse-opt","winner":"empire","reason":"noRegiment","turn":6}
+{"a":"defausse-opt","b":"empire","g":5,"first":"empire","winner":"defausse-opt","reason":"noRegiment","turn":4}
