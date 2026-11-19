@@ -35,7 +35,10 @@ const rnd = () => { const r = nextRandom(rs); rs = r.state; return r.value; };
 const pick = <T,>(xs: T[]) => xs[Math.floor(rnd() * xs.length)]!;
 const shuffle = <T,>(xs: T[]) => { const a = xs.slice(); for (let i = a.length - 1; i > 0; i--) { const k = Math.floor(rnd() * (i + 1)); [a[i], a[k]] = [a[k]!, a[i]!]; } return a; };
 
-const factionsOf = (key: string) => key.split('+') as Faction[];
+// « libre-<deck> » : toutes les factions, en partant du deck <deck> du mode normal (une direction de recherche par deck de départ).
+const ALL: Faction[] = ['empire', 'elfe', 'demons', 'nomades'];
+const isFree = (key: string) => key.startsWith('libre');
+const factionsOf = (key: string) => (isFree(key) ? ALL : key.split('+') as Faction[]);
 const of = (id: string, f: Faction) => CARDS[id]!.faction === f || ((CARDS[id]!.factions as string[] | undefined) ?? []).includes(f);
 const inKey = (id: string, fs: Faction[]) => !BAN.has(id) && (CARDS[id]!.faction === 'neutre' || fs.some(f => of(id, f)));
 const low = (id: string) => CARDS[id]!.niveau <= 3;
@@ -45,7 +48,7 @@ const lvl1Regs = (d: string[]) => d.filter(id => CARDS[id]!.cardType === 'Regime
 function valid(d: string[], fs: Faction[]): boolean {
   if (d.length !== 45 || d.filter(low).length !== 30 || lvl1Regs(d) < 4) return false;
   if (!d.every(id => inKey(id, fs) && count(d, id) <= maxOf(id))) return false;
-  return fs.length === 1 || fs.every(f => d.filter(id => of(id, f)).length >= MIN_EACH);
+  return fs.length !== 2 || fs.every(f => d.filter(id => of(id, f)).length >= MIN_EACH);
 }
 const mainFaction = (d: string[], fs: Faction[]) => fs.slice().sort((a, b) => d.filter(id => of(id, b)).length - d.filter(id => of(id, a)).length)[0]!;
 
@@ -100,10 +103,14 @@ for (const key of KEYS) {
   // Départ : decks optimisés (mono) ou croisements des decks des deux factions (binôme), complétés au besoin.
   const start: string[][] = [];
   // Le deck déjà retenu pour cette clé (src/data/optimizedNormal.ts) fait partie du départ.
-  const prev = NORMAL_DECKS.find(d => d.id === key.replace('+', '-'));
+  const prev = NORMAL_DECKS.find(d => d.id === (isFree(key) ? key.replace(/^libre-?/, '') : key.replace('+', '-')));
   if (prev && valid(prev.cards, fs)) start.push(prev.cards.slice().sort());
   else if (prev) start.push(cross(pool, fs, prev.cards, prev.cards));
   if (EXTRA_SEED) start.push(valid(EXTRA_SEED, fs) ? EXTRA_SEED.slice().sort() : cross(pool, fs, EXTRA_SEED, EXTRA_SEED));
+  if (isFree(key)) { // le deck de départ croisé avec d'autres decks du mode normal, de toutes factions
+    const base = prev ? prev.cards : pick(NORMAL_DECKS).cards;
+    while (start.length < KEEP + 3) start.push(cross(pool, fs, base, pick(NORMAL_DECKS.filter(d => d.cards !== base)).cards));
+  }
   if (fs.length === 1) for (const d of seeds) start.push(valid(d, fs) ? d.slice().sort() : cross(pool, fs, d, d));
   const A = seeds.filter((_, i) => OPTIMIZED_DECKS.filter(o => fs.includes(o.faction))[i]!.faction === fs[0]);
   const B = seeds.filter((_, i) => OPTIMIZED_DECKS.filter(o => fs.includes(o.faction))[i]!.faction === fs[fs.length - 1]);
