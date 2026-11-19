@@ -1,5 +1,6 @@
 // Tests des mécaniques propres aux Démons et aux Nomades.
 import { describe, expect, it } from 'vitest';
+import { CARDS } from '../src/data/cards';
 import { Ctx } from '../src/engine/ctx';
 import { applyAction, legalActions } from '../src/engine/game';
 import { act, blankGame, give, place } from './helpers';
@@ -125,7 +126,7 @@ describe('Nomades', () => {
   });
   it('Volez le ravitaillement : l’adversaire défausse 3 cartes, le voleur gagne 7 − la somme des niveaux', () => {
     let s = blankGame();
-    s.players.A.level = 4; s.players.A.resource = 4;
+    s.players.A.level = 4; s.players.A.resource = 3; // équilibrage 14 : coût 3
     for (const id of ['recrue_imp', 'lancier_emp', 'chevalier_prov']) give(s, 'B', id);
     const t = give(s, 'A', 'volez_ravitaillement');
     s = act(s, { type: 'play', handUid: t }).state;
@@ -156,15 +157,16 @@ describe('Nomades', () => {
     expect(s.players.A.board.arriere[0]!.keywords).toContain('Distance');
     expect(s.players.A.board.arriere[0]!.ini).toBe(42);
   });
-  it('Chasseur de Reliques : absorbe l’ATK ou l’ARM d’un régiment de la défausse adverse', () => {
+  it('Chasseur de Reliques : absorbe l’ATK et l’ARM d’un régiment de la défausse adverse (équilibrage 14)', () => {
     let s = blankGame();
     s.players.A.level = 3; s.players.A.resource = 9;
     s.players.B.discard = ['chevalier_prov'];
     const t = give(s, 'A', 'chasseur_reliques');
     s = act(s, { type: 'play', handUid: t, target: { player: 'A', zone: 'arriere', idx: 1 } }).state;
-    expect(s.pending[0]!.options).toEqual([{ cardId: 'chevalier_prov', stat: 'atk' }, { cardId: 'chevalier_prov', stat: 'arm' }]);
-    s = act(s, { type: 'choose', option: 1 }).state;
+    expect(s.pending[0]!.options!.map(o => o.cardId)).toEqual(['chevalier_prov']);
+    s = act(s, { type: 'choose', option: 0 }).state;
     expect(s.players.A.board.arriere[1]!.baseArm).toBe(13);
+    expect(s.players.A.board.arriere[1]!.baseAtk).toBe(10 + (CARDS.chevalier_prov!.atk ?? 0));
     expect(s.players.B.discard).toHaveLength(0);
   });
 });

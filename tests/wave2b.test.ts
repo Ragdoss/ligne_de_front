@@ -49,13 +49,14 @@ describe('Vague 2 suite : Empire', () => {
     expect(ctx.effectiveAtk(u)).toBe(a + 5);
     expect(ctx.effectiveArm(u)).toBe(r + 5);
   });
-  it('Dernier carré : +15 ARM à l’avant, pas de perte de Moral à la mort d’un allié', () => {
+  it('Dernier carré : +15 ARM permanent à l’avant (équilibrage 14), pas de perte de Moral à la mort d’un allié', () => {
     let s = quiet(); s.players.A.level = 4; s.players.A.resource = 9;
     const f = place(s, 'A', 'avant', 0, 'recrue_imp');
+    const arm0 = f.baseArm;
     const victim = place(s, 'A', 'avant', 1, 'recrue_imp');
     s = act(s, { type: 'play', handUid: give(s, 'A', 'dernier_carre') }).state;
     const ctx = new Ctx(s);
-    expect(s.players.A.board.avant[0]!.squareArm).toBe(15);
+    expect(s.players.A.board.avant[0]!.baseArm).toBe(arm0 + 15);
     const mor = s.players.A.board.avant[0]!.currentMor;
     ctx.destroy(ctx.findUnit(victim.uid)!, 'end');
     expect(s.players.A.board.avant[0]!.currentMor).toBe(mor);
@@ -85,7 +86,7 @@ describe('Vague 2 suite : Démons', () => {
     const n = s.players.A.hand.length;
     s = act(s, { type: 'play', handUid: give(s, 'A', 'rituel_sang_noir'), target: slot('A', 'arriere', 0) }).state;
     expect(s.players.A.board.arriere[0]).toBeNull();
-    expect(s.players.A.hand.length).toBe(n + 1 + 1);
+    expect(s.players.A.hand.length).toBe(n + 1 + 2); // équilibrage 14 : la Garde d’Asura fait piocher 2
   });
   it('Gardien des chaînes : les attaquants de ses voisins perdent 3 ATK par niveau sacrifié', () => {
     let s = quiet(); s.players.A.level = 3; s.players.A.resource = 9;
@@ -167,7 +168,7 @@ describe('Vague 2 suite : Nomades et neutres', () => {
     const ctx = new Ctx(s);
     const a = ctx.effectiveArm(n);
     place(s, 'A', 'isole', 0, 'sentinelles_oasis');
-    expect(ctx.effectiveArm(n)).toBe(a + 5);
+    expect(ctx.effectiveArm(n)).toBe(a + 10); // équilibrage 14
     const m = place(s, 'A', 'avant', 2, 'milice_village');
     const m0 = ctx.effectiveArm(m);
     place(s, 'A', 'avant', 3, 'recrue_imp');

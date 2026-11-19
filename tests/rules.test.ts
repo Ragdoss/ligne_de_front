@@ -285,18 +285,17 @@ describe('Tactiques', () => {
     expect(s.players.A.deck[0]).toBe('charge_imp');
     expect(s.pending).toHaveLength(0);
   });
-  it('Promotion : défausser un Leader, puis choisir n’importe quel Leader du deck', () => {
+  it('Promotion (équilibrage 14) : choisir n’importe quel Leader du deck, sans en défausser', () => {
     let s = blankGame();
     s.players.A.level = 3; s.players.A.resource = 9;
     s.players.A.deck = ['recrue_imp', 'capitaine_garde', 'recrue_imp', 'general_empire', 'lieutenant', 'general_empire'];
     give(s, 'A', 'lieutenant');
     const p = give(s, 'A', 'promotion');
     s = act(s, { type: 'play', handUid: p }).state;
-    s = act(s, { type: 'choose', option: 0 }).state;
-    expect(s.players.A.discard).toContain('lieutenant');
+    expect(s.players.A.discard).not.toContain('lieutenant');
     expect(s.pending[0]).toMatchObject({ kind: 'promotionPick', options: [{ cardId: 'capitaine_garde' }, { cardId: 'general_empire' }, { cardId: 'lieutenant' }] });
     s = act(s, { type: 'choose', option: 1 }).state;
-    expect(s.players.A.hand.map(h => h.cardId)).toEqual(['general_empire']);
+    expect(s.players.A.hand.map(h => h.cardId).sort()).toEqual(['general_empire', 'lieutenant']);
   });
 });
 

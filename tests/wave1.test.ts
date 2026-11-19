@@ -289,15 +289,17 @@ describe('Vague 1 : cross-faction et neutres', () => {
     expect(new Ctx(s).loseMoral(u, 3)).toBe(0);
     expect(u.currentMor).toBe(1);
   });
-  it('Dryade corrompue : les soins font aussi baisser la lassitude (reliquat conservé)', () => {
+  it('Dryade corrompue (équilibrage 14) : les soins font reculer la limite de défaite (reliquat conservé)', () => {
     let s = blankGame(); s.players.A.resource = 5; s.players.A.points = 10;
+    const lim = s.config.defeatLassitude.A;
     place(s, 'A', 'arriere', 0, 'dryade_corrompue');
     place(s, 'A', 'avant', 0, 'elem_terre', { currentEnd: 5 });
     s = act(s, { type: 'play', handUid: give(s, 'A', 'soin_simple', { generated: true }), target: slot('A', 'avant', 0) }).state;
-    expect(s.players.A.board.avant[0]!.currentEnd).toBe(20); // le soin n'est plus annulé (Soin simple : 15 END)
+    expect(s.players.A.board.avant[0]!.currentEnd).toBe(25); // Soin simple : 20 END
     expect(s.players.A.points).toBe(10);
+    expect(s.config.defeatLassitude.A).toBe(lim + 1);
     s = act(s, { type: 'play', handUid: give(s, 'A', 'soin_simple', { generated: true }), target: slot('A', 'avant', 0) }).state;
-    expect(s.players.A.points).toBe(9);
+    expect(s.config.defeatLassitude.A).toBe(lim + 2);
   });
   it('Éveil Élémentaire : jeton posé dans la case choisie, deux avec Communion', () => {
     let s = blankGame(); s.players.A.level = 2; s.players.A.resource = 5;

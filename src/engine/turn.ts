@@ -58,6 +58,7 @@ export function startTurn(ctx: Ctx, p: PlayerId): void {
       if (u.guardOwner === p) u.guardOwner = null; // Racines protectrices : jusqu'au prochain tour du lanceur
       if (u.stunHold === p) u.stunHold = null; // Chaînes de l'Abîme (Offrande)
       if (u.steadyOwner === p) u.steadyOwner = null; // Dernier carré
+      if (u.moralCapOwner === p) u.moralCapOwner = null; // Rempart de chair
       if (u.pactShield?.owner === p) u.pactShield = null; // Pacte de Survie : fin au début du tour du lanceur
     }
   }
@@ -111,6 +112,8 @@ export function startTurn(ctx: Ctx, p: PlayerId): void {
   if (pz) {
     ctx.mill(p, pz.mill, poison!.cardId);
     if (pz.handDiscard) ctx.queueChoice('handDiscard', p, poison!.cardId, { n: pz.handDiscard, sum: 0, thief: null, gainBase: 0 });
+    const rh = (pz as { randomHandDiscard?: number }).randomHandDiscard ?? 0; // Équilibrage 14 : aussi une carte de la main au hasard
+    for (let i = 0; i < rh && pl.hand.length && !ctx.over; i++) ctx.discardFromHand(p, pl.hand[ctx.randomInt(pl.hand.length)]!.uid, poison!.cardId);
   }
   for (const u of ctx.units(p)) {
     if (ctx.over) return;
@@ -135,7 +138,10 @@ export function startTurn(ctx: Ctx, p: PlayerId): void {
   for (const u of ctx.units(p)) {
     const d = card(u.cardId);
     generators += d.generatesResourceEachTurn ?? 0;
-    if (u.leader) generators += (card(u.leader).leaderResourceEachTurn as number | undefined) ?? 0; // Quartier-maître
+    if (u.leader) { // Quartier-maître : +1, puis +2 à partir de son 3e tour en jeu (équilibrage 14)
+      const l = card(u.leader), late = l.leaderResourceFromThirdTurn as number | undefined;
+      generators += late && ctx.s.turn - (u.leaderSince ?? ctx.s.turn) >= 3 ? late : (l.leaderResourceEachTurn as number | undefined) ?? 0;
+    }
     const rc = d.resourceIfCaravane as number | undefined; // Caravanier armé
     if (rc && ctx.units(p).some(x => baseCard(x.cardId) === 'caravane_marchande')) generators += rc;
     rally = Math.max(rally, d.ralliesBrokenEmpireEachTurn ?? 0);
@@ -167,10 +173,7 @@ export function startTurn(ctx: Ctx, p: PlayerId): void {
     const ref = rm ? ctx.slotOf(u.uid) : null;
     if (rm && ref) for (const n of ctx.rowNeighbors(ref)) ctx.heal(n, 0, rm, u.cardId);
     const fa = !u.brokenMorale ? d.armToRandomAllyEachTurn as number | undefined : undefined;
-    if (fa) {
-      const pool = ctx.units(p).filter(x => x.uid !== u.uid);
-      if (pool.length) { const t = pool[ctx.randomInt(pool.length)]!; t.baseArm += fa; ctx.emit({ type: 'effect', key: 'forgeron', player: p, cardId: u.cardId, data: { uid: t.uid, target: t.cardId } }); }
-    }
+    if (fa && ctx.units(p).some(x => x.uid !== u.uid)) ctx.queueChoice('forgeron', p, u.cardId, { uid: u.uid, n: fa }); // Équilibrage 14 : au choix
   }
   // Porte-Étendard : +1 Moral par exemplaire à chaque porteur de Leader. Aumônier : soin du porteur.
   const banners = ctx.units(p).reduce((n, u) => n + (card(u.cardId).moralToLeaderCarriersEachTurn ?? 0), 0);

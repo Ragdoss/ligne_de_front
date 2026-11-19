@@ -119,7 +119,7 @@ describe('Vague 2 : tenir la première ligne', () => {
     const f = place(s, 'A', 'avant', 1, 'recrue_imp', { currentEnd: 10, currentMor: 2 });
     const r = act(s, { type: 'endTurn' });
     const u = r.state.players.A.board.avant[1]!;
-    expect(u.currentEnd).toBe(15);
+    expect(u.currentEnd).toBe(20); // équilibrage 14 : 10 END
     expect(u.currentMor).toBe(3);
     expect(u.uid).toBe(f.uid);
   });

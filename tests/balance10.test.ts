@@ -14,20 +14,24 @@ describe('Équilibrage 10 — Elfes', () => {
     expect(CARDS.sentinelle_cimes!.cout).toBe(2);
     expect(CARDS.clerc_foret!.vieTours).toBe(5);
   });
-  it('Soin simple : 15 END', () => {
+  it('Soin simple : 20 END et 1 Moral (équilibrage 14)', () => {
     const s = ready(quiet());
     const u = place(s, 'A', 'avant', 0, 'elem_terre', { currentEnd: 10 });
+    u.currentMor = u.maxMor - 2;
     const r = act(s, { type: 'play', handUid: give(s, 'A', 'soin_simple'), target: slot('A', 'avant', 0) });
-    expect(r.state.players.A.board.avant[0]!.currentEnd).toBe(u.currentEnd + 15);
+    expect(r.state.players.A.board.avant[0]!.currentEnd).toBe(u.currentEnd + 20);
+    expect(r.state.players.A.board.avant[0]!.currentMor).toBe(u.currentMor + 1);
   });
-  it('Sérénité : −5 lassitude, −10 avec un Élémentaux', () => {
+  it('Sérénité (équilibrage 14) : la défaite recule de 5, de 10 avec un Élémentaux ; la lassitude ne bouge pas', () => {
     let s = ready(quiet());
+    const lim = s.config.defeatLassitude.A;
     s = act(s, { type: 'play', handUid: give(s, 'A', 'serenite_foret') }).state;
-    expect(s.players.A.points).toBe(15);
+    expect(s.players.A.points).toBe(20);
+    expect(s.config.defeatLassitude.A).toBe(lim + 5);
     s = ready(quiet());
     place(s, 'A', 'avant', 0, 'elem_terre');
     s = act(s, { type: 'play', handUid: give(s, 'A', 'serenite_foret') }).state;
-    expect(s.players.A.points).toBe(10);
+    expect(s.config.defeatLassitude.A).toBe(lim + 10);
   });
   it('Chant de la sève et Sang de sève comptent comme des soins (Veilleuse des Sources)', () => {
     let s = ready(quiet());

@@ -66,7 +66,7 @@ export function unplayableReason(ctx: Ctx, p: PlayerId, h: HandCard): string | n
       break;
     }
     case 'eveilElementaire': if (!pl.board.avant.some(u => !u)) return 'condition'; break;
-    case 'promotion': if (!pl.hand.some(x => x.uid !== h.uid && card(x.cardId).cardType === 'Leader')) return 'condition'; break;
+    case 'promotion': if (!pl.deck.some(id => card(id).cardType === 'Leader')) return 'condition'; break; // Équilibrage 14 : plus de Leader à défausser
     case 'tuteurDemoniaque': if (!pl.deck.some(id => isDemonRegiment(id))) return 'condition'; break;
     case 'halteConvoi': if (!ctx.s.scenario?.convoy) return 'scenarioOnly'; break;
   }
@@ -155,13 +155,21 @@ export function validSecondTarget(ctx: Ctx, c: CardDef, first: SlotRef, ref: Slo
   return false;
 }
 
+/** Carte d'une main, avec ce que la main y a changé (Capacocha : Sacrifice gagné ou relevé). */
+export function handCardDef(h: HandCard): CardDef {
+  const c = card(h.cardId);
+  if (!h.sacrificeBonus || c.cardType !== 'Regiment') return c;
+  const base = (c.sacrificeMinLevel as number | undefined) ?? 0;
+  return { ...c, sacrificeMinLevel: base + h.sacrificeBonus, ...(base ? {} : { sacrificeGainsStats: false, sacrificeGainsKeywords: false }) } as CardDef;
+}
+
 // ---------- Jouer ----------
 export function playCard(ctx: Ctx, p: PlayerId, handUid: number, target?: SlotRef, target2?: SlotRef): string | null {
   const pl = ctx.player(p);
   const hIdx = pl.hand.findIndex(h => h.uid === handUid);
   if (hIdx === -1) return 'notInHand';
   const h = pl.hand[hIdx]!;
-  const c = card(h.cardId);
+  const c = handCardDef(h);
   const why = unplayableReason(ctx, p, h);
   if (why) return why;
   const n = targetCount(c);
@@ -316,7 +324,17 @@ export function arrivalEffects(ctx: Ctx, p: PlayerId, u: Unit, cardKey: string, 
   }
   if (asCard === 'marchand_ames') ctx.queueChoice('marchandAmes', p, asCard);
   // Marchand de damnés : l'adversaire défausse une carte de sa main (son choix), deux si le sacrifié était de niveau 3+.
-  if (asCard === 'marchand_damnes') ctx.queueChoice('handDiscard', q, asCard, { n: sacLevel >= 3 ? 2 : 1, sum: 0, thief: null, gainBase: 0 });
+  if (asCard === 'marchand_damnes') { // Équilibrage 14 : au hasard
+    const n = sacLevel >= 3 ? 2 : 1;
+    if (c.discardAtRandom) { for (let i = 0; i < n && ctx.player(q).hand.length && !ctx.over; i++) ctx.discardFromHand(q, ctx.player(q).hand[ctx.randomInt(ctx.player(q).hand.length)]!.uid, asCard); }
+    else ctx.queueChoice('handDiscard', q, asCard, { n, sum: 0, thief: null, gainBase: 0 });
+  }
+  // Capacocha (équilibrage 14) : (niveau du sacrifié − 3) régiments au hasard de la main adverse gagnent Sacrifice niveau 1+ (ou +1).
+  if (c.handSacrificeTax && sacLevel > 3) {
+    const regs = ctx.shuffle(ctx.player(q).hand.filter(x => card(x.cardId).cardType === 'Regiment')).slice(0, sacLevel - 3);
+    for (const x of regs) x.sacrificeBonus = (x.sacrificeBonus ?? 0) + 1;
+    if (regs.length) ctx.emit({ type: 'effect', key: 'capacochaTax', player: p, cardId: asCard, data: { count: regs.length } });
+  }
   // Basilic de la nécropole : rejoue l'arrivée de 2 régiments Nomades de ta défausse (leurs bonus de stats sont pour lui).
   if (asCard === 'basilic_necropole') ctx.queueChoice('necropole', p, asCard, { uid: u.uid, left: 2 });
   if (asCard === 'morvak') {
@@ -361,6 +379,7 @@ export function attachLeader(ctx: Ctx, p: PlayerId, c: CardDef, u: Unit): void {
   if (u.leader) { ctx.discardLeader(u); u.leaderStacks = 0; } // remplacement (Leaders « requiert un Leader » uniquement)
   u.leader = c.id;
   u.leaderOwner = p;
+  u.leaderSince = ctx.s.turn; // Quartier-maître
   if (c.bonusMor) { u.maxMor += c.bonusMor; u.currentMor = Math.min(u.maxMor, u.currentMor + c.bonusMor); }
   ctx.emit({ type: 'leaderAttached', player: p, leaderId: c.id, uid: u.uid, cardId: u.cardId });
   if (c.bonusEnd) { u.maxEnd += c.bonusEnd; u.currentEnd += c.bonusEnd; }
@@ -521,7 +540,7 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
       note('ordreHautCommandement', { count: n });
       break;
     }
-    case 'promotion': ctx.queueChoice('promotionDiscard', p, c.id); break;
+    case 'promotion': ctx.queueChoice('promotionPick', p, c.id); break; // Équilibrage 14 : cherche directement un Leader du deck
     case 'assassinat': {
       if (target?.leader) {
         ctx.discardLeader(target);
@@ -543,10 +562,14 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
       let n = 0;
       for (const u of ctx.units(p)) if (u.types.includes('Elfe')) { u.tempIni += 15; n++; }
       note('briseMatin', { count: n });
+      for (let i = 0; i < ((c.drawAfter as number | undefined) ?? 0) && !ctx.over; i++) ctx.draw(p, c.id); // Équilibrage 14
       break;
     }
-    case 'serenite':
-      ctx.loseLassitude(p, ((c.lassitudeLoss as number | undefined) ?? 3) * (c.doubledWithElemental && ctx.controlsElemental(p) ? 2 : 1), c.id);
+    case 'serenite': { // Équilibrage 14 : recule la limite de défaite (au lieu de retirer de la lassitude, ce qui retardait le niveau)
+      const k = c.doubledWithElemental && ctx.controlsElemental(p) ? 2 : 1;
+      if (c.defeatLimitGain) ctx.raiseDefeatLimit(p, (c.defeatLimitGain as number) * k, c.id);
+      else ctx.loseLassitude(p, ((c.lassitudeLoss as number | undefined) ?? 3) * k, c.id);
+    }
       for (let i = 0; i < ((c.drawAfter as number | undefined) ?? 0) && !ctx.over; i++) ctx.draw(p, c.id);
       break;
     case 'buffArchers': {
@@ -554,7 +577,7 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
       note('buffArchers');
       break;
     }
-    case 'soin10': ctx.heal(target!, (c.healAmount as number | undefined) ?? 10, 0, c.id); break; // Soin simple
+    case 'soin10': ctx.heal(target!, (c.healAmount as number | undefined) ?? 10, (c.healMor as number | undefined) ?? 0, c.id); break; // Soin simple
     case 'brumeTrompeuse': {
       const elems = ctx.units(p).filter(u => u.types.includes('Élémentaux')).length;
       target!.tempIni -= 20;
@@ -717,9 +740,10 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
       for (const x of ctx.units(p)) ctx.heal(x, 0, 3, c.id);
       break;
     }
-    case 'chantSeve':
+    case 'chantSeve': // Équilibrage 14 : 2e Tactique du tour +10 ATK ; 3e (ou plus) : aussi +1 Moral et pioche 1
       ctx.heal(target!, 10, 0, c.id);
       if ((pl.tacticsThisTurn ?? 0) >= 2) { target!.tempAtk += 10; note('chantSeve', { uid: target!.uid }); }
+      if ((pl.tacticsThisTurn ?? 0) >= 3) { ctx.heal(target!, 0, 1, c.id); if (!ctx.over) ctx.draw(p, c.id); }
       break;
     case 'augure': {
       const looked = pl.deck.splice(0, 3);
@@ -761,8 +785,8 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
     }
     case 'mirageOasis': addKeyword(target!, 'Mirage 1'); note('mirageOasis', { uid: target!.uid }); break;
     // --- Vague 2 (suite) ---
-    case 'dernierCarre':
-      for (const x of pl.board.avant) if (x) { x.squareArm = Math.max(x.squareArm, 15); x.squareOwner = p; x.steadyOwner = p; }
+    case 'dernierCarre': // Équilibrage 14 : l'ARM est permanente ; le Moral reste protégé jusqu'au prochain tour
+      for (const x of pl.board.avant) if (x) { x.baseArm += 15; x.steadyOwner = p; }
       break;
     case 'chargeDecisive':
       for (const x of ctx.units(p)) if (x.types.includes('Monté')) { x.tempAtk += 20; x.tempIni += 50; }
@@ -788,7 +812,7 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
       for (const x of ctx.units(p)) ctx.heal(x, 0, 3, c.id);
       break;
     }
-    case 'tempeteLames': for (const x of ctx.units(p)) if (keywordValue(x, 'Mirage') > 0) x.tempAtk += 10; break;
+    case 'tempeteLames': for (const x of ctx.units(p)) if (keywordValue(x, 'Mirage') > 0) x.tempAtk += 20; else if (x.types.includes('Nomade')) x.tempAtk += 10; break; // Équilibrage 14
     case 'sermentTraite': for (const x of ctx.units(p)) if (x.leader) ctx.heal(x, 20, 0, c.id); break;
     case 'contratConvoi':
       pl.resource += 2; ctx.emit({ type: 'resource', player: p, amount: 2, source: c.id });
@@ -830,9 +854,10 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
     case 'chantTraque': volley(ctx, p, !!c.volleyAtPrey); break;
     case 'corRalliement': for (const x of ctx.units(p)) if (x.brokenMorale) ctx.heal(x, 0, (c.rallyBroken as number | undefined) ?? 2, c.id); break;
     // --- Vague 3 ---
-    case 'pacteSuccession': {
-      ctx.discardLeader(target!);
-      ctx.emit({ type: 'leaderDestroyed', uid: target!.uid, cardId: target!.cardId, leaderId: target!.leader! });
+    case 'pacteSuccession': { // Équilibrage 14 : le Leader revient dans ta main
+      const lid = target!.leader!;
+      ctx.addToHand(p, lid);
+      ctx.emit({ type: 'returnedToHand', player: p, cardId: lid });
       target!.leader = null; target!.leaderOwner = null; target!.leaderStacks = 0;
       ctx.queueChoice('pacteSuccession', p, c.id);
       break;
@@ -853,7 +878,13 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
       break;
     }
     case 'ventAurore': pl.aurora = { marker: ctx.turnMarker(), uid: target!.uid }; note('ventAurore', { uid: target!.uid }); break;
-    case 'ranconnement': ctx.queueChoice('ranconnement', q, c.id); break;
+    case 'ranconnement': { // Équilibrage 14 : les deux, la carte défaussée (au choix de l'adversaire) et les 2 ressources
+      const o = ctx.player(q);
+      o.resourcePenalty = (o.resourcePenalty ?? 0) + 2;
+      ctx.emit({ type: 'effect', key: 'ranconnementRes', player: q, cardId: c.id });
+      if (o.hand.length) ctx.queueChoice('ranconnement', q, c.id);
+      break;
+    }
     case 'recyclageSables': {
       const pool = ctx.shuffle(pl.discard.map((id, i) => i)).slice(0, 5).sort((a, b) => b - a);
       const back = pool.map(i => pl.discard.splice(i, 1)[0]!);
@@ -888,14 +919,21 @@ export function applyOffrande(ctx: Ctx, p: PlayerId, cardId: string, paid: boole
   if (ctx.over) return;
   const target = uid !== null ? ctx.findUnit(uid) : null;
   switch (card(cardId).effect) {
-    case 'pacteMineur': for (let i = 0; i < (paid ? 3 : 1) && !ctx.over; i++) ctx.draw(p, cardId); break;
+    case 'pacteMineur': { // Équilibrage 14 : une des cartes piochées (au choix) coûte 1 de moins
+      const before = new Set(ctx.player(p).hand.map(x => x.uid));
+      for (let i = 0; i < (paid ? 3 : 1) && !ctx.over; i++) ctx.draw(p, cardId);
+      const drawn = ctx.player(p).hand.filter(x => !before.has(x.uid));
+      if (drawn.length === 1) { drawn[0]!.discount = (drawn[0]!.discount ?? 0) + 1; ctx.emit({ type: 'effect', key: 'pacteMineurCost', player: p, cardId, data: { cardId: drawn[0]!.cardId } }); }
+      else if (drawn.length > 1) ctx.queueChoice('pacteMineurCost', p, cardId, { uids: drawn.map(x => x.uid).join(',') });
+      break;
+    }
     case 'murmure': {
       if (!target || target.controller === p) { ctx.emit({ type: 'effect', key: 'noTarget', player: p, cardId }); break; }
       ctx.takeControl(target, p, !paid, cardId, paid);
       break;
     }
-    case 'voileOmbre':
-      if (target) { target.squareArm = Math.max(target.squareArm, paid ? 20 : 10); target.squareOwner = p; }
+    case 'voileOmbre': // Équilibrage 14 : Mirage 1, ou Mirage 2 avec l'Offrande
+      if (target) { addKeyword(target, paid ? 'Mirage 2' : 'Mirage 1'); ctx.emit({ type: 'effect', key: 'voileOmbre', player: p, cardId, data: { uid: target.uid, n: paid ? 2 : 1 } }); }
       break;
     case 'chainesAbime':
       if (!target || target.controller === p) { ctx.emit({ type: 'effect', key: 'noTarget', player: p, cardId }); break; }
@@ -911,7 +949,7 @@ export function applyOffrande(ctx: Ctx, p: PlayerId, cardId: string, paid: boole
     }
     case 'rempartChair': {
       const list = paid ? ctx.units(p).filter(u => u.types.includes('Démon')) : target ? [target] : [];
-      for (const u of list) { u.squareArm = Math.max(u.squareArm, 15); u.squareOwner = p; }
+      for (const u of list) { u.squareArm = Math.max(u.squareArm, 20); u.squareOwner = p; u.moralCapOwner = p; } // Équilibrage 14 : +20 ARM, Moral protégé
       ctx.emit({ type: 'effect', key: 'rempartChair', player: p, cardId, data: { count: list.length } });
       break;
     }
@@ -922,6 +960,8 @@ export function applyOffrande(ctx: Ctx, p: PlayerId, cardId: string, paid: boole
 function afterSacrifice(ctx: Ctx, p: PlayerId, cardId: string, bornTurn: number): void {
   const d = card(cardId);
   sacrificedDraw(ctx, p, cardId);
+  if (ctx.over) return;
+  ctx.pactDraw(p, true); // Maître des pactes (équilibrage 14) : un sacrifice compte aussi
   if (ctx.over) return;
   const pl = ctx.player(p);
   const sacRes = d.onSacrificedResource as number | undefined; // Vaisseau de chair
@@ -942,8 +982,8 @@ function afterSacrifice(ctx: Ctx, p: PlayerId, cardId: string, bornTurn: number)
     if (atk && !x.brokenMorale) x.baseAtk += atk;
     res += (xd.resourceOnOwnSacrifice as number | undefined) ?? 0; // Autel des âmes
     lass += x.brokenMorale ? 0 : ((xd.lassitudeOnOwnSacrifice as number | undefined) ?? 0); // Capacocha
-    const bl = x.leader && !x.brokenMorale ? card(x.leader).leaderOnSacrifice as { mor: number; atk: number } | undefined : undefined; // Bourreau de la Légion
-    if (bl) { ctx.heal(x, 0, bl.mor, x.leader!); x.tempAtk += bl.atk; }
+    const bl = x.leader && !x.brokenMorale ? card(x.leader).leaderOnSacrifice as { mor: number; atk: number; permanent?: boolean } | undefined : undefined; // Bourreau de la Légion
+    if (bl) { ctx.heal(x, 0, bl.mor, x.leader!); if (bl.permanent) x.baseAtk += bl.atk; else x.tempAtk += bl.atk; }
   }
   if (ctx.over) return;
   if (res) { pl.resource += res; ctx.emit({ type: 'resource', player: p, amount: res, source: 'autel_ames' }); }

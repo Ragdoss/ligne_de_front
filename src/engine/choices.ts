@@ -34,9 +34,9 @@ function computeOptions(ctx: Ctx, c: PendingChoice): ChoiceOption[] {
     case 'relics': {
       if (!ctx.findUnit(Number(c.data.uid))) return [];
       const out: ChoiceOption[] = [];
-      for (const id of unique(opp.discard.filter(x => card(x).cardType === 'Regiment'))) {
-        if ((card(id).atk ?? 0) > 0) out.push({ cardId: id, stat: 'atk' });
-        if ((card(id).arm ?? 0) > 0) out.push({ cardId: id, stat: 'arm' });
+      for (const id of unique(opp.discard.filter(x => card(x).cardType === 'Regiment'))) { // Équilibrage 14 : l'ATK et l'ARM
+        const a = card(id).atk ?? 0, r = card(id).arm ?? 0;
+        if (a > 0 || r > 0) out.push({ cardId: id, label: `${cardName(id)} : +${a} ATK et +${r} ARM` });
       }
       return out;
     }
@@ -97,9 +97,16 @@ function computeOptions(ctx: Ctx, c: PendingChoice): ChoiceOption[] {
     case 'pacteSuccession':
       return [{ value: 0, label: 'Ne pas payer d’Offrande' }, { value: 1, label: 'Offrande 1 (+1 lassitude) : pioche 2 cartes' },
         { value: 2, label: 'Offrande 2 (+2 lassitude) : pioche 2 cartes et gagne 2 ressources' }];
-    case 'ranconnement':
-      return [{ value: -1, label: 'Perdre 2 ressources au début de ton prochain tour' },
-        ...pl.hand.map(h => ({ handUid: h.uid, cardId: h.cardId, label: `Défausser ${cardName(h.cardId)}` }))];
+    case 'ranconnement': // Équilibrage 14 : la perte de 2 ressources s'applique de toute façon ; reste la carte à défausser
+      return pl.hand.map(h => ({ handUid: h.uid, cardId: h.cardId, label: `Défausser ${cardName(h.cardId)}` }));
+    case 'pacteMineurCost': {
+      const uids = String(c.data.uids ?? '').split(',').map(Number);
+      return pl.hand.filter(h => uids.includes(h.uid)).map(h => ({ handUid: h.uid, cardId: h.cardId, label: `${cardName(h.cardId)} coûtera 1 de moins` }));
+    }
+    case 'forgeron': {
+      const from = Number(c.data.uid);
+      return ctx.units(c.player).filter(u => u.uid !== from).map(u => ({ value: u.uid, cardId: u.cardId, label: `+${c.data.n} ARM permanent à ${cardName(u.cardId)}` }));
+    }
     case 'dresseuse':
       return unique(opp.discard).map(cardId => ({ cardId, label: `Retirer ${cardName(cardId)} (Basilic de niveau ${card(cardId).niveau} ou moins)` }));
     case 'recupTactic':
@@ -203,7 +210,9 @@ export function resolveChoice(ctx: Ctx, index: number): string | null {
       break;
     case 'ranconAmes': {
       const u = ctx.findUnit(Number(c.data.uid))!;
-      u.tempAtk += 5 * o.value!;
+      // Équilibrage 14 : +10 ATK par point, jusqu'à la fin du prochain tour du lanceur (ce combat, celui de l'adversaire, le suivant).
+      u.lingerAtk = (u.lingerAtk ?? 0) + 10 * o.value!;
+      u.lingerCombats = 3;
       note('ranconAmes', { uid: u.uid, x: o.value });
       ctx.gainLassitude(p, o.value!, c.source);
       break;
@@ -227,8 +236,10 @@ export function resolveChoice(ctx: Ctx, index: number): string | null {
     case 'relics': {
       const u = ctx.findUnit(Number(c.data.uid))!;
       removeFrom(opp.discard, o.cardId!);
-      if (o.stat === 'atk') u.baseAtk += card(o.cardId!).atk ?? 0; else u.baseArm += card(o.cardId!).arm ?? 0;
-      note('relics', { uid: u.uid, cardId: o.cardId, stat: o.stat });
+      if (o.stat === 'atk') u.baseAtk += card(o.cardId!).atk ?? 0;
+      else if (o.stat === 'arm') u.baseArm += card(o.cardId!).arm ?? 0;
+      else { u.baseAtk += card(o.cardId!).atk ?? 0; u.baseArm += card(o.cardId!).arm ?? 0; } // Équilibrage 14 : les deux
+      note('relics', { uid: u.uid, cardId: o.cardId, stat: o.stat ?? 'both' });
       break;
     }
     case 'shadow':
@@ -331,6 +342,16 @@ export function resolveChoice(ctx: Ctx, index: number): string | null {
       if (o.value === -1) { pl.resourcePenalty = (pl.resourcePenalty ?? 0) + 2; note('ranconnementRes'); }
       else ctx.discardFromHand(p, o.handUid!, c.source);
       break;
+    case 'pacteMineurCost': {
+      const h = pl.hand.find(x => x.uid === o.handUid);
+      if (h) { h.discount = (h.discount ?? 0) + 1; note('pacteMineurCost', { cardId: h.cardId }); }
+      break;
+    }
+    case 'forgeron': {
+      const u = ctx.findUnit(o.value!);
+      if (u) { u.baseArm += Number(c.data.n); note('forgeron', { uid: u.uid, target: u.cardId }); }
+      break;
+    }
     case 'dresseuse': {
       removeFrom(opp.discard, o.cardId!);
       const lvl = card(o.cardId!).niveau;
@@ -341,7 +362,7 @@ export function resolveChoice(ctx: Ctx, index: number): string | null {
       });
       if (best < 0) { note('noTarget'); break; }
       const id = pl.deck.splice(best, 1)[0]!;
-      pl.deck.unshift(id);
+      ctx.deliverDrawn(p, id, c.source); // Équilibrage 14 : directement en main
       note('dresseuse', { cardId: id });
       break;
     }

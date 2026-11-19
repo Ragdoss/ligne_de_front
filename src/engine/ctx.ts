@@ -367,6 +367,7 @@ export class Ctx {
     }
     // Bonus des tactiques (ce tour-ci) : ils s'appliquent même au Moral brisé.
     atk += u.tempAtk;
+    atk += u.lingerAtk ?? 0; // Rançon d'Âmes : jusqu'à la fin du prochain tour du lanceur
     if (!u.brokenMorale) {
       // Prêtresse des saisons : Communion.
       const cb = u.leader ? card(u.leader).communionBonus as { atk?: number } | undefined : undefined;
@@ -591,7 +592,7 @@ export class Ctx {
     u.currentMor = Math.min(u.maxMor, u.currentMor + n);
     this.dryadBonus(u, 0, u.currentMor - b);
   }
-  /** Dryade corrompue : chaque gain d'END ou de Moral d'un allié fait aussi baisser la lassitude (1 par tranche de 20 END, 1 par point de Moral). */
+  /** Dryade corrompue : chaque gain d'END ou de Moral d'un allié recule aussi la limite de défaite (1 par tranche de 20 END, 1 par point de Moral). */
   private dryadBonus(u: Unit, gEnd: number, gMor: number): void {
     if (gEnd <= 0 && gMor <= 0) return;
     const dry = this.units(u.controller).find(x => card(x.cardId).healsAlsoLowerLassitude);
@@ -601,7 +602,7 @@ export class Ctx {
     pl.dryadAcc = (pl.dryadAcc ?? 0) + gEnd;
     const g = Math.floor(pl.dryadAcc / step) + gMor;
     pl.dryadAcc %= step;
-    if (g > 0) { this.emit({ type: 'effect', key: 'dryade', player: u.controller, cardId: dry.cardId, data: { uid: u.uid } }); this.loseLassitude(u.controller, g, dry.cardId); }
+    if (g > 0) this.raiseDefeatLimit(u.controller, g, dry.cardId); // Équilibrage 14 : recule la limite de défaite au lieu de retirer de la lassitude
   }
 
   heal(u: Unit, end: number, mor: number, source: string): { end: number; mor: number } {
@@ -659,13 +660,24 @@ export class Ctx {
         const v = card(x.cardId).atkOnCardLassitude as number | undefined; // Sorcière du pacte
         if (v && !x.brokenMorale) x.tempAtk += v;
       }
-      const marker = this.s.turn * 2 + (this.s.active === 'A' ? 0 : 1);
-      const pact = this.units(p).find(x => x.leader && !x.brokenMorale && card(x.leader).drawOnFirstCardLassitude);
-      if (pact && pl.pactDrawnAt !== marker) {
-        pl.pactDrawnAt = marker;
-        this.draw(p, pact.leader!);
-      }
+      this.pactDraw(p, false);
     }
+  }
+  /** Maître des pactes : la première fois à chaque tour (lassitude gagnée par une carte, ou sacrifice), pioche 1 carte. */
+  pactDraw(p: PlayerId, onSacrifice: boolean): void {
+    const pl = this.player(p);
+    const marker = this.s.turn * 2 + (this.s.active === 'A' ? 0 : 1);
+    const pact = this.units(p).find(x => x.leader && !x.brokenMorale && card(x.leader).drawOnFirstCardLassitude && (!onSacrifice || card(x.leader).drawOnSacrifice));
+    if (pact && pl.pactDrawnAt !== marker) {
+      pl.pactDrawnAt = marker;
+      this.draw(p, pact.leader!);
+    }
+  }
+  /** Sérénité de la Forêt, Dryade corrompue : la défaite par lassitude arrive `n` points plus tard pour `p`. */
+  raiseDefeatLimit(p: PlayerId, n: number, source: string): void {
+    if (n <= 0 || !Number.isFinite(this.s.config.defeatLassitude[p])) return;
+    this.s.config.defeatLassitude[p] += n;
+    this.emit({ type: 'effect', key: 'defeatLimit', player: p, cardId: source, data: { amount: n, limit: this.s.config.defeatLassitude[p] } });
   }
   loseLassitude(p: PlayerId, n: number, source: string): void {
     const pl = this.player(p);
@@ -856,7 +868,12 @@ export class Ctx {
     if (!minion) this.gainLassitude(p, u.niveau, 'destroyed');
     if (u.prey && !this.over) this.onPreyDestroyed(u, killer, u.brokenMorale && !minion);
     if (!u.isToken) this.discard(u.borrowed?.owner ?? u.owner ?? p, u.cardId); // un régiment volé retourne dans la défausse de son propriétaire
-    if (relayTo && this.isAlive(relayTo)) this.moveLeader(u, relayTo, u.leader!);
+    if (relayTo && this.isAlive(relayTo)) {
+      const lid = u.leader!;
+      this.moveLeader(u, relayTo, lid);
+      const rm = card(lid).relayMor as number | undefined; // Officier de relève : +1 Moral au régiment qui le reçoit
+      if (rm) this.heal(relayTo, 0, rm, lid);
+    }
     else if (u.leader && (u.leaderOwner ?? p) === p && this.units(p).some(x => card(x.cardId).leadersReturnToHand && !x.brokenMorale)) {
       // Maximilien : le Leader revient dans la main au lieu de partir en défausse.
       this.addToHand(p, u.leader);

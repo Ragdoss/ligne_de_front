@@ -44,7 +44,7 @@ export function choiceTitle(c: PendingChoice): string {
       return c.source === 'handLimit'
         ? `Main pleine : défausse une carte avant de piocher (encore ${remaining})`
         : `${cardName(c.source)} : défausse une carte de ta main (encore ${remaining})`;
-    case 'relics': return 'Chasseur de Reliques : choisis un régiment de la défausse adverse et la statistique gagnée';
+    case 'relics': return 'Chasseur de Reliques : choisis un régiment de la défausse adverse (le Chasseur gagne son ATK et son ARM)';
     case 'shadow': return 'Marchand d’Ombres : main adverse révélée, choisis la carte qu’il défausse';
     case 'caravane': return 'Caravane Marchande : supprime une carte de la défausse adverse (durée de vie + son niveau)';
     case 'ransomDesert': return 'Rançon du Désert : supprime une carte de la défausse adverse';
@@ -58,13 +58,15 @@ export function choiceTitle(c: PendingChoice): string {
     case 'placeToken': return `${cardName(c.source)} : choisis la case avant du jeton (encore ${c.data.left})`;
     case 'marche': return `${cardName(c.source)} — Marché : défausser une carte de ta main pour en piocher une ?`;
     case 'pacteSuccession': return 'Pacte de succession : quelle Offrande paies-tu ?';
-    case 'ranconnement': return 'Rançonnement : défausse une carte de ta main, ou perds 2 ressources au début de ton prochain tour';
+    case 'ranconnement': return 'Rançonnement : défausse une carte de ta main (tu perdras aussi 2 ressources au début de ton prochain tour)';
     case 'dresseuse': return 'Dresseuse de basilics : retire une carte de la défausse adverse (le Basilic cherché sera de ce niveau ou moins)';
     case 'recupTactic': return 'Récupérateur : reprends en main une Tactique de ta défausse';
     case 'mirageMorts': return 'Mirage des morts : choisis une Tactique Nomade de ta défausse à rejouer gratuitement ce tour-ci';
     case 'interrogatoire': return 'Interrogatoire : main adverse révélée, choisis une carte';
     case 'necropole': return `Basilic de la nécropole : choisis un régiment Nomade de ta défausse dont l’arrivée est rejouée (encore ${c.data.left})`;
     case 'reineBasilics': return 'Reine des Basilics : reprends en main autant de Basilics de ta défausse que tu veux (ils gagnent Minions et coûtent 1 de moins)';
+    case 'pacteMineurCost': return 'Pacte mineur : choisis la carte piochée qui coûtera 1 de moins';
+    case 'forgeron': return `Forgeron de campagne : choisis le régiment qui gagne +${c.data.n} ARM permanent`;
   }
 }
 

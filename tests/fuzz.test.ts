@@ -15,7 +15,8 @@ function checkInvariants(s: GameState): void {
   for (const p of ['A', 'B'] as const) {
     const pl = s.players[p];
     expect(pl.resource).toBeGreaterThanOrEqual(0);
-    for (const u of ctx.units(p)) {
+    // Partie finie : le moteur s'arrête net (une cascade de pertes de Moral peut rester à mi-chemin).
+    for (const u of s.over ? [] : ctx.units(p)) {
       expect(uids.has(u.uid)).toBe(false);
       uids.add(u.uid);
       expect(u.controller).toBe(p);

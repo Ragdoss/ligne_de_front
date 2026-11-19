@@ -2,7 +2,7 @@
 
 import { Ctx, card } from './ctx';
 import { activateChoices, resolveChoice } from './choices';
-import { targetedCost, cardCost, playCard, targetCount, unplayableReason, validFirstTarget, validSecondTarget } from './play';
+import { targetedCost, cardCost, handCardDef, playCard, targetCount, unplayableReason, validFirstTarget, validSecondTarget } from './play';
 import { seedFrom } from './rng';
 import { applyScenarioStart } from './scenario';
 import { endTurn } from './turn';
@@ -113,7 +113,7 @@ export function playsForHandCard(state: GameState, handUid: number): Action[] {
   const p = state.active;
   const h = state.players[p].hand.find(x => x.uid === handUid);
   if (!h || unplayableReason(ctx, p, h)) return [];
-  const c = card(h.cardId);
+  const c = handCardDef(h); // Capacocha : Sacrifice ajouté à ce régiment
   const n = targetCount(c);
   if (n === 0) return [{ type: 'play', handUid }];
   const out: Action[] = [];

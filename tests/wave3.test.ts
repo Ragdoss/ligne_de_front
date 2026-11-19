@@ -46,8 +46,8 @@ describe('Vague 3 — Elfes (Prime)', () => {
     place(s, 'A', 'avant', 0, 'recrue_imp', { types: ['Elfe'], leader: 'maitresse_initiative', leaderOwner: 'A' });
     place(s, 'B', 'avant', 0, 'forteresse');
     const s2 = act(s, { type: 'play', handUid: give(s, 'A', 'coup_avance'), target: slot('A', 'avant', 0) }).state;
-    // 10 ATK + Prime : 20 (Coup d'avance) + 5 (Maîtresse)
-    expect(hits(act(s2, { type: 'endTurn' }).events, 'recrue_imp')[0]!.atk).toBe(35);
+    // 10 ATK + Prime : 20 (Coup d'avance) + 10 (Maîtresse, équilibrage 14)
+    expect(hits(act(s2, { type: 'endTurn' }).events, 'recrue_imp')[0]!.atk).toBe(40);
   });
 
   it('Vent de l’aurore : les régiments plus lents que la cible n’attaquent pas', () => {
@@ -107,7 +107,7 @@ describe('Vague 3 — Démons', () => {
     const res = s.players.A.resource, lassB = s.players.B.points;
     s = act(s, { type: 'play', handUid: give(s, 'A', 'basilic_demoniaque'), target: slot('A', 'avant', 0) }).state;
     expect(s.players.A.board.arriere[0]!.baseAtk).toBe(8 + 5);
-    expect(s.players.B.points).toBe(lassB + 1);
+    expect(s.players.B.points).toBe(lassB + 2); // Capacocha : 2 lassitude par sacrifice (équilibrage 14)
     expect(s.players.A.resource).toBe(res - 3 + 2 + 2); // coût 3, +2 Vaisseau, +2 Autel
     expect(s.players.A.board.avant[1]!.currentMor).toBe(2 - 1 + 2); // −1 (mort d'un allié), +2 (2 tours passés en jeu)
   });
@@ -119,6 +119,7 @@ describe('Vague 3 — Démons', () => {
     const hand = s.players.A.hand.length, res = s.players.A.resource;
     s = choose(s, o => o.value === 2);
     expect(s.players.A.board.avant[0]!.leader).toBeNull();
+    expect(s.players.A.hand.some(h => h.cardId === 'seigneur_tourments')).toBe(true); // équilibrage 14 : le Leader revient en main
     expect(s.players.A.hand.length).toBe(hand + 2);
     expect(s.players.A.resource).toBe(res + 2);
   });
@@ -181,11 +182,13 @@ describe('Vague 3 — Nomades et bi-factions', () => {
     expect(cardCost(new Ctx(s), 'B', s.players.B.hand.at(-1)!)).toBe(3);
   });
 
-  it('Rançonnement : perdre 2 ressources au prochain tour', () => {
+  it('Rançonnement (équilibrage 14) : défausser une carte et perdre 2 ressources au prochain tour', () => {
     let s = ready(quiet());
     give(s, 'B', 'recrue_imp');
     s = act(s, { type: 'play', handUid: give(s, 'A', 'ranconnement') }).state;
-    s = choose(s, o => o.value === -1);
+    expect(s.pending[0]!.options!.every(o => o.handUid !== undefined)).toBe(true);
+    s = choose(s, o => o.cardId === 'recrue_imp');
+    expect(s.players.B.hand).toHaveLength(0);
     expect(s.players.B.resourcePenalty).toBe(2);
     const lvl = s.players.B.level;
     s.players.B.resource = 0;
@@ -207,13 +210,14 @@ describe('Vague 3 — Nomades et bi-factions', () => {
     expect(new Ctx(s).effectiveAtk(s.players.A.board.avant[0]!)).toBe(atk0 + 5);
   });
 
-  it('Dresseuse de basilics : place un Basilic de niveau ≤ sur le dessus de la pioche', () => {
+  it('Dresseuse de basilics (équilibrage 14) : un Basilic de niveau ≤ rejoint la main', () => {
     let s = ready(quiet());
     s.players.B.discard = ['forteresse'];
     s.players.A.deck = ['recrue_imp', 'basilics_oasis', 'reine_basilics', 'recrue_imp'];
     s = act(s, { type: 'play', handUid: give(s, 'A', 'dresseuse_basilics'), target: slot('A', 'arriere', 0) }).state;
     s = choose(s, o => o.cardId === 'forteresse');
-    expect(s.players.A.deck[0]).toBe('reine_basilics');
+    expect(s.players.A.hand.some(h => h.cardId === 'reine_basilics')).toBe(true);
+    expect(s.players.A.deck).not.toContain('reine_basilics');
     expect(s.players.B.discard).not.toContain('forteresse');
   });
 

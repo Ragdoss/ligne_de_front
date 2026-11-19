@@ -24,6 +24,10 @@ export function pickTarget(ctx: Ctx, a: Unit, p: PlayerId, zone: Zone, idx: numb
   // Terrain scindé (Titan de la Fracture) : on ne frappe que sur son propre terrain.
   const here = (z: 'avant' | 'arriere', i: number) => ctx.sameSeg({ zone, idx }, { zone: z, idx: i });
   const all = [...opp.avant.map((u, i) => (here('avant', i) ? u : null)), ...opp.arriere.map((u, i) => (here('arriere', i) ? u : null))];
+  if (a.leader && !a.brokenMorale && card(a.leader).leaderTargetsPrey) { // Druide Ancien (équilibrage 14) : la Proie en priorité
+    const prey = all.find(u => u && u.prey === p);
+    if (prey) return prey;
+  }
   if (distance) {
     // Marque du chasseur : les régiments à Distance de ce joueur attaquent le régiment marqué.
     const marked = all.find(u => u && u.markedBy === p);
@@ -212,6 +216,7 @@ export function resolveCombat(ctx: Ctx, ending: PlayerId): void {
       u.justDeployed = false;
       u.ignoreArmor = false;
       u.tempAtk = 0; u.tempDebuffAtk = 0; u.tempArm = 0; u.tempIni = 0;
+      if (u.lingerCombats && --u.lingerCombats <= 0) { u.lingerCombats = 0; u.lingerAtk = 0; } // Rançon d'Âmes
       u.stunned = !!u.stunHold; // Chaînes de l'Abîme avec Offrande : reste sonné jusqu'au prochain tour du lanceur
       u.woundedByFrondeur = false;
       u.blinded = false;
@@ -275,6 +280,7 @@ export function attack(ctx: Ctx, a: Unit, target: Unit, mult = 1): boolean {
     atk += a.tempAtkVsPrey ?? 0; // Volée de Flèches
     for (const x of ctx.units(a.controller)) if (!x.brokenMorale) atk += (card(x.cardId).alliesAtkVsPrey as number | undefined) ?? 0; // Éclaireuse des fourrés
     if (a.leader && !a.brokenMorale) atk += (card(a.cardId).preyAtkWithLeader as number | undefined) ?? 0; // Archers de la Garde sylvestre
+    if (a.leader && !a.brokenMorale) atk += (card(a.leader).leaderAtkVsPrey as number | undefined) ?? 0; // Druide Ancien
   }
   // Maître des embuscades : + l'avance d'INI de l'attaquant sur sa cible.
   if (a.leader && !a.brokenMorale && card(a.leader).leaderIniDiffAtk) atk += Math.max(0, ctx.effectiveIni(a) - ctx.effectiveIni(target));
@@ -298,7 +304,11 @@ export function attack(ctx: Ctx, a: Unit, target: Unit, mult = 1): boolean {
   target.currentEnd = Math.max(0, target.currentEnd - damage);
   if (damage > 0 && card(a.cardId).woundInflictsFrondeurMill) target.woundedByFrondeur = true;
   const fearVal = a.brokenMorale ? 0 : ctx.fear(a);
-  const moralLoss = ctx.loseMoral(target, 1 + fearVal + (prime ? ((ad.primeMoral as number | undefined) ?? 0) : 0)); // Archère du premier trait
+  let wanted = 1 + fearVal + (prime ? ((ad.primeMoral as number | undefined) ?? 0) : 0); // Archère du premier trait
+  const capM = target.moralCapOwner ? ctx.turnMarker() : null; // Rempart de chair : 1 Moral au plus par tour par les attaques
+  if (capM !== null) wanted = Math.min(wanted, Math.max(0, 1 - (target.moralCapMarker === capM ? target.moralCapUsed ?? 0 : 0)));
+  const moralLoss = ctx.loseMoral(target, wanted);
+  if (capM !== null) { target.moralCapUsed = (target.moralCapMarker === capM ? target.moralCapUsed ?? 0 : 0) + moralLoss; target.moralCapMarker = capM; }
   ctx.checkBroken(target);
   ctx.emit({
     type: 'attack', attacker: a.uid, attackerCard: a.cardId, target: target.uid, targetCard: target.cardId,

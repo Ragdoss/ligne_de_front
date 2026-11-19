@@ -172,6 +172,15 @@ export interface Unit {
   stunHold?: PlayerId | null;
   /** Dernier carré : ne perd pas de Moral à la mort d'un allié jusqu'au prochain tour de ce joueur. */
   steadyOwner?: PlayerId | null;
+  /** Rempart de chair : ne perd pas plus de 1 Moral par les attaques à chaque tour, jusqu'au prochain tour de ce joueur. */
+  moralCapOwner?: PlayerId | null;
+  moralCapMarker?: number;
+  moralCapUsed?: number;
+  /** Rançon d'Âmes : ATK gagnée pour les `lingerCombats` prochains combats (jusqu'à la fin du prochain tour du lanceur). */
+  lingerAtk?: number;
+  lingerCombats?: number;
+  /** Tour où le Leader actuel a été attaché (Quartier-maître). */
+  leaderSince?: number;
   /** Tour d'arrivée en jeu (Vaisseau de chair). */
   bornTurn?: number;
   /** Seigneur des holocaustes : nombre de passages d'un porteur sacrifié à un Démon invoqué (chacun : +5 ATK, +1 Moral). */
@@ -195,6 +204,8 @@ export interface HandCard {
   freeCopy?: boolean;
   /** Reine des Basilics : le régiment arrive en jeu avec Minions. */
   minion?: boolean;
+  /** Capacocha : niveaux de Sacrifice ajoutés à ce régiment (Sacrifice niveau 1+ s'il n'en avait pas). */
+  sacrificeBonus?: number;
 }
 
 export interface Board {
@@ -280,7 +291,9 @@ export type ChoiceKind =
   | 'mirageMorts'       // Mirage des morts : Tactique Nomade de sa défausse à rejouer
   | 'interrogatoire'    // Interrogatoire : carte de la main adverse à taxer (ou défausser)
   | 'necropole'         // Basilic de la nécropole : régiment Nomade de sa défausse dont l'arrivée est rejouée
-  | 'reineBasilics';    // Reine des Basilics : Basilics de sa défausse à reprendre en main (autant qu'on veut)
+  | 'reineBasilics'     // Reine des Basilics : Basilics de sa défausse à reprendre en main (autant qu'on veut)
+  | 'pacteMineurCost'   // Pacte mineur : carte piochée qui coûtera 1 de moins
+  | 'forgeron';         // Forgeron de campagne : régiment qui gagne +5 ARM permanent
 
 export interface ChoiceOption {
   cardId?: string;
