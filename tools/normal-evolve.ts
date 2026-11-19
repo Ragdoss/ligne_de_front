@@ -7,9 +7,11 @@
 // Population de départ : le deck déjà retenu pour la clé, les decks optimisés de la faction (ou un croisement de ceux des deux factions pour un binôme).
 // Usage : npx tsx tools/normal-evolve.ts <clés, ex. empire,elfe+demons> [générations=6] [parties=24]
 // Variables d'environnement : NE_OPP=normal (adversaires : les 10 decks de src/data/optimizedNormal.ts au lieu des 12 du 25/10),
-// NE_BAN=id,id… (cartes interdites), NE_TAG=x (résultat dans reports/normal-<clé>-x.json), NE_SEED=deck.json (deck de départ en plus).
+// NE_BAN=id,id… (cartes interdites), NE_TAG=x (résultat dans reports/normal-<clé>-x.json), NE_SEED=deck.json (deck de départ en plus),
+// NE_FOCUS=id,id… ou NE_FOCUS=balance14 (une mutation sur deux tire ses cartes parmi celles-ci, pour les faire essayer).
 import { readFileSync, writeFileSync } from 'node:fs';
 import { chooseActionV3, STRONG_AI } from '../src/ai/heuristic';
+import { BALANCE_14 } from '../src/data/balance14';
 import { CARDS } from '../src/data/cards';
 import { OPTIMIZED_DECKS } from '../src/data/optimized';
 import { NORMAL_DECKS } from '../src/data/optimizedNormal';
@@ -23,6 +25,7 @@ const GENS = Number(process.argv[3] ?? 6);
 const N = Number(process.argv[4] ?? 24);
 const KEEP = 5, MUT = 6, CROSS = 3, MIN_EACH = 10;
 const BAN = new Set((process.env.NE_BAN ?? '').split(',').filter(Boolean));
+const FOCUS = new Set(process.env.NE_FOCUS === 'balance14' ? Object.keys(BALANCE_14) : (process.env.NE_FOCUS ?? '').split(',').filter(Boolean));
 const TAG = process.env.NE_TAG ? `-${process.env.NE_TAG}` : '';
 const OPPS: { faction: Faction; cards: string[]; id?: string }[] = process.env.NE_OPP === 'normal' ? NORMAL_DECKS : OPTIMIZED_DECKS;
 const EXTRA_SEED = process.env.NE_SEED ? (JSON.parse(readFileSync(process.env.NE_SEED, 'utf8')) as { cards: string[] }).cards : null;
@@ -53,7 +56,8 @@ function mutate(pool: string[], fs: Faction[], d0: string[]): string[] {
     for (let i = 0; i < k; i++) {
       const idx = Math.floor(rnd() * d.length);
       const band = pool.filter(id => low(id) === low(d[idx]!) && id !== d[idx] && count(d, id) < maxOf(id));
-      d[idx] = pick(band);
+      const focus = FOCUS.size && rnd() < 0.5 ? band.filter(id => FOCUS.has(id)) : [];
+      d[idx] = pick(focus.length ? focus : band);
     }
     if (valid(d, fs)) return d.sort();
   }
