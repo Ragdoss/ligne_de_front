@@ -131,7 +131,7 @@ export function Hand({ game, player, order, setOrder, canAct, hidden, selected, 
               <span className="h-lvl" title={`Niveau ${c.niveau}`}>{levelLabel(c.niveau)}</span>
               <div className="h-low">
                 <div className="h-name">{cardName(c.id)}</div>
-                <div className="h-type">{TYPE_LABEL[c.cardType]}{c.cardType === 'Regiment' ? ` · ${slotLabel(c)}` : ''}{h.freeCopy ? ' · copie gratuite' : ''}{h.minion ? ' · Minions' : ''}{h.sacrificeBonus ? ` · Sacrifice niv. ${((card(h.cardId).sacrificeMinLevel as number | undefined) ?? 0) + h.sacrificeBonus}+` : ''}</div>
+                <div className="h-type">{TYPE_LABEL[c.cardType]}{c.cardType === 'Regiment' ? ` · ${slotLabel(c)}` : ''}{h.freeCopy ? ' · copie gratuite' : ''}{h.minion ? ' · Minions' : ''}{h.buff ? ` · +${h.buff.atk ?? 0} ATK +${h.buff.end ?? 0} END +${h.buff.mor ?? 0} Moral` : ''}{h.sacrificeBonus ? ` · Sacrifice niv. ${((card(h.cardId).sacrificeMinLevel as number | undefined) ?? 0) + h.sacrificeBonus}+` : ''}</div>
                 <Summary c={c} />
               </div>
               <button type="button" className="mv l" aria-label="Décaler à gauche" onClick={e => { e.stopPropagation(); move(h.uid, i - 1); }}>‹</button>

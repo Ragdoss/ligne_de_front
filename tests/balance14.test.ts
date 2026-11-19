@@ -56,18 +56,18 @@ describe('Équilibrage 14', () => {
     expect(h.atk).toBe(base + 10);
   });
 
-  it('Rançon d’Âmes : +10 ATK par point, jusqu’à la fin du prochain tour du lanceur', () => {
+  it('Rançon d’Âmes : +15 ATK par point, jusqu’à la fin du prochain tour du lanceur', () => {
     let s = ready(quiet());
     const d = place(s, 'A', 'avant', 0, 'chien_infernal');
     const ctx0 = new Ctx(s);
     const base = ctx0.effectiveAtk(d);
     s = act(s, { type: 'play', handUid: give(s, 'A', 'rancon_ames'), target: slot('A', 'avant', 0) }).state;
     s = choose(s, o => o.value === 2);
-    expect(new Ctx(s).effectiveAtk(new Ctx(s).findUnit(d.uid)!)).toBe(base + 20);
+    expect(new Ctx(s).effectiveAtk(new Ctx(s).findUnit(d.uid)!)).toBe(base + 30);
     s = act(s, { type: 'endTurn' }).state; // combat de A
-    expect(new Ctx(s).findUnit(d.uid)!.lingerAtk).toBe(20);
+    expect(new Ctx(s).findUnit(d.uid)!.lingerAtk).toBe(30);
     s = act(s, { type: 'endTurn' }).state; // combat de B
-    expect(new Ctx(s).findUnit(d.uid)!.lingerAtk).toBe(20);
+    expect(new Ctx(s).findUnit(d.uid)!.lingerAtk).toBe(30);
     s = act(s, { type: 'endTurn' }).state; // combat suivant de A : fin du bonus
     expect(new Ctx(s).findUnit(d.uid)?.lingerAtk ?? 0).toBe(0);
   });
@@ -160,11 +160,51 @@ describe('Équilibrage 14', () => {
     expect(gains).toEqual([1, 1, 2]);
   });
 
-  it('Maître des pactes : un sacrifice fait aussi piocher (une fois par tour)', () => {
+  it('Maître des pactes : un sacrifice fait aussi piocher, et chaque déclenchement rapporte 1 ressource', () => {
     let s = ready(quiet());
     place(s, 'A', 'avant', 1, 'chien_infernal', { types: ['Démon'], leader: 'maitre_pactes', leaderOwner: 'A' });
     place(s, 'A', 'arriere', 0, 'cultiste');
+    const res = s.players.A.resource;
     const r = act(s, { type: 'play', handUid: give(s, 'A', 'rituel_sang_noir'), target: slot('A', 'arriere', 0) });
     expect(r.events.filter(e => e.type === 'draw' && e.source === 'maitre_pactes')).toHaveLength(1);
+    expect(r.state.players.A.resource).toBe(res - CARDS.rituel_sang_noir!.cout + 1); // seconde passe : +1 ressource
+  });
+
+  it('Maître des pactes (seconde passe) : plus de limite d’une fois par tour', () => {
+    let s = ready(quiet());
+    place(s, 'A', 'avant', 1, 'chien_infernal', { types: ['Démon'], leader: 'maitre_pactes', leaderOwner: 'A' });
+    let n = 0;
+    for (let i = 0; i < 2; i++) {
+      const r = act(s, { type: 'play', handUid: give(s, 'A', 'pacte_sang') });
+      n += r.events.filter(e => e.type === 'draw' && e.source === 'maitre_pactes').length;
+      s = r.state;
+    }
+    expect(n).toBe(2);
+  });
+
+  it('Dernier carré (seconde passe) : le Moral reste protégé après le tour suivant', () => {
+    let s = ready(quiet());
+    place(s, 'A', 'avant', 0, 'recrue_imp');
+    const victim = place(s, 'A', 'avant', 1, 'recrue_imp');
+    s = act(s, { type: 'play', handUid: give(s, 'A', 'dernier_carre') }).state;
+    s = act(act(s, { type: 'endTurn' }).state, { type: 'endTurn' }).state; // le tour de A revient
+    const mor = s.players.A.board.avant[0]!.currentMor;
+    const v = new Ctx(s).findUnit(victim.uid);
+    if (v) new Ctx(s).destroy(v, 'end');
+    expect(s.players.A.board.avant[0]!.currentMor).toBe(mor);
+  });
+
+  it('Dresseuse de basilics (seconde passe) : le Basilic cherché arrive avec +10 ATK, +5 END, +2 Moral', () => {
+    let s = ready(quiet());
+    s.players.B.discard = ['forteresse'];
+    s.players.A.deck = ['recrue_imp', 'basilics_oasis', 'recrue_imp'];
+    s = act(s, { type: 'play', handUid: give(s, 'A', 'dresseuse_basilics'), target: slot('A', 'arriere', 0) }).state;
+    s = choose(s, o => o.cardId === 'forteresse');
+    const h = s.players.A.hand.find(x => x.cardId === 'basilics_oasis')!;
+    expect(h.buff).toEqual({ atk: 10, end: 5, mor: 2 });
+    s = act(s, { type: 'play', handUid: h.uid, target: slot('A', 'avant', 2) }).state;
+    const u = s.players.A.board.avant[2]!;
+    expect(u.baseAtk).toBe(CARDS.basilics_oasis!.atk! + 10);
+    expect(u.maxMor).toBe(CARDS.basilics_oasis!.mor! + 2);
   });
 });

@@ -3,7 +3,7 @@
 
 export const BALANCE14_TEXT_FR: Record<string, { desc: string }> = {
   promotion: { desc: 'Choisis un Leader de ton deck et pioche-le, puis mélange ton deck.' },
-  dernier_carre: { desc: 'Tes régiments avant gagnent +15 ARM de façon permanente et, jusqu’à ton prochain tour, ne perdent pas de Moral à la mort d’un allié.' },
+  dernier_carre: { desc: 'Tes régiments avant gagnent +15 ARM et ne perdent plus de Moral à la mort d’un allié, de façon permanente.' },
   officier_releve: { desc: 'Si le porteur est détruit, ce Leader passe sur un régiment Empire voisin sans Leader au lieu de partir en défausse ; ce régiment regagne 1 Moral.' },
   serenite_foret: { desc: 'Ta défaite par lassitude recule de 5 points, 10 si tu contrôles un Élémentaux. Pioche 2 cartes.' },
   soin_simple: { desc: '+20 Endurance et +1 Moral à la cible.' },
@@ -14,8 +14,8 @@ export const BALANCE14_TEXT_FR: Record<string, { desc: string }> = {
   chamane_foret: { desc: '+25 END à l’arrivée puis +10 END à chaque fin de tour (des deux joueurs). Communion (un Elfe et un Élémentaux en jeu) : +10 ATK.' },
   druide_ancien: { desc: 'Le porteur attaque toujours la Proie en priorité s’il y en a une, avec +10 ATK. Quand il la détruit, il regagne 20 END et 2 Moral.' },
   garde_asura: { desc: 'Quand elle est sacrifiée, pioche 2 cartes.' },
-  maitre_pactes: { desc: 'La première fois à chaque tour que tu gagnes de la lassitude par l’effet d’une carte ou que tu sacrifies un régiment, pioche 1 carte.' },
-  rancon_ames: { desc: 'Cible un Démon allié : gagne X points de lassitude (X au choix, de 1 à 5) ; il gagne +10 ATK par point payé jusqu’à la fin de ton prochain tour.' },
+  maitre_pactes: { desc: 'Chaque fois que tu gagnes de la lassitude par l’effet d’une carte ou que tu sacrifies un régiment, pioche 1 carte et gagne 1 ressource.' },
+  rancon_ames: { desc: 'Cible un Démon allié : gagne X points de lassitude (X au choix, de 1 à 5) ; il gagne +15 ATK par point payé jusqu’à la fin de ton prochain tour.' },
   capacocha: { desc: 'Sacrifice niveau 3+. À son arrivée, (niveau du régiment sacrifié − 3) régiments au hasard de la main adverse gagnent Sacrifice niveau 1+ (ou +1 au niveau de leur Sacrifice). Chaque fois qu’un de tes régiments est sacrifié, l’adversaire gagne 2 lassitude.' },
   pacte_mineur: { desc: 'Pioche 1 carte. Offrande 3 : pioche 3 cartes à la place. Une des cartes piochées (au choix) coûte 1 de moins.' },
   pacte_succession: { desc: 'Le Leader d’un de tes régiments revient dans ta main. Offrande 1 : pioche 2 cartes. Offrande 2 : pioche 2 cartes et gagne 2 ressources.' },
@@ -25,7 +25,7 @@ export const BALANCE14_TEXT_FR: Record<string, { desc: string }> = {
   colporteur: { desc: 'À son arrivée, pioche 1 carte.' },
   puits_empoisonne: { desc: 'Durée de vie 2 tours. Au début du tour adverse, l’adversaire défausse la carte du dessus de sa pioche et une carte de sa main au hasard.' },
   sentinelles_oasis: { desc: 'Durée de vie 4 tours. Tes régiments Nomades gagnent +10 ARM.' },
-  dresseuse_basilics: { desc: 'À son arrivée, retire une carte de la défausse adverse, puis cherche dans ton deck un régiment Basilic de niveau égal ou inférieur et ajoute-le à ta main.' },
+  dresseuse_basilics: { desc: 'À son arrivée, retire une carte de la défausse adverse, puis cherche dans ton deck un régiment Basilic de niveau égal ou inférieur et ajoute-le à ta main : il gagnera +10 ATK, +5 END et +2 Moral en arrivant en jeu.' },
   ranconnement: { desc: 'L’adversaire défausse une carte de sa main (son choix) et perd 2 ressources au début de son prochain tour.' },
   chasseur_reliques: { desc: 'À son arrivée, choisis un régiment dans la défausse adverse et supprime-le : le Chasseur gagne de façon permanente son ATK et son ARM.' },
   tempete_lames: { desc: 'Ce tour-ci, tes régiments Nomades gagnent +10 ATK, et ceux avec Mirage +20 ATK à la place.' },

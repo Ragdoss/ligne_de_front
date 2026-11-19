@@ -6,7 +6,7 @@ import type { CardDef } from '../engine/types';
 export const BALANCE_14: Record<string, Partial<CardDef>> = {
   // --- Empire ---
   promotion: {},                                            // plus de Leader à défausser (moteur)
-  dernier_carre: {},                                        // +15 ARM permanent (moteur)
+  dernier_carre: {},                                        // +15 ARM permanent, Moral protégé pour de bon (moteur, seconde passe)
   officier_releve: { cout: 0, relayMor: 1 },                // coût 1 → 0 ; +1 Moral au régiment qui le reçoit
   maximilien: { cout: 4 },                                  // 6 → 4
   heraut_imperial: { niveau: 4 },                           // 5 → 4
@@ -22,8 +22,8 @@ export const BALANCE_14: Record<string, Partial<CardDef>> = {
   premiere_lame: { end: 70 },                               // 50 → 70 END
   // --- Démons ---
   garde_asura: { end: 30, onSacrificedDraw: 2 },            // 20 → 30 END ; sacrifiée : pioche 2 (au lieu de 1)
-  maitre_pactes: { bonusMor: 1, drawOnSacrifice: true },    // +1 Moral ; se déclenche aussi sur un sacrifice
-  rancon_ames: {},                                          // +10 ATK par point, jusqu'à la fin de ton prochain tour (moteur)
+  maitre_pactes: { bonusMor: 1, drawOnSacrifice: true, pactEveryTime: true, pactResource: 1 }, // +1 Moral ; aussi sur un sacrifice ; seconde passe : à chaque fois, +1 ressource
+  rancon_ames: { ranconAtkPerPoint: 15 },                  // +15 ATK par point (seconde passe ; 10 avant), jusqu'à la fin de ton prochain tour
   capacocha: { lassitudeOnOwnSacrifice: 2, handSacrificeTax: true }, // 1 → 2 lassitude ; arrivée : Sacrifice sur la main adverse
   pacte_mineur: {},                                         // une carte piochée coûte 1 de moins (moteur)
   pacte_succession: {},                                     // le Leader revient en main (moteur)
@@ -35,7 +35,7 @@ export const BALANCE_14: Record<string, Partial<CardDef>> = {
   puits_empoisonne: { poisonsOpponentTurn: { mill: 1, handDiscard: 0, randomHandDiscard: 1 } }, // + une carte de la main au hasard
   maitre_caravane: { cout: 0, bonusIni: 10 },               // coût 1 → 0 ; +10 INI
   sentinelles_oasis: { auraNomadeArm: 10 },                 // +5 → +10 ARM
-  dresseuse_basilics: {},                                   // le Basilic va en main (moteur)
+  dresseuse_basilics: { basilicBuff: { atk: 10, end: 5, mor: 2 } }, // le Basilic va en main ; seconde passe : il gagne +10 ATK, +5 END, +2 Moral
   cheikh_ossements: { niveau: 3 },                          // 4 → 3
   oasis_cachee: { cout: 0 },                                // 1 → 0
   ranconnement: {},                                         // les deux : défausse et 2 ressources perdues (moteur)

@@ -3,7 +3,7 @@
 import { Ctx, baseCard, card, opponentOf } from './ctx';
 import { applyOffrande, arrivalEffects, isBasilicRegiment, isDemonRegiment } from './play';
 import { CARD_TEXT_FR } from '../i18n/cards.fr';
-import type { ChoiceOption, PendingChoice } from './types';
+import type { ChoiceOption, HandCard, PendingChoice } from './types';
 
 const unique = (ids: string[]) => Array.from(new Set(ids));
 
@@ -211,7 +211,7 @@ export function resolveChoice(ctx: Ctx, index: number): string | null {
     case 'ranconAmes': {
       const u = ctx.findUnit(Number(c.data.uid))!;
       // Équilibrage 14 : +10 ATK par point, jusqu'à la fin du prochain tour du lanceur (ce combat, celui de l'adversaire, le suivant).
-      u.lingerAtk = (u.lingerAtk ?? 0) + 10 * o.value!;
+      u.lingerAtk = (u.lingerAtk ?? 0) + ((card(c.source).ranconAtkPerPoint as number | undefined) ?? 10) * o.value!;
       u.lingerCombats = 3;
       note('ranconAmes', { uid: u.uid, x: o.value });
       ctx.gainLassitude(p, o.value!, c.source);
@@ -362,7 +362,10 @@ export function resolveChoice(ctx: Ctx, index: number): string | null {
       });
       if (best < 0) { note('noTarget'); break; }
       const id = pl.deck.splice(best, 1)[0]!;
+      const n = pl.hand.length;
       ctx.deliverDrawn(p, id, c.source); // Équilibrage 14 : directement en main
+      const bf = card(c.source).basilicBuff as HandCard['buff'] | undefined; // seconde passe : +10 ATK, +5 END, +2 Moral
+      if (bf && pl.hand.length > n) pl.hand[pl.hand.length - 1]!.buff = { ...bf };
       note('dresseuse', { cardId: id });
       break;
     }

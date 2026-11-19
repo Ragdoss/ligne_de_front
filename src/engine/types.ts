@@ -172,6 +172,8 @@ export interface Unit {
   stunHold?: PlayerId | null;
   /** Dernier carré : ne perd pas de Moral à la mort d'un allié jusqu'au prochain tour de ce joueur. */
   steadyOwner?: PlayerId | null;
+  /** Dernier carré (équilibrage 14, seconde passe) : ne perd plus jamais de Moral à la mort d'un allié. */
+  steadyForever?: boolean;
   /** Rempart de chair : ne perd pas plus de 1 Moral par les attaques à chaque tour, jusqu'au prochain tour de ce joueur. */
   moralCapOwner?: PlayerId | null;
   moralCapMarker?: number;
@@ -206,6 +208,8 @@ export interface HandCard {
   minion?: boolean;
   /** Capacocha : niveaux de Sacrifice ajoutés à ce régiment (Sacrifice niveau 1+ s'il n'en avait pas). */
   sacrificeBonus?: number;
+  /** Dresseuse de basilics : bonus du régiment à son arrivée en jeu. */
+  buff?: { atk?: number; end?: number; mor?: number };
 }
 
 export interface Board {

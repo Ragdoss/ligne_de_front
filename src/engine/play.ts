@@ -183,7 +183,7 @@ export function playCard(ctx: Ctx, p: PlayerId, handUid: number, target?: SlotRe
   pl.hand.splice(hIdx, 1);
   ctx.emit({ type: 'cardPlayed', player: p, cardId: c.id, cost });
 
-  if (c.cardType === 'Regiment') deployRegiment(ctx, p, c, target!, h.minion);
+  if (c.cardType === 'Regiment') deployRegiment(ctx, p, c, target!, h.minion, h.buff);
   else if (c.cardType === 'Leader') attachLeader(ctx, p, c, ctx.unitAt(target!)!);
   else {
     if (!h.generated) ctx.discard(p, c.id, true);
@@ -232,9 +232,14 @@ function onTacticPlayed(ctx: Ctx, p: PlayerId): void {
   }
 }
 
-function deployRegiment(ctx: Ctx, p: PlayerId, c: CardDef, ref: SlotRef, minion = false): void {
+function deployRegiment(ctx: Ctx, p: PlayerId, c: CardDef, ref: SlotRef, minion = false, buff?: HandCard['buff']): void {
   const pl = ctx.player(p);
   const u = ctx.makeUnit(c.id, p);
+  if (buff) { // Dresseuse de basilics
+    u.baseAtk += buff.atk ?? 0;
+    if (buff.end) { u.maxEnd += buff.end; u.currentEnd += buff.end; }
+    if (buff.mor) { u.maxMor += buff.mor; u.currentMor += buff.mor; }
+  }
   if (minion) addKeyword(u, 'Minions'); // Basilic repris par la Reine des Basilics
   // Fracture (roguelite) : un tour sur deux, le régiment déployé perd définitivement 10 % de ses stats ; l'adversaire gagne 1 lassitude.
   if (ctx.fractured(p)) {
@@ -786,7 +791,7 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
     case 'mirageOasis': addKeyword(target!, 'Mirage 1'); note('mirageOasis', { uid: target!.uid }); break;
     // --- Vague 2 (suite) ---
     case 'dernierCarre': // Équilibrage 14 : l'ARM est permanente ; le Moral reste protégé jusqu'au prochain tour
-      for (const x of pl.board.avant) if (x) { x.baseArm += 15; x.steadyOwner = p; }
+      for (const x of pl.board.avant) if (x) { x.baseArm += 15; x.steadyForever = true; } // seconde passe : Moral protégé pour de bon
       break;
     case 'chargeDecisive':
       for (const x of ctx.units(p)) if (x.types.includes('Monté')) { x.tempAtk += 20; x.tempIni += 50; }

@@ -665,14 +665,21 @@ export class Ctx {
   }
   /** Maître des pactes : la première fois à chaque tour (lassitude gagnée par une carte, ou sacrifice), pioche 1 carte. */
   pactDraw(p: PlayerId, onSacrifice: boolean): void {
+    if (this.inPact) return; // une pioche du Maître des pactes ne le redéclenche pas (pioche vide, etc.)
     const pl = this.player(p);
     const marker = this.s.turn * 2 + (this.s.active === 'A' ? 0 : 1);
     const pact = this.units(p).find(x => x.leader && !x.brokenMorale && card(x.leader).drawOnFirstCardLassitude && (!onSacrifice || card(x.leader).drawOnSacrifice));
-    if (pact && pl.pactDrawnAt !== marker) {
-      pl.pactDrawnAt = marker;
-      this.draw(p, pact.leader!);
-    }
+    if (!pact) return;
+    const l = card(pact.leader!);
+    if (!l.pactEveryTime && pl.pactDrawnAt === marker) return; // équilibrage 14 (seconde passe) : plus de limite d'une fois par tour
+    pl.pactDrawnAt = marker;
+    this.inPact = true;
+    this.draw(p, pact.leader!);
+    this.inPact = false;
+    const res = l.pactResource as number | undefined;
+    if (res && !this.over) { pl.resource += res; this.emit({ type: 'resource', player: p, amount: res, source: pact.leader! }); }
   }
+  private inPact = false;
   /** Sérénité de la Forêt, Dryade corrompue : la défaite par lassitude arrive `n` points plus tard pour `p`. */
   raiseDefeatLimit(p: PlayerId, n: number, source: string): void {
     if (n <= 0 || !Number.isFinite(this.s.config.defeatLassitude[p])) return;
@@ -931,7 +938,7 @@ export class Ctx {
 
     const allies = this.units(p);
     for (const a of allies) {
-      const steady = (!!a.leader && !a.brokenMorale && !!card(a.leader).leaderNoAllyDeathMoralLoss) || !!a.steadyOwner; // Acolyte Damné, Dernier carré
+      const steady = (!!a.leader && !a.brokenMorale && !!card(a.leader).leaderNoAllyDeathMoralLoss) || !!a.steadyOwner || !!a.steadyForever; // Acolyte Damné, Dernier carré
       if (!minion && !steady) {
         const lost = this.loseMoral(a, 1);
         if (lost) this.emit({ type: 'moralLoss', uid: a.uid, cardId: a.cardId, amount: lost, source: 'allyDeath' });
