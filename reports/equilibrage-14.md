@@ -63,3 +63,15 @@ Test des decks aléatoires (tools/faction-card-impact.ts, 2 × 400 decks par fac
   Ralliement d’urgence             0 → 1
   Marchand de damnés               0 → -2
 ```
+
+## Seconde passe (19/11 au soir) : Dernier carré, Maître des pactes, Rançon d’Âmes, Dresseuse de basilics
+
+```
+empire : 50 % → 51 %
+  Dernier carré : -2 → -2
+demons : 30 % → 32 %
+  Maître des pactes : -7 → -4
+  Rançon d'Âmes : -3 → 1
+nomades : 22 % → 22 %
+  Dresseuse de basilics : -3 → -1
+```
