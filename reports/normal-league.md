@@ -144,3 +144,39 @@ defausse-opt      32 % (192) D-noRegiment 31%, D-lassitude 29%, V-noRegiment 20%
 ```
 
 Retenus : Empire v2 (35 → 53 %) et Démons v2 (45 → 62 %). Les 4 autres gardent leur deck (Elfes 59 contre 53, Empire + Démons 64 contre 53, Elfes + Démons 57 contre 52, Empire + Elfes 50 contre 45).
+
+## Génération du 19/11 après l’équilibrage 14, et decks toutes factions
+
+Nouvelle passe des 10 clés (suffixe -eq14 ; adversaires : decks du mode normal ; une mutation sur deux essaie une carte de l’équilibrage 14) et 3 recherches toutes factions (libre-<deck de départ>, 8 générations). Tournoi : 23 decks, 12 parties par paire.
+
+```
+3036 parties
+demons            66 % (264) V-lassitude 45%, D-lassitude 25%, V-noRegiment 21%, D-noRegiment 5%, D-emptyDeck 3%
+empire-demons-eq14  65 % (264) V-lassitude 56%, D-lassitude 18%, D-noRegiment 9%, V-noRegiment 9%, D-emptyDeck 8%, V-emptyDeck 0%
+libre-elfe        65 % (264) V-lassitude 41%, V-noRegiment 23%, D-lassitude 18%, D-noRegiment 9%, D-emptyDeck 8%
+empire-demons     64 % (264) V-lassitude 50%, D-lassitude 21%, V-noRegiment 12%, D-noRegiment 11%, D-emptyDeck 4%, V-emptyDeck 2%
+demons-eq14       63 % (264) V-lassitude 48%, D-lassitude 31%, V-noRegiment 15%, D-emptyDeck 3%, D-noRegiment 2%
+nomades           55 % (264) V-emptyDeck 41%, D-lassitude 20%, V-noRegiment 14%, D-noRegiment 13%, D-emptyDeck 12%, V-lassitude 1%
+libre-empire-demons  55 % (264) V-lassitude 33%, D-lassitude 27%, V-noRegiment 22%, D-emptyDeck 9%, D-noRegiment 8%
+elfe-demons       52 % (264) V-lassitude 30%, D-lassitude 23%, V-noRegiment 22%, D-emptyDeck 16%, D-noRegiment 9%
+elfe              51 % (264) V-lassitude 31%, D-lassitude 22%, D-emptyDeck 21%, V-noRegiment 19%, D-noRegiment 6%, V-emptyDeck 1%
+empire-elfe       50 % (264) V-noRegiment 25%, D-noRegiment 25%, V-lassitude 25%, D-emptyDeck 13%, D-lassitude 12%
+empire-eq14       48 % (264) V-lassitude 36%, D-emptyDeck 22%, D-lassitude 19%, D-noRegiment 11%, V-noRegiment 11%, V-emptyDeck 1%
+libre-nomades     48 % (264) V-emptyDeck 36%, D-lassitude 23%, D-noRegiment 15%, D-emptyDeck 13%, V-noRegiment 11%, V-lassitude 1%
+elfe-demons-eq14  47 % (264) D-lassitude 31%, V-lassitude 31%, V-noRegiment 16%, D-emptyDeck 13%, D-noRegiment 10%, V-emptyDeck 0%
+elfe-eq14         46 % (264) V-lassitude 31%, D-lassitude 30%, D-emptyDeck 18%, V-noRegiment 14%, D-noRegiment 7%
+empire-elfe-eq14  46 % (264) V-lassitude 33%, D-lassitude 29%, D-emptyDeck 18%, V-noRegiment 10%, D-noRegiment 7%, V-emptyDeck 2%
+elfe-nomades-eq14  46 % (264) V-emptyDeck 37%, D-lassitude 22%, D-noRegiment 17%, D-emptyDeck 14%, V-noRegiment 8%, V-lassitude 1%
+elfe-nomades      45 % (264) V-emptyDeck 36%, D-lassitude 23%, D-noRegiment 16%, D-emptyDeck 15%, V-noRegiment 9%
+empire            44 % (264) V-lassitude 31%, D-lassitude 25%, D-emptyDeck 22%, V-noRegiment 11%, D-noRegiment 9%, V-emptyDeck 2%
+demons-nomades-eq14  44 % (264) V-emptyDeck 31%, D-lassitude 24%, D-noRegiment 22%, V-noRegiment 10%, D-emptyDeck 10%, V-lassitude 2%
+demons-nomades    41 % (264) V-emptyDeck 31%, D-noRegiment 25%, D-lassitude 23%, D-emptyDeck 11%, V-noRegiment 9%, V-lassitude 1%
+empire-nomades    39 % (264) V-emptyDeck 26%, D-noRegiment 21%, D-lassitude 21%, D-emptyDeck 19%, V-noRegiment 8%, V-lassitude 5%
+nomades-eq14      39 % (264) D-noRegiment 31%, V-emptyDeck 28%, D-lassitude 18%, D-emptyDeck 13%, V-noRegiment 10%
+empire-nomades-eq14  34 % (264) D-lassitude 27%, V-emptyDeck 27%, D-noRegiment 23%, D-emptyDeck 16%, V-noRegiment 5%, V-lassitude 2%
+
+```
+
+Ajoutés au menu à côté des anciens (reports/normal-added.json) : Empire + Démons, Empire, Elfes + Nomades et Démons + Nomades du 19/11 (meilleurs que leur ancien deck), et les 3 decks toutes factions.
+
+Cartes de l’équilibrage 14 retenues par les 10 nouveaux decks (exemplaires) : Ralliement d’urgence 5, Cheikh des ossements 3, Héraut impérial 3, Veilleur d’Os 3, Rançonnement 2, puis une fois Officier de relève, Promotion, Capacocha, Volez le ravitaillement, Maximilien, Forgeron de campagne, Maître de Caravane, Puits empoisonné, Brise du Matin, Première Lame.
