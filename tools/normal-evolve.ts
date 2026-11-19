@@ -8,7 +8,7 @@
 // Usage : npx tsx tools/normal-evolve.ts <clés, ex. empire,elfe+demons> [générations=6] [parties=24]
 // Variables d'environnement : NE_OPP=normal (adversaires : les 10 decks de src/data/optimizedNormal.ts au lieu des 12 du 25/10),
 // NE_BAN=id,id… (cartes interdites), NE_TAG=x (résultat dans reports/normal-<clé>-x.json), NE_SEED=deck.json (deck de départ en plus),
-// NE_FOCUS=id,id… ou NE_FOCUS=balance14 (une mutation sur deux tire ses cartes parmi celles-ci, pour les faire essayer).
+// NE_OUT=dossier (où écrire les résultats, reports par défaut), NE_FOCUS=id,id… ou NE_FOCUS=balance14 (une mutation sur deux tire ses cartes parmi celles-ci, pour les faire essayer).
 import { readFileSync, writeFileSync } from 'node:fs';
 import { chooseActionV3, STRONG_AI } from '../src/ai/heuristic';
 import { BALANCE_14 } from '../src/data/balance14';
@@ -130,6 +130,6 @@ for (const key of KEYS) {
     pop.sort((a, b) => b.wins / b.games - a.wins / a.games);
     const top = pop.slice(0, 3);
     console.log(`${key} génération ${gen + 1}/${GENS} : meilleur ${Math.round((100 * top[0]!.wins) / top[0]!.games)} % (${top[0]!.games} parties), top 3 ${top.map(x => Math.round((100 * x.wins) / x.games)).join('/')} % — ${Math.round((Date.now() - t0) / 1000)} s`);
-    writeFileSync(`reports/normal-${key.replace('+', '-')}${TAG}.json`, JSON.stringify({ key, opp: process.env.NE_OPP === 'normal' ? 'normal' : '25/10', ban: [...BAN], faction: mainFaction(top[0]!.deck, fs), generation: gen + 1, best: top.map(x => ({ deck: x.deck, rate: x.wins / x.games, games: x.games })) }, null, 1) + '\n');
+    writeFileSync(`${process.env.NE_OUT ?? 'reports'}/normal-${key.replace('+', '-')}${TAG}.json`, JSON.stringify({ key, opp: process.env.NE_OPP === 'normal' ? 'normal' : '25/10', ban: [...BAN], faction: mainFaction(top[0]!.deck, fs), generation: gen + 1, best: top.map(x => ({ deck: x.deck, rate: x.wins / x.games, games: x.games })) }, null, 1) + '\n');
   }
 }

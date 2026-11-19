@@ -2,7 +2,7 @@
 // commençant à tour de rôle, IA forte des deux côtés. Option --patch balance/x.json : valeurs de cartes d'essai.
 // Option --only <texte> : seulement les paires dont un des decks contient ce texte (ex. --only nomades).
 // Variables d'environnement : NL_V2=tag (ajoute les decks reports/normal-<id>-<tag>.json sous l'id <id>-<tag>),
-// NL_EXTRA=deck.json,deck.json (decks { id, faction, cards } en plus).
+// NL_DIR=dossier de ces fichiers (reports par défaut), NL_EXTRA=deck.json,deck.json (decks { id, faction, cards } en plus).
 // Usage : npx tsx tools/normal-league.ts [parties par paire=20] [shard=0] [nShards=1] [--patch fichier] [--only texte]
 //         → une ligne JSON par partie { a, b, g, first, winner, reason, turn } sur stdout
 import { existsSync, readFileSync } from 'node:fs';
@@ -21,7 +21,7 @@ type D = { id: string; faction: Faction; cards: string[] };
 const DECKS: D[] = [...NORMAL_DECKS];
 const TAG = process.env.NL_V2;
 if (TAG) for (const d of NORMAL_DECKS) {
-  const f = `reports/normal-${d.id}-${TAG}.json`;
+  const f = `${process.env.NL_DIR ?? 'reports'}/normal-${d.id}-${TAG}.json`;
   if (!existsSync(f)) continue;
   const r = JSON.parse(readFileSync(f, 'utf8')) as { faction: Faction; best: { deck: string[] }[] };
   DECKS.push({ id: `${d.id}-${TAG}`, faction: r.faction, cards: r.best[0]!.deck });
