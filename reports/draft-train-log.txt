@@ -1,0 +1,12 @@
+A 1/8 (6 min) : 384 decks, écart moyen des notes 2.59 ; en tête : archere_premier_trait 8.9, elem_feu 8.7, elem_eau 8.2, premiere_lame 7.3, elem_terre 7.2, coup_avance 7.1, veterans_ligne 6.9, chamane_foret 6.8
+A 2/8 (12 min) : 384 decks, écart moyen des notes 1.11 ; en tête : elem_feu 8.8, elem_eau 8.4, danseuses_lames 8.3, clerc_foret 7.8, archere_premier_trait 7.7, veterans_ligne 7.5, eveil_elementaire 7, archers_garde_sylvestre 6.4
+A 3/8 (18 min) : 384 decks, écart moyen des notes 0.93 ; en tête : veterans_ligne 7.8, clerc_foret 7.7, elem_feu 7.5, danseuses_lames 7.2, eveil_elementaire 7, elem_eau 5.9, archers_garde_sylvestre 5.9, cavaliers_garde 5.8
+A 4/8 (24 min) : 384 decks, écart moyen des notes 1.39 ; en tête : veterans_ligne 6.7, veterans_louer 6.2, chevaliers_ordre 6.1, clerc_foret 5.6, imperatrice_octavia 5.5, archers_garde_sylvestre 5.2, cavaliers_garde 4.7, capitaine_mercenaire 4.7
+A 5/8 (29 min) : 384 decks, écart moyen des notes 0.93 ; en tête : chevaliers_ordre 6.9, veterans_ligne 5.5, cavaliers_garde 5.2, pacte_sang 4.9, gargouille_sentinelle 4.8, gardien_crepuscule 4.8, lancier_emp 4.7, gardienne_lumiere 4.6
+A 6/8 (35 min) : 384 decks, écart moyen des notes 1.04 ; en tête : chevaliers_ordre 7, gargouille_sentinelle 5.2, cavaliers_garde 4.3, dryades_guerisseuses 4, premiere_lame 4, esclave_guerrier 3.9, pacte_sang 3.8, garde_frontiere_sylvestre 3.8
+A 7/8 (42 min) : 384 decks, écart moyen des notes 1.01 ; en tête : gargouille_sentinelle 6, chevaliers_ordre 5.8, elem_eau 4.6, dryades_guerisseuses 4.5, gardienne_lumiere 4.3, danseuses_lames 4.2, gardien_ecorce 4, pretresse_saisons 3.9
+A 8/8 (48 min) : 384 decks, écart moyen des notes 1.04 ; en tête : chevaliers_ordre 8, gargouille_sentinelle 6.7, lieutenant 4.9, gardien_chaines 4.9, gardienne_lumiere 4.6, sergents_instructeurs 4.3, danseuses_lames 4.2, cuirassiers_lourds 4.2
+B (59 min) : libre : les meilleures cartes, sans faction 56 % ; deux factions, hors faction si note ≥ 4 50 % ; souple : hors faction si note ≥ 2 49 % ; notes nouvelles, réglages anciens 46 %
+C (70 min) : nouvelle IA 71 % contre l'ancienne
+fini (70 min)
+P (11 min) : ancienne 25 % (1152 parties, 3.5 factions) ; libre 60 % (1152 parties, 4.0 factions) ; fidèle 54 % (1152 parties, 3.8 factions) ; opportuniste 62 % (1152 parties, 3.9 factions)

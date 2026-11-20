@@ -44,16 +44,16 @@ describe('IA du draft : personnalités', () => {
     }
   });
 
-  it('« Fidèle » ne garde hors de ses deux factions que les cartes exceptionnelles ; « Libre » prend les meilleures', () => {
+  it('« Opportuniste » ne garde hors de ses deux factions que les bonnes cartes ; « Libre » prend les meilleures', () => {
     const st = draftAll(21);
     const picks = st.picks[2]!;
-    const fidele = PERSONALITIES.find(p => p.id === 'fidele')!;
+    const opp = PERSONALITIES.find(p => p.id === 'opportuniste')!;
     const [f1, f2] = topFactions(picks);
     const inMain = (id: string) => cardFactions(id).some(f => f === f1 || f === f2 || f === 'neutre');
-    const pool = picks.filter(id => inMain(id) || rating(id) >= fidele.offKeep).length;
-    const outside = buildAiDeck(picks, fidele).filter(id => !inMain(id));
-    // Hors de ses deux factions : seulement des cartes notées 4 ou plus, sauf s'il faut compléter le deck.
-    if (pool >= 40) expect(outside.every(id => rating(id) >= fidele.offKeep)).toBe(true);
+    const pool = picks.filter(id => inMain(id) || rating(id) >= opp.offKeep).length;
+    const outside = buildAiDeck(picks, opp).filter(id => !inMain(id));
+    // Hors de ses deux factions : seulement des cartes notées 1 ou plus, sauf s'il faut compléter le deck.
+    if (pool >= 40) expect(outside.every(id => rating(id) >= opp.offKeep)).toBe(true);
     expect(outside.every(id => CARDS[id])).toBe(true);
     const libre = PERSONALITIES.find(p => p.id === 'libre')!;
     const deck = buildAiDeck(picks, libre);

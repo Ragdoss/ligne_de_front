@@ -96,10 +96,11 @@ export const cardFactions = (id: string): Faction[] => {
  * 6e choix), et note à partir de laquelle une carte hors de ses deux factions entre dans son deck.
  */
 export interface DraftPersonality { id: string; name: string; desc: string; main: number; second: number; off: number; offKeep: number }
+// Les deux retenues font jeu égal (62 % et 60 % dans les mêmes drafts, l'ancienne IA 25 %) ; « Fidèle » (rester dans ses
+// deux factions sauf carte notée 4 ou plus) a été écartée : 54 %.
 export const PERSONALITIES: DraftPersonality[] = [
-  { id: 'libre', name: 'Libre', desc: 'prend les meilleures cartes, quelle que soit leur faction', main: 0.5, second: 0.25, off: 0, offKeep: -999 },
-  { id: 'fidele', name: 'Fidèle', desc: 'reste dans ses deux factions, sauf pour une carte exceptionnelle', main: 3, second: 1.5, off: -1, offKeep: 4 },
   { id: 'opportuniste', name: 'Opportuniste', desc: 'suit deux factions mais prend volontiers une bonne carte d’ailleurs', main: 1.5, second: 0.75, off: -0.25, offKeep: 1 },
+  { id: 'libre', name: 'Libre', desc: 'prend les meilleures cartes, quelle que soit leur faction', main: 0.5, second: 0.25, off: 0, offKeep: -999 },
 ];
 /** Personnalité par défaut (anciens drafts, « Deck proposé ») : la plus forte. */
 export const DEFAULT_PERSONALITY = 0;
