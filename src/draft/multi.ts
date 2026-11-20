@@ -2,7 +2,7 @@
 // L'hôte tient l'état et l'envoie à tout le monde ; les invités envoient leurs choix. Logique pure et déterministe.
 // Même déroulé que le draft solo : 6 paquets de 8 cartes, construction du deck, puis tournoi chacun contre chacun.
 import {
-  aiPick, buildAiDeck, newPack, PACKS, SCHEDULE, SEATS, simulateMatch, winsNeeded,
+  aiPick, buildAiDeck, drawPersonalities, newPack, PACKS, personalityOf, SCHEDULE, SEATS, simulateMatch, winsNeeded,
   type BestOf, type DraftState, type MatchResult,
 } from './draft';
 
@@ -25,7 +25,7 @@ export const matchKey = (a: number, b: number) => `${a}-${b}`;
 export function newMulti(seed: number, bestOf: BestOf, seats: MultiSeat[]): MultiDraft {
   const all = Array.from({ length: SEATS }, (_, i) => seats[i] ?? { name: '', avatar: '', human: false });
   const st: MultiDraft = {
-    version: 1, seed, rng: seed | 0, phase: 'pick', round: 0, packs: [], picks: [[], [], [], []], decks: [null, null, null, null], results: [], bestOf,
+    version: 1, seed, rng: seed | 0, phase: 'pick', round: 0, packs: [], picks: [[], [], [], []], decks: [null, null, null, null], results: [], bestOf, personalities: drawPersonalities(seed),
     multi: true, seats: all, chosen: all.map(() => null), mround: 0, scores: {},
   };
   st.packs = Array.from({ length: SEATS }, () => newPack(st));
@@ -46,7 +46,7 @@ function resolvePicks(st: MultiDraft): void {
     st.round++;
     if (st.round >= PACKS) {
       st.phase = 'build';
-      for (let s = 0; s < SEATS; s++) if (!st.seats[s]!.human) st.decks[s] = buildAiDeck(st.picks[s]!);
+      for (let s = 0; s < SEATS; s++) if (!st.seats[s]!.human) st.decks[s] = buildAiDeck(st.picks[s]!, personalityOf(st, s));
       startTournamentIfReady(st);
     } else st.packs = Array.from({ length: SEATS }, () => newPack(st));
   } else {
@@ -150,7 +150,7 @@ export function dropHuman(prev: MultiDraft, seat: number): MultiDraft {
   st.seats[seat] = { ...st.seats[seat]!, human: false, name: `${st.seats[seat]!.name} (ordinateur)` };
   st.chosen[seat] = null;
   if (st.phase === 'pick') resolvePicks(st);
-  if (st.phase === 'build') { if (!st.decks[seat]) st.decks[seat] = buildAiDeck(st.picks[seat]!); startTournamentIfReady(st); }
+  if (st.phase === 'build') { if (!st.decks[seat]) st.decks[seat] = buildAiDeck(st.picks[seat]!, personalityOf(st, seat)); startTournamentIfReady(st); }
   if (st.phase === 'tournament') {
     for (const [a, b] of SCHEDULE[st.mround] ?? []) {
       if (!st.seats[a]!.human && !st.seats[b]!.human && !resultOf(st, a, b)) st.results.push(simulateMatch(st, a, b, st.mround));

@@ -7,14 +7,16 @@
 //   Phase B — façon de drafter : plusieurs réglages (fidélité aux factions, cartes hors faction, construction du deck) se
 //     rencontrent dans les mêmes drafts ; le meilleur est gardé.
 //   Phase C — vérification : la nouvelle IA contre l'ancienne (notes et réglages actuels du jeu), deux sièges chacune.
+//   Personnalités (après coup) : quelques réglages et l'ancienne IA dans les mêmes drafts, avec les notes de result.json.
 // Usage : npx tsx tools/draft-train.ts [itérations A=8] [drafts par itération=96] [processus=2]
+//         npx tsx tools/draft-train.ts personas [drafts=192] [processus=2]
 //         (interne) npx tsx tools/draft-train.ts worker <job.json> <sortie.json>
 import { spawn } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { chooseActionV3, STRONG_AI } from '../src/ai/heuristic';
 import { CARDS } from '../src/data/cards';
 import { BASICS, DECK_MIN, HIGH_ADVISED, LVL1_MIN, newPack, PACKS, SEATS } from '../src/draft/draft';
-import { CARD_RATING } from '../src/draft/ratings';
+import { CARD_RATING } from './draft-ratings-v1';
 import { applyAction, createGame } from '../src/engine/game';
 import type { Faction, GameState } from '../src/engine/types';
 import { COLLECTIBLE } from '../src/profile/profile';
@@ -133,7 +135,9 @@ if (process.argv[2] === 'worker') {
 }
 
 // ---------- Coordination ----------
-const ITER = Number(process.argv[2] ?? 8), DRAFTS = Number(process.argv[3] ?? 96), PROCS = Number(process.argv[4] ?? 2);
+const PERSONAS = process.argv[2] === 'personas';
+const ARGS = process.argv.slice(PERSONAS ? 3 : 2);
+const ITER = Number(ARGS[0] ?? 8), DRAFTS = Number(ARGS[PERSONAS ? 0 : 1] ?? (PERSONAS ? 192 : 96)), PROCS = Number(ARGS[PERSONAS ? 1 : 2] ?? 2);
 const DIR = process.env.DT_DIR ?? 'reports/draft-train';
 if (!existsSync(DIR)) mkdirSync(DIR, { recursive: true });
 let seedCounter = 1;
@@ -234,4 +238,26 @@ async function main(): Promise<void> {
   writeFileSync(`${DIR}/result.json`, JSON.stringify({ best: { ...best, ratings: undefined }, ratings, phaseB: ranked, newVsOld: newRate, offCards, decksC: rsC.filter(x => x.policy === 0).length }, null, 1));
   log(`fini (${el()})`);
 }
-void main();
+/** Personnalités : chaque réglage, et l'ancienne IA comme repère, se rencontrent dans les mêmes drafts (sièges tournants). */
+async function personas(): Promise<void> {
+  const t0 = Date.now();
+  const { ratings } = JSON.parse(readFileSync(`${DIR}/result.json`, 'utf8')) as { ratings: Record<string, number> };
+  const base = { ...OLD, ratings };
+  const variants: Policy[] = [
+    OLD,
+    { ...base, name: 'libre', build: 'best', main: 0.5, second: 0.25, off: 0, offKeep: -999 },
+    { ...base, name: 'fidèle', build: 'best', off: -1, offKeep: 4 },
+    { ...base, name: 'opportuniste', build: 'best', main: 1.5, second: 0.75, off: -0.25, offKeep: 1 },
+  ];
+  const rot = (k: number) => [0, 1, 2, 3].map(s => (s + k) % 4);
+  const rs = await run(variants, Array.from({ length: DRAFTS }, (_, k) => ({ seed: 900001 + k * 7919, seats: rot(k) })), 'P');
+  // Taux de victoire de chacun sur l'ensemble de ses parties, et nombre moyen de factions dans ses decks.
+  const rates = variants.map((v, i) => ({ name: v.name, rate: winRate(rs, i), games: rs.filter(r => r.policy === i).reduce((a, r) => a + r.games, 0) }));
+  const nFac = variants.map((v, i) => {
+    const ds = rs.filter(r => r.policy === i).map(r => new Set(r.deck.flatMap(facs).filter(f => f !== 'neutre')).size);
+    return ds.reduce((a, b) => a + b, 0) / Math.max(1, ds.length);
+  });
+  writeFileSync(`${DIR}/personas.json`, JSON.stringify({ variants: variants.map(v => ({ ...v, ratings: undefined })), rates, nFac }, null, 1));
+  log(`P (${Math.round((Date.now() - t0) / 60000)} min) : ${rates.map((r, i) => `${r.name} ${Math.round(100 * r.rate)} % (${r.games} parties, ${nFac[i]!.toFixed(1)} factions)`).join(' ; ')}`);
+}
+if (PERSONAS) void personas(); else void main();

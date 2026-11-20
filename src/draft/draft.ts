@@ -46,6 +46,8 @@ export interface DraftState {
   bestOf?: BestOf;
   /** Ton match en cours : parties gagnées par toi et par l'adversaire. */
   current?: [number, number];
+  /** Personnalité de l'IA de chaque siège (index dans PERSONALITIES ; absent = anciens drafts, personnalité par défaut). */
+  personalities?: number[];
 }
 
 // ---------- Hasard déterministe ----------
@@ -74,27 +76,60 @@ export function newPack(st: { rng: number }): string[] {
 }
 
 export function newDraft(seed = Date.now(), bestOf: BestOf = 1): DraftState {
-  const st: DraftState = { version: 1, seed, rng: seed | 0, phase: 'pick', round: 0, packs: [], picks: [[], [], [], []], decks: [null, null, null, null], results: [], bestOf };
+  const st: DraftState = { version: 1, seed, rng: seed | 0, phase: 'pick', round: 0, packs: [], picks: [[], [], [], []], decks: [null, null, null, null], results: [], bestOf, personalities: drawPersonalities(seed) };
   st.packs = Array.from({ length: SEATS }, () => newPack(st));
   return st;
 }
 
 // ---------- IA de draft ----------
+// Notes et réglages appris par des drafts entre IA (tools/draft-train.ts, reports/draft-train.md, 20/11/2026).
 export const rating = (id: string) => CARD_RATING[id] ?? CARDS[id]!.niveau * 0.5;
+/** Factions d'une carte : les deux pour une carte bi-faction. */
+export const cardFactions = (id: string): Faction[] => {
+  const c = CARDS[id]!;
+  const fs = (c as { factions?: Faction[] }).factions;
+  return fs?.length ? fs : [c.faction];
+};
+
+/**
+ * Personnalité d'une IA de draft : bonus de choix pour sa 1re faction, sa 2e, malus pour les autres (à partir de son
+ * 6e choix), et note à partir de laquelle une carte hors de ses deux factions entre dans son deck.
+ */
+export interface DraftPersonality { id: string; name: string; desc: string; main: number; second: number; off: number; offKeep: number }
+export const PERSONALITIES: DraftPersonality[] = [
+  { id: 'libre', name: 'Libre', desc: 'prend les meilleures cartes, quelle que soit leur faction', main: 0.5, second: 0.25, off: 0, offKeep: -999 },
+  { id: 'fidele', name: 'Fidèle', desc: 'reste dans ses deux factions, sauf pour une carte exceptionnelle', main: 3, second: 1.5, off: -1, offKeep: 4 },
+  { id: 'opportuniste', name: 'Opportuniste', desc: 'suit deux factions mais prend volontiers une bonne carte d’ailleurs', main: 1.5, second: 0.75, off: -0.25, offKeep: 1 },
+];
+/** Personnalité par défaut (anciens drafts, « Deck proposé ») : la plus forte. */
+export const DEFAULT_PERSONALITY = 0;
+
+/** Personnalités des 4 sièges, tirées au hasard à partir de la graine (sans toucher au tirage des paquets). */
+export function drawPersonalities(seed: number): number[] {
+  let h = (seed | 0) ^ 0x5bd1e995;
+  return Array.from({ length: SEATS }, (_, i) => {
+    h = Math.imul(h ^ (h >>> 15), 0x85ebca6b) ^ Math.imul(i + 1, 0x9e3779b1);
+    h ^= h >>> 13;
+    return (h >>> 0) % PERSONALITIES.length;
+  });
+}
+export const personalityOf = (st: Pick<DraftState, 'personalities'>, seat: number): DraftPersonality =>
+  PERSONALITIES[st.personalities?.[seat] ?? DEFAULT_PERSONALITY] ?? PERSONALITIES[DEFAULT_PERSONALITY]!;
 
 /** Factions dominantes d'une pile de cartes (somme des notes, neutre exclu), de la plus forte à la plus faible. */
 export function topFactions(cards: string[]): Faction[] {
   const sum: Partial<Record<Faction, number>> = {};
-  for (const id of cards) { const f = CARDS[id]!.faction; if (f !== 'neutre') sum[f] = (sum[f] ?? 0) + 2 + rating(id); }
+  for (const id of cards) for (const f of cardFactions(id)) if (f !== 'neutre') sum[f] = (sum[f] ?? 0) + 2 + rating(id);
   return (Object.keys(sum) as Faction[]).sort((a, b) => sum[b]! - sum[a]!);
 }
 
-function aiScore(id: string, picks: string[], st: { rng: number }): number {
+function aiScore(id: string, picks: string[], st: { rng: number }, p: DraftPersonality): number {
   const c = CARDS[id]!;
   let s = rating(id) + next(st) * 1.5;
   if (picks.length >= 6) {
     const [f1, f2] = topFactions(picks);
-    if (c.faction === f1) s += 3; else if (c.faction === f2) s += 1.5; else if (c.faction !== 'neutre') s -= 2;
+    const fs = cardFactions(id);
+    if (fs.includes(f1!)) s += p.main; else if (f2 && fs.includes(f2)) s += p.second; else if (!fs.includes('neutre')) s += p.off;
   }
   const high = picks.filter(x => CARDS[x]!.niveau >= 4).length;
   if (c.niveau >= 4 && picks.length >= 20 && high < HIGH_ADVISED) s += 2;
@@ -102,9 +137,9 @@ function aiScore(id: string, picks: string[], st: { rng: number }): number {
 }
 
 export function aiPick(st: DraftState, seat: number): void {
-  const pack = st.packs[seat]!;
+  const pack = st.packs[seat]!, p = personalityOf(st, seat);
   let best = 0, bestScore = -Infinity;
-  pack.forEach((id, i) => { const s = aiScore(id, st.picks[seat]!, st); if (s > bestScore) { bestScore = s; best = i; } });
+  pack.forEach((id, i) => { const s = aiScore(id, st.picks[seat]!, st, p); if (s > bestScore) { bestScore = s; best = i; } });
   st.picks[seat]!.push(pack.splice(best, 1)[0]!);
 }
 
@@ -120,7 +155,7 @@ export function pickCard(prev: DraftState, index: number): DraftState {
     st.round++;
     if (st.round >= PACKS) {
       st.phase = 'build';
-      for (let s = 1; s < SEATS; s++) st.decks[s] = buildAiDeck(st.picks[s]!);
+      for (let s = 1; s < SEATS; s++) st.decks[s] = buildAiDeck(st.picks[s]!, personalityOf(st, s));
     } else st.packs = Array.from({ length: SEATS }, () => newPack(st));
   } else {
     // Rondes 1 et 3 : on passe à gauche ; ronde 2 : à droite.
@@ -133,6 +168,13 @@ export function pickCard(prev: DraftState, index: number): DraftState {
 // ---------- Decks ----------
 export function deckFaction(deck: string[]): Faction {
   return topFactions(deck)[0] ?? 'empire';
+}
+/** Factions d'un deck pour l'affichage : la principale, puis celles qui ont au moins 5 cartes (3 au plus). */
+export function deckFactions(deck: string[]): Faction[] {
+  const n: Partial<Record<Faction, number>> = {};
+  for (const id of deck) for (const f of cardFactions(id)) n[f] = (n[f] ?? 0) + 1;
+  const top = topFactions(deck);
+  return top.filter((f, i) => i === 0 || (n[f] ?? 0) >= 5).slice(0, 3);
 }
 
 export interface DraftDeckCheck { ok: boolean; problems: string[]; warnings: string[]; total: number; lvl1: number; high: number }
@@ -151,13 +193,26 @@ export function checkDraftDeck(deck: string[], picks: string[]): DraftDeckCheck 
   return { ok: problems.length === 0, problems, warnings, total: deck.length, lvl1, high };
 }
 
-/** Deck de l'IA : ses deux factions principales + neutre, complété par ses meilleures autres cartes puis des régiments de base. */
-export function buildAiDeck(picks: string[]): string[] {
+/**
+ * Deck de l'IA : les cartes de ses deux factions principales et les neutres, plus celles d'ailleurs dont la note atteint
+ * le seuil de sa personnalité ; d'abord les régiments de niveau 1 obligatoires, puis assez de niveaux 4-5, puis les
+ * meilleures cartes jusqu'à 40, enfin des régiments de base si besoin.
+ */
+export function buildAiDeck(picks: string[], p: DraftPersonality = PERSONALITIES[DEFAULT_PERSONALITY]!): string[] {
   const [f1, f2] = topFactions(picks);
-  const main = picks.filter(id => [f1, f2, 'neutre'].includes(CARDS[id]!.faction));
-  const rest = picks.filter(id => ![f1, f2, 'neutre'].includes(CARDS[id]!.faction)).sort((a, b) => rating(b) - rating(a));
-  const deck = main.slice();
-  for (const id of rest) { if (deck.length >= DECK_MIN) break; deck.push(id); }
+  const inMain = (id: string) => cardFactions(id).some(f => f === f1 || f === f2 || f === 'neutre');
+  const byRating = (a: string, b: string) => rating(b) - rating(a);
+  const left = picks.filter(id => inMain(id) || rating(id) >= p.offKeep).sort(byRating);
+  const others = picks.filter(id => !(inMain(id) || rating(id) >= p.offKeep)).sort(byRating);
+  const isLvl1Reg = (id: string) => CARDS[id]!.niveau === 1 && CARDS[id]!.cardType === 'Regiment';
+  const deck: string[] = [];
+  const take = (src: string[], i: number) => { deck.push(src[i]!); src.splice(i, 1); };
+  for (let i = 0; i < left.length && deck.length < LVL1_MIN;) { if (isLvl1Reg(left[i]!)) take(left, i); else i++; }
+  for (let i = 0; i < left.length && deck.filter(x => CARDS[x]!.niveau >= 4).length < HIGH_ADVISED;) {
+    if (CARDS[left[i]!]!.niveau >= 4) take(left, i); else i++;
+  }
+  while (deck.length < DECK_MIN && left.length) take(left, 0);
+  while (deck.length < DECK_MIN && others.length) take(others, 0);
   return autoFillBasics(deck, f1);
 }
 

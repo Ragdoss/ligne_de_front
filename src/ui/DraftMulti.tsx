@@ -11,7 +11,7 @@ import { hostRoomMulti, joinRoom, newRoomCode, PROTOCOL, webrtcAvailable, type L
 import { defeatCoins, type Profile } from '../profile/profile';
 import { Avatar } from './avatars';
 import { CardTile } from './CardTile';
-import { Builder, byFactionLevel, countOf, NO_DRAFT_FILTER, PackGrid, PicksSummary, SortChips, type DraftFilter, type DraftSort } from './Draft';
+import { Builder, byFactionLevel, countOf, deckFactionsLabel, NO_DRAFT_FILTER, PackGrid, PersonaTag, PicksSummary, SortChips, type DraftFilter, type DraftSort } from './Draft';
 import { GameScreen } from './GameScreen';
 import { showZoom, zoomProps } from './HoverZoom';
 import { cardName, FACTION_LABEL } from './labels';
@@ -300,6 +300,7 @@ export function MultiDraftScreen({ profile, onExit, gameOpts, reward }: {
         <TopBar title={`Draft à plusieurs — paquet ${st.round + 1} / ${PACKS}, choix ${pickNo} / ${PACK_SIZE}`} onBack={leave} />
         {status}
         <p className="small muted">{done ? `Choix enregistré. En attente de : ${waitingFor(i => st.chosen[i] === null)}.` : `Clique sur une carte pour la garder. Le reste du paquet part ${st.round % 2 === 0 ? 'à ta gauche' : 'à ta droite'}.`}</p>
+        {st.seats.some(x => !x.human) && <p className="small muted draft-opponents">Ordinateur : {st.seats.map((x, i) => (x.human ? null : <span key={i}>{x.name} <PersonaTag st={st} seat={i} /></span>))}</p>}
         <div className="draft-layout">
           <div>
             <SortChips value={sort} set={setSort} />
@@ -348,8 +349,8 @@ export function MultiDraftScreen({ profile, onExit, gameOpts, reward }: {
           {table.map((t, i) => (
             <tr key={t.seat} className={t.seat === me ? 'me' : undefined}>
               <td>{i + 1}</td>
-              <td><Avatar id={st.seats[t.seat]!.human ? st.seats[t.seat]!.avatar : FACTION_AVATAR[deckFaction(st.decks[t.seat]!)]!} size={32} /> {st.seats[t.seat]!.name}{st.seats[t.seat]!.human ? '' : ' 🤖'}</td>
-              <td>{FACTION_LABEL[deckFaction(st.decks[t.seat]!)]}</td>
+              <td><Avatar id={st.seats[t.seat]!.human ? st.seats[t.seat]!.avatar : FACTION_AVATAR[deckFaction(st.decks[t.seat]!)]!} size={32} /> {st.seats[t.seat]!.name}{st.seats[t.seat]!.human ? '' : <> 🤖 <PersonaTag st={st} seat={t.seat} /></>}</td>
+              <td>{deckFactionsLabel(st.decks[t.seat]!)}</td>
               <td>{t.wins}</td><td>{t.losses}</td>
             </tr>
           ))}

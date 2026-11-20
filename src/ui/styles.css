@@ -426,6 +426,8 @@ button.danger { background: var(--danger); border: 1px solid var(--danger); colo
 .draft-table th, .draft-table td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); }
 .draft-table td .avatar { margin-right: 6px; }
 .draft-table tr.me td { color: var(--brass-bright); font-weight: 700; }
+.persona { display: inline-block; font-size: .72rem; font-weight: 600; padding: 1px 7px; border-radius: 10px; border: 1px solid var(--brass); color: var(--brass-bright); vertical-align: middle; cursor: help; white-space: nowrap; }
+.draft-opponents { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: center; }
 .draft-results { margin: 0; padding-left: 18px; color: var(--parchment-dim); }
 .draft-final { font-family: 'Cinzel', serif; font-size: 1.15rem; color: var(--brass-bright); margin: 0; }
 

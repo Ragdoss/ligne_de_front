@@ -2,8 +2,8 @@
 import { useMemo, useState } from 'react';
 import { CARDS } from '../data/cards';
 import {
-  AI_AVATARS, AI_NAMES, FACTION_AVATAR, BASICS, buildAiDeck, checkDraftDeck, deckFaction, DECK_MIN, humanGameFirst, newDraft, nextOpponent, PACK_SIZE, PACKS, pickCard,
-  recordHumanGame, SCHEDULE, standings, winsNeeded, type BestOf, type DraftState,
+  AI_AVATARS, AI_NAMES, FACTION_AVATAR, BASICS, buildAiDeck, checkDraftDeck, deckFaction, deckFactions, DECK_MIN, humanGameFirst, newDraft, nextOpponent, PACK_SIZE, PACKS, pickCard,
+  personalityOf, recordHumanGame, SCHEDULE, standings, winsNeeded, type BestOf, type DraftState,
 } from '../draft/draft';
 import { formatEvent } from '../i18n/log.fr';
 import { COINS_PER_WIN, defeatCoins, type Profile } from '../profile/profile';
@@ -18,6 +18,14 @@ import { TopBar } from './Screens';
 import draftBg from './assets/draft_bg.webp';
 
 const KEY = 'ligneDeFront.jeu.draft.v1';
+
+/** Factions d'un deck : « Empire + Elfes ». */
+export const deckFactionsLabel = (deck: string[]) => deckFactions(deck).map(f => FACTION_LABEL[f]).join(' + ');
+/** Étiquette de la personnalité d'une IA de draft (sa description au survol). */
+export function PersonaTag({ st, seat }: { st: Pick<DraftState, 'personalities'>; seat: number }) {
+  const p = personalityOf(st, seat);
+  return <span className="persona" title={`Personnalité : ${p.desc}`}>{p.name}</span>;
+}
 /** Bonus de pièces pour la première place du tournoi. */
 export const DRAFT_FIRST_BONUS = 10;
 
@@ -268,6 +276,7 @@ export function DraftScreen({ profile, onExit, gameOpts, reward, onMulti }: {
       <div className="camp">
         <TopBar title={`Draft — paquet ${st.round + 1} / ${PACKS}, choix ${pickNo} / ${PACK_SIZE}`} onBack={onExit} right={abandon} />
         <p className="small muted">Clique sur une carte pour la garder. Le reste du paquet part {st.round % 2 === 0 ? 'à ta gauche' : 'à ta droite'}.</p>
+        <p className="small muted draft-opponents">Tes adversaires : {[1, 2, 3].map(seat => <span key={seat}>{names[seat]} <PersonaTag st={st} seat={seat} /></span>)}</p>
         <div className="draft-layout">
           <div>
             <SortChips value={sort} set={setSort} />
@@ -317,8 +326,8 @@ export function DraftScreen({ profile, onExit, gameOpts, reward, onMulti }: {
           {table.map((t, i) => (
             <tr key={t.seat} className={t.seat === 0 ? 'me' : undefined}>
               <td>{i + 1}</td>
-              <td><Avatar id={avatars[t.seat]!} size={32} /> {names[t.seat]}</td>
-              <td>{FACTION_LABEL[deckFaction(st.decks[t.seat]!)]}</td>
+              <td><Avatar id={avatars[t.seat]!} size={32} /> {names[t.seat]}{t.seat > 0 && <> <PersonaTag st={st} seat={t.seat} /></>}</td>
+              <td>{deckFactionsLabel(st.decks[t.seat]!)}</td>
               <td>{t.wins}</td><td>{t.losses}</td>
             </tr>
           ))}
@@ -332,7 +341,7 @@ export function DraftScreen({ profile, onExit, gameOpts, reward, onMulti }: {
       {opp !== null && st.phase === 'tournament' && (
         <div className="choices row left">
           <button type="button" className="primary" onClick={() => setGame({ opp, key: Date.now(), first: humanGameFirst(st) })}>
-            {st.current ? `Partie ${st.current[0] + st.current[1] + 1} contre ${names[opp]} (match : ${st.current[0]} – ${st.current[1]})` : `Jouer la ronde ${round + 1} contre ${names[opp]} (${FACTION_LABEL[deckFaction(st.decks[opp]!)]}${(st.bestOf ?? 1) > 1 ? `, Bo${st.bestOf}` : ''})`}
+            {st.current ? `Partie ${st.current[0] + st.current[1] + 1} contre ${names[opp]} (match : ${st.current[0]} – ${st.current[1]})` : `Jouer la ronde ${round + 1} contre ${names[opp]} (${personalityOf(st, opp).name}, ${deckFactionsLabel(st.decks[opp]!)}${(st.bestOf ?? 1) > 1 ? `, Bo${st.bestOf}` : ''})`}
           </button>
         </div>
       )}
