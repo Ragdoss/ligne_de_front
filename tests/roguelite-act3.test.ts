@@ -100,8 +100,10 @@ describe('Acte 3', () => {
     expect(optionsFor({ ...run, node: 4 }).find(o => o.kind === 'miniboss')).toEqual(expect.objectContaining({ boss: 'reflet' }));
   });
   it('10 decks : les 6 paires et les 4 trios, de 45 cartes', () => {
-    expect(ACT3_DECKS.length).toBeGreaterThanOrEqual(2);
-    for (const d of ACT3_DECKS) { expect(d.cards).toHaveLength(45); expect(d.factions.length).toBeGreaterThanOrEqual(2); }
+    expect(ACT3_DECKS).toHaveLength(10);
+    expect(ACT3_DECKS.filter(d => d.factions.length === 2)).toHaveLength(6);
+    expect(ACT3_DECKS.filter(d => d.factions.length === 3)).toHaveLength(4);
+    for (const d of ACT3_DECKS) expect(d.cards).toHaveLength(45);
   });
   it('adversaire de l’acte 3 : niveau 3, 1 régiment de niveau 2 et 2 de niveau 3 en main', () => {
     const run = act3('a3b');
