@@ -31,7 +31,7 @@ export function Home({ profile, go }: { profile: Profile; go: (t: HomeTarget) =>
     ['online', 'Jouer en ligne', 'Contre un ami, de navigateur à navigateur (premier jet)'],
     ['draft', 'Draft à 4', 'Contre l’ordinateur ou entre amis en ligne (jusqu’à 4 joueurs), puis tournoi'],
     ['campaign', 'Campagne', 'Les campagnes solo et ta campagne en cours'],
-    ['roguelite', 'Roguelite (prototype)', 'Augustus contre les Titans : une run, des choix, une armée qui s’use'],
+    ['roguelite', 'Roguelite (prototype)', 'Les champions des Dieux contre les Titans : 3 actes, des choix, une armée qui s’use'],
     ['collection', 'Ma collection', 'Mes decks, mes cartes, ouverture de paquets'],
     ['options', 'Options', 'Taille de l’interface, vitesse du jeu…'],
   ];

@@ -24,7 +24,8 @@ const DECK_SAFE = 12;
 function unitValue(ctx: Ctx, u: Unit): number {
   const leader = u.leader ? 6 : 0;
   return ctx.effectiveAtk(u) * 0.6 + u.currentEnd * 0.15 + u.currentMor * 2 + ctx.effectiveArm(u) * 2 + leader
-    + (card(u.cardId).generatesResourceEachTurn ?? 0) * 6 + (u.keywords.includes('GenerateurRessource') ? 6 : 0);
+    + (card(u.cardId).generatesResourceEachTurn ?? 0) * 6 + (u.keywords.includes('GenerateurRessource') ? 6 : 0)
+    + (card(u.cardId).mindControlEachEnemyTurn ? 40 * (u.vieTours ?? 1) : 0); // Modifieur de l'esprit (roguelite) : un régiment pris par tour
 }
 
 /** Valeur d'une position du point de vue de `p` (plus c'est haut, mieux c'est). */
