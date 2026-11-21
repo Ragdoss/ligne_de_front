@@ -17,6 +17,7 @@ describe('Rôles des régiments', () => {
   it('exemples : Chamelier Monté, Lyra Archer et Élite, Garde-frontière sylvestre Humain (avec les races)', () => {
     expect(CARDS.chamelier!.types).toEqual(['Humain', 'Nomade', 'Monté']);
     expect(CARDS.lyra!.types).toEqual(['Elfe', 'Archer', 'Élite']);
+    expect(CARDS.sentinelle_chene!.types).toEqual(['Elfe', 'Élémentaux', 'Chevalier']);
     expect(CARDS.garde_frontiere_sylvestre!.types).toEqual(['Elfe', 'Humain', 'Empire']);
   });
   it('tous les régiments neutres de niveau 1 sont des Recrues', () => {

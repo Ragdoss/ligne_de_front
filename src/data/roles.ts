@@ -16,6 +16,7 @@ export const ROLES_ADDED: Record<string, string[]> = {
   duelliste_sylvestre: ['Élite'],
   gardienne_lumiere: ['Archer'],
   lyra: ['Archer', 'Élite'],
+  sentinelle_chene: ['Chevalier'],
   premiere_lame: ['Élite'],
   // --- Démons ---
   collecteur_ames: ['Magicien'],
