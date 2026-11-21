@@ -14,7 +14,8 @@ import { CAMPAIGN_EASE, scenarioGameSetup } from '../campaign/campaign';
 import { SCENARIOS } from '../campaign/campaigns';
 import { COURONNE_SCENARIOS } from '../campaign/couronne';
 import { ELF_SCENARIOS } from '../campaign/elfes';
-import { ACT2_DECKS } from './act2decks';
+import { ACT2_DECKS, type Act2Deck } from './act2decks';
+import { ACT3_DECKS } from './act3decks';
 import type { CampaignScenario } from '../campaign/types';
 import { keyFor } from '../profile/store';
 
@@ -61,19 +62,28 @@ export const ETENDARDS: Etendard[] = [
   { id: 'sceau', name: 'Sceau impérial', desc: 'Empire. Le premier Leader que tu joues à chaque tour coûte 1 de moins.', champion: 'augustus' },
   { id: 'fleche', name: 'Flèche de chasse', desc: 'Elfes. Au début de chacun de tes tours, s’il n’y a pas de Proie, le régiment adverse au Moral le plus bas devient la Proie.', champion: 'eldrin' },
   { id: 'chasseur', name: 'Bannière du chasseur insatiable', desc: 'Elfes. Quand une Proie est détruite, un régiment adverse au hasard perd 10 END.', champion: 'eldrin' },
+  // Nomades (Nathan, 21/11/2026).
+  { id: 'sablier', name: 'Sablier du Sultan', desc: 'Nomades. Au début de chacun de tes tours, l’adversaire défausse la première carte de sa pioche.', champion: 'sultan' },
+  { id: 'voile', name: 'Voile de mirage', desc: 'Nomades. Au début de chacun de tes tours, ton régiment au Moral le plus bas gagne Mirage 1.', champion: 'sultan' },
+  { id: 'fanion', name: 'Fanion des pillards', desc: 'Nomades. Tous tes régiments ont Pillage 1 (au moins).', champion: 'sultan' },
   { id: 'lame', name: 'Lame maudite', desc: '+5 ATK à tous tes régiments, mais +1 lassitude à chaque fin de ton tour.', risky: true },
 ];
 export const etendardOf = (id: string) => ETENDARDS.find(e => e.id === id)!;
 export const LASSITUDE_SHOP = 5;
 
 // ---------- Champions ----------
-export type ChampionId = 'augustus' | 'eldrin';
-export interface Champion { id: ChampionId; name: string; faction: Faction; crest: string; deck: () => string[]; unlock?: string }
+export type ChampionId = 'augustus' | 'eldrin' | 'sultan';
+export interface Champion { id: ChampionId; name: string; faction: Faction; crest: string; deck: () => string[]; unlock?: string; unlockHint?: string }
 export const CHAMPIONS: Champion[] = [
   { id: 'augustus', name: 'Augustus, le Dernier Empereur', faction: 'empire', crest: 'A', deck: () => COURONNE_SCENARIOS.cc1!.A.deckList!.slice() },
   // Débloqué par 3 Offrandes à l'entraînement ; deck de départ de la campagne Elfe (04/11/2026).
   { id: 'eldrin', name: 'Eldrin, le premier Bourgeon', faction: 'elfe', crest: 'E', deck: () => ELF_SCENARIOS.e1!.A.deckList!.slice(), unlock: 'champion:elfe' },
+  // Débloqué par la première victoire contre le boss de l'acte 1 ; deck de départ de la campagne Nomade (Nathan, 21/11/2026).
+  { id: 'sultan', name: 'Evvelin Hukumdar, le Sultan', faction: 'nomades', crest: 'S', deck: () => SCENARIOS.n1!.A.deckList!.slice(), unlock: 'champion:nomades',
+    unlockHint: 'bats le boss de l’acte 1' },
 ];
+/** Le Sultan se débloque en battant le boss de l'acte 1 (avec n'importe quel champion). */
+export const SULTAN_UNLOCK = 'champion:nomades';
 export const championOf = (id: ChampionId | undefined) => CHAMPIONS.find(c => c.id === (id ?? 'augustus'))!;
 export const shortName = (id: ChampionId | undefined) => championOf(id).name.split(',')[0]!;
 
@@ -86,9 +96,9 @@ export type NodeOption =
   | { kind: 'miniboss'; deck: string; boss?: MiniBossId }
   | { kind: 'event'; id: EventId }
   | { kind: 'marche' }
-  | { kind: 'boss'; deck: string; titan?: 'glissement' | 'fracture' };
+  | { kind: 'boss'; deck: string; titan?: 'glissement' | 'fracture' | 'discorde' };
 /** Mini-boss de l'acte 1 : l'Essence de la réalité ou les Fragments de réalité (le même pendant tout l'acte). */
-export type MiniBossId = 'essence' | 'fragments' | 'fracture' | 'convergence';
+export type MiniBossId = 'essence' | 'fragments' | 'fracture' | 'convergence' | 'reflet';
 export type EventId = 'camp' | 'entrainement';
 export type CardPurpose = 'retirer' | 'ameliorer' | 'humain' | 'elfe' | 'garde';
 /** Étapes à résoudre avant de choisir le nœud suivant. */
@@ -136,6 +146,8 @@ export interface RunState {
   over: null | { won: boolean; text: string };
   /** Incorruptible : le combat en cours est à rejouer après le résumé. */
   relaunch?: boolean;
+  /** Déblocages gagnés pendant la run (versés à la méta par l'écran, voir unlocksWon). */
+  newUnlocks?: string[];
 }
 export interface RunMeta {
   essence: number;
@@ -183,10 +195,17 @@ export function variantDef(rc: RunCard, upg: Record<string, number> = {}): CardD
     if (b.types?.includes('Élémentaux') && lvl('protecteur_foret')) { const p = 0.1 * lvl('protecteur_foret'); add('end', Math.round(((b.end as number) ?? 0) * p)); add('mor', Math.round(((b.mor as number) ?? 0) * p)); }
     if (b.types?.includes('Monté') && lvl('magister_equitum')) add('atk', Math.round(((b.atk as number) ?? 0) * 0.2 * lvl('magister_equitum')));
     if (b.niveau >= 4 && lvl('praefectus')) add('cout', -1);
+    // Sultan : Maître des Basilics, Caravanes du désert (régiments isolés).
+    if (b.types?.includes('Basilic') && lvl('maitre_basilics')) {
+      const k = lvl('maitre_basilics');
+      add('atk', Math.round(((b.atk as number) ?? 0) * 0.05 * k)); add('end', Math.round(((b.end as number) ?? 0) * 0.1 * k)); add('ini', Math.round(((b.ini as number) ?? 0) * 0.1 * k));
+    }
+    if ((b.slotType === 'isole' || (b.slotTypes as string[] | undefined)?.includes('isole')) && lvl('caravanes')) add('cout', -lvl('caravanes'));
   }
   if (b.cardType === 'Leader') {
     if (lvl('generalissime')) add('bonusPct', 20 * lvl('generalissime'));
     if (lvl('imperator')) add('cout', -1);
+    if (lvl('mirage_royal')) (d as unknown as Record<string, number>).leaderMirage = lvl('mirage_royal');
   }
   if (b.cardType === 'Tactique' && lvl('genie')) {
     const g = lvl('genie');
@@ -194,6 +213,8 @@ export function variantDef(rc: RunCard, upg: Record<string, number> = {}): CardD
   }
   for (const k of STATS) if (m[k] && typeof b[k] === 'number') (d as unknown as Record<string, number>)[k] = floored(b[k] as number, m[k]!);
   if (m.cout) d.cout = Math.max(0, Math.min(b.cout + 2, b.cout + m.cout));
+  // Fanion des pillards : tous les régiments ont au moins Pillage 1.
+  if (b.cardType === 'Regiment' && lvl('etd:fanion') && !(b.keywords ?? []).some(k => k.startsWith('Pillage '))) d.keywords = [...(b.keywords ?? []), 'Pillage 1'];
   if (rc.curse?.frag) (d as unknown as Record<string, number>).fragHits = rc.curse.frag;
   if (m.bonusPct) for (const k of BONUSES) { const v = b[k] as number | undefined; if (v) (d as unknown as Record<string, number>)[k] = floored(v, (v * m.bonusPct) / 100); }
   return d;
@@ -235,9 +256,21 @@ export const regenOf = (run: RunState) => 5 * (run.upg?.regeneration ?? 0);
 const REWARDS: RewardKind[] = ['or', 'or', 'essence', 'xp', 'offrandes', 'amelioration'];
 const EVENTS: EventId[] = ['camp', 'entrainement'];
 
+/** Decks adverses d'un acte (2 et 3), et clé d'option d'un deck tiré au hasard. */
+const ACT_DECKS: Record<number, { prefix: string; decks: Act2Deck[] }> = { 2: { prefix: 'a2', decks: ACT2_DECKS }, 3: { prefix: 'a3', decks: ACT3_DECKS } };
+const actDeckKey = (r: () => number, act: number) => { const a = ACT_DECKS[Math.min(act, 3)]!; return `${a.prefix}:${pickOne(r, a.decks).key}`; };
+/** Deck d'acte 2 ou 3 d'une clé d'option (« a2:empire », « a3:elfe+demons »). */
+const actDeckOf = (key: string): { act: number; deck: Act2Deck } | undefined => {
+  const m = /^a([23]):(.+)$/.exec(key);
+  const d = m ? ACT_DECKS[Number(m[1])]!.decks.find(x => x.key === m[2]) : undefined;
+  return d ? { act: Number(m![1]), deck: d } : undefined;
+};
+
 /** Le mini-boss de l'acte : tiré une fois pour l'acte (même mini-boss, même deck à chaque proposition). */
 export function miniBossFor(run: RunState): NodeOption {
   const r = rng(`${run.seed}|${run.act}|miniboss`);
+  // Acte 3 : le Titan du Reflet (Nathan, 21/11/2026).
+  if (run.act >= 3) return { kind: 'miniboss', boss: 'reflet', deck: actDeckKey(r, 3) };
   // Acte 2 : la Convergence (les trois mini-boss de l'acte 1 à la fois) ; deux autres viendront.
   if (run.act >= 2) return { kind: 'miniboss', boss: 'convergence', deck: `a2:${pickOne(r, ACT2_DECKS).key}` };
   const boss = pickOne(r, ['essence', 'fragments', 'fracture'] as const);
@@ -247,8 +280,11 @@ export function miniBossFor(run: RunState): NodeOption {
 export function optionsFor(run: RunState): NodeOption[] {
   const n = run.node + 1;
   const r = rng(`${run.seed}|${run.act}|${n}|options`);
-  const combat = (): NodeOption => ({ kind: 'combat', reward: pickOne(r, REWARDS), deck: run.act >= 2 && ACT2_DECKS.length ? `a2:${pickOne(r, ACT2_DECKS).key}` : pickOne(r, ACT1_DECKS) });
-  if (n > NODES_PER_ACT) return [run.act >= 2 ? { kind: 'boss', titan: 'fracture', deck: `a2:${pickOne(r, ACT2_DECKS).key}` } : { kind: 'boss', titan: 'glissement', deck: pickOne(r, BOSS_DECKS) }];
+  const combat = (): NodeOption => ({ kind: 'combat', reward: pickOne(r, REWARDS), deck: run.act >= 2 ? actDeckKey(r, run.act) : pickOne(r, ACT1_DECKS) });
+  if (n > NODES_PER_ACT) {
+    if (run.act >= 3) return [{ kind: 'boss', titan: 'discorde', deck: actDeckKey(r, 3) }];
+    return [run.act >= 2 ? { kind: 'boss', titan: 'fracture', deck: `a2:${pickOne(r, ACT2_DECKS).key}` } : { kind: 'boss', titan: 'glissement', deck: pickOne(r, BOSS_DECKS) }];
+  }
   const out: NodeOption[] = [];
   // Mini-boss : proposé à partir du 4e nœud tant qu'il n'est pas fait ; la 3e fois, il est la seule option.
   if (!run.miniBossDone && n >= 4) {
@@ -288,18 +324,18 @@ const NO_EASE = { ...CAMPAIGN_EASE, startResource: 0, lassitudeMul: 1, vitalEnd:
 const TITAN_OF: Partial<Record<Faction, string>> = { demons: 'titan_demon_ronge', elfe: 'titan_archere' };
 
 /** Deck adverse : celui du scénario, avec des cartes touchées par les Titans à la place de deux cartes. */
-function enemyDeck(run: RunState, scId: string): { faction: Faction; deck: string[]; label: string; act2?: boolean } {
+function enemyDeck(run: RunState, scId: string): { faction: Faction; deck: string[]; label: string; act: number } {
   const r = rng(`${run.seed}|${run.act}|${run.node}|deck`);
-  // Acte 2 : decks optimisés pour commencer au niveau 2 (un par faction, un par paire de factions).
-  const a2 = scId.startsWith('a2:') ? ACT2_DECKS.find(d => d.key === scId.slice(3)) : undefined;
-  const faction = a2 ? a2.factions[0]! : SCENARIOS[scId]!.B.faction;
-  const deck = a2 ? a2.cards.slice() : SCENARIOS[scId]!.B.deckList!.slice();
-  const add = [...(a2 ? a2.factions : [faction]).map(f => TITAN_OF[f]), 'titan_echo'].filter(Boolean) as string[];
+  // Actes 2 et 3 : decks optimisés pour commencer au niveau 2 (acte 2 : une faction ou une paire) ou 3 (acte 3 : une paire ou un trio).
+  const ad = actDeckOf(scId)?.deck;
+  const faction = ad ? ad.factions[0]! : SCENARIOS[scId]!.B.faction;
+  const deck = ad ? ad.cards.slice() : SCENARIOS[scId]!.B.deckList!.slice();
+  const add = [...(ad ? ad.factions : [faction]).map(f => TITAN_OF[f]), 'titan_echo'].filter(Boolean) as string[];
   for (const t of add) deck.splice(Math.floor(r() * deck.length), 1, t);
-  return { faction, deck, label: a2 ? a2.label : SCENARIOS[scId]!.B.label, act2: !!a2 };
+  return { faction, deck, label: ad ? ad.label : SCENARIOS[scId]!.B.label, act: actDeckOf(scId)?.act ?? 1 };
 }
 /** Nom de l'armée adverse d'une option de combat. */
-export const enemyLabel = (deckKey: string) => deckKey.startsWith('a2:') ? ACT2_DECKS.find(d => d.key === deckKey.slice(3))?.label ?? 'une armée' : SCENARIOS[deckKey]?.B.label ?? 'une armée';
+export const enemyLabel = (deckKey: string) => actDeckOf(deckKey)?.deck.label ?? SCENARIOS[deckKey]?.B.label ?? 'une armée';
 
 /** Le combat d'un nœud, sous la forme d'un scénario (règles affichées dans la bulle) et de la partie du moteur. */
 export function fight(run: RunState, o: NodeOption, seed: string | number): { sc: CampaignScenario; setup: GameSetup } {
@@ -330,12 +366,24 @@ export function fight(run: RunState, o: NodeOption, seed: string | number): { sc
       deckRules: { min: 0, text: 'Les trois épreuves de l’acte 1 à la fois. Ton Essence de la réalité (arrière) use tes régiments quand elle est attaquée ; des Fragments de réalité apparaissent chez l’adversaire (2 au plus) ; un de tes tours sur deux est fracturé. L’adversaire commence.' },
       intro: [{ who: '', text: 'Tout ce que les Titans ont déjà tenté se produit en même temps : la réalité se fend, s’effrite et se dérobe sous vos pas.' }],
       A: { ...base.A, start: { arriere: { '1': 'essence_realite' } } } };
+  } else if (kind === 'miniboss' && (o as { boss?: MiniBossId }).boss === 'reflet') {
+    sc = { ...base, title: `Acte ${run.act} — Mini-boss : le Titan du Reflet`,
+      deckRules: { min: 0, text: 'Chaque régiment que tu joues fait apparaître en face de lui une copie à 75 % de ses stats (si la case est libre). Le Titan ne pose ses régiments qu’en face des tiens. Le Titan du Reflet (isolé) fait perdre son camp s’il est détruit ; les victoires habituelles restent possibles, sauf « plus de régiments » pour lui. Tu commences.' },
+      intro: [{ who: '', text: 'Le champ de bataille se couvre d’un miroir immense. Chaque soldat qui s’avance y voit son double lui faire face.' }],
+      B: { ...base.B, start: { isole: 'titan_reflet' } },
+      mustSurvive: { B: 'titan_reflet' }, noRegimentDefeatFromTurn: { B: NEVER } };
   } else if (kind === 'miniboss') {
     sc = { ...base, title: `Acte ${run.act} — Mini-boss : l’Essence de la réalité`,
       deckRules: { min: 0, text: 'Ton Essence de la réalité (arrière) use définitivement tes régiments chaque fois qu’elle est attaquée. L’adversaire commence.' },
       intro: [{ who: '', text: 'Un Titan est proche : vous sentez l’essence même de la réalité en train d’être modifiée.' }],
       A: { ...base.A, start: { arriere: { '1': 'essence_realite' } } },
       B: { ...base.B, start: { avant: { '1': 'mercenaire_stagiaire', '2': 'mercenaire_stagiaire' } } } };
+  } else if (run.act >= 3) {
+    sc = { ...base, title: `Acte ${run.act} — Boss : le Titan de la Discorde`,
+      deckRules: { min: 0, text: 'Détruis le Titan de la Discorde (arrière 2). Un de tes régiments qui l’attaque pour la 3e fois passe de son côté. Son deck contient 10 « Manipulation des faibles » (il prend un de tes régiments jusqu’à ce que son Moral se brise) et 3 « Modifieur de l’esprit » (isolé : au début de chacun de tes tours, il prend un de tes régiments tant qu’il reste en jeu, 2 tours).' },
+      intro: [{ who: '', text: 'Des murmures courent dans les rangs. Les soldats se regardent de travers : qui, parmi eux, sert encore les Dieux ?' }],
+      B: { ...base.B, deckList: [...e.deck, ...Array(10).fill('manipulation_faibles'), ...Array(3).fill('modifieur_esprit')], start: { arriere: { '1': 'titan_discorde' } } },
+      mustSurvive: { B: 'titan_discorde' }, emptyDeckDefeat: { B: false }, defeatLassitude: { A: lim, B: NEVER }, noRegimentDefeatFromTurn: { B: NEVER } };
   } else if (run.act >= 2) {
     sc = { ...base, title: `Acte ${run.act} — Boss : le Titan de la Fracture`,
       deckRules: { min: 0, text: 'Détruis le Titan de la Fracture (arrière 2). À sa chute, le terrain se scinde en deux terrains de 3 avant / 2 arrière qui ne communiquent plus (ton régiment en arrière 2 est détruit), et deux Titans apparaissent, un sur chaque terrain. Détruis-les tous les deux pour gagner.' },
@@ -354,7 +402,9 @@ export function fight(run: RunState, o: NodeOption, seed: string | number): { sc
   if (mf) sc.levelThresholds = { A: [0, 4, 9, 16, 25, 50].map((t, i) => (i === 0 ? 0 : t - Math.min(mf, i + 1))) };
   const setup = scenarioGameSetup(sc, deckIds(run), seed, 0, NO_EASE);
   // Acte 2 : l'adversaire commence au niveau 2, avec 3 régiments de niveau 2 en main (au lieu de 3 de niveau 1).
-  if (e.act2) { setup.B = { ...setup.B, startRegimentLevel: 2 }; setup.scenario = { ...setup.scenario!, startLevel: { ...(setup.scenario?.startLevel ?? {}), B: 2 } }; }
+  // Acte 3 : niveau 3, avec 1 régiment de niveau 2 et 2 de niveau 3 en main.
+  if (e.act === 2) { setup.B = { ...setup.B, startRegimentLevel: 2 }; setup.scenario = { ...setup.scenario!, startLevel: { ...(setup.scenario?.startLevel ?? {}), B: 2 } }; }
+  if (e.act === 3) { setup.B = { ...setup.B, startRegimentLevels: [2, 3, 3] }; setup.scenario = { ...setup.scenario!, startLevel: { ...(setup.scenario?.startLevel ?? {}), B: 3 } }; }
   const has = (e: string) => (run.etendards ?? []).includes(e);
   const seuil = LASSITUDE_RULE === 'seuil';
   const mob = (run.upg?.mobilisation_initiale ?? 0) + (has('tambour') ? 1 : 0) + (seuil ? Math.floor(run.lassitude / FATIGUE_AID_STEP) : 0);
@@ -362,13 +412,17 @@ export function fight(run: RunState, o: NodeOption, seed: string | number): { sc
   setup.scenario = { ...setup.scenario!, startLassitude: { A: seuil ? 0 : run.lassitude }, ...(mob ? { startResource: { A: mob } } : {}),
     ...(has('etat_major') ? { startDraw: { A: 1 } } : {}), ...(has('sceau') ? { leaderSeal: { A: true } } : {}),
     ...(has('fleche') ? { huntArrow: { A: true } } : {}), ...(has('chasseur') ? { preyKillEnd: { A: 10 } } : {}),
+    ...(has('sablier') ? { turnMill: { A: 1 } } : {}), ...(has('voile') ? { mirageLowest: { A: 1 } } : {}),
+    ...(run.upg?.razzia ? { razzia: { A: run.upg.razzia } } : {}),
     ...(run.upg?.inepuisable ? { tacticDrawEvery: { A: run.upg.inepuisable >= 2 ? 2 : 3 } } : {}),
     ...(kind === 'boss' && run.act < 2 ? { glissement: { victim: 'A' as const, tactic: 'lutter_mouvement' } } : {}),
-    ...(kind === 'boss' && run.act >= 2 ? { fractureBoss: { pid: 'B' as const, titan: 'titan_fracture', shards: ['titan_eclat_vif', 'titan_eclat_massif'] } } : {}),
+    ...(kind === 'boss' && run.act === 2 ? { fractureBoss: { pid: 'B' as const, titan: 'titan_fracture', shards: ['titan_eclat_vif', 'titan_eclat_massif'] } } : {}),
+    ...(kind === 'boss' && run.act >= 3 ? { discorde: { pid: 'B' as const, titan: 'titan_discorde', switchAt: 3 } } : {}),
+    ...(kind === 'miniboss' && mb === 'reflet' ? { reflet: { pid: 'B' as const, pct: 75 } } : {}),
     ...(kind === 'miniboss' && ['fragments', 'convergence'].includes(mb) ? { fragments: { pid: 'B' as const, cardId: 'fragment_realite', max: 2 } } : {}),
     ...(kind === 'miniboss' && ['fracture', 'convergence'].includes(mb) ? { fracture: { victim: 'A' as const } } : {}) };
   // Niveaux d'avance du joueur (règle « niveau ») : l'adversaire reçoit un renfort neutre (Minions) dès le départ.
-  const ahead = startLevelOf(run.lassitude, sc.levelThresholds?.A ?? DEFAULT_LEVEL_THRESHOLDS) - (e.act2 ? 2 : 1);
+  const ahead = startLevelOf(run.lassitude, sc.levelThresholds?.A ?? DEFAULT_LEVEL_THRESHOLDS) - e.act;
   const help = LASSITUDE_RULE === 'niveau' ? AHEAD_HELP[Math.min(ahead, AHEAD_HELP.length) - 1] : undefined;
   if (help) {
     const zone = CARDS[help]!.slotType === 'arriere' ? 'arriere' : 'avant';
@@ -383,7 +437,7 @@ export function fight(run: RunState, o: NodeOption, seed: string | number): { sc
     }
   }
   // Qui commence : au hasard (reproductible), sauf règle du scénario : l'adversaire au mini-boss, le joueur contre le boss.
-  setup.first = kind === 'miniboss' && ['essence', 'convergence'].includes(mb) ? 'B' : kind === 'boss' ? 'A' : (rng(`${run.seed}|${run.act}|${run.node}|first|${seed}`)() < 0.5 ? 'A' : 'B');
+  setup.first = kind === 'miniboss' && ['essence', 'convergence'].includes(mb) ? 'B' : kind === 'boss' || (kind === 'miniboss' && mb === 'reflet') ? 'A' : (rng(`${run.seed}|${run.act}|${run.node}|first|${seed}`)() < 0.5 ? 'A' : 'B');
   return { sc, setup };
 }
 
@@ -424,16 +478,22 @@ export function afterFight(run: RunState, g: GameState): RunState {
   if (o.kind === 'boss') {
     next.xp += 10; next.essence += 5;
     lines.push('+10 Expérience, +5 Essence divine.');
-    if (next.act >= 2) {
-      next.over = { won: true, text: 'Les Titans de la Fracture sont tombés. L’acte 2 est gagné : c’est la fin du prototype.' };
-      next.steps = [{ kind: 'resume', title: 'Les Titans sont vaincus !', lines }];
+    if (next.act >= 3) {
+      next.over = { won: true, text: 'Le Titan de la Discorde est tombé : les armées des Dieux ne se déchireront plus. La run est gagnée !' };
+      next.steps = [{ kind: 'resume', title: 'Le Titan de la Discorde est vaincu !', lines }];
       return next;
     }
+    // Le Sultan se débloque à la première victoire contre le boss de l'acte 1.
+    if (next.act === 1) {
+      next.newUnlocks = [...(next.newUnlocks ?? []), SULTAN_UNLOCK];
+      lines.push('Evvelin Hukumdar, le Sultan, a vu ta victoire : il rejoint les champions des Dieux (s’il ne l’avait pas déjà fait).');
+    }
     // Acte suivant : la run continue avec la même lassitude.
+    const fallen = next.act === 1 ? 'Le Titan du Glissement s’effondre !' : 'Les Titans de la Fracture sont tombés !';
     next.act++; next.node = 0; next.miniBossDone = false; next.miniBossOffers = 0; next.eventThisAct = false; next.current = null;
     next.options = optionsFor(next);
     lines.push(`L’acte ${next.act} commence : tu gardes ta lassitude (${next.lassitude}), et tu perdras désormais à ${defeatAt(next)}.`);
-    next.steps = [{ kind: 'resume', title: 'Le Titan du Glissement s’effondre !', lines }, { kind: 'volontaires', round: 0 }, { kind: 'volontaires', round: 1 }];
+    next.steps = [{ kind: 'resume', title: fallen, lines }, { kind: 'volontaires', round: 0 }, { kind: 'volontaires', round: 1 }];
     return next;
   }
   if (o.kind === 'combat') {
@@ -460,6 +520,10 @@ export function afterFight(run: RunState, g: GameState): RunState {
   next.steps = [{ kind: 'resume', title: 'Victoire !', lines }, ...steps];
   return next;
 }
+/** Déblocages gagnés par ce combat (versés à la méta par l'écran). */
+export const unlocksWon = (before: RunState, after: RunState) => (after.newUnlocks ?? []).filter(u => !(before.newUnlocks ?? []).includes(u));
+/** Verse des déblocages à la méta (sans doublon). */
+export const withUnlocks = (meta: RunMeta, keys: string[]): RunMeta => (keys.some(k => !meta.unlocks.includes(k)) ? { ...meta, unlocks: [...meta.unlocks, ...keys.filter(k => !meta.unlocks.includes(k))] } : meta);
 /** Expérience gagnée par un combat (réserve commune à tous les champions, versée tout de suite, 04/11/2026). */
 export const xpWon = (before: RunState, after: RunState) => Math.max(0, after.xp - before.xp);
 /** Offrandes gagnées par ce nœud (versées à la méta par l'écran). */
@@ -652,6 +716,8 @@ export function loadMeta(): RunMeta {
       const m = { ...newMeta(), ...(JSON.parse(raw) as RunMeta) };
       // Avant Eldrin (04/11/2026), les améliorations d'Expérience étaient celles d'Augustus, sans préfixe.
       for (const u of UPGRADES) if (u.currency === 'xp' && m.upg[u.id] !== undefined) { m.upg[`augustus:${u.id}`] = m.upg[u.id]!; delete m.upg[u.id]; }
+      // Avant le Sultan (21/11/2026) : une run gagnée prouve que le boss de l'acte 1 a déjà été battu.
+      if (m.wins > 0 && !m.unlocks.includes(SULTAN_UNLOCK)) m.unlocks = [...m.unlocks, SULTAN_UNLOCK];
       return m;
     }
   } catch { /* rien */ }
@@ -709,6 +775,11 @@ export const UPGRADES: Upgrade[] = [
   { id: 'inepuisable', champions: ['eldrin'], currency: 'xp', name: 'Inépuisable', desc: 'Niveau 1 : toutes les 3 Tactiques jouées, pioche une carte. Niveau 2 : toutes les 2.', max: 2, cost: l => [8, 14][l]! },
   { id: 'protecteur_foret', champions: ['eldrin'], currency: 'xp', name: 'Protecteur de la forêt', desc: 'Tes régiments Élémentaux gagnent +10 % d’END et de Moral par niveau.', max: 5, cost: l => 4 + 2 * l },
   { id: 'fontaine', champions: ['eldrin'], currency: 'xp', name: 'Fontaine d’immortalité', desc: 'À chaque nœud, avant tout le reste, −1 lassitude par niveau.', max: 5, cost: l => 6 + 3 * l },
+  // Sultan (Nathan, 21/11/2026 ; noms et prix proposés par Claude).
+  { id: 'razzia', champions: ['sultan'], currency: 'xp', name: 'Razzia', desc: 'Quand l’adversaire défausse une carte (de sa main ou de sa pioche), il en défausse une de plus, au plus 1 fois par tour par niveau.', max: 3, cost: l => [8, 12, 16][l]! },
+  { id: 'maitre_basilics', champions: ['sultan'], currency: 'xp', name: 'Maître des Basilics', desc: 'Tes régiments Basilics gagnent +5 % d’ATK, +10 % d’END et +10 % d’INI par niveau.', max: 5, cost: l => 4 + 2 * l },
+  { id: 'caravanes', champions: ['sultan'], currency: 'xp', name: 'Caravanes du désert', desc: 'Tes régiments isolés coûtent 1 de moins par niveau.', max: 2, cost: l => [8, 14][l]! },
+  { id: 'mirage_royal', champions: ['sultan'], currency: 'xp', name: 'Mirage royal', desc: 'Quand tu joues un Leader, son porteur gagne Mirage 1 par niveau.', max: 2, cost: l => [8, 14][l]! },
 ];
 /** Clé d'enregistrement : les améliorations d'Expérience sont propres à chaque champion. */
 export const upgradeKey = (u: Upgrade, champ: ChampionId) => (u.currency === 'xp' ? `${champ}:${u.id}` : u.id);

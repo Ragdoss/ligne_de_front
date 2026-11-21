@@ -1,9 +1,9 @@
-// Mode roguelite — prototype de l'acte 1 (03/11/2026). La logique est dans src/roguelite/run.ts.
+// Mode roguelite (prototype de l'acte 1 le 03/11/2026 ; actes 2 et 3 ensuite). La logique est dans src/roguelite/run.ts.
 import { useState } from 'react';
 import type { GameState } from '../engine/types';
 import {
   addCard, afterFight, applyCards, chooseOption, closeRun, defeatAt, eligible, EVENT_TEXT, eventChoices, fight, isImproved, isTouched, loadMeta, loadRun,
-  marketOffers, LASSITUDE_RULE, fightDefeatAt, FATIGUE_AID_STEP, enemyLabel, xpWon, CHAMPIONS, championOf, shortName, upgradesFor, type ChampionId, newMeta, NODES_PER_ACT, etendardOf, UPGRADES, buyUpgrade, cannotBuy, upgradeLevel, newRun, nextNode, offrandesWon, promotions, registerRun, removeCard, resolveEvent, saveMeta, saveRun, variantId, volunteers,
+  marketOffers, LASSITUDE_RULE, SULTAN_UNLOCK, unlocksWon, withUnlocks, fightDefeatAt, FATIGUE_AID_STEP, enemyLabel, xpWon, CHAMPIONS, championOf, shortName, upgradesFor, type ChampionId, newMeta, NODES_PER_ACT, etendardOf, UPGRADES, buyUpgrade, cannotBuy, upgradeLevel, newRun, nextNode, offrandesWon, promotions, registerRun, removeCard, resolveEvent, saveMeta, saveRun, variantId, volunteers,
   LASSITUDE_SHOP, type CardPurpose, type NodeOption, type RunMeta, type RunState, type Step,
 } from '../roguelite/run';
 import { formatEvent } from '../i18n/log.fr';
@@ -25,10 +25,11 @@ const PURPOSE_TITLE: Record<CardPurpose, string> = {
 
 function optionText(o: NodeOption): { icon: string; title: string; text: string } {
   if (o.kind === 'combat') return { icon: '⚔', title: `Combat : ${enemyLabel(o.deck)}`, text: `Récompenses : de l’or, ${REWARD_LABEL[o.reward]} et 2 volontaires.` };
-  if (o.kind === 'miniboss') return { icon: '✦', title: o.boss === 'fragments' ? 'Mini-boss : les Fragments de réalité' : o.boss === 'fracture' ? 'Mini-boss : la Fracture de la réalité' : o.boss === 'convergence' ? 'Mini-boss : la Convergence' : 'Mini-boss : l’Essence de la réalité', text: 'Un adversaire plus fort, une règle spéciale. Récompenses : un Étendard, de l’or, de l’Essence divine, des volontaires, une promotion et une amélioration.' };
+  if (o.kind === 'miniboss') return { icon: '✦', title: o.boss === 'fragments' ? 'Mini-boss : les Fragments de réalité' : o.boss === 'fracture' ? 'Mini-boss : la Fracture de la réalité' : o.boss === 'convergence' ? 'Mini-boss : la Convergence' : o.boss === 'reflet' ? 'Mini-boss : le Titan du Reflet' : 'Mini-boss : l’Essence de la réalité', text: 'Un adversaire plus fort, une règle spéciale. Récompenses : un Étendard, de l’or, de l’Essence divine, des volontaires, une promotion et une amélioration.' };
   if (o.kind === 'event') return { icon: '❖', title: `Événement : ${EVENT_TEXT[o.id].title}`, text: 'Un choix, sans combat.' };
   if (o.kind === 'marche') return { icon: '⚖', title: 'Marchand', text: '5 offres : cartes, retrait, repos, amélioration, parfois un Étendard.' };
-  if (o.titan === 'fracture') return { icon: '☠', title: 'Boss : le Titan de la Fracture', text: 'Le Titan de l’acte 2 : à sa chute, le terrain se scinde et deux Titans apparaissent.' };
+  if (o.titan === 'discorde') return { icon: '☠', title: 'Boss : le Titan de la Discorde', text: 'Le Titan de l’acte 3 : il retourne tes régiments contre toi. Le vaincre gagne la run.' };
+  if (o.titan === 'fracture') return { icon: '☠', title: 'Boss : le Titan de la Fracture', text: 'Le Titan de l’acte 2 : à sa chute, le terrain se scinde et deux Titans apparaissent. Le vaincre ouvre l’acte 3.' };
   return { icon: '☠', title: 'Boss : le Titan du Glissement', text: 'Le Titan de l’acte 1. Le vaincre ouvre l’acte 2.' };
 }
 
@@ -157,9 +158,9 @@ export function RogueliteScreen({ gameOpts, live, onExit }: { gameOpts: GameOpts
   if (mode === 'home' || !run) {
     return (
       <div className="camp rl">
-        <TopBar title="Roguelite — prototype" onBack={onExit} />
+        <TopBar title="Roguelite" onBack={onExit} />
         <p>Tu es l’instrument des Dieux dans leur guerre contre les Titans. Les Titans corrompent la réalité et dressent les armées des Dieux les unes contre les autres.</p>
-        <p className="muted small">Prototype de l’acte 1 : 8 nœuds puis le Titan du Glissement. La lassitude est en partie gardée d’un combat à l’autre ; à {defeatAt({ act: 1 } as RunState)} de lassitude, la run est perdue. L’Essence divine et l’Expérience gagnées s’achètent en améliorations entre les runs. Pas encore d’Étendards.</p>
+        <p className="muted small">3 actes de 8 nœuds, chacun terminé par un Titan : le Glissement, la Fracture, puis la Discorde. La lassitude est en partie gardée d’un combat à l’autre ; la run est perdue à {defeatAt({ act: 1 } as RunState)} de lassitude à l’acte 1, {defeatAt({ act: 2 } as RunState)} à l’acte 2 et {defeatAt({ act: 3 } as RunState)} à l’acte 3. L’Essence divine et l’Expérience gagnées s’achètent en améliorations entre les runs.</p>
         <div className="rl-purse">
           <span className="pill">Essence divine <b>{meta.essence}</b></span>
           <span className="pill">Expérience <b>{meta.xp}</b></span>
@@ -173,11 +174,11 @@ export function RogueliteScreen({ gameOpts, live, onExit }: { gameOpts: GameOpts
             return (
               <button type="button" key={c.id} disabled={!open} className={`rl-champ-card${champ === c.id ? ' on' : ''}${open ? '' : ' locked'}`} onClick={() => { setChamp(c.id); setUpChamp(c.id); }}>
                 <div className="rl-crest">{open ? c.crest : '?'}</div><b>{c.name}</b>
-                <span className="muted small">{FACTION_LABEL[c.faction]}{open ? '' : ' · à débloquer par un événement'}</span>
+                <span className="muted small">{FACTION_LABEL[c.faction]}{open ? '' : c.unlockHint ? ` · à débloquer : ${c.unlockHint}` : ' · à débloquer par un événement'}</span>
               </button>
             );
           })}
-          {(['demons', 'nomades'] as const).map(f => (
+          {(['demons'] as const).map(f => (
             <div key={f} className="rl-champ-card locked"><div className="rl-crest">?</div><b>{FACTION_LABEL[f]}</b>
               <span className="muted small">À débloquer par un événement</span></div>
           ))}
@@ -200,6 +201,7 @@ export function RogueliteScreen({ gameOpts, live, onExit }: { gameOpts: GameOpts
                 <button type="button" onClick={() => setConfirmReset(false)}>Annuler</button>
               </>}
           {!meta.unlocks.includes('champion:elfe') && <button type="button" onClick={() => setMeta({ ...meta, unlocks: [...meta.unlocks, 'champion:elfe'] })}>Débloquer Eldrin (test)</button>}
+          {!meta.unlocks.includes(SULTAN_UNLOCK) && <button type="button" onClick={() => setMeta(withUnlocks(meta, [SULTAN_UNLOCK]))}>Débloquer le Sultan (test)</button>}
         </div>
       </div>
     );
@@ -243,7 +245,7 @@ export function RogueliteScreen({ gameOpts, live, onExit }: { gameOpts: GameOpts
                 <button type="button" className="primary" onClick={() => {
                   const o = run.current;
                   const next = afterFight(run, g);
-                  let m = { ...meta, offrandes: meta.offrandes + (g.over!.winner === 'A' ? offrandesWon(o) : 0), xp: meta.xp + xpWon(run, next) };
+                  let m = withUnlocks({ ...meta, offrandes: meta.offrandes + (g.over!.winner === 'A' ? offrandesWon(o) : 0), xp: meta.xp + xpWon(run, next) }, unlocksWon(run, next));
                   if (next.over) m = closeRun(m, next);
                   setMeta(m); setRun(next); setMode('run');
                 }}>Continuer</button>

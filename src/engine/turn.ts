@@ -17,6 +17,7 @@ export function endTurn(ctx: Ctx): void {
   pl.hand = pl.hand.filter(h => !h.freeCopy && !h.ephemeral); // + copies éphémères (Volée de Flèches)
   resolveCombat(ctx, ending);
   if (ctx.over) return;
+  ctx.settleControl(); // Manipulation des faibles, Modifieur de l'esprit, Titan de la Discorde
   // Prise de contrôle temporaire : les régiments empruntés retournent à leur propriétaire.
   ctx.returnBorrowed();
 
@@ -197,6 +198,10 @@ export function startTurn(ctx: Ctx, p: PlayerId): void {
   // Scénario : avancée du convoi et événements du tour (renforts, dialogues…).
   scenarioTurnStart(ctx, p);
   if (ctx.over) return;
+  // Modifieur de l'esprit (roguelite) : au début de ton tour, le régiment isolé adverse prend le contrôle d'un de tes régiments.
+  const foeIso = ctx.player(q).board.isole;
+  if (foeIso && card(foeIso.cardId).mindControlEachEnemyTurn) ctx.mindControl(q, foeIso);
+  ctx.settleControl();
 
   // Pioche. Main pleine (limite atteinte) : on défausse d'abord autant de cartes qu'on va en piocher (au choix),
   // puis on pioche — la pioche continue donc toujours de s'épuiser.

@@ -151,7 +151,11 @@ export interface Unit {
   /** Croissance : nombre de fois où le régiment a déjà grandi. */
   growthCount?: number;
   /** Prise de contrôle temporaire : rendu à `owner` à la fin du tour. */
-  borrowed?: { owner: PlayerId } | null;
+  /** Régiment pris à `owner` : rendu en fin de tour, ou (`until`) quand son Moral se brise / quand le régiment `until` quitte le jeu. */
+  borrowed?: { owner: PlayerId; until?: 'broken' | number } | null;
+  /** Roguelite, Titan de la Discorde : attaques de ce régiment contre le Titan ; passage de son côté à régler après le combat. */
+  discordeHits?: number;
+  discordeSwitch?: boolean;
   /** Propriétaire d'origine (carte volée pour de bon) : sa carte retourne dans cette défausse. */
   owner?: PlayerId;
   /** Marque du chasseur : les régiments à Distance de ce joueur l'attaquent ce tour-ci. */
@@ -258,6 +262,14 @@ export interface PlayerState {
   huntArrow?: boolean;
   /** Roguelite, Bannière du chasseur insatiable : Proie détruite → un régiment adverse au hasard perd N END. */
   preyKillEnd?: number;
+  /** Roguelite, Sablier du Sultan : au début de ses tours, l'adversaire défausse le dessus de sa pioche (N cartes). */
+  turnMill?: number;
+  /** Roguelite, Voile de mirage : au début de ses tours, son régiment au Moral le plus bas gagne Mirage N. */
+  mirageLowest?: number;
+  /** Roguelite, Razzia : chaque défausse adverse en entraîne une de plus, N fois par tour au plus (compteur du tour). */
+  razzia?: number;
+  razziaAt?: number;
+  razziaUsed?: number;
   /** Ressources perdues au début de son prochain tour (Rançonnement, Bourse de guerre). */
   resourcePenalty?: number;
   /** Avantage décisif : nombre d'exemplaires joués pour le combat de ce tour (repère de tour). */
@@ -406,6 +418,11 @@ export interface ScenarioRules {
   fracture?: { victim: PlayerId };
   /** Roguelite, boss de l'acte 2 : `titan` détruit → le terrain se scinde et `shards` apparaissent ; victoire quand ils sont tous détruits. */
   fractureBoss?: { pid: PlayerId; titan: string; shards: string[] };
+  /** Roguelite, boss de l'acte 3 : un régiment adverse qui attaque `titan` pour la `switchAt`-ième fois passe du côté de `pid`. */
+  discorde?: { pid: PlayerId; titan: string; switchAt: number };
+  /** Roguelite, mini-boss de l'acte 3 (Titan du Reflet) : chaque régiment joué par l'adversaire de `pid` crée en face une copie
+   *  à `pct` % de ses stats ; `pid` ne pose ses régiments qu'en face d'un régiment adverse. */
+  reflet?: { pid: PlayerId; pct: number };
 }
 export interface ScenarioSetup extends ScenarioRules {
   start?: Partial<Record<PlayerId, { avant?: Record<string, string>; arriere?: Record<string, string>; isole?: string }>>;
@@ -422,6 +439,10 @@ export interface ScenarioSetup extends ScenarioRules {
   tacticDrawEvery?: Partial<Record<PlayerId, number>>;
   huntArrow?: Partial<Record<PlayerId, boolean>>;
   preyKillEnd?: Partial<Record<PlayerId, number>>;
+  /** Roguelite (Sultan) : Sablier du Sultan, Voile de mirage, Razzia. */
+  turnMill?: Partial<Record<PlayerId, number>>;
+  mirageLowest?: Partial<Record<PlayerId, number>>;
+  razzia?: Partial<Record<PlayerId, number>>;
   /** Roguelite : lassitude de départ (le niveau suit). */
   startLassitude?: Partial<Record<PlayerId, number>>;
 }

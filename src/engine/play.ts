@@ -98,6 +98,9 @@ export function validFirstTarget(ctx: Ctx, p: PlayerId, c: CardDef, ref: SlotRef
   const sacrifice = (c.cardType === 'Regiment' && !!c.sacrificeMinLevel) || c.effect === 'rituelSang' || c.effect === 'executionExemplaire';
   if (sacrifice && u && ctx.s.config.noSacrifice?.includes(u.cardId)) return false;
   if (c.cardType === 'Regiment') {
+    // Titan du Reflet (roguelite) : son camp ne pose ses régiments qu'en face d'un régiment adverse.
+    const rf = ctx.s.scenario?.reflet;
+    if (rf && rf.pid === p && !ctx.unitAt({ player: opponentOf(p), zone: ref.zone, idx: ref.idx })) return false;
     const min = c.sacrificeMinLevel as number | undefined;
     if (min) return !!u && (c.slotTypes ?? [c.slotType]).includes(ref.zone) && u.niveau >= min; // invocation par sacrifice
     const zones = c.slotTypes ?? [c.slotType];
@@ -115,6 +118,7 @@ export function validFirstTarget(ctx: Ctx, p: PlayerId, c: CardDef, ref: SlotRef
   }
   // Prise de contrôle : régiment avant ou arrière (sans case libre de ton côté, il partira en défausse).
   if (c.needsFreeSlot && ref.zone === 'isole') return false;
+  if (c.targetNotBroken && u.brokenMorale) return false; // Manipulation des faibles
   const maxLvl = c.maxTargetLevel as number | undefined;
   if (maxLvl !== undefined && u.niveau > maxLvl) return false;
   switch (c.targetRule) {
@@ -298,6 +302,19 @@ function deployRegiment(ctx: Ctx, p: PlayerId, c: CardDef, ref: SlotRef, minion 
   }
   if (u.types.includes('Basilic') && ctx.units(p).some(x => card(x.cardId).grantsBasilicsArriveReady)) u.arrivesReady = true;
   ctx.setAt(ref, u);
+  // Titan du Reflet (roguelite) : une copie à 75 % de ses stats apparaît en face, si la case est libre.
+  const rf = ctx.s.scenario?.reflet;
+  if (rf && rf.pid === opponentOf(p) && ref.zone !== 'isole') {
+    const dest: SlotRef = { player: rf.pid, zone: ref.zone, idx: ref.idx };
+    if (!ctx.unitAt(dest)) {
+      const k = rf.pct / 100, m = ctx.makeUnit(c.id, rf.pid, true);
+      m.baseAtk = Math.round(u.baseAtk * k); m.baseArm = Math.round(u.baseArm * k); m.ini = Math.round(u.ini * k);
+      m.maxEnd = m.currentEnd = Math.max(1, Math.round(u.maxEnd * k)); m.maxMor = m.currentMor = Math.max(1, Math.round(u.maxMor * k));
+      m.keywords = u.keywords.slice();
+      ctx.setAt(dest, m);
+      ctx.emit({ type: 'effect', key: 'refletCopy', player: rf.pid, cardId: c.id, data: { uid: m.uid } });
+    }
+  }
   ctx.emit({ type: 'deployed', player: p, uid: u.uid, cardId: c.id, slot: ref });
   arrivalEffects(ctx, p, u, c.id, sacLevel);
   // Légion de Morvak : rejoue aussi l'effet d'arrivée du régiment sacrifié.
@@ -391,6 +408,8 @@ export function attachLeader(ctx: Ctx, p: PlayerId, c: CardDef, u: Unit): void {
   if (c.healOnAttach) ctx.heal(u, c.healOnAttach, 0, c.id);
   if (c.healMorOnAttach) ctx.heal(u, 0, c.healMorOnAttach, c.id);
   if (c.grantsKeywordOnAttach) addKeyword(u, c.grantsKeywordOnAttach);
+  const lm = c.leaderMirage as number | undefined; // Mirage royal (roguelite, Sultan)
+  if (lm) { u.keywords.push(`Mirage ${lm}`); ctx.emit({ type: 'effect', key: 'voileMirage', player: p, cardId: u.cardId, data: { uid: u.uid, n: lm } }); }
   const cm = c.communionMorOnAttach as number | undefined; // Prêtresse des saisons
   if (cm && ctx.communion(u.controller)) { u.maxMor += cm; u.currentMor += cm; }
   if (c.bonusNiveauOnAttach) u.niveau += c.bonusNiveauOnAttach;
@@ -761,6 +780,7 @@ function resolveTactic(ctx: Ctx, p: PlayerId, c: CardDef, t1?: SlotRef, t2?: Slo
       ctx.queueChoice('offrande', p, c.id, { x: (c.offrande as number) ?? 0, uid: target?.uid ?? null });
       break;
     case 'appat': ctx.takeControl(target!, p, true, c.id); break;
+    case 'manipulation': ctx.takeControl(target!, p, true, c.id, false, true); break; // Titan de la Discorde : jusqu'à ce que son Moral se brise
     case 'fuiteDunes': {
       const lvl = target!.niveau;
       ctx.discardLeader(target!);

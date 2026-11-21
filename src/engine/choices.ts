@@ -187,7 +187,7 @@ export function resolveChoice(ctx: Ctx, index: number): string | null {
       note('visionChosen', { chosen: o.cardId });
       break;
     case 'promotionDiscard':
-      ctx.discardFromHand(p, o.handUid!, c.source);
+      ctx.discardFromHand(p, o.handUid!, c.source, true);
       ctx.s.pending.unshift({ kind: 'promotionPick', player: p, source: c.source, options: null, data: {} });
       break;
     case 'promotionPick':
@@ -287,7 +287,7 @@ export function resolveChoice(ctx: Ctx, index: number): string | null {
     }
     case 'chuchoteur': {
       if (o.value === 1) { note('chuchoteurKeep'); break; }
-      ctx.mill(p, 1, c.source);
+      ctx.mill(p, 1, c.source, true);
       ctx.gainLassitude(p, 1, c.source);
       const left = Number(c.data.left) - 1;
       if (left > 0 && !ctx.over) ctx.s.pending.unshift({ ...c, options: null, data: { ...c.data, left } });
@@ -305,7 +305,7 @@ export function resolveChoice(ctx: Ctx, index: number): string | null {
     case 'placeControlled': {
       const u = ctx.findUnit(Number(c.data.uid));
       if (!u || u.controller === p) break;
-      ctx.placeControlled(u, p, { player: p, zone: o.slot!.zone, idx: o.slot!.idx }, c.data.temporary === 1, c.source);
+      ctx.placeControlled(u, p, { player: p, zone: o.slot!.zone, idx: o.slot!.idx }, c.data.temporary === 1, c.source, c.data.untilBroken === 1 ? 'broken' : undefined);
       if (c.data.fullMoral === 1) { u.currentMor = u.maxMor; u.brokenMorale = false; }
       break;
     }
@@ -319,7 +319,7 @@ export function resolveChoice(ctx: Ctx, index: number): string | null {
     }
     case 'marche':
       if (o.skip) break;
-      ctx.discardFromHand(p, o.handUid!, c.source);
+      ctx.discardFromHand(p, o.handUid!, c.source, true);
       if (!ctx.over) ctx.draw(p, c.source);
       {
         // Maître du bazar : le premier échange de chaque tour rapporte une ressource.

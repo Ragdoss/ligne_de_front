@@ -387,6 +387,13 @@ export function attack(ctx: Ctx, a: Unit, target: Unit, mult = 1): boolean {
     ctx.checkBroken(a);
     if (a.currentMor <= 0) ctx.destroy(a, 'moral');
   }
+  // Titan de la Discorde (roguelite) : à sa 3e attaque contre lui, le régiment passe de son côté (après le combat).
+  const dc = ctx.s.scenario?.discorde;
+  if (dc && !ctx.over && target.cardId === dc.titan && a.controller !== dc.pid && ctx.isAlive(a)) {
+    a.discordeHits = (a.discordeHits ?? 0) + 1;
+    if (a.discordeHits >= dc.switchAt) a.discordeSwitch = true;
+    ctx.emit({ type: 'effect', key: 'discordeHit', player: a.controller, cardId: a.cardId, data: { uid: a.uid, n: a.discordeHits, of: dc.switchAt } });
+  }
   return prime;
 }
 

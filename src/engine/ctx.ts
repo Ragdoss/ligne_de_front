@@ -225,23 +225,23 @@ export class Ctx {
     return null;
   }
   /** Prise de contrôle d'un régiment (avant ou arrière) par `p` : `p` choisit la case où le poser (aucune case libre = défausse). */
-  takeControl(u: Unit, p: PlayerId, temporary: boolean, source: string, fullMoral = false): void {
+  takeControl(u: Unit, p: PlayerId, temporary: boolean, source: string, fullMoral = false, untilBroken = false): void {
     if (u.controller === p || !this.isAlive(u)) return;
-    this.queueChoice('placeControlled', p, source, { uid: u.uid, temporary: temporary ? 1 : 0, fullMoral: fullMoral ? 1 : 0 });
+    this.queueChoice('placeControlled', p, source, { uid: u.uid, temporary: temporary ? 1 : 0, fullMoral: fullMoral ? 1 : 0, untilBroken: untilBroken ? 1 : 0 });
   }
   /** Pose le régiment pris dans la case choisie par son nouveau contrôleur. */
-  placeControlled(u: Unit, p: PlayerId, dest: SlotRef, temporary: boolean, source: string): void {
+  placeControlled(u: Unit, p: PlayerId, dest: SlotRef, temporary: boolean, source: string, until?: 'broken' | number): void {
     const from = this.slotOf(u.uid);
     if (!from || this.unitAt(dest)) return;
     const prev = u.controller;
     this.setAt(from, null);
     u.controller = p;
-    if (temporary) u.borrowed = { owner: u.borrowed?.owner ?? prev };
+    if (temporary) u.borrowed = { owner: u.borrowed?.owner ?? prev, ...(until !== undefined ? { until } : {}) };
     else { u.owner = u.borrowed?.owner ?? u.owner ?? prev; u.borrowed = null; }
     u.pactShield = null; u.squareArm = 0; u.squareOwner = null; u.stunned = false; u.guardOwner = null; u.rootedBy = null; u.markedBy = null; u.exposedTo = null;
     if (u.prey === p) u.prey = null; // pris par son chasseur : ce n'est plus une Proie
     this.setAt(dest, u);
-    this.emit({ type: 'effect', key: temporary ? 'controlTaken' : 'controlKept', player: p, cardId: source, data: { uid: u.uid, target: u.cardId } });
+    this.emit({ type: 'effect', key: !temporary ? 'controlKept' : until === 'broken' ? 'controlUntilBroken' : until !== undefined ? 'controlMind' : 'controlTaken', player: p, cardId: source, data: { uid: u.uid, target: u.cardId } });
     this.emit({ type: 'moved', uid: u.uid, cardId: u.cardId, from, to: dest });
   }
   /** Régiment pris sans case libre : il part dans la défausse de son propriétaire. */
@@ -253,31 +253,72 @@ export class Ctx {
     this.discardLeader(u);
     this.emit({ type: 'effect', key: 'controlDiscarded', player: p, cardId: source, data: { target: u.cardId } });
   }
-  /** Fin du tour : les régiments empruntés retournent à leur propriétaire (case libre la plus proche, sinon en défausse). */
+  /** Fin du tour : les régiments empruntés (pour le tour) retournent à leur propriétaire (case libre la plus proche, sinon en défausse). */
   returnBorrowed(): void {
+    for (const p of ['A', 'B'] as PlayerId[]) for (const u of this.units(p)) if (u.borrowed && u.borrowed.until === undefined) this.returnOne(u);
+  }
+  /** Un régiment emprunté retourne à son propriétaire. */
+  returnOne(u: Unit): void {
+    if (!u.borrowed) return;
+    const owner = u.borrowed.owner;
+    const from = this.slotOf(u.uid)!;
+    u.borrowed = null;
+    this.setAt(from, null);
+    u.controller = owner;
+    const dest = from.zone === 'isole' ? null : this.freeSlotNear(owner, from.zone, from.idx);
+    if (dest) {
+      this.setAt(dest, u);
+      this.emit({ type: 'effect', key: 'controlReturned', player: owner, cardId: u.cardId, data: { uid: u.uid } });
+      this.emit({ type: 'moved', uid: u.uid, cardId: u.cardId, from, to: dest });
+    } else {
+      if (!u.isToken) this.discard(owner, u.cardId);
+      this.discardLeader(u);
+      this.emit({ type: 'effect', key: 'controlLost', player: owner, cardId: u.cardId, data: { uid: u.uid } });
+    }
+  }
+  /**
+   * Après chaque action et chaque combat (jamais au milieu) : les régiments pris « jusqu'à ce que leur Moral se brise »
+   * (Manipulation des faibles) ou par un régiment qui a quitté le jeu (Modifieur de l'esprit) reviennent ; les régiments
+   * qui ont attaqué le Titan de la Discorde pour la 3e fois passent de son côté.
+   */
+  settleControl(): void {
+    if (this.over) return;
     for (const p of ['A', 'B'] as PlayerId[]) {
       for (const u of this.units(p)) {
-        if (!u.borrowed) continue;
-        const owner = u.borrowed.owner;
-        const from = this.slotOf(u.uid)!;
-        u.borrowed = null;
-        this.setAt(from, null);
-        u.controller = owner;
-        const dest = from.zone === 'isole' ? null : this.freeSlotNear(owner, from.zone, from.idx);
-        if (dest) {
-          this.setAt(dest, u);
-          this.emit({ type: 'effect', key: 'controlReturned', player: owner, cardId: u.cardId, data: { uid: u.uid } });
-          this.emit({ type: 'moved', uid: u.uid, cardId: u.cardId, from, to: dest });
-        } else {
-          if (!u.isToken) this.discard(owner, u.cardId);
-          this.discardLeader(u);
-          this.emit({ type: 'effect', key: 'controlLost', player: owner, cardId: u.cardId, data: { uid: u.uid } });
-        }
+        const until = u.borrowed?.until;
+        if ((until === 'broken' && u.brokenMorale) || (typeof until === 'number' && !this.slotOf(until))) this.returnOne(u);
       }
+    }
+    const dc = this.s.scenario?.discorde;
+    if (!dc) return;
+    for (const u of this.units(opponentOf(dc.pid))) {
+      if (!u.discordeSwitch) continue;
+      u.discordeSwitch = false;
+      const from = this.slotOf(u.uid);
+      if (!from || from.zone === 'isole') continue;
+      const dest = this.freeSlotNear(dc.pid, from.zone, from.idx);
+      if (dest) this.placeControlled(u, dc.pid, dest, false, dc.titan);
+      else this.discardControlled(u, dc.pid, dc.titan);
+    }
+  }
+  /**
+   * Modifieur de l'esprit (roguelite) : au début du tour de l'adversaire, le régiment isolé `src` de `p` prend le contrôle
+   * du meilleur régiment adverse (niveau, puis ATK), tant qu'il reste en jeu. Rien si `p` n'a plus de case libre.
+   */
+  mindControl(p: PlayerId, src: Unit): void {
+    const q = opponentOf(p);
+    const foes = this.units(q).filter(u => { const r = this.slotOf(u.uid); return r && r.zone !== 'isole' && !u.borrowed && !card(u.cardId).excludeFromMoralTotal; });
+    foes.sort((a, b) => b.niveau - a.niveau || this.effectiveAtk(b) - this.effectiveAtk(a) || b.currentEnd - a.currentEnd);
+    for (const u of foes) {
+      const r = this.slotOf(u.uid)!;
+      const dest = this.freeSlotNear(p, r.zone as 'avant' | 'arriere', r.idx);
+      if (!dest) continue;
+      this.placeControlled(u, p, dest, true, src.cardId, src.uid);
+      return;
     }
   }
   /** Défausse les `n` cartes du dessus de la pioche de `p` (usure) ; s'arrête si la pioche est vide. */
-  mill(p: PlayerId, n: number, source: string): number {
+  mill(p: PlayerId, n: number, source: string, self = false): number {
     const pl = this.player(p);
     let k = 0;
     for (; k < n && pl.deck.length && !this.over; k++) {
@@ -287,7 +328,26 @@ export class Ctx {
       const d = card(top).drawWhenDiscarded as number | undefined;
       if (d) for (let i = 0; i < d && !this.over; i++) this.draw(p, top);
     }
+    if (!self && source !== 'razzia') for (let i = 0; i < k && !this.over; i++) this.razzia(p, 'deck');
     return k;
+  }
+  /**
+   * Razzia (roguelite, Sultan) : quand `p` défausse une carte (de sa main ou de sa pioche, hors échanges qu'il fait lui-même),
+   * son adversaire lui en fait défausser une de plus, du même endroit (la main : au hasard), N fois par tour au plus.
+   */
+  razzia(p: PlayerId, from: 'hand' | 'deck'): void {
+    const raider = this.player(opponentOf(p));
+    const n = raider.razzia;
+    if (!n || this.over) return;
+    const m = this.turnMarker();
+    if (raider.razziaAt !== m) { raider.razziaAt = m; raider.razziaUsed = 0; }
+    if ((raider.razziaUsed ?? 0) >= n) return;
+    const pl = this.player(p);
+    if (from === 'hand' ? !pl.hand.length : !pl.deck.length) return;
+    raider.razziaUsed = (raider.razziaUsed ?? 0) + 1;
+    this.emit({ type: 'effect', key: 'razzia', player: raider.id, cardId: 'razzia', data: {} });
+    if (from === 'hand') this.discardFromHand(p, pl.hand[this.randomInt(pl.hand.length)]!.uid, 'razzia');
+    else this.mill(p, 1, 'razzia');
   }
 
   // ---------- Météo de scénario ----------
@@ -779,7 +839,12 @@ export class Ctx {
     }
   }
   /** Défausse une carte précise de la main (défausse forcée). */
-  discardFromHand(p: PlayerId, handUid: number, source: string): string | null {
+  discardFromHand(p: PlayerId, handUid: number, source: string, self = false): string | null {
+    const r = this.discardFromHandOnly(p, handUid, source);
+    if (r && !self && source !== 'razzia') this.razzia(p, 'hand');
+    return r;
+  }
+  private discardFromHandOnly(p: PlayerId, handUid: number, source: string): string | null {
     const pl = this.player(p);
     const i = pl.hand.findIndex(h => h.uid === handUid);
     if (i === -1) return null;

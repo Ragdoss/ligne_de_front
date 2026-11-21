@@ -1,7 +1,7 @@
 // Règles de scénario prises en charge par le moteur : mise en place, événements de début de tour,
 // convoi, ressources gagnées en perdant la comparaison de Moral. Les textes et récompenses vivent dans src/campaign.
 
-import { Ctx } from './ctx';
+import { card, Ctx } from './ctx';
 import type { DialogLine, PlayerId, ScenarioEvent, ScenarioSetup } from './types';
 
 /** Place les régiments de départ, la main de départ et les niveaux imposés par le scénario. */
@@ -29,6 +29,9 @@ export function applyScenarioStart(ctx: Ctx, sc: ScenarioSetup): void {
     if (sc.tacticDrawEvery?.[p]) pl.tacticDrawEvery = sc.tacticDrawEvery[p];
     if (sc.huntArrow?.[p]) pl.huntArrow = true;
     if (sc.preyKillEnd?.[p]) pl.preyKillEnd = sc.preyKillEnd[p];
+    if (sc.turnMill?.[p]) pl.turnMill = sc.turnMill[p];
+    if (sc.mirageLowest?.[p]) pl.mirageLowest = sc.mirageLowest[p];
+    if (sc.razzia?.[p]) pl.razzia = sc.razzia[p];
     // Roguelite : lassitude gardée du combat précédent ; on commence au niveau correspondant.
     const lass = sc.startLassitude?.[p];
     if (lass) { pl.points = lass; ctx.checkLevel(p); pl.resource = Math.max(pl.resource, pl.level + (sc.startResource?.[p] ?? 0)); }
@@ -50,6 +53,19 @@ export function scenarioTurnStart(ctx: Ctx, p: PlayerId): void {
   if (ctx.player(p).huntArrow) {
     const foes = ctx.units(p === 'A' ? 'B' : 'A').filter(u => ctx.slotOf(u.uid)?.zone !== 'isole');
     if (foes.length && !foes.some(u => u.prey === p)) ctx.setPrey(p, foes.reduce((a, b) => (b.currentMor < a.currentMor ? b : a)), 'fleche_chasse');
+  }
+  // Sablier du Sultan : l'adversaire défausse le dessus de sa pioche.
+  const tm = ctx.player(p).turnMill;
+  if (tm) { ctx.mill(p === 'A' ? 'B' : 'A', tm, 'sablier_sultan'); if (ctx.over) return; }
+  // Voile de mirage : ton régiment au Moral le plus bas (hors Moral brisé) gagne Mirage.
+  const ml = ctx.player(p).mirageLowest;
+  if (ml) {
+    const mine = ctx.units(p).filter(u => !u.brokenMorale && !card(u.cardId).excludeFromMoralTotal);
+    if (mine.length) {
+      const t = mine.reduce((a, b) => (b.currentMor < a.currentMor ? b : a));
+      t.keywords.push(`Mirage ${ml}`);
+      ctx.emit({ type: 'effect', key: 'voileMirage', player: p, cardId: t.cardId, data: { uid: t.uid, n: ml } });
+    }
   }
   // Météo : annoncée au début du tour de A quand elle change.
   if (sc.weather && p === 'A') {
