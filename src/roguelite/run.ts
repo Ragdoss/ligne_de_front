@@ -68,11 +68,11 @@ export const LASSITUDE_SHOP = 5;
 
 // ---------- Champions ----------
 export type ChampionId = 'augustus' | 'eldrin';
-export interface Champion { id: ChampionId; name: string; faction: Faction; crest: string; deck: () => string[]; unlock?: string; unlockHint?: string }
+export interface Champion { id: ChampionId; name: string; faction: Faction; crest: string; deck: () => string[]; unlock?: string }
 export const CHAMPIONS: Champion[] = [
   { id: 'augustus', name: 'Augustus, le Dernier Empereur', faction: 'empire', crest: 'A', deck: () => COURONNE_SCENARIOS.cc1!.A.deckList!.slice() },
   // Débloqué par 3 Offrandes à l'entraînement ; deck de départ de la campagne Elfe (04/11/2026).
-  { id: 'eldrin', name: 'Eldrin, le premier Bourgeon', faction: 'elfe', crest: 'E', deck: () => ELF_SCENARIOS.e1!.A.deckList!.slice(), unlock: 'champion:elfe', unlockHint: '3 Offrandes à l’entraînement' },
+  { id: 'eldrin', name: 'Eldrin, le premier Bourgeon', faction: 'elfe', crest: 'E', deck: () => ELF_SCENARIOS.e1!.A.deckList!.slice(), unlock: 'champion:elfe' },
 ];
 export const championOf = (id: ChampionId | undefined) => CHAMPIONS.find(c => c.id === (id ?? 'augustus'))!;
 export const shortName = (id: ChampionId | undefined) => championOf(id).name.split(',')[0]!;
@@ -579,8 +579,7 @@ export function marketOffers(run: RunState, meta?: RunMeta, gold0 = run.gold): M
 
 // ---------- Événements ----------
 export interface EventChoice { id: string; label: string; disabled?: string }
-/** Offrandes à faire à l'entraînement pour débloquer le premier champion (04/11/2026 : 3 au lieu de 6 ; 21/11/2026 : débloqué
- *  dès la 3e Offrande, au lieu d'un choix à la visite suivante). */
+/** Offrandes à faire à l'entraînement pour débloquer le premier champion (04/11/2026 : 3 au lieu de 6). */
 export const CHAMPION_OFFERINGS = 3;
 export const EVENT_TEXT: Record<EventId, { title: string; text: string }> = {
   camp: { title: 'Le camp abandonné', text: 'Une armée a monté un camp ici, mais aucune trace de ce qui a pu lui arriver.' },
@@ -601,7 +600,6 @@ export function eventChoices(run: RunState, meta: RunMeta, id: EventId, second =
   ];
   if (!second) {
     out.push({ id: 'offrande', label: 'Faire une Offrande et faire un 2e choix', disabled: off >= 6 ? 'Déjà 6 Offrandes faites ici' : noOffer });
-    // Anciennes sauvegardes : 3 Offrandes déjà faites avant le déblocage automatique.
     if (off >= CHAMPION_OFFERINGS && !meta.unlocks.includes('champion:elfe')) out.push({ id: 'champion', label: 'Débloquer Eldrin, le premier Bourgeon (champion Elfe)' });
   }
   void run;
@@ -618,17 +616,7 @@ export function resolveEvent(run: RunState, meta: RunMeta, id: EventId, choice: 
   }
   const n = 1 + Math.floor(off / 3);
   if (choice === 'humain' || choice === 'elfe') { run.steps.unshift({ kind: 'cartes', purpose: choice, n, optional: false }); return []; }
-  if (choice === 'offrande') {
-    meta.offrandes--;
-    meta.offeredAt.entrainement = off + 1;
-    run.steps.unshift({ kind: 'evenement', id, second: true });
-    const lines = ['Ton Offrande est acceptée : tu peux faire un 2e choix.'];
-    if (off + 1 >= CHAMPION_OFFERINGS && !meta.unlocks.includes('champion:elfe')) {
-      meta.unlocks.push('champion:elfe');
-      lines.push(`${CHAMPION_OFFERINGS}e Offrande : Eldrin, le premier Bourgeon, rejoint les champions des Dieux.`);
-    }
-    return lines;
-  }
+  if (choice === 'offrande') { meta.offrandes--; meta.offeredAt.entrainement = off + 1; run.steps.unshift({ kind: 'evenement', id, second: true }); return ['Ton Offrande est acceptée : tu peux faire un 2e choix.']; }
   if (choice === 'champion') { meta.unlocks.push('champion:elfe'); return ['Eldrin, le premier Bourgeon, rejoint les champions des Dieux.']; }
   return [];
 }

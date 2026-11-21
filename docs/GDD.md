@@ -562,4 +562,4 @@ Le simulateur documente lui-même, dans un encart "Hypothèses", les choix faits
   - **Recrue** : Diablotins, Jeune Nomade, Voleurs de provisions et tous les régiments neutres de niveau 1.
   - **Humain** : Garde-frontière sylvestre.
   - Effets concernés aujourd'hui : Volée de Flèches (Archers), Charge décisive, Lanciers et Écuyers de la Garde (Montés), Milice de village et Prêtre Sacrificiel (Humains).
-- **Roguelite (21/11/2026, Nathan)** : Eldrin est débloqué dès la 3e Offrande à l'entraînement (avant : un choix à la visite suivante). Les volontaires, le marché et les promotions ne proposent plus de binômes aux champions, sauf s'il n'y a rien d'autre.
+- **Roguelite (21/11/2026, Nathan)** : les volontaires, le marché et les promotions ne proposent plus de binômes aux champions, sauf s'il n'y a rien d'autre.

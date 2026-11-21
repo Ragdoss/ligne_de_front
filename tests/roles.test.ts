@@ -1,9 +1,8 @@
-// Rôles ajoutés aux régiments (21/11/2026) et deux changements du roguelite : Eldrin débloqué à la 3e Offrande,
-// binômes retirés des cartes proposées aux champions.
+// Rôles ajoutés aux régiments (21/11/2026) et roguelite : binômes retirés des cartes proposées aux champions.
 import { describe, expect, it } from 'vitest';
 import { CARDS } from '../src/data/cards';
 import { ROLES_ADDED } from '../src/data/roles';
-import { CHAMPION_OFFERINGS, eventChoices, newMeta, newRun, promotions, resolveEvent, volunteers } from '../src/roguelite/run';
+import { newMeta, newRun, promotions, volunteers } from '../src/roguelite/run';
 
 const isPair = (id: string) => ((CARDS[id]!.factions as string[] | undefined)?.length ?? 0) > 1;
 
@@ -25,21 +24,7 @@ describe('Rôles des régiments', () => {
   });
 });
 
-describe('Roguelite : Eldrin et binômes', () => {
-  it('la 3e Offrande à l’entraînement débloque Eldrin tout de suite', () => {
-    const meta = { ...newMeta(), offrandes: 5, offeredAt: { entrainement: CHAMPION_OFFERINGS - 1 } };
-    const run = newRun('eldrin');
-    expect(eventChoices(run, meta, 'entrainement').some(c => c.id === 'champion')).toBe(false);
-    const lines = resolveEvent(run, meta, 'entrainement', 'offrande');
-    expect(meta.unlocks).toContain('champion:elfe');
-    expect(lines.join(' ')).toMatch(/Eldrin/);
-    expect(run.steps[0]).toEqual(expect.objectContaining({ kind: 'evenement', second: true }));
-  });
-  it('avant la 3e Offrande, rien n’est débloqué', () => {
-    const meta = { ...newMeta(), offrandes: 5, offeredAt: { entrainement: CHAMPION_OFFERINGS - 2 } };
-    resolveEvent(newRun('eldrin2'), meta, 'entrainement', 'offrande');
-    expect(meta.unlocks).not.toContain('champion:elfe');
-  });
+describe('Roguelite : binômes', () => {
   it('volontaires et promotions ne proposent pas de binômes aux champions', () => {
     for (const champ of ['augustus', 'eldrin'] as const) {
       for (let k = 0; k < 40; k++) {

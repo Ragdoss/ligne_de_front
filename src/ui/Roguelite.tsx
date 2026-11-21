@@ -173,7 +173,7 @@ export function RogueliteScreen({ gameOpts, live, onExit }: { gameOpts: GameOpts
             return (
               <button type="button" key={c.id} disabled={!open} className={`rl-champ-card${champ === c.id ? ' on' : ''}${open ? '' : ' locked'}`} onClick={() => { setChamp(c.id); setUpChamp(c.id); }}>
                 <div className="rl-crest">{open ? c.crest : '?'}</div><b>{c.name}</b>
-                <span className="muted small">{FACTION_LABEL[c.faction]}{open ? '' : ` · à débloquer : ${c.unlockHint ?? 'par un événement'}`}</span>
+                <span className="muted small">{FACTION_LABEL[c.faction]}{open ? '' : ' · à débloquer par un événement'}</span>
               </button>
             );
           })}
