@@ -18,6 +18,11 @@ export function applyScenarioStart(ctx: Ctx, sc: ScenarioSetup): void {
         u.justDeployed = false;
         const ov = sc.startOverrides?.[cardId];
         if (ov?.mor !== undefined) { u.maxMor = ov.mor; u.currentMor = ov.mor; }
+        if (ov?.atk !== undefined) u.baseAtk = ov.atk;
+        if (ov?.arm !== undefined) u.baseArm = ov.arm;
+        if (ov?.ini !== undefined) u.ini = ov.ini;
+        if (ov?.end !== undefined) { u.maxEnd = ov.end; u.currentEnd = ov.end; }
+        if (ov?.endLoss) { u.maxEnd = Math.max(1, u.maxEnd - ov.endLoss); u.currentEnd = Math.min(u.currentEnd, u.maxEnd); }
         if (ov?.minion && !u.keywords.includes('Minions')) u.keywords.push('Minions');
         pl.board[zone][Number(idx)] = u;
       }

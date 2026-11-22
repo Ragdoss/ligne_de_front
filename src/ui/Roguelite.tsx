@@ -4,8 +4,9 @@ import type { GameState } from '../engine/types';
 import {
   addCard, afterFight, applyCards, chooseOption, closeRun, defeatAt, eligible, EVENT_TEXT, eventChoices, fight, isImproved, isTouched, loadMeta, loadRun,
   marketOffers, LASSITUDE_RULE, SULTAN_UNLOCK, unlocksWon, withUnlocks, fightDefeatAt, FATIGUE_AID_STEP, enemyLabel, xpWon, CHAMPIONS, championOf, shortName, upgradesFor, type ChampionId, newMeta, NODES_PER_ACT, etendardOf, UPGRADES, buyUpgrade, cannotBuy, upgradeLevel, newRun, nextNode, offrandesWon, promotions, registerRun, removeCard, resolveEvent, saveMeta, saveRun, variantId, volunteers,
-  LASSITUDE_SHOP, type CardPurpose, type NodeOption, type RunMeta, type RunState, type Step,
+  LASSITUDE_SHOP, catalogueFor, type CardPurpose, type NodeOption, type RunMeta, type RunState, type Step,
 } from '../roguelite/run';
+import { CARDS } from '../data/cards';
 import { formatEvent } from '../i18n/log.fr';
 import { SCENARIOS } from '../campaign/campaigns';
 import { CardTile } from './CardTile';
@@ -21,6 +22,7 @@ const REWARD_LABEL = { or: 'de l’or en plus', essence: 'de l’Essence divine'
 const PURPOSE_TITLE: Record<CardPurpose, string> = {
   retirer: 'Retirer une carte de ton deck', ameliorer: 'Améliorer une carte : efface d’abord ses malus des Titans ; sinon régiment +10 % ATK, END, ARM et Moral, Leader +20 % à ses bonus, Tactique −1 de coût', humain: 'L’entraînement humain : +5 ARM, +2 Moral',
   elfe: 'L’entraînement elfe : coûte 1 de moins, +10 INI', garde: 'Laisser jusqu’à 2 régiments surveiller le camp (ils quittent ton deck)',
+  ville: 'Offrir une carte à la garnison de la ville (elle quitte ton deck ; son niveau renforce la garnison)',
 };
 
 function optionText(o: NodeOption): { icon: string; title: string; text: string } {
@@ -28,6 +30,7 @@ function optionText(o: NodeOption): { icon: string; title: string; text: string 
   if (o.kind === 'miniboss') return { icon: '✦', title: o.boss === 'fragments' ? 'Mini-boss : les Fragments de réalité' : o.boss === 'fracture' ? 'Mini-boss : la Fracture de la réalité' : o.boss === 'convergence' ? 'Mini-boss : la Convergence' : o.boss === 'reflet' ? 'Mini-boss : le Titan du Reflet' : 'Mini-boss : l’Essence de la réalité', text: 'Un adversaire plus fort, une règle spéciale. Récompenses : un Étendard, de l’or, de l’Essence divine, des volontaires, une promotion et une amélioration.' };
   if (o.kind === 'event') return { icon: '❖', title: `Événement : ${EVENT_TEXT[o.id].title}`, text: 'Un choix, sans combat.' };
   if (o.kind === 'marche') return { icon: '⚖', title: 'Marchand', text: '5 offres : cartes, retrait, repos, amélioration, parfois un Étendard.' };
+  if (o.kind === 'ville') return { icon: '⚔', title: 'La ville assiégée', text: `Briser le siège : ${enemyLabel(o.deck)}.` };
   if (o.titan === 'discorde') return { icon: '☠', title: 'Boss : le Titan de la Discorde', text: 'Le Titan de l’acte 3 : il retourne tes régiments contre toi. Le vaincre gagne la run.' };
   if (o.titan === 'fracture') return { icon: '☠', title: 'Boss : le Titan de la Fracture', text: 'Le Titan de l’acte 2 : à sa chute, le terrain se scinde et deux Titans apparaissent. Le vaincre ouvre l’acte 3.' };
   return { icon: '☠', title: 'Boss : le Titan du Glissement', text: 'Le Titan de l’acte 1. Le vaincre ouvre l’acte 2.' };
@@ -59,6 +62,14 @@ function ChampionPanel({ run, meta, onDeck }: { run: RunState; meta: RunMeta; on
             {run.etendards.map(e => <span key={e} className={`rl-etd${etendardOf(e).risky ? ' risky' : ''}`} title={etendardOf(e).desc}>{etendardOf(e).name}</span>)}
           </div>
         )}
+        {(run.caravane || (run.sceau?.left ?? 0) > 0 || (run.bonusLimit ?? 0) > 0) && (
+          <div className="rl-etendards">
+            <span className="muted small">Événements</span>
+            {(run.bonusLimit ?? 0) > 0 && <span className="rl-etd" title="Camp abandonné : pour le reste de la run">Lassitude maximale +{run.bonusLimit}</span>}
+            {run.caravane && <span className="rl-etd" title="Bazar de l’oasis : pour le reste de la run">Caravane marchande au départ de chaque combat</span>}
+            {(run.sceau?.left ?? 0) > 0 && <span className="rl-etd" title="Chantier d’un sceau">Sceau : {run.sceau!.left} Titan(s) boss à −{run.sceau!.end} END</span>}
+          </div>
+        )}
         <button type="button" onClick={onDeck}>Deck : {run.deck.length} cartes</button>
       </div>
     </aside>
@@ -82,6 +93,31 @@ const modBadge = (run: RunState, id: string) => {
   if (isImproved(rc)) return <span className="rl-mark improved">Améliorée</span>;
   return undefined;
 };
+
+/** Bazar de l'oasis : une carte au choix parmi toutes celles du champion, filtrée par niveau. */
+function CataloguePicker({ run, onDone }: { run: RunState; onDone: (id: string) => void }) {
+  const all = catalogueFor(run);
+  const [lvl, setLvl] = useState(0);
+  const [sel, setSel] = useState<string | null>(null);
+  const list = lvl ? all.filter(id => CARDS[id]!.niveau === lvl) : all;
+  return (
+    <section className="rl-step">
+      <h2 className="sub">Une carte au choix</h2>
+      <p className="muted">Toutes les cartes de ta faction et les neutres ({all.length}). Clique sur une carte, puis valide.</p>
+      <div className="choices row left">
+        {[0, 1, 2, 3, 4, 5].map(l => <button type="button" key={l} className={lvl === l ? 'primary' : ''} onClick={() => setLvl(l)}>{l ? `Niveau ${l}` : 'Tous'}</button>)}
+        <button type="button" className="primary" disabled={!sel} onClick={() => { showZoom(null); onDone(sel!); }}>Prendre {sel ? cardName(sel) : ''}</button>
+      </div>
+      <div className="camp-grid">
+        {list.map(id => (
+          <button type="button" key={id} className={`vn-pick${sel === id ? ' on' : ''}`} onClick={() => setSel(id)}>
+            <CardTile id={id} />
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
 
 /** Choix de cartes du deck (retirer, améliorer, entraînement). */
 function CardPicker({ run, purpose, n, optional, onDone }: { run: RunState; purpose: CardPurpose; n: number; optional: boolean; onDone: (uids: number[]) => void }) {
@@ -333,6 +369,8 @@ export function RogueliteScreen({ gameOpts, live, onExit }: { gameOpts: GameOpts
     );
   } else if (step?.kind === 'cartes') {
     body = <CardPicker key={`${run.node}-${run.steps.length}`} run={run} purpose={step.purpose} n={step.n} optional={step.optional} onDone={uids => { const n = structuredClone(run); const out = applyCards(n, step.purpose, uids); doneStep(n, out); }} />;
+  } else if (step?.kind === 'catalogue') {
+    body = <CataloguePicker key={`${run.node}-cat`} run={run} onDone={id => { const n = structuredClone(run); addCard(n, id); doneStep(n, [`${cardName(id)} rejoint ton deck.`]); }} />;
   } else if (step?.kind === 'evenement') {
     const ev = EVENT_TEXT[step.id];
     body = (
@@ -348,6 +386,8 @@ export function RogueliteScreen({ gameOpts, live, onExit }: { gameOpts: GameOpts
               const out = resolveEvent(n, m, step.id, ch.id);
               if (out.length) n.steps.unshift({ kind: 'resume', title: ev.title, lines: out });
               setMeta(m);
+              // Ville assiégée : le combat pour briser le siège.
+              if (n.current?.kind === 'ville') { setRun(n); setGameKey(Date.now()); setMode('game'); return; }
               if (!n.steps.length) { setRun(nextNode(n)); setNotes([]); } else setRun(n);
             }}>{ch.label}{ch.disabled ? ` (${ch.disabled})` : ''}</button>
           ))}

@@ -59,6 +59,11 @@ export const TITAN_CARDS: Record<string, CardDef> = {
     id: 'modifieur_esprit', cardType: 'Regiment', faction: 'neutre', niveau: 4, cout: 5, slotType: 'isole', types: ['Esprit'],
     atk: 0, end: 10, arm: 0, ini: 5, mor: 2, keywords: [], vieTours: 2, mindControlEachEnemyTurn: true,
   },
+  // Ville assiégée (événement du roguelite, Nathan, 22/11/2026) : ses stats viennent du bonus (startOverrides).
+  garnison_ville: {
+    id: 'garnison_ville', cardType: 'Regiment', faction: 'demons', niveau: 1, cout: 0, slotType: 'arriere', types: ['Démon', 'Garnison'],
+    atk: 0, end: 20, arm: 0, ini: 5, mor: 5, keywords: [],
+  },
   // Mini-boss de l'acte 3 (Nathan, 21/11/2026) : le Titan du Reflet.
   titan_reflet: {
     id: 'titan_reflet', cardType: 'Regiment', faction: 'neutre', niveau: 5, cout: 0, slotType: 'isole', types: ['Titan'],
@@ -80,6 +85,7 @@ export const TITAN_TEXT_FR: Record<string, { name: string; desc: string }> = {
   titan_discorde: { name: 'Titan de la Discorde', desc: 'Un régiment qui l’attaque pour la 3e fois change de camp (après le combat). Il ne compte pas dans le Moral total.' },
   manipulation_faibles: { name: 'Manipulation des faibles', desc: 'Prends le contrôle d’un régiment adverse (avant ou arrière, Moral non brisé) jusqu’à ce que son Moral soit brisé. Sans case libre de ton côté, il part en défausse.' },
   modifieur_esprit: { name: 'Modifieur de l’esprit', desc: 'Au début de chaque tour adverse, prend le contrôle du meilleur régiment adverse, jusqu’à ce que le Modifieur quitte le jeu. Durée de vie : 2 tours.' },
+  garnison_ville: { name: 'Garnison de la ville', desc: 'Les Cultistes qui tiennent les murs. Si la garnison tombe, le combat est perdu.' },
   titan_reflet: { name: 'Titan du Reflet', desc: 'Chaque régiment que tu joues fait apparaître en face une copie à 75 % de ses stats. Son camp ne pose ses régiments qu’en face des tiens. Il ne compte pas dans le Moral total.' },
 };
 

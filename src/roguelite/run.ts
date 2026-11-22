@@ -84,6 +84,8 @@ export const CHAMPIONS: Champion[] = [
 ];
 /** Le Sultan se débloque en battant le boss de l'acte 1 (avec n'importe quel champion). */
 export const SULTAN_UNLOCK = 'champion:nomades';
+/** Le champion des Démons (à venir) se débloque en brisant le siège de la ville assiégée. */
+export const DEMON_UNLOCK = 'champion:demons';
 export const championOf = (id: ChampionId | undefined) => CHAMPIONS.find(c => c.id === (id ?? 'augustus'))!;
 export const shortName = (id: ChampionId | undefined) => championOf(id).name.split(',')[0]!;
 
@@ -95,12 +97,14 @@ export type NodeOption =
   | { kind: 'combat'; reward: RewardKind; deck: string }
   | { kind: 'miniboss'; deck: string; boss?: MiniBossId }
   | { kind: 'event'; id: EventId }
+  /** Ville assiégée : le combat pour briser le siège (bonus de la garnison). */
+  | { kind: 'ville'; deck: string; bonus: number }
   | { kind: 'marche' }
   | { kind: 'boss'; deck: string; titan?: 'glissement' | 'fracture' | 'discorde' };
 /** Mini-boss de l'acte 1 : l'Essence de la réalité ou les Fragments de réalité (le même pendant tout l'acte). */
 export type MiniBossId = 'essence' | 'fragments' | 'fracture' | 'convergence' | 'reflet';
-export type EventId = 'camp' | 'entrainement';
-export type CardPurpose = 'retirer' | 'ameliorer' | 'humain' | 'elfe' | 'garde';
+export type EventId = 'camp' | 'entrainement' | 'fontaine' | 'bazar' | 'chantier' | 'ville';
+export type CardPurpose = 'retirer' | 'ameliorer' | 'humain' | 'elfe' | 'garde' | 'ville';
 /** Étapes à résoudre avant de choisir le nœud suivant. */
 export type Step =
   | { kind: 'resume'; title: string; lines: string[] }
@@ -108,6 +112,8 @@ export type Step =
   | { kind: 'promotion' }
   | { kind: 'cartes'; purpose: CardPurpose; n: number; optional: boolean }
   | { kind: 'evenement'; id: EventId; second?: boolean }
+  /** Bazar de l'oasis : une carte au choix parmi toutes celles du champion. */
+  | { kind: 'catalogue' }
   | { kind: 'marche'; bought: number[]; /** Or à l'arrivée au marchand (chance d'une bénédiction). */ gold0?: number }
   | { kind: 'etendard'; choices: string[] };
 export interface MarketOffer { kind: 'carte' | 'retirer' | 'lassitude' | 'ameliorer' | 'etendard' | 'benediction'; cardId?: string; etendard?: string; benediction?: string; /** En or, ou en Offrandes pour une bénédiction. */ price: number }
@@ -148,6 +154,14 @@ export interface RunState {
   relaunch?: boolean;
   /** Déblocages gagnés pendant la run (versés à la méta par l'écran, voir unlocksWon). */
   newUnlocks?: string[];
+  /** Camp abandonné : lassitude maximale en plus pour le reste de la run. */
+  bonusLimit?: number;
+  /** Bazar de l'oasis : chaque combat commence avec une Caravane marchande (isolé). */
+  caravane?: boolean;
+  /** Chantier d'un sceau : les `left` prochains Titans boss d'acte commencent avec `end` d'END en moins. */
+  sceau?: { left: number; end: number };
+  /** Ville assiégée, pendant la visite : niveau de la carte offerte, Offrande faite. */
+  ville?: { cardLevel: number; offered: boolean };
 }
 export interface RunMeta {
   essence: number;
@@ -247,14 +261,15 @@ export function newRun(seed = String(Date.now()), meta: RunMeta = newMeta(), cha
   registerRun(run);
   return run;
 }
-export const defeatAt = (run: Pick<RunState, 'act'> & { upg?: Record<string, number> }) =>
-  ACT_LASSITUDE[run.act - 1]! + Math.min(run.upg?.lassitude ?? 0, LASSITUDE_UPG_CAP[run.act - 1]!);
+export const defeatAt = (run: Pick<RunState, 'act'> & { upg?: Record<string, number>; bonusLimit?: number }) =>
+  ACT_LASSITUDE[run.act - 1]! + Math.min(run.upg?.lassitude ?? 0, LASSITUDE_UPG_CAP[run.act - 1]!) + (run.bonusLimit ?? 0);
 /** Régénération (en points de pourcentage retirés de la part gardée). */
 export const regenOf = (run: RunState) => 5 * (run.upg?.regeneration ?? 0);
 
 // ---------- Options du nœud suivant ----------
 const REWARDS: RewardKind[] = ['or', 'or', 'essence', 'xp', 'offrandes', 'amelioration'];
-const EVENTS: EventId[] = ['camp', 'entrainement'];
+/** Tous les événements, tirés au hasard à n'importe quel acte (au plus un par acte, jamais deux fois le même dans une run). */
+const EVENTS: EventId[] = ['camp', 'entrainement', 'fontaine', 'bazar', 'chantier', 'ville'];
 
 /** Decks adverses d'un acte (2 et 3), et clé d'option d'un deck tiré au hasard. */
 const ACT_DECKS: Record<number, { prefix: string; decks: Act2Deck[] }> = { 2: { prefix: 'a2', decks: ACT2_DECKS }, 3: { prefix: 'a3', decks: ACT3_DECKS } };
@@ -313,7 +328,10 @@ export function chooseOption(run: RunState, meta: RunMeta, i: number): RunState 
   const o = next.options[i]!;
   if (next.options.some(x => x.kind === 'miniboss')) next.miniBossOffers++;
   next.current = o;
-  if (o.kind === 'event') { next.eventsSeen.push(o.id); next.eventThisAct = true; next.steps = [{ kind: 'evenement', id: o.id }]; }
+  if (o.kind === 'event') {
+    next.eventsSeen.push(o.id); next.eventThisAct = true; next.steps = [{ kind: 'evenement', id: o.id }];
+    if (o.id === 'ville') next.ville = { cardLevel: 0, offered: false };
+  }
   if (o.kind === 'marche') next.steps = [{ kind: 'marche', bought: [], gold0: next.gold }];
   void meta;
   return next;
@@ -340,7 +358,7 @@ export const enemyLabel = (deckKey: string) => actDeckOf(deckKey)?.deck.label ??
 /** Le combat d'un nœud, sous la forme d'un scénario (règles affichées dans la bulle) et de la partie du moteur. */
 export function fight(run: RunState, o: NodeOption, seed: string | number): { sc: CampaignScenario; setup: GameSetup } {
   registerRun(run);
-  const kind = o.kind as 'combat' | 'miniboss' | 'boss';
+  const kind = o.kind as 'combat' | 'miniboss' | 'boss' | 'ville';
   const e = enemyDeck(run, (o as { deck: string }).deck);
   const lim = fightDefeatAt(run), enemyLim = ACT_LASSITUDE[run.act - 1]!; // l'amélioration Lassitude ne vaut que pour le joueur
   const base: CampaignScenario = {
@@ -378,6 +396,14 @@ export function fight(run: RunState, o: NodeOption, seed: string | number): { sc
       intro: [{ who: '', text: 'Un Titan est proche : vous sentez l’essence même de la réalité en train d’être modifiée.' }],
       A: { ...base.A, start: { arriere: { '1': 'essence_realite' } } },
       B: { ...base.B, start: { avant: { '1': 'mercenaire_stagiaire', '2': 'mercenaire_stagiaire' } } } };
+  } else if (kind === 'ville') {
+    const g = garrisonStats((o as { bonus: number }).bonus);
+    sc = { ...base, title: `Acte ${run.act} — La ville assiégée`,
+      deckRules: { min: 0, text: `Brise le siège. La garnison (arrière 2 : ${g.atk} ATK, ${g.end} END, ${g.arm} ARM, ${g.ini} INI, ${g.mor} Moral) doit tenir : si elle tombe, le combat est perdu. Une Garde d’Asura et des Diablotins se battent à tes côtés. L’adversaire commence avec un niveau de plus, des Ingénieurs de siège et un Forgeron de campagne.` },
+      intro: [{ who: '', text: 'Les Cultistes tiennent encore les murs. Derrière eux, la ville retient son souffle.' }],
+      A: { ...base.A, start: { arriere: { '0': 'garde_asura', '1': 'garnison_ville' }, avant: { '2': 'diablotins' } } },
+      B: { ...base.B, start: { arriere: { '2': 'ingenieurs_siege' }, isole: 'forgeron_campagne' } },
+      mustSurvive: { A: 'garnison_ville' } };
   } else if (run.act >= 3) {
     sc = { ...base, title: `Acte ${run.act} — Boss : le Titan de la Discorde`,
       deckRules: { min: 0, text: 'Détruis le Titan de la Discorde (arrière 2). Un de tes régiments qui l’attaque pour la 3e fois passe de son côté. Son deck contient 10 « Manipulation des faibles » (il prend un de tes régiments jusqu’à ce que son Moral se brise) et 3 « Modifieur de l’esprit » (isolé : au début de chacun de tes tours, il prend un de tes régiments tant qu’il reste en jeu, 2 tours).' },
@@ -405,6 +431,24 @@ export function fight(run: RunState, o: NodeOption, seed: string | number): { sc
   // Acte 3 : niveau 3, avec 1 régiment de niveau 2 et 2 de niveau 3 en main.
   if (e.act === 2) { setup.B = { ...setup.B, startRegimentLevel: 2 }; setup.scenario = { ...setup.scenario!, startLevel: { ...(setup.scenario?.startLevel ?? {}), B: 2 } }; }
   if (e.act === 3) { setup.B = { ...setup.B, startRegimentLevels: [2, 3, 3] }; setup.scenario = { ...setup.scenario!, startLevel: { ...(setup.scenario?.startLevel ?? {}), B: 3 } }; }
+  // Ville assiégée : l'adversaire a un niveau de plus que l'acte (sans changer les renforts d'équilibrage) ; la garnison.
+  if (kind === 'ville') {
+    const g = garrisonStats((o as { bonus: number }).bonus);
+    setup.scenario = { ...setup.scenario!, startLevel: { ...(setup.scenario?.startLevel ?? {}), B: e.act + 1 },
+      startOverrides: { ...(setup.scenario?.startOverrides ?? {}), garnison_ville: g } };
+  }
+  // Bazar de l'oasis : une Caravane marchande en isolé au début de chaque combat (si la case est libre).
+  if (run.caravane && !setup.scenario?.start?.A?.isole) {
+    const start = structuredClone(setup.scenario?.start ?? {});
+    (start.A ??= {}).isole = 'caravane_marchande';
+    setup.scenario = { ...setup.scenario!, start };
+  }
+  // Chantier d'un sceau : le Titan boss commence avec de l'END en moins (celui de la Fracture seulement, pas ses éclats).
+  if (kind === 'boss' && (run.sceau?.left ?? 0) > 0) {
+    const titan = run.act >= 3 ? 'titan_discorde' : run.act === 2 ? 'titan_fracture' : 'titan_glissement';
+    setup.scenario = { ...setup.scenario!, startOverrides: { ...(setup.scenario?.startOverrides ?? {}), [titan]: { endLoss: run.sceau!.end } } };
+    sc.deckRules = { ...sc.deckRules, text: `${sc.deckRules.text} Le sceau l’affaiblit : −${run.sceau!.end} END.` };
+  }
   const has = (e: string) => (run.etendards ?? []).includes(e);
   const seuil = LASSITUDE_RULE === 'seuil';
   const mob = (run.upg?.mobilisation_initiale ?? 0) + (has('tambour') ? 1 : 0) + (seuil ? Math.floor(run.lassitude / FATIGUE_AID_STEP) : 0);
@@ -483,6 +527,7 @@ export function afterFight(run: RunState, g: GameState): RunState {
       next.steps = [{ kind: 'resume', title: 'Le Titan de la Discorde est vaincu !', lines }];
       return next;
     }
+    if (next.sceau && next.sceau.left > 0) next.sceau.left--;
     // Le Sultan se débloque à la première victoire contre le boss de l'acte 1.
     if (next.act === 1) {
       next.newUnlocks = [...(next.newUnlocks ?? []), SULTAN_UNLOCK];
@@ -508,6 +553,15 @@ export function afterFight(run: RunState, g: GameState): RunState {
     next.gold += gold; lines.unshift(`+${gold} or.`);
     steps.push({ kind: 'volontaires', round: 0 }, { kind: 'volontaires', round: 1 });
     if (o.reward === 'amelioration') steps.push({ kind: 'cartes', purpose: 'ameliorer', n: 1, optional: true });
+  } else if (o.kind === 'ville') {
+    // Ville assiégée : or, Essence, Expérience et un Étendard ; la 1re victoire débloque le champion des Démons (à venir).
+    const gold = Math.round(25 * (1 + (next.upg?.interet ?? 0) / 3));
+    next.gold += gold; next.essence += 5; next.xp += 3;
+    lines.unshift(`+${gold} or, +5 Essence divine, +3 Expérience.`);
+    next.newUnlocks = [...(next.newUnlocks ?? []), DEMON_UNLOCK];
+    lines.push('Le siège est brisé : les Cultistes de la ville se rallient aux champions des Dieux (le champion des Démons arrive bientôt).');
+    const etd = etendardChoices(next, 3);
+    if (etd.length) steps.push({ kind: 'etendard', choices: etd });
   } else if (o.kind === 'miniboss') {
     next.miniBossDone = true;
     const gold = Math.round(25 * (1 + (next.upg?.interet ?? 0) / 3));
@@ -594,6 +648,7 @@ export function applyCards(run: RunState, purpose: CardPurpose, uids: number[]):
     if (!rc) continue;
     const name = CARD_TEXT_FR[rc.id]?.name ?? rc.id;
     if (purpose === 'retirer' || purpose === 'garde') { removeCard(run, uid); out.push(`${name} quitte ton deck.`); }
+    if (purpose === 'ville') { run.ville = { cardLevel: CARDS[rc.id]!.niveau, offered: run.ville?.offered ?? false }; removeCard(run, uid); out.push(`${name} rejoint la garnison de la ville (niveau ${CARDS[rc.id]!.niveau}).`); }
     if (purpose === 'ameliorer') out.push(`${name} : ${improve(rc)}.`);
     if (purpose === 'humain') { rc.mods.arm = (rc.mods.arm ?? 0) + 5; rc.mods.mor = (rc.mods.mor ?? 0) + 2; out.push(`${name} : +5 ARM, +2 Moral.`); }
     if (purpose === 'elfe') { rc.mods.ini = (rc.mods.ini ?? 0) + 10; rc.mods.cout = (rc.mods.cout ?? 0) - 1; out.push(`${name} : coûte 1 de moins, +10 INI.`); }
@@ -645,44 +700,147 @@ export function marketOffers(run: RunState, meta?: RunMeta, gold0 = run.gold): M
 export interface EventChoice { id: string; label: string; disabled?: string }
 /** Offrandes à faire à l'entraînement pour débloquer le premier champion (04/11/2026 : 3 au lieu de 6). */
 export const CHAMPION_OFFERINGS = 3;
+/** Offrandes au plus par événement : au-delà, les choix qui en demandent disparaissent (Nathan, 22/11/2026). */
+export const EVENT_MAX_OFFERINGS: Record<EventId, number> = { camp: 3, entrainement: 6, fontaine: 3, bazar: 5, chantier: 3, ville: 3 };
 export const EVENT_TEXT: Record<EventId, { title: string; text: string }> = {
   camp: { title: 'Le camp abandonné', text: 'Une armée a monté un camp ici, mais aucune trace de ce qui a pu lui arriver.' },
   entrainement: { title: 'L’entraînement', text: 'Un régiment coalisé d’Elfes et d’Humains s’entraîne ; les meneurs de chaque peuple proposent de vous aider.' },
+  fontaine: { title: 'La fontaine des Elfes', text: 'Tu arrives dans un sanctuaire elfe épargné par les conflits. Une des fontaines d’immortalité elfes est la pièce centrale de ce lieu.' },
+  bazar: { title: 'Le bazar de l’oasis', text: 'Un marché s’est formé près d’une oasis : une pause bien méritée dans cette campagne éprouvante.' },
+  chantier: { title: 'Le chantier d’un sceau', text: 'Un énorme chantier s’étale sur une superficie plus grande que la plupart des villes que vous connaissez. Des glyphes complexes, dans un panachage de matériaux différents, prennent forme sous la supervision d’un Dieu : un plan de secours, si les Titans s’avèrent indestructibles.' },
+  ville: { title: 'La ville assiégée', text: 'Une armée de Cultistes défend une ville assiégée par une armée trompée par les Titans. Ils vous demandent de l’aide pour briser le siège.' },
 };
+/** Garnison de la ville assiégée selon le bonus (niveau de la carte offerte + Offrandes faites à la ville). */
+export const garrisonStats = (b: number) => ({ atk: 2 * b, end: 20 + 10 * b, arm: b, ini: 5 + 2 * b, mor: 5 + b });
+/** Bonus de la garnison : niveau de la carte offerte pendant la visite + Offrandes déjà faites à la ville. */
+export const garrisonBonus = (run: RunState, meta: RunMeta) => (run.ville?.cardLevel ?? 0) + (meta.offeredAt.ville ?? 0);
+/** Bazar de l'oasis : toutes les cartes que le champion peut recevoir (sa faction et les neutres, sans binômes). */
+export const catalogueFor = (run: RunState) => COLLECTIBLE.filter(inFaction(championOf(run.champion).faction))
+  .sort((a, b) => CARDS[a]!.niveau - CARDS[b]!.niveau || (CARD_TEXT_FR[a]?.name ?? a).localeCompare(CARD_TEXT_FR[b]?.name ?? b));
+
 export function eventChoices(run: RunState, meta: RunMeta, id: EventId, second = false): EventChoice[] {
   const off = meta.offeredAt[id] ?? 0;
+  const canOffer = off < EVENT_MAX_OFFERINGS[id]; // au-delà du maximum, les choix à Offrande disparaissent
   const noOffer = meta.offrandes < 1 ? 'Il te faut une Offrande' : undefined;
-  if (id === 'camp') return [
-    { id: 'repos', label: `Profiter du camp pour se reposer : lassitude −${5 + 5 * off}` },
-    { id: 'offrande', label: `Faire une Offrande (−1 Offrande) : débloque la Régénération${meta.unlocks.includes('regeneration') ? ' (déjà débloquée)' : ''}`, disabled: noOffer },
-    { id: 'garde', label: 'Laisser des régiments surveiller le camp : retire jusqu’à 2 régiments de ton deck' },
-  ];
-  const n = 1 + Math.floor(off / 3);
-  const out: EventChoice[] = [
-    { id: 'humain', label: `Humain : ${n} régiment(s) gagne(nt) +5 ARM et +2 Moral` },
-    { id: 'elfe', label: `Elfe : ${n} régiment(s) coûte(nt) 1 de moins et gagne(nt) +10 INI` },
-  ];
-  if (!second) {
-    out.push({ id: 'offrande', label: 'Faire une Offrande et faire un 2e choix', disabled: off >= 6 ? 'Déjà 6 Offrandes faites ici' : noOffer });
-    if (off >= CHAMPION_OFFERINGS && !meta.unlocks.includes('champion:elfe')) out.push({ id: 'champion', label: 'Débloquer Eldrin, le premier Bourgeon (champion Elfe)' });
+  const noneYet = off === 0 ? 'aucune Offrande faite ici pour l’instant' : undefined;
+  const out: EventChoice[] = [];
+  if (id === 'camp') {
+    out.push({ id: 'repos', label: `Profiter du camp pour se reposer : lassitude maximale +${5 * off} pour le reste de la run (5 par Offrande faite ici)`, disabled: noneYet });
+    if (canOffer) out.push({ id: 'offrande', label: `Faire une Offrande (−1 Offrande) : débloque la Régénération${meta.unlocks.includes('regeneration') ? ' (déjà débloquée)' : ''}`, disabled: noOffer });
+    out.push({ id: 'garde', label: 'Laisser des régiments surveiller le camp : retire jusqu’à 2 régiments de ton deck' });
+    return out;
   }
-  void run;
+  if (id === 'entrainement') {
+    const n = 1 + Math.floor(off / 3);
+    out.push({ id: 'humain', label: `Humain : ${n} régiment(s) gagne(nt) +5 ARM et +2 Moral` });
+    out.push({ id: 'elfe', label: `Elfe : ${n} régiment(s) coûte(nt) 1 de moins et gagne(nt) +10 INI` });
+    if (!second) {
+      if (canOffer) out.push({ id: 'offrande', label: 'Faire une Offrande et faire un 2e choix', disabled: noOffer });
+      if (off >= CHAMPION_OFFERINGS && !meta.unlocks.includes('champion:elfe')) out.push({ id: 'champion', label: 'Débloquer Eldrin, le premier Bourgeon (champion Elfe)' });
+    }
+    return out;
+  }
+  if (id === 'fontaine') {
+    const touched = run.deck.filter(isTouched).length;
+    out.push({ id: 'boire', label: `Boire à la fontaine : lassitude −${5 * off} (5 par Offrande faite ici)`, disabled: noneYet });
+    out.push({ id: 'tremper', label: `Tremper les armes des soldats dans l’eau magique : retire les malus des Titans de ${3 * off} carte(s) au hasard (3 par Offrande faite ici)`,
+      disabled: noneYet ?? (touched ? undefined : 'aucune carte touchée par les Titans') });
+    if (canOffer) out.push({ id: 'offrande', label: 'Faire une Offrande aux gardiens du sanctuaire (−1 Offrande)', disabled: noOffer });
+    if (off >= 3 && !meta.unlocks.includes('incorruptible')) out.push({ id: 'incorruptible', label: 'Les protecteurs t’enseignent leur secret pour rester loin de l’influence des Titans : débloque la bénédiction Incorruptible' });
+    return out;
+  }
+  if (id === 'bazar') {
+    out.push({ id: 'dime', label: `Les marchands versent une dîme à l’armée des Dieux : +${30 * off} or (30 par Offrande faite ici)`, disabled: noneYet });
+    out.push({ id: 'carte', label: 'En discutant à gauche et à droite avec les caravaniers, tu trouves exactement ce dont tu as besoin : une carte au choix parmi toutes celles de ton champion' });
+    const done = run.caravane ? 'déjà en place pour cette run' : undefined;
+    if (canOffer) out.push({ id: 'offrande', label: 'Faire une Offrande à l’oasis (−1 Offrande) : des Nomades te remercient, et chaque combat de cette run commence avec une Caravane marchande en isolé', disabled: done ?? noOffer });
+    else out.push({ id: 'logistique', label: 'Tes amis nomades mettent en place une ligne logistique : chaque combat de cette run commence avec une Caravane marchande en isolé', disabled: done });
+    return out;
+  }
+  if (id === 'chantier') {
+    if (canOffer) out.push({ id: 'offrande', label: 'Faire une Offrande pour aider au chantier (−1 Offrande)', disabled: noOffer });
+    if (!meta.unlocks.includes('parangon')) out.push({ id: 'benediction', label: 'Le Dieu reconnaît tes efforts et t’octroie une bénédiction : débloque Parangon',
+      disabled: (meta.upg.incorruptible ?? 0) < 1 ? 'il faut la bénédiction Incorruptible au niveau 1 ou plus' : undefined });
+    out.push({ id: 'sceau', label: off ? `Le sceau, bien qu’incomplet, agit déjà sur l’essence des Titans : ${off === 1 ? 'le prochain Titan boss d’acte commence' : `les ${off} prochains Titans boss d’acte commencent`} avec ${15 * off} d’END en moins` : 'Le sceau agit sur l’essence des Titans (15 d’END en moins par Offrande faite ici)', disabled: noneYet });
+    return out;
+  }
+  // Ville assiégée : une carte offerte et une Offrande au plus par visite, puis partir ou combattre.
+  const v = run.ville ?? { cardLevel: 0, offered: false };
+  if (!v.cardLevel) out.push({ id: 'carte', label: 'Offrir une carte pour aider la garnison à tenir les murs : retire une carte de ton deck (son niveau renforce la garnison), puis fais un autre choix' });
+  if (!v.offered && canOffer) out.push({ id: 'offrande', label: 'Faire une Offrande aux démons qui protègent la ville (−1 Offrande), puis faire un autre choix', disabled: noOffer });
+  out.push({ id: 'partir', label: 'Notre combat est plus important qu’une ville : laisser la garnison défendre la ville' });
+  const g = garrisonStats(garrisonBonus(run, meta));
+  out.push({ id: 'combat', label: `Chaque combat compte : briser le siège (garnison ${g.atk} ATK, ${g.end} END, ${g.arm} ARM, ${g.ini} INI, ${g.mor} Moral ; si elle tombe, la run est perdue)` });
   return out;
 }
+
 /** Applique un choix d'événement ; ajoute les étapes qui en découlent. Retourne les lignes du résumé. */
 export function resolveEvent(run: RunState, meta: RunMeta, id: EventId, choice: string): string[] {
   const off = meta.offeredAt[id] ?? 0;
+  const offer = () => { meta.offrandes--; meta.offeredAt[id] = off + 1; };
   if (id === 'camp') {
-    if (choice === 'repos') { const d = Math.min(run.lassitude, 5 + 5 * off); run.lassitude -= d; return [`Tu te reposes : lassitude −${d}.`]; }
-    if (choice === 'offrande') { meta.offrandes--; meta.offeredAt.camp = off + 1; if (!meta.unlocks.includes('regeneration')) meta.unlocks.push('regeneration'); return ['Ton Offrande est acceptée : la Régénération est débloquée.']; }
+    if (choice === 'repos') { run.bonusLimit = (run.bonusLimit ?? 0) + 5 * off; return [`Tu te reposes : lassitude maximale +${5 * off} pour le reste de la run.`]; }
+    if (choice === 'offrande') { offer(); if (!meta.unlocks.includes('regeneration')) meta.unlocks.push('regeneration'); return ['Ton Offrande est acceptée : la Régénération est débloquée.']; }
     run.steps.unshift({ kind: 'cartes', purpose: 'garde', n: 2, optional: true });
     return [];
   }
-  const n = 1 + Math.floor(off / 3);
-  if (choice === 'humain' || choice === 'elfe') { run.steps.unshift({ kind: 'cartes', purpose: choice, n, optional: false }); return []; }
-  if (choice === 'offrande') { meta.offrandes--; meta.offeredAt.entrainement = off + 1; run.steps.unshift({ kind: 'evenement', id, second: true }); return ['Ton Offrande est acceptée : tu peux faire un 2e choix.']; }
-  if (choice === 'champion') { meta.unlocks.push('champion:elfe'); return ['Eldrin, le premier Bourgeon, rejoint les champions des Dieux.']; }
-  return [];
+  if (id === 'entrainement') {
+    const n = 1 + Math.floor(off / 3);
+    if (choice === 'humain' || choice === 'elfe') { run.steps.unshift({ kind: 'cartes', purpose: choice, n, optional: false }); return []; }
+    if (choice === 'offrande') { offer(); run.steps.unshift({ kind: 'evenement', id, second: true }); return ['Ton Offrande est acceptée : tu peux faire un 2e choix.']; }
+    if (choice === 'champion') { meta.unlocks.push('champion:elfe'); return ['Eldrin, le premier Bourgeon, rejoint les champions des Dieux.']; }
+    return [];
+  }
+  if (id === 'fontaine') {
+    if (choice === 'boire') { const d = Math.min(run.lassitude, 5 * off); run.lassitude -= d; return [`Tu bois à la fontaine : lassitude −${d}.`]; }
+    if (choice === 'tremper') {
+      const r = rng(`${run.seed}|${run.act}|${run.node}|fontaine`);
+      const touched = run.deck.filter(isTouched);
+      const out: string[] = [];
+      for (let k = 0; k < 3 * off && touched.length; k++) {
+        const rc = touched.splice(Math.floor(r() * touched.length), 1)[0]!;
+        delete rc.curse;
+        out.push(`${CARD_TEXT_FR[rc.id]?.name ?? rc.id} est lavée de l’influence des Titans.`);
+      }
+      return out.length ? out : ['Aucune carte n’était touchée par les Titans.'];
+    }
+    if (choice === 'offrande') { offer(); return ['Les gardiens du sanctuaire acceptent ton Offrande.']; }
+    if (choice === 'incorruptible') { meta.unlocks.push('incorruptible'); return ['La bénédiction Incorruptible est débloquée.']; }
+    return [];
+  }
+  if (id === 'bazar') {
+    if (choice === 'dime') { run.gold += 30 * off; return [`Les marchands versent leur dîme : +${30 * off} or.`]; }
+    if (choice === 'carte') { run.steps.unshift({ kind: 'catalogue' }); return []; }
+    if (choice === 'offrande' || choice === 'logistique') {
+      const lines: string[] = [];
+      if (choice === 'offrande') {
+        offer();
+        lines.push('Un groupe de Nomades remarque ton Offrande et t’en remercie.');
+        if (off + 1 >= 2 && !meta.unlocks.includes('mobilisation_initiale')) { meta.unlocks.push('mobilisation_initiale'); lines.push('La bénédiction Mobilisation initiale est débloquée.'); }
+      } else lines.push('Tes amis nomades mettent en place une ligne logistique pour soutenir l’armée des Dieux.');
+      run.caravane = true;
+      lines.push('Chaque combat de cette run commence avec une Caravane marchande en isolé.');
+      return lines;
+    }
+    return [];
+  }
+  if (id === 'chantier') {
+    if (choice === 'offrande') { offer(); return ['Ton Offrande aide au chantier du sceau.']; }
+    if (choice === 'benediction') { meta.unlocks.push('parangon'); return ['La bénédiction Parangon est débloquée.']; }
+    if (choice === 'sceau') { run.sceau = { left: off, end: 15 * off }; return [`Le sceau agit : ${off === 1 ? 'le prochain Titan boss d’acte commencera' : `les ${off} prochains Titans boss d’acte commenceront`} avec ${15 * off} d’END en moins.`]; }
+    return [];
+  }
+  // Ville assiégée.
+  if (choice === 'carte') { run.steps.unshift({ kind: 'evenement', id }); run.steps.unshift({ kind: 'cartes', purpose: 'ville', n: 1, optional: false }); return []; }
+  if (choice === 'offrande') { offer(); run.ville = { cardLevel: run.ville?.cardLevel ?? 0, offered: true }; run.steps.unshift({ kind: 'evenement', id }); return ['Les démons protecteurs de la ville acceptent ton Offrande.']; }
+  if (choice === 'combat') {
+    const r = rng(`${run.seed}|${run.act}|${run.node}|ville`);
+    run.current = { kind: 'ville', deck: run.act >= 2 ? actDeckKey(r, run.act) : pickOne(r, ACT1_DECKS), bonus: garrisonBonus(run, meta) };
+    delete run.ville;
+    return [];
+  }
+  delete run.ville;
+  return ['La garnison défendra la ville sans toi.'];
 }
 
 // ---------- Avancer ----------
@@ -756,11 +914,11 @@ export const UPGRADES: Upgrade[] = [
   { id: 'regeneration', currency: 'essence', name: 'Régénération', desc: 'Après un combat, tu gardes 5 % de lassitude de moins par niveau (jamais sous ton départ).', max: 10, cost: l => 4 + 2 * l,
     unlock: { key: 'regeneration', text: 'Fais une Offrande au camp abandonné' } },
   { id: 'mobilisation_initiale', currency: 'essence', name: 'Mobilisation initiale', desc: '+1 ressource au début de chaque combat par niveau.', max: 3, cost: l => [6, 12, 20][l]!,
-    unlock: { key: 'mobilisation_initiale', text: 'Se débloque à un événement de l’acte 3 (pas encore dans le prototype)' } },
+    unlock: { key: 'mobilisation_initiale', text: 'Fais 2 Offrandes au Bazar de l’oasis' } },
   { id: 'incorruptible', currency: 'essence', name: 'Incorruptible', desc: 'Après une défaite, le combat recommence avec 50 % de la lassitude maximale de l’acte. Une relance par niveau et par run.', max: 3, cost: l => [12, 18, 25][l]!,
-    unlock: { key: 'incorruptible', text: 'Se débloque par un événement (à venir)' } },
+    unlock: { key: 'incorruptible', text: 'Fais 3 Offrandes à la Fontaine des Elfes, puis reviens-y' } },
   { id: 'parangon', currency: 'essence', name: 'Parangon', desc: 'Une relance d’Incorruptible part avec 5 % de lassitude de moins par niveau.', max: 5, cost: l => 3 + l,
-    unlock: { key: 'parangon', text: 'Se débloque par un événement (à venir)' } },
+    unlock: { key: 'parangon', text: 'Au Chantier d’un sceau, avec Incorruptible au niveau 1 ou plus' } },
   { id: 'mobilisation_finale', currency: 'essence', name: 'Mobilisation finale !', desc: 'Crée un 6e niveau (6 ressources par tour) à 50 de lassitude. Chaque niveau de bénédiction avance d’1 point de lassitude les niveaux à partir du sien : le 1er les niveaux 2 à 6, le 2e les niveaux 2 à 6 encore, le 3e les niveaux 3 à 6, etc.', max: 5, cost: l => [6, 9, 13, 18, 24][l]! },
   { id: 'interet', currency: 'essence', name: 'Intérêt', desc: 'Tes gains d’or augmentent de 33 % par niveau (+100 % au niveau 3).', max: 3, cost: l => [8, 12, 16][l]!,
     unlock: { key: 'interet', text: 'Se débloque au marchand (contre des Offrandes)' } },

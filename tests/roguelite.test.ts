@@ -33,8 +33,10 @@ describe('Roguelite : structure d’un acte', () => {
     for (let s = 0; s < 20; s++) {
       const o = optionsFor({ ...newRun(`e${s}`), node: 1, eventThisAct: true });
       expect(o.some(x => x.kind === 'event')).toBe(false);
-      const p = optionsFor({ ...newRun(`e${s}`), node: 1, eventsSeen: ['camp', 'entrainement'] });
+      const p = optionsFor({ ...newRun(`e${s}`), node: 1, eventsSeen: ['camp', 'entrainement', 'fontaine', 'bazar', 'chantier', 'ville'] });
       expect(p.some(x => x.kind === 'event')).toBe(false);
+      const q = optionsFor({ ...newRun(`e${s}`), node: 1, eventsSeen: ['camp', 'entrainement', 'fontaine', 'bazar', 'chantier'] });
+      expect(q.filter(x => x.kind === 'event').every(x => (x as { id: string }).id === 'ville')).toBe(true);
     }
   });
   it('choisir une option compte une apparition du mini-boss', () => {

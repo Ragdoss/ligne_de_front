@@ -428,7 +428,8 @@ export interface ScenarioSetup extends ScenarioRules {
   start?: Partial<Record<PlayerId, { avant?: Record<string, string>; arriere?: Record<string, string>; isole?: string }>>;
   startHand?: Partial<Record<PlayerId, string[]>>;
   startLevel?: Partial<Record<PlayerId, number>>;
-  startOverrides?: Record<string, { mor?: number; minion?: boolean }>;
+  /** Unités de départ : stats imposées (garnison de la ville assiégée), END en moins (sceau), Minions. */
+  startOverrides?: Record<string, { atk?: number; end?: number; arm?: number; ini?: number; mor?: number; endLoss?: number; minion?: boolean }>;
   /** Ressources supplémentaires au départ (aide après plusieurs défaites en campagne). */
   startResource?: Partial<Record<PlayerId, number>>;
   /** Cartes piochées en plus au départ (mode Histoire de la campagne). */
