@@ -10,7 +10,7 @@ import { applyAction, createGame } from '../src/engine/game';
 import { startTurn } from '../src/engine/turn';
 import type { GameState } from '../src/engine/types';
 import {
-  afterFight, championOf, CHAMPIONS, fight, newMeta, newRun, optionsFor, registerRun, SULTAN_UNLOCK, unlocksWon, variantDef, withUnlocks, type RunState,
+  afterFight, cannotBuy, championOf, CHAMPIONS, fight, UPGRADES, newMeta, newRun, optionsFor, registerRun, SULTAN_UNLOCK, unlocksWon, variantDef, withUnlocks, type RunState,
 } from '../src/roguelite/run';
 import { ACT3_DECKS } from '../src/roguelite/act3decks';
 import { registerTitanCards } from '../src/data/titans';
@@ -115,6 +115,14 @@ describe('Acte 3', () => {
     expect(lv.filter(l => l === 2).length).toBeGreaterThanOrEqual(1);
     expect(lv.filter(l => l === 3).length).toBeGreaterThanOrEqual(2);
     expect(s.config.defeatLassitude.B).toBe(50);
+  });
+  it('la 1re victoire contre le Titan du Reflet débloque la Mobilisation finale', () => {
+    const run: RunState = { ...act3('a3r'), node: 4, current: { kind: 'miniboss', boss: 'reflet', deck: `a3:${ACT3_DECKS[0]!.key}` } };
+    const next = afterFight(run, fakeGame());
+    expect(unlocksWon(run, next)).toEqual(['mobilisation_finale']);
+    const u = UPGRADES.find(x => x.id === 'mobilisation_finale')!;
+    expect(cannotBuy({ ...newMeta(), essence: 99 }, u)).toMatch(/Reflet/);
+    expect(cannotBuy(withUnlocks({ ...newMeta(), essence: 99 }, unlocksWon(run, next)), u)).toBeNull();
   });
   it('battre le Titan de la Discorde gagne la run', () => {
     const run = { ...act3('a3c'), node: 8, current: { kind: 'boss' as const, titan: 'discorde' as const, deck: `a3:${ACT3_DECKS[0]!.key}` } };

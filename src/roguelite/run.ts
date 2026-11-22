@@ -566,6 +566,11 @@ export function afterFight(run: RunState, g: GameState): RunState {
     next.miniBossDone = true;
     const gold = Math.round(25 * (1 + (next.upg?.interet ?? 0) / 3));
     next.gold += gold; next.essence += 5; next.xp += 3;
+    // La 1re victoire contre le Titan du Reflet débloque la Mobilisation finale (Nathan, 22/11/2026).
+    if (o.boss === 'reflet') {
+      next.newUnlocks = [...(next.newUnlocks ?? []), 'mobilisation_finale'];
+      lines.push('Le Titan du Reflet est brisé : la bénédiction Mobilisation finale est débloquée (si elle ne l’était pas déjà).');
+    }
     lines.unshift(`+${gold} or, +5 Essence divine, +3 Expérience.`);
     const etd = etendardChoices(next, 3);
     if (etd.length) steps.push({ kind: 'etendard', choices: etd });
@@ -876,6 +881,8 @@ export function loadMeta(): RunMeta {
       for (const u of UPGRADES) if (u.currency === 'xp' && m.upg[u.id] !== undefined) { m.upg[`augustus:${u.id}`] = m.upg[u.id]!; delete m.upg[u.id]; }
       // Avant le Sultan (21/11/2026) : une run gagnée prouve que le boss de l'acte 1 a déjà été battu.
       if (m.wins > 0 && !m.unlocks.includes(SULTAN_UNLOCK)) m.unlocks = [...m.unlocks, SULTAN_UNLOCK];
+      // Mobilisation finale déjà achetée avant qu'elle ne demande le Titan du Reflet (22/11/2026) : elle reste débloquée.
+      if ((m.upg.mobilisation_finale ?? 0) > 0 && !m.unlocks.includes('mobilisation_finale')) m.unlocks = [...m.unlocks, 'mobilisation_finale'];
       return m;
     }
   } catch { /* rien */ }
@@ -919,7 +926,8 @@ export const UPGRADES: Upgrade[] = [
     unlock: { key: 'incorruptible', text: 'Fais 3 Offrandes à la Fontaine des Elfes, puis reviens-y' } },
   { id: 'parangon', currency: 'essence', name: 'Parangon', desc: 'Une relance d’Incorruptible part avec 5 % de lassitude de moins par niveau.', max: 5, cost: l => 3 + l,
     unlock: { key: 'parangon', text: 'Au Chantier d’un sceau, avec Incorruptible au niveau 1 ou plus' } },
-  { id: 'mobilisation_finale', currency: 'essence', name: 'Mobilisation finale !', desc: 'Crée un 6e niveau (6 ressources par tour) à 50 de lassitude. Chaque niveau de bénédiction avance d’1 point de lassitude les niveaux à partir du sien : le 1er les niveaux 2 à 6, le 2e les niveaux 2 à 6 encore, le 3e les niveaux 3 à 6, etc.', max: 5, cost: l => [6, 9, 13, 18, 24][l]! },
+  { id: 'mobilisation_finale', currency: 'essence', name: 'Mobilisation finale !', desc: 'Crée un 6e niveau (6 ressources par tour) à 50 de lassitude. Chaque niveau de bénédiction avance d’1 point de lassitude les niveaux à partir du sien : le 1er les niveaux 2 à 6, le 2e les niveaux 2 à 6 encore, le 3e les niveaux 3 à 6, etc.', max: 5, cost: l => [6, 9, 13, 18, 24][l]!,
+    unlock: { key: 'mobilisation_finale', text: 'Bats le Titan du Reflet (mini-boss de l’acte 3)' } },
   { id: 'interet', currency: 'essence', name: 'Intérêt', desc: 'Tes gains d’or augmentent de 33 % par niveau (+100 % au niveau 3).', max: 3, cost: l => [8, 12, 16][l]!,
     unlock: { key: 'interet', text: 'Se débloque au marchand (contre des Offrandes)' } },
   { id: 'coffre', currency: 'essence', name: 'Coffre plein', desc: 'Tu commences la run avec 50 or de plus par niveau.', max: 4, cost: l => 5 + 3 * l,
