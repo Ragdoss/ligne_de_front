@@ -640,7 +640,7 @@ export function improve(rc: RunCard): string {
     for (const k of ['atk', 'end', 'arm', 'mor'] as const) { const v = (b[k] as number | undefined) ?? 0; if (v > 0) rc.mods[k] = (rc.mods[k] ?? 0) + Math.max(1, Math.round(v * 0.1)); }
     return '+10 % ATK, END, ARM et Moral';
   }
-  if (b.cardType === 'Leader') { rc.mods.bonusPct = (rc.mods.bonusPct ?? 0) + 20; return '+20 % à ses bonus'; }
+  if (b.cardType === 'Leader') { rc.mods.bonusPct = (rc.mods.bonusPct ?? 0) + 50; return '+50 % à ses bonus'; } // 22/11/2026 : +20 % → +50 %
   rc.mods.cout = (rc.mods.cout ?? 0) - 1;
   return 'coûte 1 de moins';
 }

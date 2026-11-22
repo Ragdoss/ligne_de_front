@@ -20,7 +20,7 @@ type GameOpts = { animMul: number; aiMul: number; bannerMul: number; initialReve
 
 const REWARD_LABEL = { or: 'de l’or en plus', essence: 'de l’Essence divine', xp: 'de l’Expérience', offrandes: 'une Offrande', amelioration: 'une amélioration de carte' } as const;
 const PURPOSE_TITLE: Record<CardPurpose, string> = {
-  retirer: 'Retirer une carte de ton deck', ameliorer: 'Améliorer une carte : efface d’abord ses malus des Titans ; sinon régiment +10 % ATK, END, ARM et Moral, Leader +20 % à ses bonus, Tactique −1 de coût', humain: 'L’entraînement humain : +5 ARM, +2 Moral',
+  retirer: 'Retirer une carte de ton deck', ameliorer: 'Améliorer une carte : efface d’abord ses malus des Titans ; sinon régiment +10 % ATK, END, ARM et Moral, Leader +50 % à ses bonus, Tactique −1 de coût', humain: 'L’entraînement humain : +5 ARM, +2 Moral',
   elfe: 'L’entraînement elfe : coûte 1 de moins, +10 INI', garde: 'Laisser jusqu’à 2 régiments surveiller le camp (ils quittent ton deck)',
   ville: 'Offrir une carte à la garnison de la ville (elle quitte ton deck ; son niveau renforce la garnison)',
 };
