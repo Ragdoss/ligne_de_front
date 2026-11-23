@@ -25,7 +25,7 @@ export const TITAN_CARDS: Record<string, CardDef> = {
   // Boss de l'acte 1 : le Titan du Glissement et la tactique pour lui résister.
   titan_glissement: {
     id: 'titan_glissement', cardType: 'Regiment', faction: 'neutre', niveau: 5, cout: 0, slotType: 'arriere', types: ['Titan'],
-    atk: 5, end: 75, arm: 5, ini: 20, mor: 20, keywords: [], excludeFromMoralTotal: true,
+    atk: 5, end: 50, arm: 5, ini: 20, mor: 15, keywords: [], excludeFromMoralTotal: true, // 23/11/2026 : END 75 → 50, Moral 20 → 15
   },
   // Second mini-boss de l'acte 1 (Nathan, 04/11/2026).
   fragment_realite: {
