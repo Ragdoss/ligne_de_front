@@ -580,3 +580,4 @@ Le simulateur documente lui-même, dans un encart "Hypothèses", les choix faits
 - **Mobilisation finale (22/11/2026, Nathan)** : se débloque à la 1re victoire contre le Titan du Reflet (mini-boss de l'acte 3). Déjà achetée avant : reste débloquée.
 - **Amélioration d'un Leader (22/11/2026, Nathan)** : +50 % à ses bonus (au lieu de +20 %).
 - **Titan du Glissement (23/11/2026, Nathan)** : END 75 → 50, Moral 20 → 15 (2 victoires en 15 runs, trop dur pour le boss de l'acte 1).
+- **Éclats de la Fracture (23/11/2026, Nathan)** : END et Moral divisés par 2 (Éclat vif 30 END, 5 Moral ; Éclat massif 60 END, 10 Moral). Le Titan de la Fracture ne change pas.

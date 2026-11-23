@@ -39,11 +39,11 @@ export const TITAN_CARDS: Record<string, CardDef> = {
   },
   titan_eclat_vif: {
     id: 'titan_eclat_vif', cardType: 'Regiment', faction: 'neutre', niveau: 5, cout: 0, slotTypes: ['avant', 'arriere'], types: ['Titan'],
-    atk: 30, end: 60, arm: 10, ini: 60, mor: 10, keywords: [], excludeFromMoralTotal: true,
+    atk: 30, end: 30, arm: 10, ini: 60, mor: 5, keywords: [], excludeFromMoralTotal: true, // 23/11/2026 : END 60 → 30, Moral 10 → 5
   },
   titan_eclat_massif: {
     id: 'titan_eclat_massif', cardType: 'Regiment', faction: 'neutre', niveau: 5, cout: 0, slotTypes: ['avant', 'arriere'], types: ['Titan'],
-    atk: 10, end: 120, arm: 20, ini: 30, mor: 20, keywords: [], excludeFromMoralTotal: true,
+    atk: 10, end: 60, arm: 20, ini: 30, mor: 10, keywords: [], excludeFromMoralTotal: true, // 23/11/2026 : END 120 → 60, Moral 20 → 10
   },
   lutter_mouvement: { id: 'lutter_mouvement', cardType: 'Tactique', faction: 'neutre', niveau: 1, cout: 0, targetRule: 'none', effect: 'holdGround' },
   // Boss de l'acte 3 (Nathan, 21/11/2026) : le Titan de la Discorde, sa Tactique et son régiment isolé.
